@@ -145,7 +145,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     AdjustWindowRect(&window, WS_OVERLAPPEDWINDOW, FALSE);
 
     // CREATE THE WINDOW (using window class above)
-    hWnd = CreateWindowEx(NULL,
+    hWnd = CreateWindowEx(0,
                           "window_class_1",
                           "raytracing",
                           WS_OVERLAPPEDWINDOW,

@@ -6,8 +6,6 @@
 #include <iostream>
 #include <cmath>
 
-#define FPS 60
-
 #define WIN_POS_X 300
 #define WIN_POS_Y 300
 
@@ -30,7 +28,7 @@ int delta_mouse_y = 0;
 float delta_time = 0;
 float prev_time = GetTickCount();
 
-Sphere sphere(16, vec3(0, 0, 0));
+Sphere sphere(100, vec3(0, 0, 0));
 
 LRESULT CALLBACK WindowProc(HWND hWnd,
                             UINT message,
@@ -49,6 +47,21 @@ void calc_delta_time()
 void render(HWND hWnd)
 {
     HDC hdc = GetDC(hWnd);
+
+    void * pixels = VirtualAlloc(0,
+                                 client_width * client_height * 4,
+                                 MEM_RESERVE | MEM_COMMIT,
+                                 PAGE_READWRITE);
+    
+    BITMAPINFO bmi;
+    bmi.bmiHeader.biSize = sizeof(bmi.bmiHeader);
+    bmi.bmiHeader.biWidth = client_width;
+    bmi.bmiHeader.biHeight = -client_height; // inverted img
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32; // 32 bits to represent pixel
+    bmi.bmiHeader.biCompression = BI_RGB;    
+
+    uint32_t * pixel = (uint32_t *)pixels; // 32 bits each pixel
 
     // orthographic: all rays collinear
     vec3 ray_direction(0, 0, 1);
@@ -71,24 +84,33 @@ void render(HWND hWnd)
                       sphere.getRadius() * sphere.getRadius();
 
             float discriminant = b * b - 4 * a * c;
-            float t1 = -1, t2 = -1;
 
-            if (discriminant > 0)
+            if (discriminant > 0 || discriminant == 0)
             {
-                t1 = (-b - sqrt(discriminant)) / (2.0f * a);
-                t2 = (-b + sqrt(discriminant)) / (2.0f * a);
+                // t1 = (-b - sqrt(discriminant)) / (2.0f * a);
+                // t2 = (-b + sqrt(discriminant)) / (2.0f * a);
+                pixel[y * client_width + x] = 0xFFFFFF; // white
             }
-            else if (discriminant == 0)
+            else 
             {
-                t1 = (-b + sqrt(discriminant)) / (2.0f * a);
-            }
-
-            if (t1 >= 0 || t2 >= 0)
-            {
-                SetPixel(hdc, x, y, RGB(255, 255, 255));
+                pixel[y * client_width + x] = 0x000000; // black
             }
         }
     }
+
+    // draw
+    SetDIBitsToDevice(hdc,
+                      0,
+                      0,
+                      client_width,
+                      client_height,
+                      0,
+                      0,
+                      0,
+                      client_height,
+                      pixels,
+                      &bmi,
+                      DIB_RGB_COLORS);
 }
 
 int WINAPI WinMain(HINSTANCE hInstance,
@@ -112,7 +134,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
+    wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
     wc.lpszClassName = "WindowClass1";
 
     RegisterClassEx(&wc);
@@ -159,15 +181,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
             if (msg.message == WM_QUIT) break;
         }
 
-        calc_delta_time(); // подумой, если ограничивать кадр elapsed timemom
-        // то это нужно запихнуть в if! или вообще не нужна будет эта штука
+        calc_delta_time();
         move();
-
-        if (true) // elapsed time here (float)1000/FPS
-        {
-            InvalidateRect(hWnd, NULL, TRUE); // clear client area
-            render(hWnd);
-        }
+        render(hWnd);
     }
 
     // return this part of the WM_QUIT message to Windows
@@ -218,7 +234,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         case WM_DESTROY:
         {
             // close the app => send WM_QUIT msg
-            PostQuitMessage(0); // 0 is WM_QUIT
+            PostQuitMessage(0);
             break;
         }
         case WM_SIZE:

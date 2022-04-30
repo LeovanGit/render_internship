@@ -1,5 +1,5 @@
-#ifndef SPHERE
-#define SPHERE
+#ifndef SPHERE_HPP
+#define SPHERE_HPP
 
 #include "math.hpp"
 

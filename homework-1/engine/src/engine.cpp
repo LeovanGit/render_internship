@@ -1,10 +1,11 @@
+#include <stdint.h>
 #include <windows.h>
 #include <windowsx.h>
 
 #include "math.hpp"
 #include "sphere.hpp"
+
 #include <iostream>
-#include <cmath>
 
 #define WIN_POS_X 300
 #define WIN_POS_Y 300
@@ -14,6 +15,9 @@
 #define KEY_S 83
 #define KEY_D 68
 #define KEY_RMOUSE 2
+
+#define HEX_WHITE 0xFFFFFF
+#define HEX_BLACK 0x000000
 
 bool keys_log[254]; // 254 keys defined in WinAPI
 
@@ -47,12 +51,7 @@ void calc_delta_time()
 void render(HWND hWnd)
 {
     HDC hdc = GetDC(hWnd);
-
-    void * pixels = VirtualAlloc(0,
-                                 client_width * client_height * 4,
-                                 MEM_RESERVE | MEM_COMMIT,
-                                 PAGE_READWRITE);
-    
+ 
     BITMAPINFO bmi;
     bmi.bmiHeader.biSize = sizeof(bmi.bmiHeader);
     bmi.bmiHeader.biWidth = client_width;
@@ -60,8 +59,9 @@ void render(HWND hWnd)
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 32; // 32 bits to represent pixel
     bmi.bmiHeader.biCompression = BI_RGB;    
-
-    uint32_t * pixel = (uint32_t *)pixels; // 32 bits each pixel
+   
+    // 32 bits each pixel
+    uint32_t * pixels = new uint32_t[client_width * client_height * 4];
 
     // orthographic: all rays collinear
     vec3 ray_direction(0, 0, 1);
@@ -85,15 +85,15 @@ void render(HWND hWnd)
 
             float discriminant = b * b - 4 * a * c;
 
-            if (discriminant > 0 || discriminant == 0)
+            if (discriminant >= 0)
             {
                 // t1 = (-b - sqrt(discriminant)) / (2.0f * a);
                 // t2 = (-b + sqrt(discriminant)) / (2.0f * a);
-                pixel[y * client_width + x] = 0xFFFFFF; // white
+                pixels[y * client_width + x] = HEX_WHITE;
             }
             else 
             {
-                pixel[y * client_width + x] = 0x000000; // black
+                pixels[y * client_width + x] = HEX_BLACK;
             }
         }
     }
@@ -111,6 +111,10 @@ void render(HWND hWnd)
                       pixels,
                       &bmi,
                       DIB_RGB_COLORS);
+
+    // clear memory
+    delete [] pixels;
+    pixels = nullptr;
 }
 
 int WINAPI WinMain(HINSTANCE hInstance,
@@ -119,25 +123,22 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    int nCmdShow)
 {
     // REGISTER THE WINDOW CLASS
-    // handle of the window
     HWND hWnd;
-    // store information for the window class
-    WNDCLASSEX wc;
+    WNDCLASSEX win_class;
 
     // clear the window class:
-    // init memory block (which starts from &wc with given size) by NULL
-    ZeroMemory(&wc, sizeof(WNDCLASSEX));
+    ZeroMemory(&win_class, sizeof(WNDCLASSEX));
 
     // window class properties
-    wc.cbSize = sizeof(WNDCLASSEX);
-    wc.style = CS_HREDRAW | CS_VREDRAW;
-    wc.lpfnWndProc = WindowProc;
-    wc.hInstance = hInstance;
-    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
-    wc.lpszClassName = "WindowClass1";
+    win_class.cbSize = sizeof(WNDCLASSEX);
+    win_class.style = CS_HREDRAW | CS_VREDRAW;
+    win_class.lpfnWndProc = WindowProc;
+    win_class.hInstance = hInstance;
+    win_class.hCursor = LoadCursor(NULL, IDC_ARROW);
+    win_class.hbrBackground = (HBRUSH)COLOR_WINDOW;
+    win_class.lpszClassName = "window_class_1";
 
-    RegisterClassEx(&wc);
+    RegisterClassEx(&win_class);
 
     // calculate the window size consided on client area
     RECT window = {0, 0, client_width, client_height};
@@ -145,7 +146,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // CREATE THE WINDOW (using window class above)
     hWnd = CreateWindowEx(NULL,
-                          "WindowClass1",
+                          "window_class_1",
                           "raytracing",
                           WS_OVERLAPPEDWINDOW,
                           WIN_POS_X,
@@ -163,7 +164,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
     SetCursorPos(mouse_x, mouse_y);
 
     // MAIN LOOP (EVENT HANDLING)
-    // stores messages from Windows
     MSG msg;
 
     while(true)
@@ -225,15 +225,12 @@ void move()
     }
 }
 
-// message handler
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch(message)
     {
-        // window closed
         case WM_DESTROY:
         {
-            // close the app => send WM_QUIT msg
             PostQuitMessage(0);
             break;
         }

@@ -50,6 +50,5 @@ private:
 
 float dot(const vec3 & v1, const vec3 & v2);
 
-vec3 translate(const vec3 & obj, const vec3 & v);
-
 #endif
+

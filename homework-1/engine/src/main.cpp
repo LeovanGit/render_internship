@@ -1,11 +1,12 @@
 #include <windows.h>
 #include <windowsx.h>
+#include <chrono>
 
-#include "engine.hpp"
+#include "window.hpp"
+#include "scene.hpp"
+#include "controller.hpp"
 #include "math.hpp"
 #include "sphere.hpp"
-
-#include <iostream>
 
 #define WIN_POS_X 300
 #define WIN_POS_Y 300
@@ -13,7 +14,7 @@
 #define CLIENT_WIDTH 1000
 #define CLIENT_HEIGHT 600
 
-#define FPS 60
+constexpr float FRAME_DURATION = 1.0f / 60.0f;
 
 LRESULT CALLBACK WindowProc(HWND hWnd,
                             UINT message,
@@ -21,23 +22,20 @@ LRESULT CALLBACK WindowProc(HWND hWnd,
                             LPARAM lParam);
 
 Window win;
-
 Scene scene;
-
 Controller controller;
 
-float prev_time = GetTickCount();
-float frame_time = 0;
+auto start_time = std::chrono::steady_clock::now();
 
 bool frameTimeElapsed()
 {
-    float current_time = GetTickCount();
-    frame_time += (current_time - prev_time);
-    prev_time = current_time;
+    using namespace std::chrono;
 
-    if (frame_time >= (float)1000/FPS) // in ms
+    duration<float> elapsed_time = steady_clock::now() - start_time;
+        
+    if (elapsed_time.count() >= FRAME_DURATION)
     {
-        frame_time = 0;
+        start_time = steady_clock::now();
         return true;
     }
     return false;
@@ -63,15 +61,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
     RegisterClassEx(&wclass);
 
     // CREATE WINDOW
-    win = Window(hInstance,
-                 WIN_POS_X, WIN_POS_Y,
-                 CLIENT_WIDTH, CLIENT_HEIGHT);
+    win.init(hInstance,
+             WIN_POS_X, WIN_POS_Y,
+             CLIENT_WIDTH, CLIENT_HEIGHT);
 
     ShowWindow(win.handle, nCmdShow);
 
-    scene = Scene();
-
-    controller = Controller(win, &scene);
+    controller.init(win, &scene);
+    controller.initScene(Sphere(100, vec3(0, 0, 0)));
 
     // MAIN LOOP (EVENT HANDLING)
     MSG msg;

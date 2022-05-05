@@ -7,6 +7,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(SRC engine/src)
 set(INC engine/inc)
 
-add_executable(rt ${SRC}/engine.cpp ${SRC}/sphere.cpp ${SRC}/math.cpp)
+add_executable(rt WIN32 ${SRC}/main.cpp ${SRC}/engine.cpp ${SRC}/sphere.cpp ${SRC}/math.cpp)
 
 include_directories(${INC})

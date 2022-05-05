@@ -10,13 +10,8 @@ public:
 
     Sphere(float radius, float x, float y, float z);
 
-    vec3 getOrigin() const;
+    bool isIntersect(vec3 ray_origin, vec3 ray_direction);
 
-    float getRadius() const;
-
-    void setOrigin(const vec3 & origin);
-
-private:
     float radius;
     vec3 origin;
 };

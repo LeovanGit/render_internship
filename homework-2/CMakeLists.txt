@@ -12,6 +12,11 @@ add_executable(rt WIN32 ${SRC}/main.cpp
 			${SRC}/scene.cpp
 			${SRC}/controller.cpp
 			${SRC}/sphere.cpp
-			${SRC}/math.cpp)
+			${SRC}/math.cpp
+                        ${SRC}/material.cpp
+                        ${SRC}/colored_sphere.cpp
+                        ${SRC}/light.cpp
+                        ${SRC}/ray.cpp
+                        ${SRC}/intersection.cpp)
 
 include_directories(${INC})

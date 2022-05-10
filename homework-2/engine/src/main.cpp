@@ -1,12 +1,16 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <chrono>
+#include <vector>
 
+#include "light.hpp"
 #include "window.hpp"
 #include "scene.hpp"
 #include "controller.hpp"
 #include "math.hpp"
-#include "sphere.hpp"
+#include "colored_sphere.hpp"
+#include "material.hpp"
+#include "light.hpp"
 
 #define WIN_POS_X 300
 #define WIN_POS_Y 300
@@ -67,8 +71,19 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     ShowWindow(win.handle, nCmdShow);
 
+    // CREATE SCENE
     controller.init(win, &scene);
-    controller.initScene(Sphere(100, vec3(0, 0, 0)));
+
+    std::vector<ColoredSphere> c_spheres;
+    c_spheres.push_back(ColoredSphere(Sphere(100, vec3(0, 0, 0)),
+                                      Material(vec3(200, 0, 0))));
+    c_spheres.push_back(ColoredSphere(Sphere(100, vec3(200, 0, 0)),
+                                      Material(vec3(0, 0, 200))));
+
+    std::vector<Light> lights;
+    lights.push_back(Light(vec3(200, -200, -200), vec3(255, 255, 255)));
+
+    controller.initScene(c_spheres, lights);                         
 
     // MAIN LOOP (EVENT HANDLING)
     MSG msg;
@@ -86,7 +101,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
                 
         if (frameTimeElapsed()) 
         {
-            controller.processInput();
+            //controller.processInput();
             controller.scene->render(win);
         }
     }

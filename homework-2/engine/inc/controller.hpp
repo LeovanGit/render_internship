@@ -3,6 +3,7 @@
 
 #include "window.hpp"
 #include "scene.hpp"
+#include <vector>
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -18,9 +19,10 @@ public:
 
     void init(const Window & win, Scene * scene);
 
-    void initScene(Sphere sphere);
+    void initScene(std::vector<ColoredSphere> & c_spheres,
+                   std::vector<Light> & lights);
 
-    void processInput();
+    //void processInput();
 
     void calcMouseMovement(LPARAM lParam);
 

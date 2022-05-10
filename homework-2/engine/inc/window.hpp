@@ -20,6 +20,8 @@ public:
 
     RECT getSize() const;
 
+    RECT getClientSize() const;
+
     void flush();
 
     HWND handle;

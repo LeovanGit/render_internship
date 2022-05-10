@@ -4,10 +4,10 @@ void Window::init(HINSTANCE hInstance,
                   int pos_x, int pos_y,
                   int client_width, int client_height)
 {
-    pos_x = pos_x;
-    pos_y = pos_y;
-    client_width = client_width;
-    client_height = client_height;
+    this->pos_x = pos_x;
+    this->pos_y = pos_y;
+    this->client_width = client_width;
+    this->client_height = client_height;
 
     // calculate the window size consided on client area
     RECT window = {0, 0, client_width, client_height};
@@ -53,6 +53,18 @@ void Window::resize(int width, int height)
 std::vector<int> & Window::getPixels() { return pixels; }
 
 RECT Window::getSize() const
+{
+    RECT client = getClientSize();
+    RECT window = {0,
+                   0,
+                   client.right - client.left,
+                   client.bottom - client.top};
+    AdjustWindowRect(&window, WS_OVERLAPPEDWINDOW, FALSE);
+    
+    return window;
+}
+
+RECT Window::getClientSize() const
 {
     RECT client;
     GetClientRect(handle, &client);

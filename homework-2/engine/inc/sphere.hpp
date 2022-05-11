@@ -14,6 +14,8 @@ public:
 
     Sphere(float radius, float x, float y, float z);
 
+    bool intersect(Intersection & nearest, Ray & ray);
+
     float radius;
     vec3 origin;
 };

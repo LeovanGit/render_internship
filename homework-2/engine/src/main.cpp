@@ -75,15 +75,47 @@ int WINAPI WinMain(HINSTANCE hInstance,
     controller.init(win, &scene);
 
     std::vector<ColoredSphere> c_spheres;
-    c_spheres.push_back(ColoredSphere(Sphere(100, vec3(0, 0, 0)),
-                                      Material(vec3(200, 0, 0))));
-    c_spheres.push_back(ColoredSphere(Sphere(100, vec3(200, 0, 0)),
-                                      Material(vec3(0, 0, 200))));
+    // blue
+    c_spheres.push_back(ColoredSphere(Sphere(100, vec3(-110.0f, 105.0f, 0)),
+                                      Material(vec3(0.8f, 0.0f, 0.0f),
+                                               1.0f,
+                                               128.0f,
+                                               vec3(0.0f, 0.0f, 0.0f))));
 
-    std::vector<Light> lights;
-    lights.push_back(Light(vec3(200, -200, -200), vec3(255, 255, 255)));
+    // red
+    c_spheres.push_back(ColoredSphere(Sphere(100, vec3(110.0f, 105.0f, 0)),
+                                      Material(vec3(0.0f, 0.0f, 0.8f),
+                                               0.2f,
+                                               16.0f,
+                                               vec3(0.0f, 0.0f, 0.0f))));
 
-    controller.initScene(c_spheres, lights);                         
+    // green
+    c_spheres.push_back(ColoredSphere(Sphere(100, vec3(0.0f, -100.0f, 0)),
+                                      Material(vec3(0.0f, 0.8f, 0.0f),
+                                               0.6f,
+                                               72.0f,
+                                               vec3(0.0f, 0.0f, 0.0f))));
+
+
+    std::vector<PointLight> p_lights;
+    // right
+    p_lights.push_back(PointLight(vec3(1.0f, 1.0f, 1.0f),
+                                  250.0f,
+                                  Sphere(10, vec3(200, -200, -300)),
+                                  Material(vec3(1.0f, 1.0f, 1.0f),
+                                           0.0f, 0.0f, 
+                                           vec3(0.0f, 0.0f, 0.0f))));
+
+    // left
+    p_lights.push_back(PointLight(vec3(1.0f, 1.0f, 1.0f),
+                                  400.0f,
+                                  Sphere(10, vec3(-200, -800, -300)),
+                                  Material(vec3(1.0f, 1.0f, 1.0f),
+                                           0.0f, 0.0f, 
+                                           vec3(0.0f, 0.0f, 0.0f))));
+
+
+    controller.initScene(c_spheres, p_lights);
 
     // MAIN LOOP (EVENT HANDLING)
     MSG msg;

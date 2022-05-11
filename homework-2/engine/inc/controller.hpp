@@ -20,7 +20,7 @@ public:
     void init(const Window & win, Scene * scene);
 
     void initScene(std::vector<ColoredSphere> & c_spheres,
-                   std::vector<Light> & lights);
+                   std::vector<PointLight> & p_lights);
 
     //void processInput();
 

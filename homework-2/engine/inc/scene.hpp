@@ -2,6 +2,8 @@
 #define SCENE_HPP
 
 #include <vector>
+#include <cmath>
+#include <iostream>
 
 #include "window.hpp"
 #include "colored_sphere.hpp"
@@ -17,14 +19,19 @@ public:
     explicit Scene() = default;
 
     Scene(std::vector<ColoredSphere> c_spheres,
-          std::vector<Light> lights);
+          std::vector<PointLight> p_lights);
 
     bool findIntersection(Intersection & nearest, Ray & ray);
+
+
+    vec3 blinnPhong(Intersection & nearest,
+                    vec3 V,
+                    bool visibility);
 
     void render(Window & win);
 
     std::vector<ColoredSphere> c_spheres;
-    std::vector<Light> lights;
+    std::vector<PointLight> p_lights;
 };
 
 #endif

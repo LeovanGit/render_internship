@@ -2,15 +2,23 @@
 #define LIGHT_HPP
 
 #include "math.hpp"
+#include "sphere.hpp"
 
-class Light
+class PointLight
 {
 public:
-    Light(vec3 position, vec3 color);
+    explicit PointLight(vec3 color,
+                        float radius,
+                        Sphere sphere,
+                        Material material);
 
-vec3 position;
+    bool intersect(Intersection & nearest, Ray & ray);
+
 vec3 color;
-};
+float radius;
 
+Sphere sphere;
+Material material;
+};
 
 #endif

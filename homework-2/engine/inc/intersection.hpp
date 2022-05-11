@@ -6,6 +6,9 @@
 #include "math.hpp"
 #include "material.hpp"
 
+#define SPHERE 0
+#define LIGHT 1
+
 class Intersection
 {
 public:
@@ -15,8 +18,10 @@ public:
 
     bool isExist();
 
+int type;
 float t;
 vec3 point;
+vec3 normal;
 Material material;
 };
 

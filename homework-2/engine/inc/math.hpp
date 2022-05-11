@@ -32,6 +32,11 @@ public:
         return vec3(k * x, k * y, k * z);
     }
 
+    inline vec3 operator*(const vec3 & other) const
+    {
+        return vec3(x * other.x, y * other.y, z * other.z);
+    }
+
     inline vec3 operator+(const vec3 & other) const
     {
         return vec3(x + other.x, y + other.y, z + other.z);
@@ -42,7 +47,6 @@ public:
         return vec3(x - other.x, y - other.y, z - other.z);
     }
 
-private:
     float x;
     float y;
     float z;

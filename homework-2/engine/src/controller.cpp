@@ -14,9 +14,11 @@ void Controller::init(const Window & win, Scene * scene)
 }
 
 void Controller::initScene(std::vector<ColoredSphere> & c_spheres,
+                           std::vector<Plane> & planes,
                            std::vector<PointLight> & p_lights)
 {
     scene->c_spheres = c_spheres;
+    scene->planes = planes;
     scene->p_lights = p_lights;
 }
 

@@ -1,6 +1,6 @@
 #include "light.hpp"
 
-PointLight::PointLight(vec3 color,
+PointLight::PointLight(glm::vec3 color,
                        float radius,
                        Sphere sphere,
                        Material material) :

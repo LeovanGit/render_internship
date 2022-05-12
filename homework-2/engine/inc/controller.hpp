@@ -3,6 +3,9 @@
 
 #include "window.hpp"
 #include "scene.hpp"
+#include "sphere.hpp"
+#include "light.hpp"
+#include "plane.hpp"
 #include <vector>
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
@@ -20,6 +23,7 @@ public:
     void init(const Window & win, Scene * scene);
 
     void initScene(std::vector<ColoredSphere> & c_spheres,
+                   std::vector<Plane> & planes,
                    std::vector<PointLight> & p_lights);
 
     //void processInput();

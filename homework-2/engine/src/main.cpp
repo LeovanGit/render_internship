@@ -3,13 +3,16 @@
 #include <chrono>
 #include <vector>
 
-#include "light.hpp"
+#include "glm.hpp"
+
 #include "window.hpp"
 #include "scene.hpp"
 #include "controller.hpp"
-#include "math.hpp"
-#include "colored_sphere.hpp"
+
 #include "material.hpp"
+
+#include "plane.hpp"
+#include "colored_sphere.hpp"
 #include "light.hpp"
 
 #define WIN_POS_X 300
@@ -75,47 +78,47 @@ int WINAPI WinMain(HINSTANCE hInstance,
     controller.init(win, &scene);
 
     std::vector<ColoredSphere> c_spheres;
+
     // blue
-    c_spheres.push_back(ColoredSphere(Sphere(100, vec3(-110.0f, 105.0f, 0)),
-                                      Material(vec3(0.8f, 0.0f, 0.0f),
+    c_spheres.push_back(ColoredSphere(Sphere(100,
+                                             glm::vec3(-110.0f, 105.0f, 0)),
+                                      Material(glm::vec3(0.8f, 0.0f, 0.0f),
                                                1.0f,
                                                128.0f,
-                                               vec3(0.0f, 0.0f, 0.0f))));
+                                               glm::vec3(0.0f, 0.0f, 0.0f))));
 
     // red
-    c_spheres.push_back(ColoredSphere(Sphere(100, vec3(110.0f, 105.0f, 0)),
-                                      Material(vec3(0.0f, 0.0f, 0.8f),
+    c_spheres.push_back(ColoredSphere(Sphere(100,
+                                             glm::vec3(110.0f, 105.0f, 0)),
+                                      Material(glm::vec3(0.0f, 0.0f, 0.8f),
                                                0.2f,
                                                16.0f,
-                                               vec3(0.0f, 0.0f, 0.0f))));
+                                               glm::vec3(0.0f, 0.0f, 0.0f))));
 
     // green
-    c_spheres.push_back(ColoredSphere(Sphere(100, vec3(0.0f, -100.0f, 0)),
-                                      Material(vec3(0.0f, 0.8f, 0.0f),
+    c_spheres.push_back(ColoredSphere(Sphere(100,
+                                             glm::vec3(0.0f, -100.0f, 0)),
+                                      Material(glm::vec3(0.0f, 0.8f, 0.0f),
                                                0.6f,
                                                72.0f,
-                                               vec3(0.0f, 0.0f, 0.0f))));
+                                               glm::vec3(0.0f, 0.0f, 0.0f))));
 
+    std::vector<Plane> planes;
+    // floor
+    planes.push_back(Plane(glm::vec3(-10.0f, 107.0f, 0),
+                           glm::vec3(0, 107.0f, 0),
+                           glm::vec3(10.0f, 107.0f, 10.0f)));
 
     std::vector<PointLight> p_lights;
-    // right
-    p_lights.push_back(PointLight(vec3(1.0f, 1.0f, 1.0f),
+    p_lights.push_back(PointLight(glm::vec3(1.0f, 1.0f, 1.0f),
                                   250.0f,
-                                  Sphere(10, vec3(200, -200, -300)),
-                                  Material(vec3(1.0f, 1.0f, 1.0f),
+                                  Sphere(10,
+                                         glm::vec3(200, -200, -300)),
+                                  Material(glm::vec3(1.0f, 1.0f, 1.0f),
                                            0.0f, 0.0f, 
-                                           vec3(0.0f, 0.0f, 0.0f))));
+                                           glm::vec3(0.0f, 0.0f, 0.0f))));
 
-    // left
-    p_lights.push_back(PointLight(vec3(1.0f, 1.0f, 1.0f),
-                                  400.0f,
-                                  Sphere(10, vec3(-200, -800, -300)),
-                                  Material(vec3(1.0f, 1.0f, 1.0f),
-                                           0.0f, 0.0f, 
-                                           vec3(0.0f, 0.0f, 0.0f))));
-
-
-    controller.initScene(c_spheres, p_lights);
+    controller.initScene(c_spheres, planes, p_lights);
 
     // MAIN LOOP (EVENT HANDLING)
     MSG msg;

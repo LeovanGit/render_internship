@@ -1,6 +1,8 @@
 #include "ray.hpp"
 
-Ray::Ray(vec3 origin, vec3 direction) :
-    origin(origin), direction(direction)
+Ray::Ray(glm::vec3 origin,
+         glm::vec3 direction) :
+         origin(origin),
+         direction(glm::normalize(direction))
 {}
 

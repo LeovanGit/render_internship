@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "glm.hpp"
+#include "matrices.hpp"
 
 #include "window.hpp"
 #include "scene.hpp"
@@ -14,6 +15,7 @@
 #include "plane.hpp"
 #include "colored_sphere.hpp"
 #include "light.hpp"
+#include "camera.hpp"
 
 #define WIN_POS_X 300
 #define WIN_POS_Y 300
@@ -81,7 +83,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // blue
     c_spheres.push_back(ColoredSphere(Sphere(100,
-                                             glm::vec3(-110.0f, 105.0f, 0)),
+                                             glm::vec3(-110.0f, 105.0f, 150.0f)),
                                       Material(glm::vec3(0.8f, 0.0f, 0.0f),
                                                1.0f,
                                                128.0f,
@@ -97,7 +99,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // green
     c_spheres.push_back(ColoredSphere(Sphere(100,
-                                             glm::vec3(0.0f, -100.0f, 0)),
+                                             glm::vec3(0.0f, -100.0f, 300.0f)),
                                       Material(glm::vec3(0.0f, 0.8f, 0.0f),
                                                0.6f,
                                                72.0f,
@@ -118,7 +120,11 @@ int WINAPI WinMain(HINSTANCE hInstance,
                                            0.0f, 0.0f, 
                                            glm::vec3(0.0f, 0.0f, 0.0f))));
 
-    controller.initScene(c_spheres, planes, p_lights);
+    Camera camera(glm::vec3(0, 0, -500.0f),
+                  glm::vec3(0, -1.0f, 0),
+                  glm::vec3(0, 0, 1.0f));
+
+    controller.initScene(camera, c_spheres, planes, p_lights);
 
     // MAIN LOOP (EVENT HANDLING)
     MSG msg;

@@ -13,10 +13,12 @@ void Controller::init(const Window & win, Scene * scene)
     for (int i = 0; i != KEYS_COUNT; ++i) keys_log[i] = false;
 }
 
-void Controller::initScene(std::vector<ColoredSphere> & c_spheres,
+void Controller::initScene(Camera & camera,
+                           std::vector<ColoredSphere> & c_spheres,
                            std::vector<Plane> & planes,
                            std::vector<PointLight> & p_lights)
 {
+    scene->camera = camera;
     scene->c_spheres = c_spheres;
     scene->planes = planes;
     scene->p_lights = p_lights;

@@ -1,9 +1,12 @@
 #include "scene.hpp"
+#include "fwd.hpp"
 #include "geometric.hpp"
 
-Scene::Scene(std::vector<ColoredSphere> c_spheres,
+Scene::Scene(Camera camera,
+             std::vector<ColoredSphere> c_spheres,
              std::vector<Plane> planes,
              std::vector<PointLight> p_lights) : 
+             camera(camera),
              c_spheres(c_spheres),
              planes(planes),
              p_lights(p_lights)
@@ -39,7 +42,7 @@ bool Scene::findIntersection(Intersection & nearest, Ray & ray)
 // H - vector between L and V
 // D - distance to light source
 glm::vec3 Scene::blinnPhong(Intersection & nearest,
-                            glm::vec3 camera,
+                            Camera & camera,
                             bool visibility)
 {    
     // emission
@@ -71,7 +74,7 @@ glm::vec3 Scene::blinnPhong(Intersection & nearest,
             
             // specular not depends on object color and distance to light source
             // (only light source color)
-            glm::vec3 V = glm::normalize(camera - nearest.point);
+            glm::vec3 V = glm::normalize(camera.position - nearest.point);
             glm::vec3 H = glm::normalize(V + L);
             float cosb = fmax(0, dot(nearest.normal, H));
 
@@ -99,22 +102,39 @@ void Scene::render(Window & win)
         
     std::vector<int> & pixels = win.getPixels();
 
-    // orthographic: all rays collinear
-    Ray ray;
-    ray.direction = glm::vec3(0, 0, 1);
-
     Intersection nearest;
     nearest.reset();
 
-    for (int y = 0; y != height; ++y)        
+    glm::mat4 view_matrix = camera.getViewMatrix();
+    glm::mat4 proj_matrix = perspective(45.0f,
+                                        float(1920) / 1080,
+                                        10.0f,
+                                        1000.0f);
+
+    glm::mat4 proj_view_inv = glm::inverse(view_matrix) *
+                              glm::inverse(proj_matrix);
+
+    Ray ray;
+    ray.origin = camera.position;
+
+    for (int y = 0; y != height; ++y)
     {
         for (int x = 0; x != width; ++x)
         {
             // new coord system with (0, 0) in client area center
-            int new_x = x - width / 2;
-            int new_y = y - height / 2;
+            // and normalized: [-1; 1]
+            glm::vec2 xy;
+            xy.x = 2.0f * x / width - 1.0f;
+            xy.y = 1.0f - 2.0f * y / height; // reversed
+            
+            // dirCS.z = 1.0f -> on near plane 
+            //         = 0.0f -> on far plane
+            // (versa for not reversed depth)
+            glm::vec4 dir_cs(xy.x, xy.y, 1.0f, 1.0f);
+            glm::vec4 dir_ws = proj_view_inv * dir_cs;
 
-            ray.origin = glm::vec3(new_x, new_y, -1);
+            ray.direction = glm::normalize((glm::vec3(dir_ws) / dir_ws.w) -
+                                            camera.position);            
 
             if (findIntersection(nearest, ray))
             {
@@ -123,7 +143,6 @@ void Scene::render(Window & win)
                 if (nearest.type == SPHERE ||
                     nearest.type == PLANE)
                 {
-                    glm::vec3 camera = glm::vec3(0, 0, -500);                    
                     result_color = blinnPhong(nearest, camera, true);
                 }
                 else if (nearest.type == LIGHT)

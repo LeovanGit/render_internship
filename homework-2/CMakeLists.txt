@@ -22,5 +22,7 @@ add_executable(rt WIN32 ${SRC}/main.cpp
                         ${SRC}/light.cpp
                         ${SRC}/ray.cpp
                         ${SRC}/intersection.cpp
-                        ${SRC}/plane.cpp)
+                        ${SRC}/plane.cpp
+                        ${SRC}/matrices.cpp
+                        ${SRC}/camera.cpp)
 

@@ -120,11 +120,16 @@ int WINAPI WinMain(HINSTANCE hInstance,
                                            0.0f, 0.0f, 
                                            glm::vec3(0.0f, 0.0f, 0.0f))));
 
+    controller.initScene(c_spheres, planes, p_lights);
+
     Camera camera(glm::vec3(0, 0, -500.0f),
                   glm::vec3(0, -1.0f, 0),
                   glm::vec3(0, 0, 1.0f));
 
-    controller.initScene(camera, c_spheres, planes, p_lights);
+    camera.setPerspective(45.0f,
+                          float(CLIENT_WIDTH) / CLIENT_HEIGHT,
+                          10.0f,
+                          1000.0f);
 
     // MAIN LOOP (EVENT HANDLING)
     MSG msg;
@@ -143,7 +148,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
         if (frameTimeElapsed()) 
         {
             //controller.processInput();
-            controller.scene->render(win);
+            controller.scene->render(win, camera);
         }
     }
     exit:

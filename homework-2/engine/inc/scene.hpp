@@ -24,8 +24,7 @@ class Scene
 public:
     explicit Scene() = default;
 
-    Scene(Camera camera,
-          std::vector<ColoredSphere> c_spheres,
+    Scene(std::vector<ColoredSphere> c_spheres,
           std::vector<Plane> planes,
           std::vector<PointLight> p_lights);
 
@@ -36,9 +35,7 @@ public:
                          Camera & camera,
                          bool visibility);
 
-    void render(Window & win);
-
-    Camera camera;
+    void render(Window & win, Camera & camera);
 
     std::vector<ColoredSphere> c_spheres;
     std::vector<Plane> planes;

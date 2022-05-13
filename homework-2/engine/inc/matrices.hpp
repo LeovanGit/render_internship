@@ -20,9 +20,4 @@ public:
     glm::vec3 position;
 };
 
-glm::mat4 perspective(float fovy,
-                      float aspect,
-                      float near,
-                      float far);
-
 #endif

@@ -45,21 +45,3 @@ glm::mat4 Transform::toMatrix() const
     // scale -> rotate -> translate
     return translation * rotation * scaling;
 }
-
-glm::mat4 perspective(float fovy,
-                      float aspect,
-                      float near,
-                      float far)
-{
-    float p1 = 1 / tan(fovy / 2);
-    float p0 = p1 / aspect;
-
-    // reversed depth!
-    glm::mat4 proj_matrix
-        (p0, 0,  0,                            0,
-         0,  p1, 0,                            0,
-         0,  0,  near / (near - far),          1.0f,
-         0,  0,  (-far * near) / (near - far), 0);
-
-    return proj_matrix;
-}

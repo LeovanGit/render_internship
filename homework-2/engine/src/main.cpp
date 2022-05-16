@@ -35,6 +35,7 @@ Scene scene;
 Controller controller;
 
 auto start_time = std::chrono::steady_clock::now();
+float delta_time = 0;
 
 bool frameTimeElapsed()
 {
@@ -44,6 +45,8 @@ bool frameTimeElapsed()
         
     if (elapsed_time.count() >= FRAME_DURATION)
     {
+        delta_time = elapsed_time.count();
+
         start_time = steady_clock::now();
         return true;
     }
@@ -146,9 +149,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
             if (msg.message == WM_QUIT) goto exit;
         }
                 
-        if (frameTimeElapsed()) 
+        if (frameTimeElapsed())
         {
-            //controller.processInput();
+            controller.processInput(camera, delta_time);
             camera.updateMatrices();
             controller.scene->render(win, camera);
         }
@@ -191,6 +194,20 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         case WM_RBUTTONUP:
         {
             controller.keys_log[KEY_RMOUSE] = false;
+            break;
+        }
+        case WM_LBUTTONDOWN:
+        {
+            // fix mouse
+            controller.fixed_mouse.x = controller.mouse.x;
+            controller.fixed_mouse.y = controller.mouse.y;
+
+            controller.keys_log[KEY_LMOUSE] = true;
+            break;
+        }
+        case WM_LBUTTONUP:
+        {
+            controller.keys_log[KEY_LMOUSE] = false;
             break;
         }
         case WM_MOUSEMOVE:

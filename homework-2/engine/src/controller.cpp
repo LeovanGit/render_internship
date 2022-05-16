@@ -4,11 +4,14 @@ void Controller::init(const Window & win, Scene * scene)
 {
     this->scene = scene;
 
-    mouse_x = 0;
-    mouse_y = 0;
+    mouse.x = 0;
+    mouse.y = 0;
 
-    delta_mouse_x = 0;
-    delta_mouse_y = 0;    
+    fixed_mouse.x = 0;
+    fixed_mouse.y = 0;
+
+    delta_mouse.x = 0;
+    delta_mouse.y = 0;
 
     for (int i = 0; i != KEYS_COUNT; ++i) keys_log[i] = false;
 }
@@ -22,36 +25,50 @@ void Controller::initScene(std::vector<ColoredSphere> & c_spheres,
     scene->p_lights = p_lights;
 }
 
-// void Controller::processInput()
-// {
-//     if (keys_log[KEY_W])
-//         scene->csphere.sphere.origin = scene->csphere.sphere.origin + vec3(0.0f, -10.0f, 0.0f);
-//     if (keys_log[KEY_A])
-//         scene->csphere.sphere.origin = scene->csphere.sphere.origin + vec3(-10.0f, 0.0f, 0.0f);
-//     if (keys_log[KEY_S])
-//         scene->csphere.sphere.origin = scene->csphere.sphere.origin + vec3(0.0f, 10.0f, 0.0f);
-//     if (keys_log[KEY_D])
-//         scene->csphere.sphere.origin = scene->csphere.sphere.origin + vec3(10.0f, 0.0f, 0.0f);
-//     if (keys_log[KEY_RMOUSE])
-//     {
-//         scene->csphere.sphere.origin = scene->csphere.sphere.origin +
-//             vec3(delta_mouse_x, delta_mouse_y, 0.0f);
-//         delta_mouse_x = 0;
-//         delta_mouse_y = 0;
-//     }
-// }
+void Controller::processInput(Camera & camera, float delta_time)
+{
+    if (keys_log[KEY_W])
+        camera.addPosition(camera.getForward() * delta_time * MOVEMENT_SPEED);
+    if (keys_log[KEY_S])
+        camera.addPosition(camera.getForward() * -delta_time * MOVEMENT_SPEED);
+    if (keys_log[KEY_D])
+        camera.addPosition(camera.getRight() * delta_time * MOVEMENT_SPEED);
+    if (keys_log[KEY_A])
+        camera.addPosition(camera.getRight() * -delta_time * MOVEMENT_SPEED);
+    if (keys_log[KEY_SPACE])
+        camera.addPosition(camera.getUp() * delta_time * MOVEMENT_SPEED);
+    if (keys_log[KEY_CTRL])
+        camera.addPosition(camera.getUp() * -delta_time * MOVEMENT_SPEED);
+    if (keys_log[KEY_LMOUSE])
+    {
+       camera.addAngles(glm::vec3(delta_mouse.y / 100 * ROTATIONAL_SPEED *
+                                                        delta_time,
+                                  delta_mouse.x / 100 * ROTATIONAL_SPEED  * 
+                                                        delta_time,
+                                  0));
+    }
+    if (keys_log[KEY_Q])
+    {
+       camera.addAngles(glm::vec3(0,
+                                  0,
+                                  ROTATIONAL_SPEED * delta_time));
+    }
+    if (keys_log[KEY_E])
+    {
+        camera.addAngles(glm::vec3(0,
+                                   0,
+                                   -ROTATIONAL_SPEED * delta_time));
+    }
+}
 
 void Controller::calcMouseMovement(LPARAM lParam)
 {
-    int new_mouse_x = GET_X_LPARAM(lParam);
-    int new_mouse_y = GET_Y_LPARAM(lParam);
+    mouse.x = GET_X_LPARAM(lParam);
+    mouse.y = GET_Y_LPARAM(lParam);
 
-    if (keys_log[KEY_RMOUSE])
+    if (keys_log[KEY_LMOUSE])
     {
-        delta_mouse_x = new_mouse_x - mouse_x;
-        delta_mouse_y = new_mouse_y - mouse_y;
+        delta_mouse.x = mouse.x - fixed_mouse.x;
+        delta_mouse.y = mouse.y - fixed_mouse.y;
     }
-
-    mouse_x = new_mouse_x;
-    mouse_y = new_mouse_y;
 }

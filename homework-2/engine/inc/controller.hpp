@@ -6,6 +6,8 @@
 #include "sphere.hpp"
 #include "light.hpp"
 #include "plane.hpp"
+#include "camera.hpp"
+#include "glm.hpp"
 
 #include <vector>
 
@@ -14,7 +16,15 @@ constexpr int KEY_W = 87;
 constexpr int KEY_A = 65;
 constexpr int KEY_S = 83;
 constexpr int KEY_D = 68;
+constexpr int KEY_CTRL = 17;
+constexpr int KEY_SPACE = 32;
+constexpr int KEY_Q = 81;
+constexpr int KEY_E = 69;
+constexpr int KEY_LMOUSE = 1;
 constexpr int KEY_RMOUSE = 2;
+
+constexpr float MOVEMENT_SPEED = 500.0f;
+constexpr float ROTATIONAL_SPEED = 30.0f;
 
 class Controller
 {
@@ -27,17 +37,15 @@ public:
                    std::vector<Plane> & planes,
                    std::vector<PointLight> & p_lights);
 
-    //void processInput();
+    void processInput(Camera & camera, float delta_time);
 
     void calcMouseMovement(LPARAM lParam);
 
     Scene * scene;
 
-    int mouse_x;
-    int mouse_y;
-
-    int delta_mouse_x;
-    int delta_mouse_y;
+    glm::vec3 mouse;
+    glm::vec3 fixed_mouse;
+    glm::vec3 delta_mouse;
     
     bool keys_log[KEYS_COUNT];
 };

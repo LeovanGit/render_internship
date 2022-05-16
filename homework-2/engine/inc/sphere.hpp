@@ -2,6 +2,7 @@
 #define SPHERE_HPP
 
 #include <cmath>
+#include <iostream>
 
 #include "glm.hpp"
 #include "ray.hpp"

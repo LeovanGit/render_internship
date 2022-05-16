@@ -60,7 +60,7 @@ glm::vec3 Scene::blinnPhong(Intersection & nearest,
             L = glm::normalize(L);
             float cosa = fmax(0, glm::dot(nearest.normal, L));
 
-            float light_intensity = (p_lights[i].radius * p_lights[i].radius) / 
+            float light_intensity = (p_lights[i].radius * p_lights[i].radius) /
                                     (D * D);
 
             diffuse += p_lights[i].color *
@@ -111,9 +111,9 @@ void Scene::render(Window & win, Camera & camera)
             // new coord system with (0, 0) in client area center
             // and normalized: [-1; 1]
             glm::vec2 xy;
-            xy.x = 2.0f * x / width - 1.0f;
+            xy.x = 2.0f * x / width - 1.0f;           
             xy.y = 1.0f - 2.0f * y / height; // reversed
-            
+
             // dirCS.z = 1.0f -> on near plane 
             //         = 0.0f -> on far plane
             // (versa for not reversed depth)

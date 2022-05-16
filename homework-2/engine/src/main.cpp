@@ -83,7 +83,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // blue
     c_spheres.push_back(ColoredSphere(Sphere(100,
-                                             glm::vec3(-110.0f, 105.0f, 150.0f)),
+                                             glm::vec3(-110.0f, -105.0f, 150.0f)),
                                       Material(glm::vec3(0.8f, 0.0f, 0.0f),
                                                1.0f,
                                                128.0f,
@@ -91,7 +91,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // red
     c_spheres.push_back(ColoredSphere(Sphere(100,
-                                             glm::vec3(110.0f, 105.0f, 0)),
+                                             glm::vec3(110.0f, -105.0f, 0)),
                                       Material(glm::vec3(0.0f, 0.0f, 0.8f),
                                                0.2f,
                                                16.0f,
@@ -99,7 +99,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // green
     c_spheres.push_back(ColoredSphere(Sphere(100,
-                                             glm::vec3(0.0f, -100.0f, 300.0f)),
+                                             glm::vec3(0.0f, 100.0f, 300.0f)),
                                       Material(glm::vec3(0.0f, 0.8f, 0.0f),
                                                0.6f,
                                                72.0f,
@@ -115,16 +115,17 @@ int WINAPI WinMain(HINSTANCE hInstance,
     p_lights.push_back(PointLight(glm::vec3(1.0f, 1.0f, 1.0f),
                                   250.0f,
                                   Sphere(10,
-                                         glm::vec3(200, -200, -300)),
+                                         glm::vec3(200, 200, -300)),
                                   Material(glm::vec3(1.0f, 1.0f, 1.0f),
                                            0.0f, 0.0f, 
                                            glm::vec3(0.0f, 0.0f, 0.0f))));
 
     controller.initScene(c_spheres, planes, p_lights);
 
-    Camera camera(glm::vec3(0, 0, -500.0f),
-                  glm::vec3(0, -1.0f, 0),
-                  glm::vec3(0, 0, 1.0f));
+    // CREATE CAMERA
+    Camera camera(glm::vec3(0, 0, -1000.0f),
+                  glm::vec3(0, 1.0f, 0), // up
+                  glm::vec3(0, 0, 1.0f)); // forward
 
     camera.setPerspective(45.0f,
                           float(CLIENT_WIDTH) / CLIENT_HEIGHT,
@@ -148,6 +149,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
         if (frameTimeElapsed()) 
         {
             //controller.processInput();
+            camera.updateMatrices();
             controller.scene->render(win, camera);
         }
     }

@@ -20,6 +20,7 @@ bool Sphere::intersect(Intersection & nearest, Ray & ray)
     if (discriminant < 0) return false; // no intersection
 
     float t_near = (-b - sqrt(discriminant)) / (2 * a);
+    if (t_near <= 0) return false; // no intersection
     if (t_near >= nearest.t) return false; // intersection, but not nearest
 
     nearest.t = t_near;

@@ -1,11 +1,12 @@
 #include "matrices.hpp"
 
-#include <iostream>
 Transform::Transform(glm::vec3 position,
                      glm::vec3 rotation,
                      glm::vec3 scale) :
                      position(position),
-                     rotation(rotation),
+                     rotation(glm::vec3(glm::radians(rotation.x),
+                                        glm::radians(rotation.y),
+                                        glm::radians(rotation.z))),
                      scale(scale)
 {}
 

@@ -2,6 +2,10 @@
 #define CAMERA_HPP
 
 #include "glm.hpp"
+#include "gtc/quaternion.hpp"
+
+#include "matrices.hpp"
+
 #include <iostream>
 
 class Camera
@@ -26,6 +30,18 @@ public:
 
     const glm::mat4 & getViewProjInv() const;
 
+    void setPosition(const glm::vec3 & position);
+
+    void addPosition(const glm::vec3 & position);
+
+    void setAngles(const glm::vec3 & angles);
+
+    void addAngles(const glm::vec3 & angles);
+
+    void updateBasis();
+
+    void updateMatrices();
+
 private:
     glm::mat4 view_matrix;
     glm::mat4 proj_matrix;
@@ -34,6 +50,11 @@ private:
     glm::mat4 view_matrix_inv;
     glm::mat4 proj_matrix_inv;
     glm::mat4 view_proj_matrix_inv;
+
+    glm::quat rotation;
+
+    bool is_updated_basis;
+    bool is_updated_matrices;
 };
 
 #endif

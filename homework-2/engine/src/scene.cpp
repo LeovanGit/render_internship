@@ -54,13 +54,28 @@ bool Scene::findIntersection(Intersection & nearest, Ray & ray)
     return found_intersection;
 }
 
+bool Scene::isVisible(Intersection & nearest, glm::vec3 & dir_to_light)
+{
+    Ray ray;
+    ray.direction = dir_to_light;
+    ray.origin = nearest.point + delta * nearest.normal;
+
+    Intersection tmp;
+    tmp.reset();
+
+    if (findIntersection(tmp, ray) && tmp.type == LIGHT ||
+        !findIntersection(tmp, ray)) // for directional
+        return true;
+
+    return false;
+}
+
 // L - ray from intersection point to light source
 // V - ray from intersection point to camera
 // H - vector between L and V
 // D - distance to light source
 glm::vec3 Scene::blinnPhong(Intersection & nearest,
-                            Camera & camera,
-                            bool visibility)
+                            Camera & camera)
 {    
     // emission
     glm::vec3 result = nearest.material.emission;
@@ -71,93 +86,98 @@ glm::vec3 Scene::blinnPhong(Intersection & nearest,
     glm::vec3 diffuse(0, 0, 0);
     glm::vec3 specular(0, 0, 0);
     
-    if (visibility == true)
+    // directional light
+    for (int i = 0, size = d_lights.size(); i != size; ++i)
     {
-        // directional light
-        for (int i = 0, size = d_lights.size(); i != size; ++i)
-        {
-            // diffuse
-            glm::vec3 L = -glm::normalize(d_lights[i].direction);
-            float cosa = fmax(0, glm::dot(nearest.normal, L));
+        glm::vec3 L = -glm::normalize(d_lights[i].direction);
 
-            diffuse += d_lights[i].color *
-                       cosa *
-                       nearest.material.albedo;
+        if (!isVisible(nearest, L)) continue;
+
+        // diffuse
+        float cosa = fmax(0, glm::dot(nearest.normal, L));
+
+        diffuse += d_lights[i].color *
+            cosa *
+            nearest.material.albedo;
             
-            // specular not depends on object color and distance to light source
-            // (only light source color)
-            L = glm::normalize(d_lights[i].sphere.origin - nearest.point);
+        // specular not depends on object color and distance to light source
+        // (only light source color)
+        L = glm::normalize(d_lights[i].sphere.origin - nearest.point);
 
-            glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
-            glm::vec3 H = glm::normalize(V + L);
-            float cosb = fmax(0, dot(nearest.normal, H));
+        glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
+        glm::vec3 H = glm::normalize(V + L);
+        float cosb = fmax(0, dot(nearest.normal, H));
 
-            specular += d_lights[i].color *
-                        (float)pow(cosb, nearest.material.glossiness) * 
-                        nearest.material.specular;
-        }
-
-        // point light
-        for (int i = 0, size = p_lights.size(); i != size; ++i)
-        {
-            // diffuse
-            glm::vec3 L = p_lights[i].sphere.origin - nearest.point;
-            float D = glm::length(L);
-            L = glm::normalize(L);
-            float cosa = fmax(0, glm::dot(nearest.normal, L));
-
-            float light_intensity = (p_lights[i].radius * p_lights[i].radius) /
-                                    (D * D);
-
-            diffuse += p_lights[i].color *
-                       cosa *
-                       nearest.material.albedo *
-                       light_intensity;            
-            
-            // specular not depends on object color and distance to light source
-            // (only light source color)
-            glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
-            glm::vec3 H = glm::normalize(V + L);
-            float cosb = fmax(0, dot(nearest.normal, H));
-
-            specular += p_lights[i].color *
-                        (float)pow(cosb, nearest.material.glossiness) * 
-                        nearest.material.specular;
-        }
-
-        // spot light
-        for (int i = 0, size = s_lights.size(); i != size; ++i)
-        {
-            // diffuse
-            glm::vec3 L = s_lights[i].sphere.origin - nearest.point;
-            float D = glm::length(L);
-            L = glm::normalize(L);
-
-            // check if intersection point under spot light
-            if (glm::dot(s_lights[i].direction, -L) < 
-                cos(glm::radians(s_lights[i].angle / 2))) continue;
-
-            float cosa = fmax(0, glm::dot(nearest.normal, L));
-                        
-            float light_intensity = (s_lights[i].radius * s_lights[i].radius) /
-                                    (D * D);
-
-            diffuse += s_lights[i].color *
-                       cosa *
-                       nearest.material.albedo *
-                       light_intensity;            
-            
-            // specular not depends on object color and distance to light source
-            // (only light source color)
-            glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
-            glm::vec3 H = glm::normalize(V + L);
-            float cosb = fmax(0, dot(nearest.normal, H));
-
-            specular += s_lights[i].color *
-                        (float)pow(cosb, nearest.material.glossiness) * 
-                        nearest.material.specular;
-        }
+        specular += d_lights[i].color *
+            (float)pow(cosb, nearest.material.glossiness) * 
+            nearest.material.specular;
     }
+
+    // point light
+    for (int i = 0, size = p_lights.size(); i != size; ++i)
+    {
+        glm::vec3 L = p_lights[i].sphere.origin - nearest.point;
+        float D = glm::length(L);
+        L = glm::normalize(L);
+
+        if (!isVisible(nearest, L)) continue;
+
+        // diffuse
+        float cosa = fmax(0, glm::dot(nearest.normal, L));
+
+        float light_intensity = (p_lights[i].radius * p_lights[i].radius) /
+            (D * D);
+
+        diffuse += p_lights[i].color *
+            cosa *
+            nearest.material.albedo *
+            light_intensity;            
+            
+        // specular not depends on object color and distance to light source
+        // (only light source color)
+        glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
+        glm::vec3 H = glm::normalize(V + L);
+        float cosb = fmax(0, dot(nearest.normal, H));
+
+        specular += p_lights[i].color *
+            (float)pow(cosb, nearest.material.glossiness) * 
+            nearest.material.specular;
+    }
+
+    // spot light
+    for (int i = 0, size = s_lights.size(); i != size; ++i)
+    {
+        glm::vec3 L = s_lights[i].sphere.origin - nearest.point;
+        float D = glm::length(L);
+        L = glm::normalize(L);
+
+        if (!isVisible(nearest, L)) continue;
+
+        // diffuse
+        // check if intersection point under spot light
+        if (glm::dot(s_lights[i].direction, -L) < 
+            cos(glm::radians(s_lights[i].angle / 2))) continue;
+
+        float cosa = fmax(0, glm::dot(nearest.normal, L));
+                        
+        float light_intensity = (s_lights[i].radius * s_lights[i].radius) /
+            (D * D);
+
+        diffuse += s_lights[i].color *
+            cosa *
+            nearest.material.albedo *
+            light_intensity;            
+            
+        // specular not depends on object color and distance to light source
+        // (only light source color)
+        glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
+        glm::vec3 H = glm::normalize(V + L);
+        float cosb = fmax(0, dot(nearest.normal, H));
+
+        specular += s_lights[i].color *
+                    (float)pow(cosb, nearest.material.glossiness) * 
+                    nearest.material.specular;
+    }    
 
     result += diffuse + specular;
 
@@ -208,7 +228,7 @@ void Scene::render(Window & win, Camera & camera)
 
                 if (nearest.type != LIGHT)
                 {
-                    result_color = blinnPhong(nearest, camera, true);
+                    result_color = blinnPhong(nearest, camera);
                 }
                 else
                 {

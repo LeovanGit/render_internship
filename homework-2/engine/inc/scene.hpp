@@ -23,6 +23,7 @@
 
 constexpr int HEX_BLACK = 0x000000;
 constexpr float ambient = 0.1f;
+constexpr float delta = 0.001f;
 
 class Scene
 {
@@ -38,10 +39,10 @@ public:
 
     bool findIntersection(Intersection & nearest, Ray & ray);
 
+    bool isVisible(Intersection & nearest, glm::vec3 & dir_to_light);
 
     glm::vec3 blinnPhong(Intersection & nearest,
-                         Camera & camera,
-                         bool visibility);
+                         Camera & camera);
 
     void render(Window & win, Camera & camera);
 

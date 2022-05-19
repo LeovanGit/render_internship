@@ -93,29 +93,30 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     std::vector<ColoredSphere> c_spheres;
 
-    // // blue
-    // c_spheres.push_back(ColoredSphere(Sphere(100.0f,
-    //                                          glm::vec3(0, 0, -110.0f)),
-    //                                   Material(glm::vec3(0.4f, 0.0f, 0.0f),
-    //                                            1.0f,
-    //                                            128.0f,
-    //                                            glm::vec3(0.0f, 0.0f, 0.0f))));
+    // blue
+    c_spheres.push_back(ColoredSphere(Sphere(100.0f,
+                                             glm::vec3(0, 0, -110.0f)),
+                                      Material(glm::vec3(0.4f, 0.0f, 0.0f),
+                                               1.0f,
+                                               128.0f,
+                                               glm::vec3(0.0f, 0.0f, 0.0f))));
 
-    // // red
-    // c_spheres.push_back(ColoredSphere(Sphere(100.0f,
-    //                                          glm::vec3(-110.0f, 0, 70.0f)),
-    //                                   Material(glm::vec3(0.0f, 0.0f, 0.8f),
-    //                                            0.2f,
-    //                                            16.0f,
-    //                                            glm::vec3(0.0f, 0.0f, 0.0f))));
+    // red
+    c_spheres.push_back(ColoredSphere(Sphere(100.0f,
+                                             glm::vec3(-110.0f, 0, 70.0f)),
+                                      Material(glm::vec3(0.0f, 0.0f, 0.8f),
+                                               0.2f,
+                                               16.0f,
+                                               glm::vec3(0.0f, 0.0f, 0.0f))));
 
-    // // green
-    // c_spheres.push_back(ColoredSphere(Sphere(100.0f,
-    //                                          glm::vec3(110.0f, 0, 70.0f)),
-    //                                   Material(glm::vec3(0.0f, 0.4f, 0.0f),
-    //                                            0.6f,
-    //                                            72.0f,
-    //                                            glm::vec3(0.0f, 0.0f, 0.0f))));
+    // green
+    c_spheres.push_back(ColoredSphere(Sphere(100.0f,
+                                             glm::vec3(110.0f, 0, 70.0f)),
+                                      Material(glm::vec3(0.0f, 0.4f, 0.0f),
+                                               0.6f,
+                                               72.0f,
+                                               glm::vec3(0.0f, 0.0f, 0.0f))));
+
     // // white
     // c_spheres.push_back(ColoredSphere(Sphere(70.0f,
     //                                          glm::vec3(0, 110.0f, 0)),
@@ -135,21 +136,21 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     std::vector <Cube> cubes;
 
-    cubes.push_back(Cube(glm::vec3(0, 0, 0),
-                         glm::vec3(0.0f, 0.0f, 0.0f),
-                         glm::vec3(100.0f, 100.0f, 100.0f),
-                         Material(glm::vec3(0.0f, 0.8f, 0.0f),
-                                  0,
-                                  0,
-                                  glm::vec3(0, 0, 0))));
+    // cubes.push_back(Cube(glm::vec3(0, 0, 0),
+    //                      glm::vec3(0.0f, 0.0f, 0.0f),
+    //                      glm::vec3(100.0f, 100.0f, 100.0f),
+    //                      Material(glm::vec3(0.0f, 0.8f, 0.0f),
+    //                               0,
+    //                               0,
+    //                               glm::vec3(0, 0, 0))));
 
-    cubes.push_back(Cube(glm::vec3(300.0f, 0, 0),
-                         glm::vec3(45.0f, 0, 0),
-                         glm::vec3(50.0f, 100.0f, 100.0f),
-                         Material(glm::vec3(0.0f, 0.0f, 0.8f),
-                                  0,
-                                  0,
-                                  glm::vec3(0, 0, 0))));
+    // cubes.push_back(Cube(glm::vec3(300.0f, 0, 0),
+    //                      glm::vec3(45.0f, 0, 0),
+    //                      glm::vec3(50.0f, 100.0f, 100.0f),
+    //                      Material(glm::vec3(0.0f, 0.0f, 0.8f),
+    //                               0,
+    //                               0,
+    //                               glm::vec3(0, 0, 0))));
 
     std::vector<PointLight> p_lights;
 
@@ -163,13 +164,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
     
     std::vector<DirectionalLight> d_lights;
 
-    // d_lights.push_back(DirectionalLight(glm::vec3(1.0f),
-    //                                     glm::vec3(1.0f, -1.0f, 1.0f),
-    //                                     Sphere(10,
-    //                                            glm::vec3(-200, 200, -300)),
-    //                                     Material(glm::vec3(1.0f),
-    //                                              0.0f, 0.0f, 
-    //                                              glm::vec3(0.0f, 0.0f, 0.0f))));
+    d_lights.push_back(DirectionalLight(glm::vec3(1.0f),
+                                        glm::vec3(1.0f, -1.0f, 1.0f),
+                                        Sphere(10,
+                                               glm::vec3(-200, 200, -300)),
+                                        Material(glm::vec3(1.0f),
+                                                 0.0f, 0.0f, 
+                                                 glm::vec3(0.0f, 0.0f, 0.0f))));
 
     std::vector<SpotLight> s_lights;
 

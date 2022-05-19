@@ -1,28 +1,23 @@
 #include "plane.hpp"
 
-Plane::Plane(glm::vec3 a, glm::vec3 b, glm::vec3 c) :
-             a(a), b(b), c(c)
-{
-    glm::vec3 ab = a - b;
-    glm::vec3 ac = a - c;
-    normal = glm::normalize(glm::cross(ab, ac));
-}
+Plane::Plane(glm::vec3 normal, glm::vec3 origin) :
+             normal(normal), origin(origin)
+{}
 
 bool Plane::intersect(Intersection & nearest, Ray & ray)
 {
-    float d = -dot(normal, a);   
-    float t = -(dot(normal, ray.origin) + d) / dot(normal, ray.direction);
+    // ray || plane
+    float d = dot(normal, ray.direction);
+    if (d == 0) return false;
+    
+    float t = glm::dot((origin - ray.origin), normal) / d;
 
-    if (t >= nearest.t) return false;
+    if (t < 0) return false; // no intersection
+    if (t >= nearest.t) return false; // intersection, but not nearest
 
     nearest.t = t;
     nearest.point = ray.origin + ray.direction * t;
     nearest.normal = normal;
-    nearest.material = Material(glm::vec3(0.8f, 0.0f, 0.0f),
-                                0,
-                                0,
-                                glm::vec3(0, 0, 0));
-    nearest.type = PLANE;
 
     return true;
 }

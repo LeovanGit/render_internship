@@ -30,13 +30,15 @@ public:
 
     const glm::mat4 & getViewProjInv() const;
 
-    void setPosition(const glm::vec3 & position);
+    void setWorldPosition(const glm::vec3 & position);
 
-    void addPosition(const glm::vec3 & position);
+    void addWorldPosition(const glm::vec3 & position);
 
-    void setAngles(const glm::vec3 & angles);
+    void setWorldAngles(const glm::vec3 & angles);
 
-    void addAngles(const glm::vec3 & angles);
+    void addWorldAngles(const glm::vec3 & angles);
+
+    void addRelativeAngles(const glm::vec3 & angles);
 
     void updateBasis();
 

@@ -15,6 +15,11 @@
 #include "intersection.hpp"
 #include "plane.hpp"
 #include "camera.hpp"
+#include "colored_plane.hpp"
+#include "triangle.hpp"
+#include "colored_triangle.hpp"
+#include "cube.hpp"
+
 
 constexpr int HEX_BLACK = 0x000000;
 constexpr float ambient = 0.1f;
@@ -25,8 +30,11 @@ public:
     explicit Scene() = default;
 
     Scene(std::vector<ColoredSphere> c_spheres,
-          std::vector<Plane> planes,
-          std::vector<PointLight> p_lights);
+          std::vector<ColoredPlane> c_planes,
+          std::vector<Cube> c_cubes,
+          std::vector<PointLight> p_lights,
+          std::vector<DirectionalLight> d_lights,
+          std::vector<SpotLight> s_lights);
 
     bool findIntersection(Intersection & nearest, Ray & ray);
 
@@ -38,9 +46,12 @@ public:
     void render(Window & win, Camera & camera);
 
     std::vector<ColoredSphere> c_spheres;
-    std::vector<Plane> planes;
+    std::vector<ColoredPlane> c_planes;
+    std::vector<Cube> c_cubes;
 
     std::vector<PointLight> p_lights;
+    std::vector<DirectionalLight> d_lights;
+    std::vector<SpotLight> s_lights;
 };
 
 #endif

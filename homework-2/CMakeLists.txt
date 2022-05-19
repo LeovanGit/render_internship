@@ -24,5 +24,9 @@ add_executable(rt WIN32 ${SRC}/main.cpp
                         ${SRC}/intersection.cpp
                         ${SRC}/plane.cpp
                         ${SRC}/matrices.cpp
-                        ${SRC}/camera.cpp)
+                        ${SRC}/camera.cpp
+                        ${SRC}/colored_plane.cpp
+                        ${SRC}/triangle.cpp
+                        ${SRC}/colored_triangle.cpp
+                        ${SRC}/cube.cpp)
 

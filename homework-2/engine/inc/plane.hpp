@@ -11,14 +11,12 @@
 class Plane
 {
 public:
-    Plane(glm::vec3 a, glm::vec3 b, glm::vec3 c);
+    Plane(glm::vec3 normal, glm::vec3 origin);
 
     bool intersect(Intersection & nearest, Ray & ray);
 
-    glm::vec3 a;
-    glm::vec3 b;
-    glm::vec3 c;
     glm::vec3 normal;
+    glm::vec3 origin;
 };
 
 #endif

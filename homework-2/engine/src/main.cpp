@@ -14,14 +14,18 @@
 
 #include "plane.hpp"
 #include "colored_sphere.hpp"
+#include "colored_plane.hpp"
+#include "triangle.hpp"
+#include "colored_triangle.hpp"
 #include "light.hpp"
 #include "camera.hpp"
+#include "cube.hpp"
 
 #define WIN_POS_X 300
 #define WIN_POS_Y 300
 
-#define CLIENT_WIDTH 1000
-#define CLIENT_HEIGHT 600
+#define CLIENT_WIDTH 384
+#define CLIENT_HEIGHT 216
 
 constexpr float FRAME_DURATION = 1.0f / 60.0f;
 
@@ -36,6 +40,11 @@ Controller controller;
 
 auto start_time = std::chrono::steady_clock::now();
 float delta_time = 0;
+
+// CREATE CAMERA
+Camera camera(glm::vec3(0, 0, -1000.0f),
+              glm::vec3(0, 1.0f, 0), // up
+              glm::vec3(0, 0, 1.0f)); // forward
 
 bool frameTimeElapsed()
 {
@@ -84,51 +93,103 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     std::vector<ColoredSphere> c_spheres;
 
-    // blue
-    c_spheres.push_back(ColoredSphere(Sphere(100,
-                                             glm::vec3(-110.0f, -105.0f, 150.0f)),
-                                      Material(glm::vec3(0.8f, 0.0f, 0.0f),
-                                               1.0f,
-                                               128.0f,
-                                               glm::vec3(0.0f, 0.0f, 0.0f))));
+    // // blue
+    // c_spheres.push_back(ColoredSphere(Sphere(100.0f,
+    //                                          glm::vec3(0, 0, -110.0f)),
+    //                                   Material(glm::vec3(0.4f, 0.0f, 0.0f),
+    //                                            1.0f,
+    //                                            128.0f,
+    //                                            glm::vec3(0.0f, 0.0f, 0.0f))));
 
-    // red
-    c_spheres.push_back(ColoredSphere(Sphere(100,
-                                             glm::vec3(110.0f, -105.0f, 0)),
-                                      Material(glm::vec3(0.0f, 0.0f, 0.8f),
-                                               0.2f,
-                                               16.0f,
-                                               glm::vec3(0.0f, 0.0f, 0.0f))));
+    // // red
+    // c_spheres.push_back(ColoredSphere(Sphere(100.0f,
+    //                                          glm::vec3(-110.0f, 0, 70.0f)),
+    //                                   Material(glm::vec3(0.0f, 0.0f, 0.8f),
+    //                                            0.2f,
+    //                                            16.0f,
+    //                                            glm::vec3(0.0f, 0.0f, 0.0f))));
 
-    // green
-    c_spheres.push_back(ColoredSphere(Sphere(100,
-                                             glm::vec3(0.0f, 100.0f, 300.0f)),
-                                      Material(glm::vec3(0.0f, 0.8f, 0.0f),
-                                               0.6f,
-                                               72.0f,
-                                               glm::vec3(0.0f, 0.0f, 0.0f))));
+    // // green
+    // c_spheres.push_back(ColoredSphere(Sphere(100.0f,
+    //                                          glm::vec3(110.0f, 0, 70.0f)),
+    //                                   Material(glm::vec3(0.0f, 0.4f, 0.0f),
+    //                                            0.6f,
+    //                                            72.0f,
+    //                                            glm::vec3(0.0f, 0.0f, 0.0f))));
+    // // white
+    // c_spheres.push_back(ColoredSphere(Sphere(70.0f,
+    //                                          glm::vec3(0, 110.0f, 0)),
+    //                                   Material(glm::vec3(1.0f, 1.0f, 1.0f),
+    //                                            0.2f,
+    //                                            16.0f,
+    //                                            glm::vec3(0.0f, 0.0f, 0.0f))));
 
-    std::vector<Plane> planes;
+    std::vector<ColoredPlane> c_planes;
     // floor
-    planes.push_back(Plane(glm::vec3(-10.0f, 107.0f, 0),
-                           glm::vec3(0, 107.0f, 0),
-                           glm::vec3(10.0f, 107.0f, 10.0f)));
+    c_planes.push_back(ColoredPlane(Plane(glm::vec3(0, 1.0f, 0),
+                                          glm::vec3(0, -100.0f, 0)),
+                                    Material(glm::vec3(0.5f, 0.5f, 0.5f),
+                                             0,
+                                             0,
+                                             glm::vec3(0, 0, 0))));
+
+    std::vector <Cube> cubes;
+
+    cubes.push_back(Cube(glm::vec3(0, 0, 0),
+                         glm::vec3(0.0f, 0.0f, 0.0f),
+                         glm::vec3(100.0f, 100.0f, 100.0f),
+                         Material(glm::vec3(0.0f, 0.8f, 0.0f),
+                                  0,
+                                  0,
+                                  glm::vec3(0, 0, 0))));
+
+    cubes.push_back(Cube(glm::vec3(300.0f, 0, 0),
+                         glm::vec3(45.0f, 0, 0),
+                         glm::vec3(50.0f, 100.0f, 100.0f),
+                         Material(glm::vec3(0.0f, 0.0f, 0.8f),
+                                  0,
+                                  0,
+                                  glm::vec3(0, 0, 0))));
 
     std::vector<PointLight> p_lights;
-    p_lights.push_back(PointLight(glm::vec3(1.0f, 1.0f, 1.0f),
+
+    p_lights.push_back(PointLight(glm::vec3(0.0f, 0.8f, 1.0f),
                                   250.0f,
                                   Sphere(10,
                                          glm::vec3(200, 200, -300)),
-                                  Material(glm::vec3(1.0f, 1.0f, 1.0f),
+                                  Material(glm::vec3(0.0f, 0.8f, 1.0f),
                                            0.0f, 0.0f, 
                                            glm::vec3(0.0f, 0.0f, 0.0f))));
+    
+    std::vector<DirectionalLight> d_lights;
 
-    controller.initScene(c_spheres, planes, p_lights);
+    // d_lights.push_back(DirectionalLight(glm::vec3(1.0f),
+    //                                     glm::vec3(1.0f, -1.0f, 1.0f),
+    //                                     Sphere(10,
+    //                                            glm::vec3(-200, 200, -300)),
+    //                                     Material(glm::vec3(1.0f),
+    //                                              0.0f, 0.0f, 
+    //                                              glm::vec3(0.0f, 0.0f, 0.0f))));
 
-    // CREATE CAMERA
-    Camera camera(glm::vec3(0, 0, -1000.0f),
-                  glm::vec3(0, 1.0f, 0), // up
-                  glm::vec3(0, 0, 1.0f)); // forward
+    std::vector<SpotLight> s_lights;
+
+    // s_lights.push_back(SpotLight(glm::vec3(1.0f),
+    //                              250.0f,
+    //                              30.0f,
+    //                              glm::normalize(glm::vec3(0, -1.0f, 1.0f)),
+    //                              Sphere(10,
+    //                                     glm::vec3(-400.0, 250.0f, -300.0f)),
+    //                              Material(glm::vec3(1.0f),
+    //                                       0.0f, 0.0f, 
+    //                                       glm::vec3(0.0f, 0.0f, 0.0f))));
+
+
+    controller.initScene(c_spheres,
+                         c_planes,
+                         cubes,
+                         p_lights,
+                         d_lights,
+                         s_lights);
 
     camera.setPerspective(45.0f,
                           float(CLIENT_WIDTH) / CLIENT_HEIGHT,
@@ -173,6 +234,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         case WM_SIZE:
         {
             win.resize(LOWORD(lParam), HIWORD(lParam));
+            camera.setPerspective(45.0f,
+                                  (float)LOWORD(lParam) / HIWORD(lParam),
+                                  10.0f,
+                                  1000.0f);
             break;
         }
         case WM_KEYDOWN:

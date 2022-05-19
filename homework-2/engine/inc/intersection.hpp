@@ -9,6 +9,7 @@
 #define SPHERE 0
 #define LIGHT 1
 #define PLANE 2
+#define TRIANGLE 3
 
 class Intersection
 {

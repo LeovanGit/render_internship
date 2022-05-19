@@ -14,7 +14,6 @@ Camera::Camera(glm::vec3 position,
                                 position.x, position.y, position.z, 1.0f);
 
     rotation = glm::quat_cast(glm::mat3(right, up, forward));
-    is_updated_basis = false;
 }
 
 void Camera::setPerspective(float fovy,
@@ -37,20 +36,40 @@ void Camera::setPerspective(float fovy,
     is_updated_matrices = false;
 }
 
-glm::vec3 Camera::getPosition() const { return view_matrix_inv[3]; }
+glm::vec3 Camera::getPosition() const 
+{
+    return glm::vec3(view_matrix_inv[3][0],
+                     view_matrix_inv[3][1],
+                     view_matrix_inv[3][2]);
+}
 
-glm::vec3 Camera::getUp() const { return view_matrix_inv[1]; }
+glm::vec3 Camera::getUp() const
+{
+    return glm::vec3(view_matrix_inv[1][0],
+                     view_matrix_inv[1][1],
+                     view_matrix_inv[1][2]);
+}
 
-glm::vec3 Camera::getForward() const { return view_matrix_inv[2]; }
+glm::vec3 Camera::getForward() const
+{
+    return glm::vec3(view_matrix_inv[2][0],
+                     view_matrix_inv[2][1],
+                     view_matrix_inv[2][2]);
+}
 
-glm::vec3 Camera::getRight() const { return view_matrix_inv[0]; }
+glm::vec3 Camera::getRight() const
+{
+    return glm::vec3(view_matrix_inv[0][0],
+                     view_matrix_inv[0][1],
+                     view_matrix_inv[0][2]);
+}
 
 const glm::mat4 & Camera::getViewProjInv() const
 {
     return view_proj_matrix_inv;
 }
 
-void Camera::setPosition(const glm::vec3 & position)
+void Camera::setWorldPosition(const glm::vec3 & position)
 {
     view_matrix_inv[3][0] = position.x;
     view_matrix_inv[3][1] = position.y;
@@ -59,7 +78,7 @@ void Camera::setPosition(const glm::vec3 & position)
     is_updated_matrices = false;
 }
 
-void Camera::addPosition(const glm::vec3 & position)
+void Camera::addWorldPosition(const glm::vec3 & position)
 {
     view_matrix_inv[3][0] += position.x;
     view_matrix_inv[3][1] += position.y;
@@ -68,31 +87,13 @@ void Camera::addPosition(const glm::vec3 & position)
     is_updated_matrices = false;
 }
 
-void Camera::setAngles(const glm::vec3 & angles)
+void Camera::setWorldAngles(const glm::vec3 & angles)
 {
-    // ox
-    rotation = glm::quat(cos(glm::radians(angles.x / 2)),
-                         (float)sin(glm::radians(angles.x / 2)) *
-                         glm::vec3(1.0f, 0, 0));
-
-    // oy
-    rotation *= glm::quat(cos(glm::radians(angles.y / 2)),
-                          (float)sin(glm::radians(angles.y / 2)) *
-                          glm::vec3(0, 1.0f, 0));
-
     // oz
-    rotation *= glm::quat(cos(glm::radians(angles.z / 2)),
-                          (float)sin(glm::radians(angles.z / 2)) *
-                          glm::vec3(0, 0, 1.0f));
+    rotation = glm::quat(cos(glm::radians(angles.z / 2)),
+                         (float)sin(glm::radians(angles.z / 2)) *
+                         glm::vec3(0, 0, 1.0f));
 
-    //glm::normalize(rotation);
-
-    is_updated_basis = false;
-    is_updated_matrices = false;
-}
-
-void Camera::addAngles(const glm::vec3 & angles)
-{
     // ox
     rotation *= glm::quat(cos(glm::radians(angles.x / 2)),
                           (float)sin(glm::radians(angles.x / 2)) *
@@ -103,12 +104,53 @@ void Camera::addAngles(const glm::vec3 & angles)
                           (float)sin(glm::radians(angles.y / 2)) *
                           glm::vec3(0, 1.0f, 0));
 
+    //glm::normalize(rotation);
+
+    is_updated_basis = false;
+    is_updated_matrices = false;
+}
+
+void Camera::addWorldAngles(const glm::vec3 & angles)
+{
     // oz
     rotation *= glm::quat(cos(glm::radians(angles.z / 2)),
                           (float)sin(glm::radians(angles.z / 2)) *
                           glm::vec3(0, 0, 1.0f));
 
-    //glm::normalize(rotation);
+    // ox
+    rotation *= glm::quat(cos(glm::radians(angles.x / 2)),
+                          (float)sin(glm::radians(angles.x / 2)) *
+                          glm::vec3(1.0f, 0, 0));
+
+    // oy
+    rotation *= glm::quat(cos(glm::radians(angles.y / 2)),
+                          (float)sin(glm::radians(angles.y / 2)) *
+                          glm::vec3(0, 1.0f, 0));
+
+    // glm::normalize(rotation);
+
+    is_updated_basis = false;
+    is_updated_matrices = false;
+}
+
+void Camera::addRelativeAngles(const glm::vec3 & angles)
+{    
+    // oz
+    rotation *= glm::quat(cos(glm::radians(angles.z / 2)),
+                          (float)sin(glm::radians(angles.z / 2)) *
+                          getForward());
+
+    // ox
+    rotation *= glm::quat(cos(glm::radians(angles.x / 2)),
+                          (float)sin(glm::radians(angles.x / 2)) *
+                          getRight());
+
+    // oy
+    rotation *= glm::quat(cos(glm::radians(angles.y / 2)),
+                          (float)sin(glm::radians(angles.y / 2)) *
+                          getUp());
+
+    // glm::normalize(rotation);
 
     is_updated_basis = false;
     is_updated_matrices = false;
@@ -126,7 +168,7 @@ void Camera::updateBasis()
         {
             view_matrix_inv[i][j] = basis[i][j];
         }
-    }    
+    }
 
     is_updated_basis = true;
 }
@@ -139,7 +181,7 @@ void Camera::updateMatrices()
 
     view_matrix = glm::inverse(view_matrix_inv);
     view_proj_matrix = view_matrix * proj_matrix;
-    view_proj_matrix_inv = glm::inverse(view_matrix) *
+    view_proj_matrix_inv = view_matrix_inv *
                            glm::inverse(proj_matrix);
     
     is_updated_matrices = true;

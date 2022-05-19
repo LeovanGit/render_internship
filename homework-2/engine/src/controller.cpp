@@ -17,47 +17,60 @@ void Controller::init(const Window & win, Scene * scene)
 }
 
 void Controller::initScene(std::vector<ColoredSphere> & c_spheres,
-                           std::vector<Plane> & planes,
-                           std::vector<PointLight> & p_lights)
+                           std::vector<ColoredPlane> & c_planes,
+                           std::vector<Cube> & c_cubes,
+                           std::vector<PointLight> & p_lights,
+                           std::vector<DirectionalLight> & d_lights,
+                           std::vector<SpotLight> & s_lights)
 {
     scene->c_spheres = c_spheres;
-    scene->planes = planes;
+    scene->c_planes = c_planes;
+    scene->c_cubes = c_cubes;
     scene->p_lights = p_lights;
+    scene->d_lights = d_lights;
+    scene->s_lights = s_lights;
 }
 
 void Controller::processInput(Camera & camera, float delta_time)
 {
     if (keys_log[KEY_W])
-        camera.addPosition(camera.getForward() * delta_time * MOVEMENT_SPEED);
+        camera.addWorldPosition(camera.getForward() *
+                                delta_time * MOVEMENT_SPEED);
     if (keys_log[KEY_S])
-        camera.addPosition(camera.getForward() * -delta_time * MOVEMENT_SPEED);
+        camera.addWorldPosition(camera.getForward() * 
+                                delta_time * -MOVEMENT_SPEED);
     if (keys_log[KEY_D])
-        camera.addPosition(camera.getRight() * delta_time * MOVEMENT_SPEED);
+        camera.addWorldPosition(camera.getRight() *
+                                delta_time * MOVEMENT_SPEED);
     if (keys_log[KEY_A])
-        camera.addPosition(camera.getRight() * -delta_time * MOVEMENT_SPEED);
+        camera.addWorldPosition(camera.getRight() *
+                                delta_time * -MOVEMENT_SPEED);
     if (keys_log[KEY_SPACE])
-        camera.addPosition(camera.getUp() * delta_time * MOVEMENT_SPEED);
+        camera.addWorldPosition(camera.getUp() *
+                                delta_time * MOVEMENT_SPEED);
     if (keys_log[KEY_CTRL])
-        camera.addPosition(camera.getUp() * -delta_time * MOVEMENT_SPEED);
+        camera.addWorldPosition(camera.getUp() *
+                                delta_time * -MOVEMENT_SPEED);
     if (keys_log[KEY_LMOUSE])
     {
-       camera.addAngles(glm::vec3(delta_mouse.y / 100 * ROTATIONAL_SPEED *
-                                                        delta_time,
-                                  delta_mouse.x / 100 * ROTATIONAL_SPEED  * 
-                                                        delta_time,
-                                  0));
+        glm::vec3 angles;
+        angles.x = delta_mouse.y / 100 * ROTATIONAL_SPEED * delta_time;
+        angles.y = delta_mouse.x / 100 * ROTATIONAL_SPEED * delta_time;
+        angles.z = 0;
+
+        camera.addRelativeAngles(angles);
     }
     if (keys_log[KEY_Q])
     {
-       camera.addAngles(glm::vec3(0,
-                                  0,
-                                  ROTATIONAL_SPEED * delta_time));
+        camera.addRelativeAngles(glm::vec3(0,
+                                           0,
+                                           ROTATIONAL_SPEED * delta_time));
     }
     if (keys_log[KEY_E])
     {
-        camera.addAngles(glm::vec3(0,
-                                   0,
-                                   -ROTATIONAL_SPEED * delta_time));
+        camera.addRelativeAngles(glm::vec3(0,
+                                           0,
+                                           -ROTATIONAL_SPEED * delta_time));
     }
 }
 

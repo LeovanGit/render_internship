@@ -8,6 +8,10 @@
 #include "plane.hpp"
 #include "camera.hpp"
 #include "glm.hpp"
+#include "colored_plane.hpp"
+#include "triangle.hpp"
+#include "colored_triangle.hpp"
+#include "cube.hpp"
 
 #include <vector>
 
@@ -34,8 +38,11 @@ public:
     void init(const Window & win, Scene * scene);
 
     void initScene(std::vector<ColoredSphere> & c_spheres,
-                   std::vector<Plane> & planes,
-                   std::vector<PointLight> & p_lights);
+                   std::vector<ColoredPlane> & c_planes,
+                   std::vector<Cube> & c_cubes,
+                   std::vector<PointLight> & p_lights,
+                   std::vector<DirectionalLight> & d_lights,
+                   std::vector<SpotLight> & s_lights);
 
     void processInput(Camera & camera, float delta_time);
 

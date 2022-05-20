@@ -1,11 +1,11 @@
 #include "intersection.hpp"
 
-void Intersection::reset() 
+void math::Intersection::reset() 
 { 
-    t = std::numeric_limits<float>::infinity(); 
+    t = std::numeric_limits<float>::infinity();
 }
 
-bool Intersection::isExist()
+bool math::Intersection::isExist() const
 { 
     return t != std::numeric_limits<float>::infinity();
 }

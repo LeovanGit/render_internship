@@ -1,28 +1,29 @@
 #ifndef CUBE_HPP
 #define CUBE_HPP
 
+#include <vector>
+#include "glm.hpp"
+
 #include "triangle.hpp"
-#include "material.hpp"
 #include "matrices.hpp"
 
-#include <vector>
-
+namespace math
+{
 class Cube
 {
 public:
     Cube(glm::vec3 position,
          glm::vec3 angles,
-         glm::vec3 scale,
-         Material material);
+         glm::vec3 scale);
 
-    bool intersect(Intersection & nearest, Ray & ray);
-
-    Material material;
+    bool intersect(math::Intersection & nearest,
+                   const math::Ray & ray);
 
 private:
     glm::mat4 model_matrix;
     glm::mat4 model_matrix_inv;
-    static std::vector <Triangle> mesh;
+    static std::vector <math::Triangle> mesh;
 };
+} // namespace math
 
 #endif

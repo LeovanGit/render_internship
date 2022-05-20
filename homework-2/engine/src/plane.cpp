@@ -1,10 +1,11 @@
 #include "plane.hpp"
 
-Plane::Plane(glm::vec3 normal, glm::vec3 origin) :
+math::Plane::Plane(glm::vec3 normal, glm::vec3 origin) :
              normal(normal), origin(origin)
 {}
 
-bool Plane::intersect(Intersection & nearest, Ray & ray)
+bool math::Plane::intersect(math::Intersection & nearest,
+                            const math::Ray & ray)
 {
     // ray || plane
     float d = dot(normal, ray.direction);

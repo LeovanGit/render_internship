@@ -16,17 +16,13 @@ add_executable(rt WIN32 ${SRC}/main.cpp
 			${SRC}/window.cpp
 			${SRC}/scene.cpp
 			${SRC}/controller.cpp
-			${SRC}/sphere.cpp
-                        ${SRC}/material.cpp
-                        ${SRC}/colored_sphere.cpp
-                        ${SRC}/light.cpp
+                        ${SRC}/camera.cpp
                         ${SRC}/ray.cpp
                         ${SRC}/intersection.cpp
+			${SRC}/sphere.cpp
                         ${SRC}/plane.cpp
-                        ${SRC}/matrices.cpp
-                        ${SRC}/camera.cpp
-                        ${SRC}/colored_plane.cpp
                         ${SRC}/triangle.cpp
-                        ${SRC}/colored_triangle.cpp
-                        ${SRC}/cube.cpp)
+                        ${SRC}/cube.cpp
+                        ${SRC}/material.cpp
+                        ${SRC}/matrices.cpp)
 

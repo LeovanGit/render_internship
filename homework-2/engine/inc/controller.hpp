@@ -1,19 +1,13 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
+#include <vector>
+#include "glm.hpp"
+
 #include "window.hpp"
 #include "scene.hpp"
-#include "sphere.hpp"
-#include "light.hpp"
-#include "plane.hpp"
 #include "camera.hpp"
-#include "glm.hpp"
-#include "colored_plane.hpp"
-#include "triangle.hpp"
-#include "colored_triangle.hpp"
-#include "cube.hpp"
-
-#include <vector>
+#include "sphere.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -35,24 +29,29 @@ class Controller
 public:
     Controller() = default;
 
-    void init(const Window & win, Scene * scene);
+    void init(Scene * scene);
 
-    void initScene(std::vector<ColoredSphere> & c_spheres,
-                   std::vector<ColoredPlane> & c_planes,
-                   std::vector<Cube> & c_cubes,
-                   std::vector<PointLight> & p_lights,
-                   std::vector<DirectionalLight> & d_lights,
-                   std::vector<SpotLight> & s_lights);
+    void initScene(const std::vector<Scene::Sphere> & spheres,
+                   const std::vector<Scene::Plane> & planes,
+                   const std::vector<Scene::Cube> & cubes,
+                   const std::vector<Scene::DirectionalLight> & d_lights,
+                   const std::vector<Scene::PointLight> & p_lights,
+                   const std::vector<Scene::SpotLight> & s_lights);
 
-    void processInput(Camera & camera, float delta_time);
+    void processInput(Camera & camera,
+                      float delta_time,
+                      Window & win);
 
     void calcMouseMovement(LPARAM lParam);
 
     Scene * scene;
 
     glm::vec3 mouse;
-    glm::vec3 fixed_mouse;
+
     glm::vec3 delta_mouse;
+
+    glm::vec3 fixed_mouse;
+    glm::vec3 delta_fixed_mouse;
     
     bool keys_log[KEYS_COUNT];
 };

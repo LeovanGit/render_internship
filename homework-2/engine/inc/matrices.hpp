@@ -6,6 +6,8 @@
 
 #include <cmath>
 
+namespace math
+{
 class Transform
 {
 public:
@@ -21,5 +23,6 @@ public:
     glm::quat rotation;
     glm::vec3 position;
 };
+} // namespace math
 
 #endif

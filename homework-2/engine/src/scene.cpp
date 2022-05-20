@@ -1,87 +1,98 @@
 #include "scene.hpp"
+#include "ray.hpp"
+#include <float.h>
 
-Scene::Scene(std::vector<ColoredSphere> c_spheres,
-             std::vector<ColoredPlane> c_planes,
-             std::vector<Cube> c_cubes,
-             std::vector<PointLight> p_lights,
+Scene::Scene(std::vector<Sphere> spheres,
+             std::vector<Plane> planes,
+             std::vector<Cube> cubes,
              std::vector<DirectionalLight> d_lights,
+             std::vector<PointLight> p_lights,
              std::vector<SpotLight> s_lights) :
-             c_spheres(c_spheres),
-             c_planes(c_planes),
-             c_cubes(c_cubes),             
-             p_lights(p_lights),
-             d_lights(d_lights),
-             s_lights(s_lights)
+                spheres(spheres),
+                planes(planes),
+                cubes(cubes),
+                d_lights(d_lights),
+                p_lights(p_lights),
+                s_lights(s_lights)
 {}
 
+bool Scene::findIntersection(math::Intersection & nearest,
+                             const math::Ray & ray,
+                             Material & material,
+                             IntersectedType & type)
+{
+    ObjRef obj_ref = { nullptr, IntersectedType::EMPTY };
+
+    findIntersectionInternal(nearest, ray, obj_ref, material);
+    type = obj_ref.type;
+
+    return obj_ref.type != IntersectedType::EMPTY;
+}
+
+
 // iterate over all objects and find the nearest intersection
-bool Scene::findIntersection(Intersection & nearest, Ray & ray)
+void Scene::findIntersectionInternal(math::Intersection & nearest,
+                                     const math::Ray & ray,
+                                     ObjRef & obj_ref,
+                                     Material & material)
 {
     nearest.reset();
+
+    for (int i = 0, size = planes.size(); i != size; ++i)
+    {
+         planes[i].intersect(nearest, ray, obj_ref, material);
+    }
     
-    bool found_intersection = false;
-
-    for (int i = 0, size = c_spheres.size(); i != size; ++i)
+    for (int i = 0, size = spheres.size(); i != size; ++i)
     {
-        found_intersection |= c_spheres[i].intersect(nearest, ray);
+        spheres[i].intersect(nearest, ray, obj_ref, material);
     }
 
-    for (int i = 0, size = c_planes.size(); i != size; ++i)
+    for (int i = 0, size = cubes.size(); i != size; ++i)
     {
-        found_intersection |= c_planes[i].intersect(nearest, ray);
-    }
-
-    for (int i = 0, size = c_cubes.size(); i != size; ++i)
-    {
-        found_intersection |= c_cubes[i].intersect(nearest, ray);
+        cubes[i].intersect(nearest, ray, obj_ref, material);
     }
 
     for (int i = 0, size = p_lights.size(); i != size; ++i)
     {
-        found_intersection |= p_lights[i].intersect(nearest, ray);
-    }
-
-    for (int i = 0, size = d_lights.size(); i != size; ++i)
-    {
-        found_intersection |= d_lights[i].intersect(nearest, ray);
+        p_lights[i].intersect(nearest, ray, obj_ref, material);
     }
 
     for (int i = 0, size = s_lights.size(); i != size; ++i)
     {
-        found_intersection |= s_lights[i].intersect(nearest, ray);
+        s_lights[i].intersect(nearest, ray, obj_ref, material);
     }
-
-    return found_intersection;
 }
 
-bool Scene::isVisible(Intersection & nearest, glm::vec3 & dir_to_light)
+bool Scene::isVisible(const math::Intersection & nearest,
+                      const glm::vec3 & dir_to_light)
 {
-    Ray ray;
-    ray.direction = dir_to_light;
-    ray.origin = nearest.point + delta * nearest.normal;
+    return true;
 
-    Intersection tmp;
-    tmp.reset();
+    // Ray ray;
+    // ray.direction = dir_to_light;
+    // ray.origin = nearest.point + delta * nearest.normal;
 
-    if (findIntersection(tmp, ray) && tmp.type == LIGHT ||
-        !findIntersection(tmp, ray)) // for directional
-        return true;
+    // Intersection tmp;
+    // tmp.reset();
 
-    return false;
+    // if (findIntersection(tmp, ray) && tmp.type == LIGHT ||
+    //     !findIntersection(tmp, ray)) // for directional
+    //     return true;
+
+    // return false;
 }
 
 // L - ray from intersection point to light source
 // V - ray from intersection point to camera
 // H - vector between L and V
 // D - distance to light source
-glm::vec3 Scene::blinnPhong(Intersection & nearest,
-                            Camera & camera)
+glm::vec3 Scene::blinnPhong(const math::Intersection & nearest,
+                            const Material & material,
+                            const Camera & camera)
 {    
-    // emission
-    glm::vec3 result = nearest.material.emission;
-
     // ambient
-    result += nearest.material.albedo * ambient;
+    glm::vec3 ambient = material.albedo * AMBIENT;
 
     glm::vec3 diffuse(0, 0, 0);
     glm::vec3 specular(0, 0, 0);
@@ -97,26 +108,16 @@ glm::vec3 Scene::blinnPhong(Intersection & nearest,
         float cosa = fmax(0, glm::dot(nearest.normal, L));
 
         diffuse += d_lights[i].color *
-            cosa *
-            nearest.material.albedo;
+                   cosa *
+                   material.albedo;
             
-        // specular not depends on object color and distance to light source
-        // (only light source color)
-        L = glm::normalize(d_lights[i].sphere.origin - nearest.point);
-
-        glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
-        glm::vec3 H = glm::normalize(V + L);
-        float cosb = fmax(0, dot(nearest.normal, H));
-
-        specular += d_lights[i].color *
-            (float)pow(cosb, nearest.material.glossiness) * 
-            nearest.material.specular;
+        // no specular for directional light
     }
 
     // point light
     for (int i = 0, size = p_lights.size(); i != size; ++i)
     {
-        glm::vec3 L = p_lights[i].sphere.origin - nearest.point;
+        glm::vec3 L = p_lights[i].position - nearest.point;
         float D = glm::length(L);
         L = glm::normalize(L);
 
@@ -130,7 +131,7 @@ glm::vec3 Scene::blinnPhong(Intersection & nearest,
 
         diffuse += p_lights[i].color *
             cosa *
-            nearest.material.albedo *
+            material.albedo *
             light_intensity;            
             
         // specular not depends on object color and distance to light source
@@ -140,14 +141,14 @@ glm::vec3 Scene::blinnPhong(Intersection & nearest,
         float cosb = fmax(0, dot(nearest.normal, H));
 
         specular += p_lights[i].color *
-            (float)pow(cosb, nearest.material.glossiness) * 
-            nearest.material.specular;
+            (float)pow(cosb, material.glossiness) * 
+            material.specular;
     }
 
     // spot light
     for (int i = 0, size = s_lights.size(); i != size; ++i)
     {
-        glm::vec3 L = s_lights[i].sphere.origin - nearest.point;
+        glm::vec3 L = s_lights[i].position - nearest.point;
         float D = glm::length(L);
         L = glm::normalize(L);
 
@@ -165,7 +166,7 @@ glm::vec3 Scene::blinnPhong(Intersection & nearest,
 
         diffuse += s_lights[i].color *
             cosa *
-            nearest.material.albedo *
+            material.albedo *
             light_intensity;            
             
         // specular not depends on object color and distance to light source
@@ -175,11 +176,11 @@ glm::vec3 Scene::blinnPhong(Intersection & nearest,
         float cosb = fmax(0, dot(nearest.normal, H));
 
         specular += s_lights[i].color *
-                    (float)pow(cosb, nearest.material.glossiness) * 
-                    nearest.material.specular;
+                    (float)pow(cosb, material.glossiness) * 
+                    material.specular;
     }    
 
-    result += diffuse + specular;
+    glm::vec3 result = material.emission + ambient + diffuse + specular;
 
     // normalize
     result.x = fmin(1.0f, result.x);
@@ -197,10 +198,10 @@ void Scene::render(Window & win, Camera & camera)
         
     std::vector<int> & pixels = win.getPixels();
 
-    Intersection nearest;
+    math::Intersection nearest;
     nearest.reset();
 
-    Ray ray;
+    math::Ray ray;
     ray.origin = camera.getPosition();
 
     for (int y = 0; y != height; ++y)
@@ -222,18 +223,21 @@ void Scene::render(Window & win, Camera & camera)
             ray.direction = glm::normalize((glm::vec3(dir_ws) / dir_ws.w) -
                                             camera.getPosition());
 
-            if (findIntersection(nearest, ray))
+            Material material;
+            IntersectedType type;
+
+            if (findIntersection(nearest, ray, material, type))
             {
                 glm::vec3 result_color(0.0f, 0.0f, 0.0f);
 
-                if (nearest.type != LIGHT)
+                if (type != IntersectedType::LIGHT)
                 {
-                    result_color = blinnPhong(nearest, camera);
+                    result_color = blinnPhong(nearest, material, camera);
                 }
                 else
                 {
-                    result_color = nearest.material.albedo;
-                }
+                    result_color = material.albedo;
+                }                
 
                 pixels[y * width + x] = RGB(result_color.x * 255,
                                             result_color.y * 255,

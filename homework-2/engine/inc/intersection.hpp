@@ -4,13 +4,9 @@
 #include <limits>
 
 #include "glm.hpp"
-#include "material.hpp"
 
-#define SPHERE 0
-#define LIGHT 1
-#define PLANE 2
-#define TRIANGLE 3
-
+namespace math
+{
 class Intersection
 {
 public:
@@ -18,15 +14,12 @@ public:
     
     void reset();
 
-    bool isExist();
-
-int type;
+    bool isExist() const;
 
 float t;
 glm::vec3 point;
 glm::vec3 normal;
-
-Material material;
 };
+} // namespace math
 
 #endif

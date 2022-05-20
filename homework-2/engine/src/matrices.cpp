@@ -1,11 +1,11 @@
 #include "matrices.hpp"
 #include "gtc/quaternion.hpp"
 
-Transform::Transform(glm::vec3 position,
-                     glm::vec3 angles,
-                     glm::vec3 scale) :
-                     position(position),
-                     scale(scale)
+math::Transform::Transform(glm::vec3 position,
+                           glm::vec3 angles,
+                           glm::vec3 scale) :
+                           position(position),
+                           scale(scale)
 {
     // oz
     rotation = glm::quat(cos(glm::radians(angles.z / 2)),
@@ -23,7 +23,7 @@ Transform::Transform(glm::vec3 position,
                           glm::vec3(0, 1.0f, 0));    
 }
 
-glm::mat4 Transform::toMat4() const
+glm::mat4 math::Transform::toMat4() const
 {
     // glm is column-major!!!
     glm::mat4 translation(1.0f,       0,          0,          0,

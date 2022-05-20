@@ -1,20 +1,20 @@
 #include "sphere.hpp"
 
-Sphere::Sphere(float radius, glm::vec3 origin) :
+math::Sphere::Sphere(float radius, glm::vec3 origin) :
     radius(radius), origin(origin)
     {}
 
 // return true only if Intersection was rewrited
-// (current intersection is nearer than stored in Intersection)
-bool Sphere::intersect(Intersection & nearest, Ray & ray)
+// (because current intersection is nearer than stored in Intersection)
+bool math::Sphere::intersect(Intersection & nearest, const Ray & ray)
 {
-    glm::vec3 ray_to_sphere_origin = ray.origin - origin;
+    // L - vector from ray origin to sphere origin
+    glm::vec3 L = ray.origin - origin;
 
     // quadratic equation coeff
-    float a = 1; // dot(ray_direction, ray_direction)
-    float b = 2.0f * glm::dot(ray.direction, ray_to_sphere_origin);
-    float c = glm::dot(ray_to_sphere_origin, ray_to_sphere_origin) -
-              radius * radius;
+    float a = 1; // dot(ray.direction, ray.direction)
+    float b = 2.0f * glm::dot(ray.direction, L);
+    float c = glm::dot(L, L) - radius * radius;
 
     float discriminant = b * b - 4 * a * c;
     if (discriminant < 0) return false; // no intersection

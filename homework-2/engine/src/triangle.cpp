@@ -1,16 +1,17 @@
 #include "triangle.hpp"
 
-Triangle::Triangle(glm::vec3 normal,
-                   glm::vec3 vertex_1,
-                   glm::vec3 vertex_2,
-                   glm::vec3 vertex_3) :
-             normal(glm::normalize(normal)),
-             vertex_1(vertex_1),
-             vertex_2(vertex_2),
-             vertex_3(vertex_3)
+math::Triangle::Triangle(glm::vec3 normal,
+                         glm::vec3 vertex_1,
+                         glm::vec3 vertex_2,
+                         glm::vec3 vertex_3) :
+                         normal(normal),
+                         vertex_1(vertex_1),
+                         vertex_2(vertex_2),
+                         vertex_3(vertex_3)
 {}
 
-bool Triangle::intersect(Intersection & nearest, Ray & ray) const
+bool math::Triangle::intersect(Intersection & nearest,
+                               const Ray & ray) const
 {
     float cosa = glm::dot(normal, ray.direction);
     if (cosa == 0) return false; // ray || triangle

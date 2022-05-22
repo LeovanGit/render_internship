@@ -1,7 +1,6 @@
 #ifndef TRIANGLE_HPP
 #define TRIANGLE_HPP
 
-#include <iostream>
 #include <cmath>
 
 #include "glm.hpp"

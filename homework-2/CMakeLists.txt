@@ -5,10 +5,7 @@ project(homework-2 VERSION 1.0 LANGUAGES C CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SRC engine/src)
-set(INC engine/inc)
-
-set(GLM glm)
-include_directories(${GLM})
+set(INC engine/inc engine/inc/math glm)
 
 include_directories(${INC})
 
@@ -17,12 +14,12 @@ add_executable(rt WIN32 ${SRC}/main.cpp
 			${SRC}/scene.cpp
 			${SRC}/controller.cpp
                         ${SRC}/camera.cpp
-                        ${SRC}/ray.cpp
-                        ${SRC}/intersection.cpp
-			${SRC}/sphere.cpp
-                        ${SRC}/plane.cpp
-                        ${SRC}/triangle.cpp
-                        ${SRC}/cube.cpp
                         ${SRC}/material.cpp
-                        ${SRC}/matrices.cpp)
+                        ${SRC}/math/ray.cpp
+                        ${SRC}/math/intersection.cpp
+			${SRC}/math/sphere.cpp
+                        ${SRC}/math/plane.cpp
+                        ${SRC}/math/triangle.cpp
+                        ${SRC}/math/cube.cpp
+                        ${SRC}/math/matrices.cpp)
 

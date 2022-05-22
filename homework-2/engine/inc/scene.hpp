@@ -3,16 +3,20 @@
 
 #include <vector>
 #include <cmath>
+#include <memory>
 #include "glm.hpp"
 
 #include "window.hpp"
 #include "camera.hpp"
 #include "sphere.hpp"
+#include "ray.hpp"
 #include "plane.hpp"
 #include "triangle.hpp"
 #include "cube.hpp"
 #include "material.hpp"
 #include "intersection.hpp"
+
+constexpr bool SHADOWS = false;
 
 constexpr int HEX_BLACK = 0x000000;
 constexpr float LIGHT_SIZE = 10.0f;
@@ -39,6 +43,8 @@ protected:
     };
 
 public:
+    // ====================[SCENE OBJECTS]====================
+
     // composition of math::Sphere and Material
     // inheritance to avoid sphere.sphere
     class Sphere : public math::Sphere
@@ -54,13 +60,13 @@ public:
         bool intersect(math::Intersection & nearest,
                        const math::Ray & ray,
                        ObjRef & obj_ref,
-                       Material & material)
+                       Material *& material)
         {
             if (math::Sphere::intersect(nearest, ray))
             {
                 obj_ref.type = IntersectedType::SPHERE;
                 obj_ref.object = this;
-                material = this->material;
+                material = &(this->material);
 
                 return true;
             }
@@ -85,13 +91,13 @@ public:
         bool intersect(math::Intersection & nearest,
                        const math::Ray & ray,
                        ObjRef & obj_ref,
-                       Material & material)
+                       Material *& material)
         {
             if (math::Plane::intersect(nearest, ray))
             {
                 obj_ref.type = IntersectedType::PLANE;
                 obj_ref.object = this;
-                material = this->material;
+                material = &(this->material);
 
                 return true;
             }
@@ -117,13 +123,13 @@ public:
         bool intersect(math::Intersection & nearest,
                        const math::Ray & ray,
                        ObjRef & obj_ref,
-                       Material & material)
+                       Material *& material)
         {
             if (math::Cube::intersect(nearest, ray))
             {
                 obj_ref.type = IntersectedType::CUBE;
                 obj_ref.object = this;
-                material = this->material;
+                material = &(this->material);
 
                 return true;
             }
@@ -156,13 +162,13 @@ public:
                    glm::vec3 color) :
                    position(position),
                    radius(radius),
-                   color(color)
+                   material(Material(color, 0, 0, glm::vec3(0)))
         {}
 
         bool intersect(math::Intersection & nearest,
                        const math::Ray & ray,
                        ObjRef & obj_ref,
-                       Material & material)
+                       Material *& material)
         {
             math::Sphere sphere(LIGHT_SIZE, position);
 
@@ -170,7 +176,7 @@ public:
             {               
                 obj_ref.type = IntersectedType::LIGHT;
                 obj_ref.object = this;
-                material = Material(color, 0, 0, glm::vec3(0));
+                material = &(this->material);                
 
                 return true;
             }
@@ -179,7 +185,7 @@ public:
 
         glm::vec3 position;
         float radius;
-        glm::vec3 color;
+        Material material;
     };
 
     class SpotLight
@@ -194,13 +200,13 @@ public:
                   radius(radius),
                   angle(angle),
                   direction(direction),
-                  color(color)
+                  material(Material(color, 0, 0, glm::vec3(0)))
         {}
 
         bool intersect(math::Intersection & nearest,
                        const math::Ray & ray,
                        ObjRef & obj_ref,
-                       Material & material)
+                       Material *& material)
         {
             math::Sphere sphere(LIGHT_SIZE, position);
 
@@ -208,7 +214,7 @@ public:
             {               
                 obj_ref.type = IntersectedType::LIGHT;
                 obj_ref.object = this;
-                material = Material(color, 0, 0, glm::vec3(0));
+                material = &(this->material);
 
                 return true;
             }
@@ -219,7 +225,31 @@ public:
         float radius;
         float angle;
         glm::vec3 direction;
-        glm::vec3 color;
+        Material material;
+    };
+
+    // ====================[OBJECT DECORATORS]====================
+    class IObjectMover
+    {
+    public:
+        virtual void move(const glm::vec3 & offset) = 0;
+
+        virtual ~IObjectMover() {}
+    };
+
+    class SphereMover : public IObjectMover
+    {
+    public:
+        SphereMover(math::Sphere & sphere) :
+            sphere(sphere)
+        {}
+
+        virtual void move(const glm::vec3 & offset) override
+        {
+            sphere.origin += offset;
+        }
+
+        math::Sphere & sphere;
     };
 
     std::vector<Sphere> spheres;
@@ -240,17 +270,36 @@ public:
           std::vector<PointLight> p_lights,
           std::vector<SpotLight> s_lights);
 
-    // overloaded for render only
+    // overloaded: for render only
     bool findIntersection(math::Intersection & nearest,
                           const math::Ray & ray,
-                          Material & material,
+                          Material *& material,
                           IntersectedType & type);
+
+    class IntersectionQuery
+    {
+    public:
+        IntersectionQuery() = default;
+
+        math::Intersection nearest;
+        Material * material;
+
+        // passing by pointer allows to define if
+        // smth additional needs to be returned
+        // nullptr = no need
+        std::unique_ptr<IObjectMover> * mover;
+    };
+
+    // overloaded: for getting more data from findIntersection
+    // if it's need
+    bool findIntersection(const math::Ray & ray,
+                          IntersectionQuery & query);
  
     bool isVisible(const math::Intersection & nearest,
                    const glm::vec3 & dir_to_light);
 
     glm::vec3 blinnPhong(const math::Intersection & nearest,
-                         const Material & material,
+                         const Material * material,
                          const Camera & camera);
 
     void render(Window & win, Camera & camera);
@@ -259,7 +308,7 @@ protected:
     void findIntersectionInternal(math::Intersection & nearest,
                                   const math::Ray & ray,
                                   ObjRef & obj_ref,
-                                  Material & material);
+                                  Material *& material);
 
 };
 

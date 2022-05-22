@@ -1,20 +1,13 @@
 #include "controller.hpp"
+#include "plane.hpp"
 
 void Controller::init(Scene * scene)
 {
     this->scene = scene;
 
-    mouse.x = 0;
-    mouse.y = 0;
-
-    delta_mouse.x = 0;
-    delta_mouse.y = 0;
-
-    fixed_mouse.x = 0;
-    fixed_mouse.y = 0;
-
-    delta_fixed_mouse.x = 0;
-    delta_fixed_mouse.y = 0;
+    mouse = glm::vec2(0);
+    fixed_mouse = glm::vec2(0);
+    delta_fixed_mouse = glm::vec2(0);
 
     for (int i = 0; i != KEYS_COUNT; ++i) keys_log[i] = false;
 }
@@ -79,43 +72,61 @@ void Controller::processInput(Camera & camera,
     }
     if (keys_log[KEY_RMOUSE])
     {
-    //     RECT client_area = win.getClientSize();
-    //     int width = client_area.right - client_area.left;
-    //     int height = client_area.bottom - client_area.top;
+        RECT client_area = win.getClientSize();
+        int width = client_area.right - client_area.left;
+        int height = client_area.bottom - client_area.top;
 
-    //     glm::vec2 xy;
-    //     xy.x = 2.0f * mouse.x / width - 1.0f;           
-    //     xy.y = 1.0f - 2.0f * mouse.y / height; // reversed
+        glm::vec2 xy;
+        xy.x = 2.0f * mouse.x / width - 1.0f;           
+        xy.y = 1.0f - 2.0f * mouse.y / height; // reversed
 
-    //     Intersection nearest;
-    //     nearest.reset();
+        math::Ray ray;
+        ray.origin = camera.getPosition();
 
-    //     Ray ray;
-    //     ray.origin = camera.getPosition();
+        glm::vec4 dir_cs(xy.x, xy.y, 1.0f, 1.0f);
+        glm::vec4 dir_ws = camera.getViewProjInv() * dir_cs;
 
-    //     glm::vec4 dir_cs(xy.x, xy.y, 1.0f, 1.0f);
-    //     glm::vec4 dir_ws = camera.getViewProjInv() * dir_cs;
+        ray.direction = glm::normalize((glm::vec3(dir_ws) / dir_ws.w) -
+                                       camera.getPosition());
 
-    //     ray.direction = glm::normalize((glm::vec3(dir_ws) / dir_ws.w) -
-    //                                    camera.getPosition());
-        
-    //     if (scene->findIntersection(nearest, ray))
-    //     {
-            
-    //     }
+        if (!current_object.is_grabbed)
+        {        
+            Scene::IntersectionQuery iq;
+            iq.nearest.reset();
+            iq.mover = &current_object.mover;
+
+            if (scene->findIntersection(ray, iq))
+            {
+                current_object.grabbed_point = iq.nearest.point;
+                if (iq.mover->get()) current_object.is_grabbed = true;
+            }
+        }
+        else
+        {
+            // movement plane
+            math::Plane plane(camera.getForward(),
+                              current_object.grabbed_point);
+
+            math::Intersection intersection;
+            intersection.reset();
+
+            plane.intersect(intersection, ray);
+
+            current_object.mover->move(intersection.point -
+                                       current_object.grabbed_point);
+            current_object.grabbed_point = intersection.point;
+        }
+    } 
+    else
+    {
+        current_object.is_grabbed = false;
+        current_object.mover.reset();
     }
 }
 
 void Controller::calcMouseMovement(LPARAM lParam)
 {
-    glm::vec2 new_mouse(GET_X_LPARAM(lParam),
-                        GET_Y_LPARAM(lParam));
-
-    delta_mouse.x = new_mouse.x - mouse.x;
-    delta_mouse.y = new_mouse.y - mouse.y;
-
-    mouse.x = new_mouse.x;
-    mouse.y = new_mouse.y;
+    mouse = glm::vec2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 
     if (keys_log[KEY_LMOUSE])
     {

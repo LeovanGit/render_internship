@@ -132,50 +132,58 @@ int WINAPI WinMain(HINSTANCE hInstance,
     planes.push_back(Scene::Plane(glm::vec3(0, 1.0f, 0),
                                   glm::vec3(0, -100.0f, 0),
                                   materials[MATTE_GREY]));
+    planes.push_back(Scene::Plane(glm::vec3(0, 0, 1.0f),
+                                  glm::vec3(0),
+                                  materials[MATTE_GREY]));
+
 
 
     // CREATE SPHERES
     std::vector<Scene::Sphere> spheres;
-    spheres.push_back(Scene::Sphere(80.0f,
-                                    glm::vec3(0, -20.0f, 0),
-                                    materials[GLOSSY_BLUE]));
+    // spheres.push_back(Scene::Sphere(80.0f,
+    //                                 glm::vec3(0, -20.0f, 0),
+    //                                 materials[GLOSSY_BLUE]));
 
     spheres.push_back(Scene::Sphere(100.0f,
-                                    glm::vec3(-180.0f, 200.0f, 100.0f),
+                                    glm::vec3(0),
                                     materials[MATTE_RED]));
 
-    spheres.push_back(Scene::Sphere(120.0f,
-                                    glm::vec3(300.0f, 20.0f, 100.0f),
-                                    materials[HALF_GLOSSY_GREEN]));
+    // spheres.push_back(Scene::Sphere(100.0f,
+    //                                 glm::vec3(-180.0f, 200.0f, 100.0f),
+    //                                 materials[MATTE_RED]));
+
+    // spheres.push_back(Scene::Sphere(120.0f,
+    //                                 glm::vec3(300.0f, 20.0f, 100.0f),
+    //                                 materials[HALF_GLOSSY_GREEN]));
 
     std::vector <Scene::Cube> cubes;
-    cubes.push_back(Scene::Cube(glm::vec3(-180.0f, 0, 100.0f),
-                                glm::vec3(0.0f, 45.0f, 0.0f),
-                                glm::vec3(100.0f, 100.0f, 100.0f),
-                                materials[MATTE_WHITE]));
+    // cubes.push_back(Scene::Cube(glm::vec3(-180.0f, 0, 100.0f),
+    //                             glm::vec3(0.0f, 45.0f, 0.0f),
+    //                             glm::vec3(100.0f, 100.0f, 100.0f),
+    //                             materials[MATTE_WHITE]));
 
-    cubes.push_back(Scene::Cube(glm::vec3(-350.0f, -25.0f, -70.0f),
-                                glm::vec3(0.0f, 45.0f, 0.0f),
-                                glm::vec3(75.0f, 75.0f, 75.0f),
-                                materials[GLOSSY_RED]));
+    // cubes.push_back(Scene::Cube(glm::vec3(-350.0f, -25.0f, -70.0f),
+    //                             glm::vec3(0.0f, 45.0f, 0.0f),
+    //                             glm::vec3(75.0f, 75.0f, 75.0f),
+    //                             materials[GLOSSY_RED]));
 
     std::vector<Scene::PointLight> p_lights;
-    p_lights.push_back(Scene::PointLight(glm::vec3(-400.0, 250.0f, -300.0f),
-                                         350.0f,
-                                         glm::vec3(0.8f)));
+    // p_lights.push_back(Scene::PointLight(glm::vec3(-400.0, 250.0f, -300.0f),
+    //                                      350.0f,
+    //                                      glm::vec3(0.8f)));
     
     std::vector<Scene::DirectionalLight> d_lights;
     d_lights.push_back(Scene::DirectionalLight(
                            glm::normalize(glm::vec3(1.0f, -1.0f, 1.0f)),
-                           glm::vec3(0.3f)));
+                           glm::vec3(0.15f)));
 
     std::vector<Scene::SpotLight> s_lights;
-    s_lights.push_back(Scene::SpotLight(
-                           glm::vec3(200, 200, -300),
-                           250.0f,
-                           55.0f,
-                           glm::normalize(glm::vec3(0, -1.0f, 1.0f)),
-                           glm::vec3(0.1f, 0.5f, 1.0f)));
+    // s_lights.push_back(Scene::SpotLight(
+    //                        glm::vec3(200, 200, -300),
+    //                        400.0f,
+    //                        55.0f,
+    //                        glm::normalize(glm::vec3(0, -1.0f, 1.0f)),
+    //                        glm::vec3(0.1f, 0.5f, 1.0f)));
                                         
     controller.initScene(spheres,
                          planes,

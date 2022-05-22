@@ -46,14 +46,21 @@ public:
 
     Scene * scene;
 
-    glm::vec3 mouse;
+    glm::vec2 mouse;
+    glm::vec2 fixed_mouse;
+    glm::vec2 delta_fixed_mouse;   
 
-    glm::vec3 delta_mouse;
-
-    glm::vec3 fixed_mouse;
-    glm::vec3 delta_fixed_mouse;
-    
     bool keys_log[KEYS_COUNT];
+
+    class Object
+    {
+    public:
+        Object() = default;
+        
+        bool is_grabbed = false;
+        glm::vec3 grabbed_point;
+        std::unique_ptr<Scene::IObjectMover> mover;
+    } current_object;
 };
 
 #endif

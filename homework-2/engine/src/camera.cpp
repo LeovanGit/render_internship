@@ -69,6 +69,11 @@ const glm::mat4 & Camera::getViewProjInv() const
     return view_proj_matrix_inv;
 }
 
+const glm::mat4 & Camera::getViewProj() const
+{
+    return view_proj_matrix;
+}
+
 void Camera::setWorldPosition(const glm::vec3 & position)
 {
     view_matrix_inv[3][0] = position.x;
@@ -180,7 +185,7 @@ void Camera::updateMatrices()
     updateBasis();
 
     view_matrix = glm::inverse(view_matrix_inv);
-    view_proj_matrix = view_matrix * proj_matrix;
+    view_proj_matrix = proj_matrix * view_matrix;
     view_proj_matrix_inv = view_matrix_inv *
                            glm::inverse(proj_matrix);
     

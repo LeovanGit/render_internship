@@ -80,41 +80,39 @@ void Controller::processInput(Camera & camera,
         xy.x = 2.0f * mouse.x / width - 1.0f;           
         xy.y = 1.0f - 2.0f * mouse.y / height; // reversed
 
-        math::Ray ray;
-        ray.origin = camera.getPosition();
-
-        glm::vec4 dir_cs(xy.x, xy.y, 1.0f, 1.0f);
-        glm::vec4 dir_ws = camera.getViewProjInv() * dir_cs;
-
-        ray.direction = glm::normalize((glm::vec3(dir_ws) / dir_ws.w) -
-                                       camera.getPosition());
-
         if (!current_object.is_grabbed)
-        {        
+        {
+            math::Ray ray;
+            ray.origin = camera.getPosition();
+
+            glm::vec4 dir_cs(xy.x, xy.y, 1.0f, 1.0f);
+            glm::vec4 dir_ws = camera.getViewProjInv() * dir_cs;
+
+            ray.direction = glm::normalize((glm::vec3(dir_ws) / dir_ws.w) -
+                                           camera.getPosition());
+
             Scene::IntersectionQuery iq;
             iq.nearest.reset();
             iq.mover = &current_object.mover;
 
             if (scene->findIntersection(ray, iq))
-            {
+            {                
                 current_object.grabbed_point = iq.nearest.point;
                 if (iq.mover->get()) current_object.is_grabbed = true;
             }
         }
         else
         {
-            // movement plane
-            math::Plane plane(camera.getForward(),
-                              current_object.grabbed_point);
+            glm::vec4 point_WS(current_object.grabbed_point, 1.0f);
+            glm::vec4 point_CS = camera.getViewProj() * point_WS;
+            glm::vec3 point = glm::vec3(point_CS) / point_CS.w;
 
-            math::Intersection intersection;
-            intersection.reset();
-
-            plane.intersect(intersection, ray);
-
-            current_object.mover->move(intersection.point -
-                                       current_object.grabbed_point);
-            current_object.grabbed_point = intersection.point;
+            glm::vec4 new_pos_CS(xy.x, xy.y, point.z, 1.0f);
+            glm::vec4 new_pos_WS = camera.getViewProjInv() * new_pos_CS;
+            glm::vec3 new_pos = glm::vec3(new_pos_WS) / new_pos_WS.w;
+                       
+            current_object.mover->move(new_pos - glm::vec3(point_WS));
+            current_object.grabbed_point = glm::vec3(new_pos);
         }
     } 
     else

@@ -40,7 +40,7 @@ bool Scene::findIntersection(const math::Ray & ray,
         {
             Sphere * sphere = static_cast<Sphere *>(obj_ref.object);
             if (query.mover) query.mover->reset(new SphereMover(*sphere));
-           
+
             break;
         }
         case IntersectedType::PLANE:
@@ -49,10 +49,23 @@ bool Scene::findIntersection(const math::Ray & ray,
         }
         case IntersectedType::CUBE:
         {
+            Cube * cube = static_cast<Cube *>(obj_ref.object);
+            if (query.mover) query.mover->reset(new CubeMover(*cube));
+
             break;
         }
-        case IntersectedType::LIGHT:
+        case IntersectedType::POINT_LIGHT:
         {
+            PointLight * p_light = static_cast<PointLight *>(obj_ref.object);
+            if (query.mover) query.mover->reset(new PointLightMover(*p_light));
+
+            break;
+        }
+        case IntersectedType::SPOT_LIGHT:
+        {
+            SpotLight * s_light = static_cast<SpotLight *>(obj_ref.object);
+            if (query.mover) query.mover->reset(new SpotLightMover(*s_light));
+
             break;
         }
         case IntersectedType::EMPTY:
@@ -116,7 +129,8 @@ bool Scene::isVisible(const math::Intersection & nearest,
 
     bool found_intersection = findIntersection(tmp, ray, material, type);
 
-    return found_intersection && type == IntersectedType::LIGHT ||
+    return (found_intersection && (type == IntersectedType::POINT_LIGHT ||
+                                   type == IntersectedType::SPOT_LIGHT)) ||
         !found_intersection; // for directional
 }
 
@@ -269,7 +283,8 @@ void Scene::render(Window & win, Camera & camera)
             {
                 glm::vec3 result_color(0.0f, 0.0f, 0.0f);
 
-                if (type != IntersectedType::LIGHT)
+                if (type != IntersectedType::POINT_LIGHT &&
+                    type != IntersectedType::SPOT_LIGHT)
                 {
                     result_color = blinnPhong(nearest, material, camera);
                 }

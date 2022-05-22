@@ -31,7 +31,8 @@ protected:
         SPHERE,
         PLANE,
         CUBE,
-        LIGHT,
+        POINT_LIGHT,
+        SPOT_LIGHT,
         EMPTY
     };
 
@@ -174,7 +175,7 @@ public:
 
             if (sphere.intersect(nearest, ray))
             {               
-                obj_ref.type = IntersectedType::LIGHT;
+                obj_ref.type = IntersectedType::POINT_LIGHT;
                 obj_ref.object = this;
                 material = &(this->material);                
 
@@ -212,7 +213,7 @@ public:
 
             if (sphere.intersect(nearest, ray))
             {               
-                obj_ref.type = IntersectedType::LIGHT;
+                obj_ref.type = IntersectedType::SPOT_LIGHT;
                 obj_ref.object = this;
                 material = &(this->material);
 
@@ -250,6 +251,51 @@ public:
         }
 
         math::Sphere & sphere;
+    };
+
+    class CubeMover : public IObjectMover
+    {
+    public:
+        CubeMover(math::Cube & cube) :
+            cube(cube)
+        {}
+
+        virtual void move(const glm::vec3 & offset) override
+        {
+            cube.addPosition(offset);
+        }
+
+        math::Cube & cube;
+    };
+
+    class PointLightMover : public IObjectMover
+    {
+    public:
+        PointLightMover(PointLight & point_light) :
+            point_light(point_light)
+        {}
+
+        virtual void move(const glm::vec3 & offset) override
+        {
+            point_light.position += offset;
+        }
+
+        PointLight & point_light;
+    };
+
+    class SpotLightMover : public IObjectMover
+    {
+    public:
+        SpotLightMover(SpotLight & point_light) :
+            point_light(point_light)
+        {}
+
+        virtual void move(const glm::vec3 & offset) override
+        {
+            point_light.position += offset;
+        }
+
+        SpotLight & point_light;
     };
 
     std::vector<Sphere> spheres;

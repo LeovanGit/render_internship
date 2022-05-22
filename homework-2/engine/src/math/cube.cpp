@@ -1,5 +1,5 @@
 #include "cube.hpp"
-#include "matrix.hpp"
+#include <iostream>
 
 math::Cube::Cube(glm::vec3 position,
                  glm::vec3 angles,
@@ -7,6 +7,15 @@ math::Cube::Cube(glm::vec3 position,
 {
     Transform t(position, angles, scale);
     model_matrix = t.toMat4();
+    model_matrix_inv = glm::inverse(model_matrix);
+}
+
+void math::Cube::addPosition(glm::vec3 offset)
+{
+    model_matrix[3][0] += offset.x;
+    model_matrix[3][1] += offset.y;
+    model_matrix[3][2] += offset.z;
+
     model_matrix_inv = glm::inverse(model_matrix);
 }
 

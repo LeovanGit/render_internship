@@ -3,6 +3,7 @@
 #include <chrono>
 #include <vector>
 #include "glm.hpp"
+#include <string>
 
 #include "window.hpp"
 #include "scene.hpp"
@@ -204,6 +205,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
                 
         if (frameTimeElapsed())
         {
+            int fps = 1 / delta_time;
+            std::string fps_str = "FPS: " + std::to_string(fps);
+            SetWindowTextA(win.handle, TEXT(fps_str.c_str()));
+
             controller.processInput(camera, delta_time, win);
             camera.updateMatrices();
             controller.scene->render(win, camera);

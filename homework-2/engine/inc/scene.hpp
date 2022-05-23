@@ -16,7 +16,7 @@
 #include "material.hpp"
 #include "intersection.hpp"
 
-constexpr bool SHADOWS = false;
+constexpr bool SHADOWS = true;
 
 constexpr int HEX_BLACK = 0x000000;
 constexpr float LIGHT_SIZE = 10.0f;

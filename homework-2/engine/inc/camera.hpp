@@ -6,8 +6,6 @@
 
 #include "matrices.hpp"
 
-#include <iostream>
-
 class Camera
 {
 public:

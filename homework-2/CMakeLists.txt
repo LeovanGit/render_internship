@@ -9,6 +9,9 @@ set(INC engine/inc engine/inc/math glm)
 
 include_directories(${INC})
 
+# multi-processor compilation
+add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
+
 add_executable(rt WIN32 ${SRC}/main.cpp 
 			${SRC}/window.cpp
 			${SRC}/scene.cpp

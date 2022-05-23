@@ -1,5 +1,6 @@
 #include "matrices.hpp"
 #include "gtc/quaternion.hpp"
+#include "matrix.hpp"
 
 math::Transform::Transform(glm::vec3 position,
                            glm::vec3 angles,

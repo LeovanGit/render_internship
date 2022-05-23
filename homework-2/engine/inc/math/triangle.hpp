@@ -2,8 +2,8 @@
 #define TRIANGLE_HPP
 
 #include <cmath>
-
 #include "glm.hpp"
+
 #include "ray.hpp"
 #include "intersection.hpp"
 

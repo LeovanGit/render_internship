@@ -39,8 +39,8 @@ public:
                    const std::vector<Scene::SpotLight> & s_lights);
 
     void processInput(Camera & camera,
-                      float delta_time,
-                      Window & win);
+                      const float delta_time,
+                      const Window & win);
 
     void calcMouseMovement(LPARAM lParam);
 

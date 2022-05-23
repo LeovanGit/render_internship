@@ -6,12 +6,12 @@ Scene::Scene(std::vector<Sphere> spheres,
              std::vector<DirectionalLight> d_lights,
              std::vector<PointLight> p_lights,
              std::vector<SpotLight> s_lights) :
-                spheres(spheres),
-                planes(planes),
-                cubes(cubes),
-                d_lights(d_lights),
-                p_lights(p_lights),
-                s_lights(s_lights)
+             spheres(spheres),
+             planes(planes),
+             cubes(cubes),
+             d_lights(d_lights),
+             p_lights(p_lights),
+             s_lights(s_lights)
 {}
 
 bool Scene::findIntersection(math::Intersection & nearest,

@@ -28,8 +28,8 @@ void Controller::initScene(const std::vector<Scene::Sphere> & spheres,
 }
 
 void Controller::processInput(Camera & camera,
-                              float delta_time,
-                              Window & win)
+                              const float delta_time,
+                              const Window & win)
 {
     if (keys_log[KEY_W])
         camera.addWorldPosition(camera.getForward() *

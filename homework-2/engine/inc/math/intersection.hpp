@@ -2,7 +2,6 @@
 #define INTERSECTION_HPP
 
 #include <limits>
-
 #include "glm.hpp"
 
 namespace math

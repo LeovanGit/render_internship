@@ -31,6 +31,10 @@ void Controller::processInput(Camera & camera,
                               const float delta_time,
                               const Window & win)
 {
+    RECT client_area = win.getClientSize();
+    int width = client_area.right - client_area.left;
+    int height = client_area.bottom - client_area.top;
+
     if (keys_log[KEY_W])
         camera.addWorldPosition(camera.getForward() *
                                 delta_time * MOVEMENT_SPEED);
@@ -51,31 +55,32 @@ void Controller::processInput(Camera & camera,
                                 delta_time * -MOVEMENT_SPEED);
     if (keys_log[KEY_LMOUSE])
     {
-        glm::vec3 angles;
-        angles.x = delta_fixed_mouse.y / 100 * ROTATIONAL_SPEED * delta_time;
-        angles.y = delta_fixed_mouse.x / 100 * ROTATIONAL_SPEED * delta_time;
-        angles.z = 0;
+        // rotational speed is 180 grad / sec with delta = half-screen
 
-        camera.addRelativeAngles(angles);
+        // delta_fixed_mouse normalized to [-360; 360] grad
+        glm::vec2 speed(0);
+        speed.x = (delta_fixed_mouse.y / (float)height) * 360;
+        speed.y = (delta_fixed_mouse.x / (float)width) * 360;
+
+        camera.addRelativeAngles(glm::vec3(speed.x * delta_time,
+                                           speed.y * delta_time,
+                                           0));
     }
     if (keys_log[KEY_Q])
     {
         camera.addRelativeAngles(glm::vec3(0,
                                            0,
-                                           ROTATIONAL_SPEED * delta_time));
+                                           Z_ROTATIONAL_SPEED * delta_time));
     }
     if (keys_log[KEY_E])
     {
+
         camera.addRelativeAngles(glm::vec3(0,
                                            0,
-                                           -ROTATIONAL_SPEED * delta_time));
+                                           -Z_ROTATIONAL_SPEED * delta_time));
     }
     if (keys_log[KEY_RMOUSE])
     {
-        RECT client_area = win.getClientSize();
-        int width = client_area.right - client_area.left;
-        int height = client_area.bottom - client_area.top;
-
         glm::vec2 xy;
         xy.x = 2.0f * mouse.x / width - 1.0f;           
         xy.y = 1.0f - 2.0f * mouse.y / height; // reversed

@@ -167,11 +167,11 @@ void Camera::updateBasis()
 
     glm::mat3 basis = glm::mat3_cast(rotation);
     
-    for (int i = 0; i != 3; ++i)
+    for (int row = 0; row != 3; ++row)
     {
-        for (int j = 0; j!= 3; ++j)
+        for (int col = 0; col != 3; ++col)
         {
-            view_matrix_inv[i][j] = basis[i][j];
+            view_matrix_inv[row][col] = basis[row][col];
         }
     }
 

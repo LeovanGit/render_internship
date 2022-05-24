@@ -9,6 +9,8 @@
 #include "camera.hpp"
 #include "sphere.hpp"
 
+#include <iostream>
+
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
 constexpr int KEY_A = 65;
@@ -22,7 +24,7 @@ constexpr int KEY_LMOUSE = 1;
 constexpr int KEY_RMOUSE = 2;
 
 constexpr float MOVEMENT_SPEED = 500.0f;
-constexpr float ROTATIONAL_SPEED = 30.0f;
+constexpr float Z_ROTATIONAL_SPEED = 50.0f;
 
 class Controller
 {

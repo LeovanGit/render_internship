@@ -1,10 +1,10 @@
 #include "cube.hpp"
 
-math::Cube::Cube(glm::vec3 position,
-                 glm::vec3 angles,
-                 glm::vec3 scale)
+math::Cube::Cube(const glm::vec3 & position,
+                 const EulerAngles & angles,
+                 const glm::vec3 & scale)
 {
-    Transform t(position, angles, scale);
+    math::Transform t(position, angles, scale);
     model_matrix = t.toMat4();
     model_matrix_inv = glm::inverse(model_matrix);
 }

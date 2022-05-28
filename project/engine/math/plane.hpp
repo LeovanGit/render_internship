@@ -12,7 +12,8 @@ namespace math
 class Plane
 {
 public:
-    Plane(glm::vec3 normal, glm::vec3 origin);
+    Plane(const glm::vec3 & normal,
+          const glm::vec3 & origin);
 
     bool intersect(math::Intersection & nearest,
                    const math::Ray & ray);

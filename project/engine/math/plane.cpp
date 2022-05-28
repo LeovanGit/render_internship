@@ -1,16 +1,18 @@
 #include "plane.hpp"
 #include "euler_angles.hpp"
 
-math::Plane::Plane(glm::vec3 normal, glm::vec3 origin) :
-             normal(normal), origin(origin)
+math::Plane::Plane(const glm::vec3 & normal,
+                   const glm::vec3 & origin) :
+                   normal(normal),
+                   origin(origin)
 {}
 
 bool math::Plane::intersect(math::Intersection & nearest,
                             const math::Ray & ray)
 {
     // ray || plane
-    float d = dot(normal, ray.direction);
-    if (math::areAlmostEqual(d, 0, 0.01f)) return false;
+    float d = glm::dot(normal, ray.direction);
+    if (math::areAlmostEqual(d, 0, 0.000001f)) return false;
     
     float t = glm::dot((origin - ray.origin), normal) / d;
 

@@ -22,9 +22,9 @@ public:
 class Basis
 {
 public:
-    Basis(glm::vec3 x,
-          glm::vec3 y,
-          glm::vec3 z);
+    Basis(const glm::vec3 & x,
+          const glm::vec3 & y,
+          const glm::vec3 & z);
 
     glm::vec3 x;
     glm::vec3 y;

@@ -52,8 +52,8 @@ public:
     {
     public:
         Sphere(float radius,
-               glm::vec3 origin,
-               Material material) :
+               const glm::vec3 & origin,
+               const Material & material) :
                math::Sphere(radius, origin),
                material(material)
             {}
@@ -82,9 +82,9 @@ public:
     class Plane : public math::Plane
     {
     public:
-        Plane(glm::vec3 normal,
-              glm::vec3 origin,
-              Material material) :
+        Plane(const glm::vec3 & normal,
+              const glm::vec3 & origin,
+              Material & material) :
               math::Plane(normal, origin),
               material(material)
             {}
@@ -113,8 +113,8 @@ public:
     class Cube : public math::Cube
     {
     public:
-        Cube(glm::vec3 position,
-             glm::vec3 angles,
+        Cube(const glm::vec3 & position,
+             const math::EulerAngles & angles,
              glm::vec3 scale,
              Material material) :
              math::Cube(position, angles, scale),
@@ -143,8 +143,8 @@ public:
     class DirectionalLight
     {
     public:
-        DirectionalLight(glm::vec3 direction,
-                         glm::vec3 color) :
+        DirectionalLight(const glm::vec3 & direction,
+                         const glm::vec3 & color) :
                          direction(direction),
                          color(color)
         {}
@@ -158,9 +158,9 @@ public:
     class PointLight
     {
     public:
-        PointLight(glm::vec3 position,
+        PointLight(const glm::vec3 & position,
                    float radius,
-                   glm::vec3 color) :
+                   const glm::vec3 & color) :
                    position(position),
                    radius(radius),
                    material(Material(color, 0, 0, glm::vec3(0)))
@@ -192,11 +192,11 @@ public:
     class SpotLight
     {
     public:
-        SpotLight(glm::vec3 position,
+        SpotLight(const glm::vec3 & position,
                   float radius,
                   float angle,
-                  glm::vec3 direction,
-                  glm::vec3 color) :
+                  const glm::vec3 & direction,
+                  const glm::vec3 & color) :
                   position(position),
                   radius(radius),
                   angle(angle),
@@ -309,12 +309,12 @@ public:
 public:
     explicit Scene() = default;
 
-    Scene(std::vector<Sphere> spheres,
-          std::vector<Plane> planes,
-          std::vector<Cube> cube,
-          std::vector<DirectionalLight> d_lights,
-          std::vector<PointLight> p_lights,
-          std::vector<SpotLight> s_lights);
+    Scene(const std::vector<Sphere> & spheres,
+          const std::vector<Plane> & planes,
+          const std::vector<Cube> & cube,
+          const std::vector<DirectionalLight> & d_lights,
+          const std::vector<PointLight> & p_lights,
+          const std::vector<SpotLight> & s_lights);
 
     // overloaded: for render only
     bool findIntersection(math::Intersection & nearest,

@@ -78,12 +78,12 @@ void Controller::initScene()
 
     // CREATE CUBES
     scene->cubes.push_back(Scene::Cube(glm::vec3(-180.0f, 0, 100.0f),
-                                       glm::vec3(0.0f, 45.0f, 0.0f),
+                                       math::EulerAngles(45.0f, 0.0f, 0.0f),
                                        glm::vec3(100.0f, 100.0f, 100.0f),
                                        materials[MATTE_WHITE]));
 
     scene->cubes.push_back(Scene::Cube(glm::vec3(-350.0f, -25.0f, -70.0f),
-                                       glm::vec3(0.0f, 45.0f, 0.0f),
+                                       math::EulerAngles(45.0f, 0.0f, 0.0f),
                                        glm::vec3(75.0f, 75.0f, 75.0f),
                                        materials[GLOSSY_RED]));
 

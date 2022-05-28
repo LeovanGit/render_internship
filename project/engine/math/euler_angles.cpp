@@ -8,9 +8,9 @@ math::EulerAngles::EulerAngles(float yaw,
                                roll(roll) 
 {}
 
-math::Basis::Basis(glm::vec3 x,
-                   glm::vec3 y,
-                   glm::vec3 z) :
+math::Basis::Basis(const glm::vec3 & x,
+                   const glm::vec3 & y,
+                   const glm::vec3 & z) :
                    x(x),
                    y(y),
                    z(z)
@@ -28,5 +28,5 @@ glm::quat math::quatFromEuler(const EulerAngles & angles,
 
 bool math::areAlmostEqual(float a, float b, float delta)
 {
-    return glm::abs(a - b) < delta;
+    return std::fabs(a - b) < delta;
 }

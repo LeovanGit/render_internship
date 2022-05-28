@@ -1,11 +1,11 @@
 #include "scene.hpp"
 
-Scene::Scene(std::vector<Sphere> spheres,
-             std::vector<Plane> planes,
-             std::vector<Cube> cubes,
-             std::vector<DirectionalLight> d_lights,
-             std::vector<PointLight> p_lights,
-             std::vector<SpotLight> s_lights) :
+Scene::Scene(const std::vector<Sphere> & spheres,
+             const std::vector<Plane> & planes,
+             const std::vector<Cube> & cubes,
+             const std::vector<DirectionalLight> & d_lights,
+             const std::vector<PointLight> & p_lights,
+             const std::vector<SpotLight> & s_lights) :
              spheres(spheres),
              planes(planes),
              cubes(cubes),
@@ -189,11 +189,11 @@ glm::vec3 Scene::blinnPhong(const math::Intersection & nearest,
         // (only light source color)
         glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
         glm::vec3 H = glm::normalize(V + L);
-        float cosb = fmax(0, dot(nearest.normal, H));
+        float cosb = fmax(0, glm::dot(nearest.normal, H));
 
         specular += p_lights[i].material.albedo *
-                    (float)pow(cosb, material->glossiness) *
-                     material->specular;
+                    powf(cosb, material->glossiness) *
+                    material->specular;
     }
 
     // spot light
@@ -206,7 +206,7 @@ glm::vec3 Scene::blinnPhong(const math::Intersection & nearest,
         // diffuse
         // check if intersection point under spot light
         if (glm::dot(s_lights[i].direction, -L) >= 
-            cos(glm::radians(s_lights[i].angle / 2)))
+            cosf(glm::radians(s_lights[i].angle / 2)))
         {
             if (!isVisible(nearest, L)) continue;
 
@@ -229,7 +229,7 @@ glm::vec3 Scene::blinnPhong(const math::Intersection & nearest,
         float cosb = fmax(0, dot(nearest.normal, H));
 
         specular += s_lights[i].material.albedo *
-                    (float)pow(cosb, material->glossiness) * 
+                    powf(cosb, material->glossiness) * 
                     material->specular;
     }    
 
@@ -245,9 +245,9 @@ glm::vec3 Scene::blinnPhong(const math::Intersection & nearest,
 
 void Scene::render(Window & win, Camera & camera)
 { 
-    RECT client = win.getClientSize();
-    int width = client.right - client.left;
-    int height = client.bottom - client.top;
+    SIZE pixels_size = win.getPixelsSize();
+    int width = pixels_size.cx;
+    int height = pixels_size.cy;
         
     std::vector<int> & pixels = win.getPixels();
 

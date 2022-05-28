@@ -8,6 +8,8 @@ void Window::init(HINSTANCE hInstance,
     this->pos_y = pos_y;
     this->client_width = client_width;
     this->client_height = client_height;
+    this->pixels_width = client_width / quality;
+    this->pixels_height = client_height / quality;
 
     // calculate the window size consided on client area
     RECT window = { 0, 0, client_width, client_height };
@@ -30,13 +32,13 @@ void Window::init(HINSTANCE hInstance,
 
     // BITMAPINFO
     bmi.bmiHeader.biSize = sizeof(bmi.bmiHeader);
-    bmi.bmiHeader.biWidth = client_width;
-    bmi.bmiHeader.biHeight = -client_height; // inverted img
+    bmi.bmiHeader.biWidth = pixels_width;
+    bmi.bmiHeader.biHeight = -pixels_height; // inverted img
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 32; // 32 bits to represent pixel
     bmi.bmiHeader.biCompression = BI_RGB;
 
-    pixels.resize(client_width * client_height);
+    pixels.resize(pixels_width * pixels_height);
 }
 
 void Window::resize(int width, int height)
@@ -44,10 +46,13 @@ void Window::resize(int width, int height)
     client_width = width;
     client_height = height;
 
-    pixels.resize(client_width * client_height);
+    this->pixels_width = width / quality;
+    this->pixels_height = height / quality;
 
-    bmi.bmiHeader.biWidth = client_width;
-    bmi.bmiHeader.biHeight = -client_height;
+    pixels.resize(pixels_width * pixels_height);
+
+    bmi.bmiHeader.biWidth = pixels_width;
+    bmi.bmiHeader.biHeight = -pixels_height;
 }
 
 std::vector<int> & Window::getPixels() { return pixels; }
@@ -66,6 +71,14 @@ RECT Window::getClientSize() const
     return client;
 }
 
+SIZE Window::getPixelsSize() const
+{
+    SIZE pixels_size;
+    pixels_size.cx = pixels_width;
+    pixels_size.cy = pixels_height;
+    return pixels_size;
+}
+
 void Window::flush()
 {
     StretchDIBits(hdc,
@@ -75,8 +88,8 @@ void Window::flush()
                   client_height,
                   0,
                   0,
-                  client_width,
-                  client_height,
+                  pixels_width,
+                  pixels_height,
                   pixels.data(),
                   &bmi,
                   DIB_RGB_COLORS,

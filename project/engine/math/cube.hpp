@@ -6,15 +6,16 @@
 
 #include "triangle.hpp"
 #include "matrices.hpp"
+#include "euler_angles.hpp"
 
 namespace math
 {
 class Cube
 {
 public:
-    Cube(glm::vec3 position,
-         glm::vec3 angles,
-         glm::vec3 scale);
+    Cube(const glm::vec3 & position,
+         const EulerAngles & angles,
+         const glm::vec3 & scale);
 
     void setPosition(const glm::vec3 & pos);
 

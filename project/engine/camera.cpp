@@ -2,9 +2,9 @@
 #include "euler_angles.hpp"
 #include "gtc/quaternion.hpp"
 
-Camera::Camera(glm::vec3 position,
-               glm::vec3 up,
-               glm::vec3 forward)
+Camera::Camera(const glm::vec3 & position,
+               const glm::vec3 & up,
+               const glm::vec3 & forward)
 {
     glm::vec3 right = glm::normalize(glm::cross(up, forward));
 
@@ -24,7 +24,7 @@ void Camera::setPerspective(float fovy,
                             float near,
                             float far)
 {
-    float p1 = 1 / tan(fovy / 2);
+    float p1 = 1 / tanf(fovy / 2);
     float p0 = p1 / aspect;
 
     // reversed depth!

@@ -11,9 +11,9 @@
 class Camera
 {
 public:
-    Camera(glm::vec3 position,
-           glm::vec3 up,
-           glm::vec3 forward);
+    Camera(const glm::vec3 & position,
+           const glm::vec3 & up,
+           const glm::vec3 & forward);
 
     void setPerspective(float fovy,
                         float aspect,

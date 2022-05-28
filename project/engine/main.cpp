@@ -20,7 +20,10 @@
 #define CLIENT_WIDTH 384
 #define CLIENT_HEIGHT 216
 
+namespace
+{
 constexpr float FRAME_DURATION = 1.0f / 60.0f;
+} // namespace
 
 LRESULT CALLBACK WindowProc(HWND hWnd,
                             UINT message,
@@ -133,7 +136,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         {
             win.resize(LOWORD(lParam), HIWORD(lParam));
             camera.setPerspective(45.0f,
-                                  (float)LOWORD(lParam) / HIWORD(lParam),
+                                  float(LOWORD(lParam)) / HIWORD(lParam),
                                   10.0f,
                                   1000.0f);
             break;

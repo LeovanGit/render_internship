@@ -1,6 +1,6 @@
 #include "sphere.hpp"
 
-math::Sphere::Sphere(float radius, glm::vec3 origin) :
+math::Sphere::Sphere(float radius, const glm::vec3 & origin) :
     radius(radius), origin(origin)
     {}
 
@@ -12,7 +12,7 @@ bool math::Sphere::intersect(Intersection & nearest, const Ray & ray)
     glm::vec3 L = ray.origin - origin;
 
     // quadratic equation coeff
-    float a = dot(ray.direction, ray.direction);
+    float a = glm::dot(ray.direction, ray.direction);
     float b = glm::dot(ray.direction, L);
     float c = glm::dot(L, L) - radius * radius;
 

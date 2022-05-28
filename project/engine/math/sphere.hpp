@@ -1,7 +1,6 @@
 #ifndef SPHERE_HPP
 #define SPHERE_HPP
 
-#include <cmath>
 #include "glm.hpp"
 
 #include "ray.hpp"
@@ -12,7 +11,7 @@ namespace math
 class Sphere
 {
 public:
-    Sphere(float radius, glm::vec3 origin);
+    Sphere(float radius, const glm::vec3 & origin);
 
     bool intersect(Intersection & nearest, const Ray & ray);
 

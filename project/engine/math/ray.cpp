@@ -1,7 +1,7 @@
 #include "ray.hpp"
 
-math::Ray::Ray(glm::vec3 origin,
-               glm::vec3 direction) :
+math::Ray::Ray(const glm::vec3 & origin,
+               const glm::vec3 & direction) :
                origin(origin),
                direction(direction)
 {}

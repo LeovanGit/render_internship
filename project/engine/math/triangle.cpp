@@ -1,9 +1,10 @@
 #include "triangle.hpp"
+#include "euler_angles.hpp"
 
-math::Triangle::Triangle(glm::vec3 normal,
-                         glm::vec3 vertex_1,
-                         glm::vec3 vertex_2,
-                         glm::vec3 vertex_3) :
+math::Triangle::Triangle(const glm::vec3 & normal,
+                         const glm::vec3 & vertex_1,
+                         const glm::vec3 & vertex_2,
+                         const glm::vec3 & vertex_3) :
                          normal(normal),
                          vertex_1(vertex_1),
                          vertex_2(vertex_2),
@@ -14,7 +15,8 @@ bool math::Triangle::intersect(Intersection & nearest,
                                const Ray & ray) const
 {
     float cosa = glm::dot(normal, ray.direction);
-    if (cosa == 0) return false; // ray || triangle
+    // ray || triangle
+    if (math::areAlmostEqual(cosa, 0, 0.000001f)) return false; 
     
     float d = -glm::dot(normal, vertex_1);
     float t = -(d + glm::dot(normal, ray.origin)) / cosa;

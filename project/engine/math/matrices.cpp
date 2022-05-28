@@ -1,27 +1,17 @@
 #include "matrices.hpp"
-#include "gtc/quaternion.hpp"
-#include "matrix.hpp"
+#include "euler_angles.hpp"
 
-math::Transform::Transform(glm::vec3 position,
-                           glm::vec3 angles,
-                           glm::vec3 scale) :
+math::Transform::Transform(const glm::vec3 & position,
+                           const EulerAngles & angles,
+                           const glm::vec3 & scale) :
                            position(position),
-                           scale(scale)                         
+                           scale(scale)                   
 {
-    // oz
-    rotation = glm::quat(cos(glm::radians(angles.z / 2)),
-                         (float)sin(glm::radians(angles.z / 2)) *
-                         glm::vec3(0, 0, 1.0f));
+    math::Basis basis(glm::vec3(1.0f, 0, 0),
+                      glm::vec3(0, 1.0f, 0),
+                      glm::vec3(0, 0, 1.0f));
 
-    // ox
-    rotation *= glm::quat(cos(glm::radians(angles.x / 2)),
-                          (float)sin(glm::radians(angles.x / 2)) *
-                          glm::vec3(1.0f, 0, 0));
-
-    // oy
-    rotation *= glm::quat(cos(glm::radians(angles.y / 2)),
-                          (float)sin(glm::radians(angles.y / 2)) *
-                          glm::vec3(0, 1.0f, 0));    
+    rotation = math::quatFromEuler(angles, basis);
 }
 
 glm::mat4 math::Transform::toMat4() const

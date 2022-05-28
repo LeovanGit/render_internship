@@ -5,6 +5,8 @@
 #include <windowsx.h>
 #include <vector>
 
+constexpr float quality = 2.0f;
+
 class Window
 {
 public:
@@ -22,6 +24,8 @@ public:
 
     RECT getClientSize() const;
 
+    SIZE getPixelsSize() const;
+
     void flush();
 
     HWND handle;
@@ -33,6 +37,9 @@ public:
 private:    
     int client_width;
     int client_height;
+
+    int pixels_width;
+    int pixels_height;
 
     BITMAPINFO bmi;
     std::vector<int> pixels;

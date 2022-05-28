@@ -3,8 +3,10 @@
 
 #include "glm.hpp"
 #include "gtc/quaternion.hpp"
-
+#include "matrix.hpp"
 #include <cmath>
+
+#include "euler_angles.hpp"
 
 namespace math
 {
@@ -13,9 +15,9 @@ class Transform
 public:
     Transform() = default;
 
-    Transform(glm::vec3 position,
-              glm::vec3 angles,
-              glm::vec3 scale);
+    Transform(const glm::vec3 & position,
+              const EulerAngles & angles,
+              const glm::vec3 & scale);
 
     glm::mat4 toMat4() const;
 

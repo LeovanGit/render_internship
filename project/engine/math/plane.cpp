@@ -1,4 +1,5 @@
 #include "plane.hpp"
+#include "euler_angles.hpp"
 
 math::Plane::Plane(glm::vec3 normal, glm::vec3 origin) :
              normal(normal), origin(origin)
@@ -9,7 +10,7 @@ bool math::Plane::intersect(math::Intersection & nearest,
 {
     // ray || plane
     float d = dot(normal, ray.direction);
-    if (d == 0) return false;
+    if (math::areAlmostEqual(d, 0, 0.01f)) return false;
     
     float t = glm::dot((origin - ray.origin), normal) / d;
 

@@ -6,7 +6,7 @@ math::Transform::Transform(glm::vec3 position,
                            glm::vec3 angles,
                            glm::vec3 scale) :
                            position(position),
-                           scale(scale)
+                           scale(scale)                         
 {
     // oz
     rotation = glm::quat(cos(glm::radians(angles.z / 2)),

@@ -5,6 +5,8 @@
 #include "gtc/quaternion.hpp"
 
 #include "matrices.hpp"
+#include "euler_angles.hpp"
+#include "ray.hpp"
 
 class Camera
 {
@@ -34,15 +36,17 @@ public:
 
     void addWorldPosition(const glm::vec3 & position);
 
-    void setWorldAngles(const glm::vec3 & angles);
+    void setWorldAngles(const math::EulerAngles & angles);
 
-    void addWorldAngles(const glm::vec3 & angles);
+    void addWorldAngles(const math::EulerAngles & angles);
 
-    void addRelativeAngles(const glm::vec3 & angles);
+    void addRelativeAngles(const math::EulerAngles & angles);
 
     void updateBasis();
 
     void updateMatrices();
+
+    glm::vec3 generateWorldPointFromCS(float x, float y) const;
 
 private:
     glm::mat4 view_matrix;

@@ -16,6 +16,8 @@ public:
          glm::vec3 angles,
          glm::vec3 scale);
 
+    void setPosition(const glm::vec3 & pos);
+
     void addPosition(const glm::vec3 & offset);
 
     bool intersect(math::Intersection & nearest,

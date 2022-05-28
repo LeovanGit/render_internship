@@ -10,7 +10,7 @@ void Window::init(HINSTANCE hInstance,
     this->client_height = client_height;
 
     // calculate the window size consided on client area
-    RECT window = {0, 0, client_width, client_height};
+    RECT window = { 0, 0, client_width, client_height };
     AdjustWindowRect(&window, WS_OVERLAPPEDWINDOW, FALSE);
 
     handle = CreateWindowEx(0,
@@ -54,13 +54,8 @@ std::vector<int> & Window::getPixels() { return pixels; }
 
 RECT Window::getSize() const
 {
-    RECT client = getClientSize();
-    RECT window = {0,
-                   0,
-                   client.right - client.left,
-                   client.bottom - client.top};
-    AdjustWindowRect(&window, WS_OVERLAPPEDWINDOW, FALSE);
-    
+    RECT window;
+    GetWindowRect(handle, &window);
     return window;
 }
 
@@ -72,17 +67,18 @@ RECT Window::getClientSize() const
 }
 
 void Window::flush()
-{        
-    SetDIBitsToDevice(hdc,
-                      0,
-                      0,
-                      client_width,
-                      client_height,
-                      0,
-                      0,
-                      0,
-                      client_height,
-                      pixels.data(),
-                      &bmi,
-                      DIB_RGB_COLORS);
+{
+    StretchDIBits(hdc,
+                  0,
+                  0,
+                  client_width,
+                  client_height,
+                  0,
+                  0,
+                  client_width,
+                  client_height,
+                  pixels.data(),
+                  &bmi,
+                  DIB_RGB_COLORS,
+                  SRCCOPY);
 }

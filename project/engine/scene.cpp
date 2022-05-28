@@ -131,7 +131,7 @@ bool Scene::isVisible(const math::Intersection & nearest,
 
     return (found_intersection && (type == IntersectedType::POINT_LIGHT ||
                                    type == IntersectedType::SPOT_LIGHT)) ||
-        !found_intersection; // for directional
+           !found_intersection; // for directional
 }
 
 // L - ray from intersection point to light source
@@ -181,9 +181,9 @@ glm::vec3 Scene::blinnPhong(const math::Intersection & nearest,
             (D * D);
 
         diffuse += p_lights[i].material.albedo *
-            cosa *
-            material->albedo *
-            light_intensity;            
+                   cosa *
+                   material->albedo *
+                   light_intensity;            
             
         // specular not depends on object color and distance to light source
         // (only light source color)
@@ -192,8 +192,8 @@ glm::vec3 Scene::blinnPhong(const math::Intersection & nearest,
         float cosb = fmax(0, dot(nearest.normal, H));
 
         specular += p_lights[i].material.albedo *
-            (float)pow(cosb, material->glossiness) *
-            material->specular;
+                    (float)pow(cosb, material->glossiness) *
+                     material->specular;
     }
 
     // spot light
@@ -257,24 +257,26 @@ void Scene::render(Window & win, Camera & camera)
     math::Ray ray;
     ray.origin = camera.getPosition();
 
+    // find CS corner points in WS
+    glm::vec3 bottom_left_WS = camera.generateWorldPointFromCS(-1.0f, -1.0f);
+    glm::vec3 bottom_right_WS = camera.generateWorldPointFromCS(1.0f, -1.0f);
+    glm::vec3 top_left_WS = camera.generateWorldPointFromCS(-1.0f, 1.0f);
+
+    glm::vec3 near_plane_right = bottom_right_WS - bottom_left_WS;
+    glm::vec3 near_plane_top = top_left_WS - bottom_left_WS;
+
     for (int y = 0; y != height; ++y)
     {
         for (int x = 0; x != width; ++x)
         {
-            // new coord system with (0, 0) in client area center
-            // and normalized: [-1; 1]
+            // normalized [0; 1]
             glm::vec2 xy;
-            xy.x = 2.0f * x / width - 1.0f;           
-            xy.y = 1.0f - 2.0f * y / height; // reversed
+            xy.x = float(x + 0.5f) / width;
+            xy.y = 1.0f - float(y + 0.5f) / height; // inversed
 
-            // dirCS.z = 1.0f -> on near plane 
-            //         = 0.0f -> on far plane
-            // (versa for not reversed depth)
-            glm::vec4 dir_cs(xy.x, xy.y, 1.0f, 1.0f);
-            glm::vec4 dir_ws = camera.getViewProjInv() * dir_cs;
-
-            ray.direction = glm::normalize((glm::vec3(dir_ws) / dir_ws.w) -
-                                            camera.getPosition());
+            ray.direction = (bottom_left_WS +
+                             xy.x * near_plane_right +
+                             xy.y * near_plane_top) - ray.origin;
 
             Material * material;
             IntersectedType type;

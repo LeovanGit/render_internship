@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include "euler_angles.hpp"
 #include "gtc/quaternion.hpp"
 
 Camera::Camera(glm::vec3 position,
@@ -13,7 +14,9 @@ Camera::Camera(glm::vec3 position,
                                 forward.x,  forward.y,  forward.z,  0,
                                 position.x, position.y, position.z, 1.0f);
 
-    rotation = glm::quat_cast(glm::mat3(right, up, forward));
+    rotation = glm::quat_cast(glm::mat3(view_matrix_inv));
+
+    is_updated_basis = false;
 }
 
 void Camera::setPerspective(float fovy,
@@ -92,69 +95,39 @@ void Camera::addWorldPosition(const glm::vec3 & position)
     is_updated_matrices = false;
 }
 
-void Camera::setWorldAngles(const glm::vec3 & angles)
+void Camera::setWorldAngles(const math::EulerAngles & angles)
 {
-    // oz
-    rotation = glm::quat(cos(glm::radians(angles.z / 2)),
-                         (float)sin(glm::radians(angles.z / 2)) *
-                         glm::vec3(0, 0, 1.0f));
+    math::Basis basis(glm::vec3(1.0f, 0, 0),
+                      glm::vec3(0, 1.0f, 0),
+                      glm::vec3(0, 0, 1.0f));
 
-    // ox
-    rotation *= glm::quat(cos(glm::radians(angles.x / 2)),
-                          (float)sin(glm::radians(angles.x / 2)) *
-                          glm::vec3(1.0f, 0, 0));
-
-    // oy
-    rotation *= glm::quat(cos(glm::radians(angles.y / 2)),
-                          (float)sin(glm::radians(angles.y / 2)) *
-                          glm::vec3(0, 1.0f, 0));
-
+    rotation = math::quatFromEuler(angles, basis);
     //glm::normalize(rotation);
 
     is_updated_basis = false;
     is_updated_matrices = false;
 }
 
-void Camera::addWorldAngles(const glm::vec3 & angles)
+void Camera::addWorldAngles(const math::EulerAngles & angles)
 {
-    // oz
-    rotation *= glm::quat(cos(glm::radians(angles.z / 2)),
-                          (float)sin(glm::radians(angles.z / 2)) *
-                          glm::vec3(0, 0, 1.0f));
+    math::Basis basis(glm::vec3(1.0f, 0, 0),
+                      glm::vec3(0, 1.0f, 0),
+                      glm::vec3(0, 0, 1.0f));
 
-    // ox
-    rotation *= glm::quat(cos(glm::radians(angles.x / 2)),
-                          (float)sin(glm::radians(angles.x / 2)) *
-                          glm::vec3(1.0f, 0, 0));
-
-    // oy
-    rotation *= glm::quat(cos(glm::radians(angles.y / 2)),
-                          (float)sin(glm::radians(angles.y / 2)) *
-                          glm::vec3(0, 1.0f, 0));
-
+    rotation = math::quatFromEuler(angles, basis) * rotation;
     // glm::normalize(rotation);
 
     is_updated_basis = false;
     is_updated_matrices = false;
 }
 
-void Camera::addRelativeAngles(const glm::vec3 & angles)
-{    
-    // oz
-    rotation *= glm::quat(cos(glm::radians(angles.z / 2)),
-                          (float)sin(glm::radians(angles.z / 2)) *
-                          getForward());
+void Camera::addRelativeAngles(const math::EulerAngles & angles)
+{
+    math::Basis camera_basis(getRight(),
+                             getUp(),
+                             getForward());
 
-    // ox
-    rotation *= glm::quat(cos(glm::radians(angles.x / 2)),
-                          (float)sin(glm::radians(angles.x / 2)) *
-                          getRight());
-
-    // oy
-    rotation *= glm::quat(cos(glm::radians(angles.y / 2)),
-                          (float)sin(glm::radians(angles.y / 2)) *
-                          getUp());
-
+    rotation = math::quatFromEuler(angles, camera_basis) * rotation;
     // glm::normalize(rotation);
 
     is_updated_basis = false;
@@ -190,4 +163,14 @@ void Camera::updateMatrices()
                            glm::inverse(proj_matrix);
     
     is_updated_matrices = true;
+}
+
+glm::vec3 Camera::generateWorldPointFromCS(float x, float y) const
+{
+    glm::vec4 point_h_cs(x, y, 1.0f, 1.0f);
+    glm::vec4 point_h_ws = view_proj_matrix_inv * point_h_cs;
+
+    glm::vec3 point_ws = glm::vec3(point_h_ws) / point_h_ws.w;
+
+    return point_ws;
 }

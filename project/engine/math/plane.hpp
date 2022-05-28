@@ -5,6 +5,7 @@
 
 #include "ray.hpp"
 #include "intersection.hpp"
+#include "euler_angles.hpp"
 
 namespace math
 {

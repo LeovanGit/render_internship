@@ -8,8 +8,8 @@
 #include "scene.hpp"
 #include "camera.hpp"
 #include "sphere.hpp"
-
-#include <iostream>
+#include "plane.hpp"
+#include "euler_angles.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -23,9 +23,6 @@ constexpr int KEY_E = 69;
 constexpr int KEY_LMOUSE = 1;
 constexpr int KEY_RMOUSE = 2;
 
-constexpr float MOVEMENT_SPEED = 500.0f;
-constexpr float Z_ROTATIONAL_SPEED = 50.0f;
-
 class Controller
 {
 public:
@@ -33,12 +30,7 @@ public:
 
     void init(Scene * scene);
 
-    void initScene(const std::vector<Scene::Sphere> & spheres,
-                   const std::vector<Scene::Plane> & planes,
-                   const std::vector<Scene::Cube> & cubes,
-                   const std::vector<Scene::DirectionalLight> & d_lights,
-                   const std::vector<Scene::PointLight> & p_lights,
-                   const std::vector<Scene::SpotLight> & s_lights);
+    void initScene();
 
     void processInput(Camera & camera,
                       const float delta_time,
@@ -54,15 +46,19 @@ public:
 
     bool keys_log[KEYS_COUNT];
 
-    class Object
+    glm::vec3 movement_speed = glm::vec3(500.0f);
+    glm::vec3 rotation_speed = glm::vec3(360.0f, 360.0f, 60.0f);
+
+    class GrabbedObject
     {
     public:
-        Object() = default;
+        GrabbedObject() = default;
         
         bool is_grabbed = false;
-        glm::vec3 grabbed_point;
+        float t;
+        glm::vec3 point;
         std::unique_ptr<Scene::IObjectMover> mover;
-    } current_object;
+    } object;
 };
 
 #endif

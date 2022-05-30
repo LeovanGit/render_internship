@@ -143,7 +143,7 @@ void Controller::processInput(Camera & camera,
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_LMOUSE])
-    {
+    {	
         // delta_fixed_mouse normalized
         glm::vec2 speed(0);
         speed.x = (delta_fixed_mouse.y / float(height)) * rotation_speed.x;
@@ -173,6 +173,8 @@ void Controller::processInput(Camera & camera,
     }
     if (keys_log[KEY_RMOUSE])
     {
+        camera.updateMatrices();
+
         glm::vec2 xy;
         xy.x = 2.0f * (mouse.x + 0.5f) / width - 1.0f;           
         xy.y = 1.0f - 2.0f * (mouse.y + 0.5f) / height; // reversed

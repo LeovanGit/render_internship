@@ -14,12 +14,6 @@
 #include "camera.hpp"
 #include "sphere.hpp"
 
-#define WIN_POS_X 300
-#define WIN_POS_Y 300
-
-#define CLIENT_WIDTH 384
-#define CLIENT_HEIGHT 216
-
 namespace
 {
 constexpr float FRAME_DURATION = 1.0f / 60.0f;
@@ -78,9 +72,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     RegisterClassEx(&wclass);
 
     // CREATE WINDOW
-    win.init(hInstance,
-             WIN_POS_X, WIN_POS_Y,
-             CLIENT_WIDTH, CLIENT_HEIGHT);
+    win.init(hInstance, 300.0f, 300.0f, 384.0f, 216.0f);
 
     ShowWindow(win.handle, nCmdShow);
 
@@ -89,7 +81,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     controller.initScene();
 
     camera.setPerspective(45.0f,
-                          float(CLIENT_WIDTH) / CLIENT_HEIGHT,
+                          384.0f / 216.0f,
                           10.0f,
                           1000.0f);
 

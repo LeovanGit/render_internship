@@ -18,6 +18,8 @@ Camera::Camera(const glm::vec3 & position,
 
     is_updated_basis = false;
 
+    is_roll_enabled = false;
+
     EV_100 = 1.6f;
 }
 
@@ -99,11 +101,7 @@ void Camera::addWorldPosition(const glm::vec3 & position)
 
 void Camera::setWorldAngles(const math::EulerAngles & angles)
 {
-    math::Basis basis(glm::vec3(1.0f, 0, 0),
-                      glm::vec3(0, 1.0f, 0),
-                      glm::vec3(0, 0, 1.0f));
-
-    rotation = math::quatFromEuler(angles, basis);
+    rotation = math::quatFromEuler(angles);
     //glm::normalize(rotation);
 
     is_updated_basis = false;
@@ -112,11 +110,7 @@ void Camera::setWorldAngles(const math::EulerAngles & angles)
 
 void Camera::addWorldAngles(const math::EulerAngles & angles)
 {
-    math::Basis basis(glm::vec3(1.0f, 0, 0),
-                      glm::vec3(0, 1.0f, 0),
-                      glm::vec3(0, 0, 1.0f));
-
-    rotation = math::quatFromEuler(angles, basis) * rotation;
+    rotation = math::quatFromEuler(angles) * rotation;
     // glm::normalize(rotation);
 
     is_updated_basis = false;
@@ -125,11 +119,17 @@ void Camera::addWorldAngles(const math::EulerAngles & angles)
 
 void Camera::addRelativeAngles(const math::EulerAngles & angles)
 {
-    math::Basis camera_basis(getRight(),
-                             getUp(),
-                             getForward());
+    math::Basis basis(getRight(),
+                      glm::vec3(0, 1.0f, 0),
+                      glm::vec3(0, 0, 0));
 
-    rotation = math::quatFromEuler(angles, camera_basis) * rotation;
+    if (is_roll_enabled)
+    {
+        basis.y = getUp();
+        basis.z = getForward();
+    }
+
+    rotation = math::quatFromEuler(angles, basis) * rotation;
     // glm::normalize(rotation);
 
     is_updated_basis = false;

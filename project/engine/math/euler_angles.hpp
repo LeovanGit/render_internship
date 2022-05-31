@@ -32,7 +32,9 @@ public:
 };
 
 glm::quat quatFromEuler(const EulerAngles & angles,
-                        const Basis & basis);
+                        const Basis & basis = Basis(glm::vec3(1.0f, 0, 0),
+                                                    glm::vec3(0, 1.0f, 0),
+                                                    glm::vec3(0, 0, 1.0f)));
 
 bool areAlmostEqual(float a, float b, float delta);
 } // namespace math

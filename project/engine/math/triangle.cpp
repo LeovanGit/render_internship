@@ -3,7 +3,7 @@
 
 namespace
 {
-    constexpr float delta = 0.000001f;
+    constexpr float epsilon = 0.000001f;
 } // namespace
 
 math::Triangle::Triangle(const glm::vec3 & normal,
@@ -21,7 +21,7 @@ bool math::Triangle::intersect(Intersection & nearest,
 {
     float cosa = glm::dot(normal, ray.direction);
     // ray || triangle
-    if (math::areAlmostEqual(cosa, 0, delta)) return false; 
+    if (math::areAlmostEqual(cosa, 0, epsilon)) return false; 
     
     float d = -glm::dot(normal, vertex_1);
     float t = -(d + glm::dot(normal, ray.origin)) / cosa;

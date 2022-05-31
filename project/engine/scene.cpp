@@ -119,7 +119,7 @@ bool Scene::isVisible(const math::Intersection & nearest,
 
     math::Ray ray;
     ray.direction = dir_to_light;
-    ray.origin = nearest.point + DELTA * nearest.normal;
+    ray.origin = nearest.point + EPSILON * nearest.normal;
 
     math::Intersection tmp;
     tmp.reset();
@@ -289,6 +289,11 @@ void Scene::render(Window & win, Camera & camera)
                     type != IntersectedType::SPOT_LIGHT)
                 {
                     result_color = blinnPhong(nearest, material, camera);
+
+                    // gamma-correction
+                    result_color.x = powf(result_color.x, GAMMA);
+                    result_color.y = powf(result_color.y, GAMMA);
+                    result_color.z = powf(result_color.z, GAMMA);
                 }
                 else
                 {

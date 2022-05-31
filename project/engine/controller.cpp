@@ -26,7 +26,7 @@ void Controller::initScene()
 
     std::vector<Material> materials;
     // glossy blue
-    materials.push_back(Material(glm::vec3(0.4f, 0.0f, 0.0f),
+    materials.push_back(Material(glm::vec3(0.0f, 0.0f, 0.4f),
                                  1.0f,
                                  128.0f,
                                  glm::vec3(0.0f, 0.0f, 0.0f)));
@@ -36,7 +36,7 @@ void Controller::initScene()
                                  0,
                                  glm::vec3(0, 0, 0)));
     // matte red
-    materials.push_back(Material(glm::vec3(0.0f, 0.0f, 0.8f),
+    materials.push_back(Material(glm::vec3(0.8f, 0.0f, 0.0f),
                                  0.2f,
                                  16.0f,
                                  glm::vec3(0.0f, 0.0f, 0.0f)));
@@ -52,7 +52,7 @@ void Controller::initScene()
                                  72.0f,
                                  glm::vec3(0.0f, 0.0f, 0.0f)));
     // glossy red
-    materials.push_back(Material(glm::vec3(0.0f, 0.0f, 0.8f),
+    materials.push_back(Material(glm::vec3(0.8f, 0.0f, 0.0f),
                                  1.0f,
                                  128.0f,
                                  glm::vec3(0.0f, 0.0f, 0.0f)));
@@ -88,20 +88,21 @@ void Controller::initScene()
                                        materials[GLOSSY_RED]));
 
     // CREATE LIGHTS
-    scene->p_lights.push_back(Scene::PointLight(glm::vec3(-400.0, 250.0f, -300.0f),
-                                                350.0f,
-                                                glm::vec3(0.8f)));
+    scene->p_lights.push_back(Scene::PointLight(
+                                  glm::vec3(-400.0, 250.0f, -300.0f),
+                                  350.0f,
+                                  glm::vec3(0.8f)));
     
-    scene->d_lights.push_back(Scene::DirectionalLight(
-                                  glm::normalize(glm::vec3(1.0f, -1.0f, 1.0f)),
-                                  glm::vec3(0.15f)));
+    // scene->d_lights.push_back(Scene::DirectionalLight(
+    //                               glm::normalize(glm::vec3(1.0f, -1.0f, 1.0f)),
+    //                               glm::vec3(0.15f)));
 
     scene->s_lights.push_back(Scene::SpotLight(
                                   glm::vec3(200, 200, -300),
                                   400.0f,
                                   55.0f,
                                   glm::normalize(glm::vec3(0, -1.0f, 1.0f)),
-                                  glm::vec3(0.1f, 0.5f, 1.0f)));
+                                  glm::vec3(1.0f, 0.5f, 0.1f)));
 }
 
 void Controller::processInput(Camera & camera,
@@ -214,6 +215,14 @@ void Controller::processInput(Camera & camera,
             object.is_grabbed = false;
             object.mover.reset();
         }
+    }
+    if (keys_log[KEY_PLUS])
+    {
+        camera.EV_100 += 0.1f;
+    }
+    if (keys_log[KEY_MINUS])
+    {
+        camera.EV_100 -= 0.1f;
     }
 }
 

@@ -17,6 +17,8 @@ Camera::Camera(const glm::vec3 & position,
     rotation = glm::quat_cast(glm::mat3(view_matrix_inv));
 
     is_updated_basis = false;
+
+    EV_100 = 1.6f;
 }
 
 void Camera::setPerspective(float fovy,
@@ -173,4 +175,16 @@ glm::vec3 Camera::generateWorldPointFromCS(float x, float y) const
     glm::vec3 point_ws = glm::vec3(point_h_ws) / point_h_ws.w;
 
     return point_ws;
+}
+
+glm::vec3 Camera::adjustExposure(const glm::vec3 & color) const
+{
+    // sensor sensitivity
+    constexpr float S = 100.0f;
+
+    // lens and vignetting attenuation
+    constexpr float q = 0.65f;
+
+    float luminance_max = (78.0f / (q * S)) * powf(2.0f, EV_100);
+    return color * (1.0f / luminance_max);
 }

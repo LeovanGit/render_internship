@@ -22,6 +22,8 @@ constexpr int KEY_Q = 81;
 constexpr int KEY_E = 69;
 constexpr int KEY_LMOUSE = 1;
 constexpr int KEY_RMOUSE = 2;
+constexpr int KEY_PLUS = 187;
+constexpr int KEY_MINUS = 189;
 
 class Controller
 {

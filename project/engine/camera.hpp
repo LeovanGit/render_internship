@@ -48,6 +48,10 @@ public:
 
     glm::vec3 generateWorldPointFromCS(float x, float y) const;
 
+    glm::vec3 adjustExposure(const glm::vec3 & color) const;
+
+    float EV_100;
+
 private:
     glm::mat4 view_matrix;
     glm::mat4 proj_matrix;

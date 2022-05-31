@@ -19,9 +19,9 @@
 constexpr bool SHADOWS = true;
 constexpr int HEX_BLACK = 0x000000;
 constexpr float LIGHT_SIZE = 10.0f;
-constexpr float AMBIENT = 0.1f;
+constexpr float AMBIENT = 0.005f;
 constexpr float EPSILON = 0.001f;
-constexpr float GAMMA = 1.0f / 2.2f;
+constexpr float GAMMA = 2.2f;
 
 class Scene
 {
@@ -347,6 +347,10 @@ public:
     glm::vec3 blinnPhong(const math::Intersection & nearest,
                          const Material * material,
                          const Camera & camera);
+
+    glm::vec3 ToneMappingACES(const glm::vec3 & color) const;
+
+    glm::vec3 gammaCorrection(const glm::vec3 & color) const;
 
     void render(Window & win, Camera & camera);
 

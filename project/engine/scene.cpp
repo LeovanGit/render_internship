@@ -1,4 +1,5 @@
 #include "scene.hpp"
+#include "common.hpp"
 
 Scene::Scene(const std::vector<Sphere> & spheres,
              const std::vector<Plane> & planes,
@@ -203,13 +204,13 @@ glm::vec3 Scene::blinnPhong(const math::Intersection & nearest,
         float D = glm::length(L);
         L = glm::normalize(L);
 
+        if (!isVisible(nearest, L)) continue;
+
         // diffuse
         // check if intersection point under spot light
         if (glm::dot(s_lights[i].direction, -L) >= 
             cosf(glm::radians(s_lights[i].angle / 2)))
         {
-            if (!isVisible(nearest, L)) continue;
-
             float cosa = fmax(0, glm::dot(nearest.normal, L));
                         
             float light_intensity = (s_lights[i].radius * s_lights[i].radius) /
@@ -235,12 +236,32 @@ glm::vec3 Scene::blinnPhong(const math::Intersection & nearest,
 
     glm::vec3 result = material->emission + ambient + diffuse + specular;
 
-    // normalize
-    result.x = fmin(1.0f, result.x);
-    result.y = fmin(1.0f, result.y);
-    result.z = fmin(1.0f, result.z);
-
     return result;
+}
+
+glm::vec3 Scene::ToneMappingACES(const glm::vec3 & hdr) const
+{
+    glm::mat3 m1(0.59719f, 0.07600f, 0.02840f,
+                 0.35458f, 0.90834f, 0.13383f,
+                 0.04823f, 0.01566f, 0.83777f);
+
+    glm::mat3 m2(1.60475f, -0.10208, -0.00327f,
+                 -0.53108f,  1.10813, -0.07276f,
+                 -0.07367f, -0.00605,  1.07602f);
+
+    glm::vec3 v = m1 * hdr;    
+    glm::vec3 a = v * (v + 0.0245786f) - 0.000090537f;
+    glm::vec3 b = v * (0.983729f * v + 0.4329510f) + 0.238081f;
+    glm::vec3 ldr = clamp(m2 * (a / b), 0.0f, 1.0f);
+
+    return ldr;
+}
+
+glm::vec3 Scene::gammaCorrection(const glm::vec3 & color) const
+{
+    return glm::vec3(powf(color.x, 1.0f / GAMMA),
+                     powf(color.y, 1.0f / GAMMA),
+                     powf(color.z, 1.0f / GAMMA));
 }
 
 void Scene::render(Window & win, Camera & camera)
@@ -289,20 +310,18 @@ void Scene::render(Window & win, Camera & camera)
                     type != IntersectedType::SPOT_LIGHT)
                 {
                     result_color = blinnPhong(nearest, material, camera);
-
-                    // gamma-correction
-                    result_color.x = powf(result_color.x, GAMMA);
-                    result_color.y = powf(result_color.y, GAMMA);
-                    result_color.z = powf(result_color.z, GAMMA);
+                    result_color = camera.adjustExposure(result_color);
+                    result_color = ToneMappingACES(result_color);                  
+                    result_color = gammaCorrection(result_color);
                 }
                 else
                 {
                     result_color = material->albedo;
                 }                
 
-                pixels[y * width + x] = RGB(result_color.x * 255,
+                pixels[y * width + x] = RGB(result_color.z * 255,
                                             result_color.y * 255,
-                                            result_color.z * 255);
+                                            result_color.x * 255);
             }
             else
             {

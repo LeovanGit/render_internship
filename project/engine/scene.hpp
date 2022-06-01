@@ -22,6 +22,7 @@ constexpr float LIGHT_SIZE = 10.0f;
 constexpr float AMBIENT = 0.005f;
 constexpr float EPSILON = 0.001f;
 constexpr float GAMMA = 2.2f;
+const float PI = atanf(1.0f) * 4.0f;
 
 class Scene
 {
@@ -163,7 +164,11 @@ public:
                    const glm::vec3 & color) :
                    position(position),
                    radius(radius),
-                   material(Material(color, 0, 0, glm::vec3(0)))
+                   material(Material(color,
+                                     0,
+                                     0,
+                                     glm::vec3(0),
+                                     glm::vec3(0)))
         {}
 
         bool intersect(math::Intersection & nearest,
@@ -201,7 +206,11 @@ public:
                   radius(radius),
                   angle(angle),
                   direction(direction),
-                  material(Material(color, 0, 0, glm::vec3(0)))
+                  material(Material(color,
+                                    0,
+                                    0,
+                                    glm::vec3(0),
+                                    glm::vec3(0)))
         {}
 
         bool intersect(math::Intersection & nearest,
@@ -348,7 +357,21 @@ public:
                          const Material * material,
                          const Camera & camera);
 
-    glm::vec3 ToneMappingACES(const glm::vec3 & color) const;
+    float ggxSmith(const float roughness_sqr,
+                   const float NL,
+                   const float NV);
+
+    float ggxDistribution(const float roughness_sqr,
+                          const float NH);
+
+    glm::vec3 fresnelSchlick(const float NL,
+                             const glm::vec3 & F0);
+
+    glm::vec3 PBR(const math::Intersection & nearest,
+                  const Material * material,
+                  const Camera & camera);
+
+    glm::vec3 toneMappingACES(const glm::vec3 & color) const;
 
     glm::vec3 gammaCorrection(const glm::vec3 & color) const;
 

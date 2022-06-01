@@ -13,96 +13,110 @@ void Controller::init(Scene * scene)
 
 void Controller::initScene()
 {
-    // CREATE MATERIALS
-    enum Materials
-    {
-        GLOSSY_BLUE,
-        MATTE_GREY,
-        MATTE_RED,
-        MATTE_WHITE,
-        HALF_GLOSSY_GREEN,
-        GLOSSY_RED,
-    };
+    // // CREATE MATERIALS
+    // enum Materials
+    // {
+    //     GLOSSY_BLUE,
+    //     MATTE_GREY,
+    //     MATTE_RED,
+    //     MATTE_WHITE,
+    //     HALF_GLOSSY_GREEN,
+    //     GLOSSY_RED,
+    // };
 
-    std::vector<Material> materials;
-    // glossy blue
-    materials.push_back(Material(glm::vec3(0.0f, 0.0f, 0.4f),
-                                 1.0f,
-                                 128.0f,
-                                 glm::vec3(0.0f, 0.0f, 0.0f)));
-    // matte grey
-    materials.push_back(Material(glm::vec3(0.5f, 0.5f, 0.5f),
-                                 0,
-                                 0,
-                                 glm::vec3(0, 0, 0)));
-    // matte red
-    materials.push_back(Material(glm::vec3(0.8f, 0.0f, 0.0f),
-                                 0.2f,
-                                 16.0f,
-                                 glm::vec3(0.0f, 0.0f, 0.0f)));
-    // matte white
-    materials.push_back(Material(glm::vec3(1.0f, 1.0f, 1.0f),
-                                 0.2f,
-                                 16.0f,
-                                 glm::vec3(0.0f, 0.0f, 0.0f)));
+    // std::vector<Material> materials;
+    // // glossy blue
+    // materials.push_back(Material(glm::vec3(0.0f, 0.0f, 0.4f),
+    //                              1.0f,
+    //                              128.0f,
+    //                              glm::vec3(0.0f, 0.0f, 0.0f)));
+    // // matte grey
+    // materials.push_back(Material(glm::vec3(0.5f, 0.5f, 0.5f),
+    //                              0,
+    //                              0,
+    //                              glm::vec3(0, 0, 0)));
+    // // matte red
+    // materials.push_back(Material(glm::vec3(0.8f, 0.0f, 0.0f),
+    //                              0.2f,
+    //                              16.0f,
+    //                              glm::vec3(0.0f, 0.0f, 0.0f)));
+    // // matte white
+    // materials.push_back(Material(glm::vec3(1.0f, 1.0f, 1.0f),
+    //                              0.2f,
+    //                              16.0f,
+    //                              glm::vec3(0.0f, 0.0f, 0.0f)));
 
-    // half-glossy green
-    materials.push_back(Material(glm::vec3(0.0f, 0.4f, 0.0f),
-                                 0.6f,
-                                 72.0f,
-                                 glm::vec3(0.0f, 0.0f, 0.0f)));
-    // glossy red
-    materials.push_back(Material(glm::vec3(0.8f, 0.0f, 0.0f),
-                                 1.0f,
-                                 128.0f,
-                                 glm::vec3(0.0f, 0.0f, 0.0f)));
+    // // half-glossy green
+    // materials.push_back(Material(glm::vec3(0.0f, 0.4f, 0.0f),
+    //                              0.6f,
+    //                              72.0f,
+    //                              glm::vec3(0.0f, 0.0f, 0.0f)));
+    // // glossy red
+    // materials.push_back(Material(glm::vec3(0.8f, 0.0f, 0.0f),
+    //                              1.0f,
+    //                              128.0f,
+    //                              glm::vec3(0.0f, 0.0f, 0.0f)));
 
-    // CREATE PLANES
-    // floor
-    scene->planes.push_back(Scene::Plane(glm::vec3(0, 1.0f, 0),
-                                         glm::vec3(0, -100.0f, 0),
-                                         materials[MATTE_GREY]));
+    // // CREATE PLANES
+    // // floor
+    // scene->planes.push_back(Scene::Plane(glm::vec3(0, 1.0f, 0),
+    //                                      glm::vec3(0, -100.0f, 0),
+    //                                      materials[MATTE_GREY]));
 
-    // CREATE SPHERES
-    scene->spheres.push_back(Scene::Sphere(80.0f,
-                                           glm::vec3(0, -20.0f, 0),
-                                           materials[GLOSSY_BLUE]));
+    // // CREATE SPHERES
+    // scene->spheres.push_back(Scene::Sphere(80.0f,
+    //                                        glm::vec3(0, -20.0f, 0),
+    //                                        materials[GLOSSY_BLUE]));
 
-    scene->spheres.push_back(Scene::Sphere(100.0f,
-                                           glm::vec3(-180.0f, 200.0f, 100.0f),
-                                           materials[MATTE_RED]));
+    // scene->spheres.push_back(Scene::Sphere(100.0f,
+    //                                        glm::vec3(-180.0f, 200.0f, 100.0f),
+    //                                        materials[MATTE_RED]));
 
-    scene->spheres.push_back(Scene::Sphere(120.0f,
-                                           glm::vec3(300.0f, 20.0f, 100.0f),
-                                           materials[HALF_GLOSSY_GREEN]));
+    // scene->spheres.push_back(Scene::Sphere(120.0f,
+    //                                        glm::vec3(300.0f, 20.0f, 100.0f),
+    //                                        materials[HALF_GLOSSY_GREEN]));
 
-    // CREATE CUBES
-    scene->cubes.push_back(Scene::Cube(glm::vec3(-180.0f, 0, 100.0f),
-                                       math::EulerAngles(45.0f, 0.0f, 0.0f),
-                                       glm::vec3(100.0f, 100.0f, 100.0f),
-                                       materials[MATTE_WHITE]));
+    // // CREATE CUBES
+    // scene->cubes.push_back(Scene::Cube(glm::vec3(-180.0f, 0, 100.0f),
+    //                                    math::EulerAngles(45.0f, 0.0f, 0.0f),
+    //                                    glm::vec3(100.0f, 100.0f, 100.0f),
+    //                                    materials[MATTE_WHITE]));
 
-    scene->cubes.push_back(Scene::Cube(glm::vec3(-350.0f, -25.0f, -70.0f),
-                                       math::EulerAngles(45.0f, 0.0f, 0.0f),
-                                       glm::vec3(75.0f, 75.0f, 75.0f),
-                                       materials[GLOSSY_RED]));
+    // scene->cubes.push_back(Scene::Cube(glm::vec3(-350.0f, -25.0f, -70.0f),
+    //                                    math::EulerAngles(45.0f, 0.0f, 0.0f),
+    //                                    glm::vec3(75.0f, 75.0f, 75.0f),
+    //                                    materials[GLOSSY_RED]));
 
     // CREATE LIGHTS
-    scene->p_lights.push_back(Scene::PointLight(
-                                  glm::vec3(-400.0, 250.0f, -300.0f),
-                                  350.0f,
-                                  glm::vec3(0.8f)));
+    // scene->p_lights.push_back(Scene::PointLight(
+    //                               glm::vec3(-400.0, 250.0f, -300.0f),
+    //                               350.0f,
+    //                               glm::vec3(0.8f)));
     
     // scene->d_lights.push_back(Scene::DirectionalLight(
     //                               glm::normalize(glm::vec3(1.0f, -1.0f, 1.0f)),
     //                               glm::vec3(0.15f)));
 
-    scene->s_lights.push_back(Scene::SpotLight(
-                                  glm::vec3(200, 200, -300),
-                                  400.0f,
-                                  55.0f,
-                                  glm::normalize(glm::vec3(0, -1.0f, 1.0f)),
-                                  glm::vec3(1.0f, 0.5f, 0.1f)));
+    // scene->s_lights.push_back(Scene::SpotLight(
+    //                               glm::vec3(200, 200, -300),
+    //                               400.0f,
+    //                               55.0f,
+    //                               glm::normalize(glm::vec3(0, -1.0f, 1.0f)),
+    //                               glm::vec3(1.0f, 0.5f, 0.1f)));
+
+    // TEST FOR PBR
+    scene->spheres.push_back(Scene::Sphere(120.0f,
+                                           glm::vec3(0),
+                             Material(glm::vec3(0.1f, 0.1f, 0.1f),
+                                      0.0f,
+                                      0.8f,
+                                      glm::vec3(1.0f, 0.86f, 0.56f),
+                                      glm::vec3(0))));
+
+    scene->p_lights.push_back(Scene::PointLight(
+                                  glm::vec3(-400.0, 0.0f, 0.0f),
+                                  350.0f,
+                                  glm::vec3(1.0f)));
 }
 
 void Controller::processInput(Camera & camera,

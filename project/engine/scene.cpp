@@ -1,5 +1,11 @@
 #include "scene.hpp"
 #include "common.hpp"
+#include "detail/qualifier.hpp"
+#include <cmath>
+#include <propidl.h>
+#include <rpcdcep.h>
+#include <utility>
+#include <winbase.h>
 
 Scene::Scene(const std::vector<Sphere> & spheres,
              const std::vector<Plane> & planes,
@@ -239,7 +245,76 @@ glm::vec3 Scene::blinnPhong(const math::Intersection & nearest,
     return result;
 }
 
-glm::vec3 Scene::ToneMappingACES(const glm::vec3 & hdr) const
+float Scene::ggxSmith(const float roughness_sqr,
+                      const float NL,
+                      const float NV)
+{
+    float NL_sqr = NL * NL;
+    float NV_sqr = NV * NV;
+
+    float G1 = 2.0f / (1.0f + sqrtf(1.0f + roughness_sqr * 
+                                    (1 - NL_sqr ) / NL_sqr));
+
+    float G2 = 2.0f / (1.0f + sqrtf(1.0f + roughness_sqr * 
+                                    (1 - NV_sqr ) / NV_sqr));
+
+    return G1 * G2;
+}
+
+float Scene::ggxDistribution(const float roughness_sqr,
+                             const float NH)
+{
+    float NH_sqr = NH * NH;
+    
+    float denom = NH_sqr * (roughness_sqr - 1.0f) + 1.0f;
+
+    float D = roughness_sqr / (PI * denom * denom);
+
+    return D;
+}
+
+glm::vec3 Scene::fresnelSchlick(const float NL,
+                                const glm::vec3 & F0)
+{
+    return F0 + (1.0f - F0) * powf(1.0f - NL, 5.0f);
+}
+
+glm::vec3 Scene::PBR(const math::Intersection & nearest,
+                     const Material * material,
+                     const Camera & camera)
+{
+    // vector from point to light
+    glm::vec3 L = glm::normalize(p_lights[0].position - nearest.point);
+
+    if (!isVisible(nearest, L)) return glm::vec3(0);
+
+    float roughness_sqr = (1.0f - material->glossiness) * 
+                          (1.0f - material->glossiness);
+
+    // vector from point to camera
+    glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
+    // vector between L and V
+    glm::vec3 H = glm::normalize(L + V);
+
+    float NL = glm::dot(nearest.normal, L);
+    float NV = glm::dot(nearest.normal, V);
+    float NH = glm::dot(nearest.normal, H);
+    
+    // GGX Cook-Torrance specular BRDF
+    float G = ggxSmith(roughness_sqr, NL, NV);
+    float D = ggxDistribution(roughness_sqr, NH);
+    glm::vec3 F = fresnelSchlick(NL, material->fresnel);
+
+    glm::vec3 specular = 0.25f * D * F * G / NV;
+
+    // Lambertian diffuse BRDF
+    glm::vec3 diffuse = material->albedo * p_lights[0].material.albedo *
+                        (1.0f - F) * NL / PI;
+
+    return diffuse + specular;
+}
+
+glm::vec3 Scene::toneMappingACES(const glm::vec3 & hdr) const
 {
     glm::mat3 m1(0.59719f, 0.07600f, 0.02840f,
                  0.35458f, 0.90834f, 0.13383f,
@@ -309,9 +384,10 @@ void Scene::render(Window & win, Camera & camera)
                 if (type != IntersectedType::POINT_LIGHT &&
                     type != IntersectedType::SPOT_LIGHT)
                 {
-                    result_color = blinnPhong(nearest, material, camera);
+                    // result_color = blinnPhong(nearest, material, camera);
+                    result_color = PBR(nearest, material, camera);
                     result_color = camera.adjustExposure(result_color);
-                    result_color = ToneMappingACES(result_color);                  
+                    result_color = toneMappingACES(result_color);                  
                     result_color = gammaCorrection(result_color);
                 }
                 else

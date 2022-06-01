@@ -2,10 +2,12 @@
 
 Material::Material(const glm::vec3 & albedo,
                    float specular, 
-                   float glossiness, 
+                   float glossiness,
+                   const glm::vec3 & fresnel,
                    const glm::vec3 & emission) :
                    albedo(albedo),
                    specular(specular),
                    glossiness(glossiness),
+                   fresnel(fresnel),
                    emission(emission) {}
 

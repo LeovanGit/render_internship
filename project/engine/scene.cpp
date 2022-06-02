@@ -1,11 +1,4 @@
 #include "scene.hpp"
-#include "common.hpp"
-#include "detail/qualifier.hpp"
-#include <cmath>
-#include <propidl.h>
-#include <rpcdcep.h>
-#include <utility>
-#include <winbase.h>
 
 Scene::Scene(const std::vector<Sphere> & spheres,
              const std::vector<Plane> & planes,
@@ -223,9 +216,9 @@ glm::vec3 Scene::blinnPhong(const math::Intersection & nearest,
                 (D * D);
 
             diffuse += s_lights[i].material.albedo *
-                cosa *
-                material->albedo *
-                light_intensity;
+                       cosa *
+                       material->albedo *
+                       light_intensity;
         }
         // even if spot light don't illuminate object, specular exists
             
@@ -252,17 +245,23 @@ float Scene::ggxSmith(const float roughness_sqr,
     float NL_sqr = NL * NL;
     float NV_sqr = NV * NV;
 
-    float G1 = 2.0f / (1.0f + sqrtf(1.0f + roughness_sqr * 
-                                    (1 - NL_sqr ) / NL_sqr));
+    // real Smith
+    // float G1 = 2.0f / (1.0f + sqrtf(1.0f + roughness_sqr * 
+    //                                 (1 - NL_sqr ) / NL_sqr));
 
-    float G2 = 2.0f / (1.0f + sqrtf(1.0f + roughness_sqr * 
-                                    (1 - NV_sqr ) / NV_sqr));
+    // float G2 = 2.0f / (1.0f + sqrtf(1.0f + roughness_sqr * 
+    //                                 (1 - NV_sqr ) / NV_sqr));
 
-    return G1 * G2;
+    // return G1 * G2;
+
+    // fast Smith from Filament
+    return 2.0f / (sqrtf(1 + roughness_sqr * (1 - NV_sqr) / NV_sqr) +
+                   sqrtf(1 + roughness_sqr * (1 - NL_sqr) / NL_sqr));
+
 }
 
-float Scene::ggxDistribution(const float roughness_sqr,
-                             const float NH)
+float Scene::ggxTrowbridgeReitz(const float roughness_sqr,
+                                const float NH)
 {
     float NH_sqr = NH * NH;
     
@@ -283,35 +282,42 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
                      const Material * material,
                      const Camera & camera)
 {
-    // vector from point to light
-    glm::vec3 L = glm::normalize(p_lights[0].position - nearest.point);
+    glm::vec3 color = material->albedo * AMBIENT;
 
-    if (!isVisible(nearest, L)) return glm::vec3(0);
+    for (int i = 0, size = p_lights.size(); i != size; ++i)
+    {
+        // vector from point to light
+        glm::vec3 L = glm::normalize(p_lights[i].position - nearest.point);
 
-    float roughness_sqr = (1.0f - material->glossiness) * 
-                          (1.0f - material->glossiness);
+        if (!isVisible(nearest, L)) continue;
 
-    // vector from point to camera
-    glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
-    // vector between L and V
-    glm::vec3 H = glm::normalize(L + V);
+        float roughness_sqr = (1.0f - material->glossiness) * 
+                              (1.0f - material->glossiness);
 
-    float NL = glm::dot(nearest.normal, L);
-    float NV = glm::dot(nearest.normal, V);
-    float NH = glm::dot(nearest.normal, H);
+        // vector from point to camera
+        glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
+        // vector between L and V
+        glm::vec3 H = glm::normalize(L + V);
+
+        float NL = fmax(0.0f, glm::dot(nearest.normal, L));
+        float NV = fmax(0.0f, glm::dot(nearest.normal, V));
+        float NH = fmax(0.0f, glm::dot(nearest.normal, H));
     
-    // GGX Cook-Torrance specular BRDF
-    float G = ggxSmith(roughness_sqr, NL, NV);
-    float D = ggxDistribution(roughness_sqr, NH);
-    glm::vec3 F = fresnelSchlick(NL, material->fresnel);
+        // GGX Cook-Torrance specular BRDF
+        float G = ggxSmith(roughness_sqr, NL, NV);
+        float D = ggxTrowbridgeReitz(roughness_sqr, NH);
+        glm::vec3 F = fresnelSchlick(NL, material->fresnel);
 
-    glm::vec3 specular = 0.25f * D * F * G / NV;
+        // epsilon to avoid division by zero
+        glm::vec3 specular = 0.25f * D * F * G / (NV * NL + EPSILON);
 
-    // Lambertian diffuse BRDF
-    glm::vec3 diffuse = material->albedo * p_lights[0].material.albedo *
-                        (1.0f - F) * NL / PI;
+        // Lambertian diffuse BRDF
+        glm::vec3 diffuse = material->albedo * (1.0f - F) / PI;
 
-    return diffuse + specular;
+        color += (specular + diffuse) * p_lights[i].material.albedo * NL;
+    }
+
+    return color;
 }
 
 glm::vec3 Scene::toneMappingACES(const glm::vec3 & hdr) const
@@ -401,7 +407,9 @@ void Scene::render(Window & win, Camera & camera)
             }
             else
             {
-                pixels[y * width + x] = HEX_BLACK;
+                // pixels[y * width + x] = HEX_BLACK;
+                // pixels[y * width + x] = RGB(218.0f, 213.0f, 184.0f);
+                   pixels[y * width + x] = RGB(30.0f, 30.0f, 30.0f);
             }
         }
     }

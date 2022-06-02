@@ -5,7 +5,7 @@
 #include <windowsx.h>
 #include <vector>
 
-constexpr float quality = 2.0f;
+constexpr float quality = 1.0f;
 
 class Window
 {

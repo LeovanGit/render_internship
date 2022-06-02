@@ -16,7 +16,7 @@
 #include "material.hpp"
 #include "intersection.hpp"
 
-constexpr bool SHADOWS = true;
+constexpr bool SHADOWS = false;
 constexpr int HEX_BLACK = 0x000000;
 constexpr float LIGHT_SIZE = 10.0f;
 constexpr float AMBIENT = 0.005f;
@@ -361,7 +361,7 @@ public:
                    const float NL,
                    const float NV);
 
-    float ggxDistribution(const float roughness_sqr,
+    float ggxTrowbridgeReitz(const float roughness_sqr,
                           const float NH);
 
     glm::vec3 fresnelSchlick(const float NL,

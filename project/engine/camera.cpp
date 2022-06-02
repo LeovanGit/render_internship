@@ -20,7 +20,7 @@ Camera::Camera(const glm::vec3 & position,
 
     is_roll_enabled = false;
 
-    EV_100 = 1.6f;
+    EV_100 = 2.0f;
 }
 
 void Camera::setPerspective(float fovy,

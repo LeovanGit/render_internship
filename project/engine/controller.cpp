@@ -105,18 +105,38 @@ void Controller::initScene()
     //                               glm::vec3(1.0f, 0.5f, 0.1f)));
 
     // TEST FOR PBR
-    scene->spheres.push_back(Scene::Sphere(120.0f,
-                                           glm::vec3(0),
-                             Material(glm::vec3(0.1f, 0.1f, 0.1f),
-                                      0.0f,
-                                      0.8f,
-                                      glm::vec3(1.0f, 0.86f, 0.56f),
-                                      glm::vec3(0))));
+    for (int row = 0; row != 5; ++row)
+    {
+	for (int col = 0; col != 5; ++col)
+        {
+            float glossiness = 0.98f - 0.04f * (row * 5.0f + col);
+            scene->spheres.push_back(Scene::Sphere(100.0f,
+                                                   glm::vec3(-440.0f + 220.0f * col,
+                                                             440.0f - 220.0f * row,
+                                                             0),
+                                                   Material(
+                                                       glm::vec3(1.0f, 0.0f, 0.0f),
+                                                       0.0f,
+                                                       glossiness,
+                                                       glm::vec3(0.2f),
+                                                       glm::vec3(0.0f))));
+        }
+    }
 
     scene->p_lights.push_back(Scene::PointLight(
-                                  glm::vec3(-400.0, 0.0f, 0.0f),
+                                  glm::vec3(5000.0f, 5000.0f, -5000.0f),
                                   350.0f,
-                                  glm::vec3(1.0f)));
+                                  glm::vec3(5.0f)));
+
+    scene->p_lights.push_back(Scene::PointLight(
+                                  glm::vec3(-5000.0f, 5000.0f, -5000.0f),
+                                  350.0f,
+                                  glm::vec3(5.0f)));
+
+    scene->p_lights.push_back(Scene::PointLight(
+                                  glm::vec3(0, -5000.0f, -5000.0f),
+                                  350.0f,
+                                  glm::vec3(5.0f)));
 }
 
 void Controller::processInput(Camera & camera,

@@ -1,4 +1,5 @@
 #include "controller.hpp"
+#include "ext/quaternion_common.hpp"
 
 void Controller::init(Scene * scene)
 {
@@ -59,9 +60,15 @@ void Controller::initScene()
 
     // // CREATE PLANES
     // // floor
+    // Material mat(glm::vec3(0.5f),
+    //              0.0f,
+    //              0.5f,
+    //              0.0f,
+    //              glm::vec3(0.0f));
+
     // scene->planes.push_back(Scene::Plane(glm::vec3(0, 1.0f, 0),
     //                                      glm::vec3(0, -100.0f, 0),
-    //                                      materials[MATTE_GREY]));
+    //                                      mat));
 
     // // CREATE SPHERES
     // scene->spheres.push_back(Scene::Sphere(80.0f,
@@ -105,38 +112,47 @@ void Controller::initScene()
     //                               glm::vec3(1.0f, 0.5f, 0.1f)));
 
     // TEST FOR PBR
-    for (int row = 0; row != 5; ++row)
+    for (int row = 0; row != 7; ++row)
     {
-	for (int col = 0; col != 5; ++col)
+        for (int col = 0; col != 7; ++col)
         {
-            float glossiness = 0.98f - 0.04f * (row * 5.0f + col);
-            scene->spheres.push_back(Scene::Sphere(100.0f,
-                                                   glm::vec3(-440.0f + 220.0f * col,
-                                                             440.0f - 220.0f * row,
-                                                             0),
-                                                   Material(
-                                                       glm::vec3(1.0f, 0.0f, 0.0f),
-                                                       0.0f,
-                                                       glossiness,
-                                                       glm::vec3(0.2f),
-                                                       glm::vec3(0.0f))));
+            float roughness = 0.01f + 0.99f / 6.0f * col;
+            float metalness = 1.0f - 1.0f / 6.0f * row;
+
+            scene->spheres.push_back(
+                Scene::Sphere(100.0f,
+                              glm::vec3(-660.0f + 220.0f * col,
+                                        660.0f - 220.0f * row,
+                                        0),
+                              Material(
+                                  glm::vec3(1.0f, 0.0f, 0.0f),
+                                  0.0f,
+                                  1.0f - roughness,
+                                  metalness,
+                                  glm::vec3(0.0f))));
         }
     }
 
     scene->p_lights.push_back(Scene::PointLight(
-                                  glm::vec3(5000.0f, 5000.0f, -5000.0f),
+                                  glm::vec3(1000.0f, 1000.0f, -1000.0f),
                                   350.0f,
                                   glm::vec3(5.0f)));
 
     scene->p_lights.push_back(Scene::PointLight(
-                                  glm::vec3(-5000.0f, 5000.0f, -5000.0f),
+                                  glm::vec3(-1000.0f, 1000.0f, -1000.0f),
                                   350.0f,
                                   glm::vec3(5.0f)));
 
     scene->p_lights.push_back(Scene::PointLight(
-                                  glm::vec3(0, -5000.0f, -5000.0f),
+                                  glm::vec3(0.0f, -1000.0f, -1000.0f),
                                   350.0f,
                                   glm::vec3(5.0f)));
+
+    // center
+    // scene->p_lights.push_back(Scene::PointLight(
+    //                               glm::vec3(0.0f, 0.0f, -1000.0f),
+    //                               350.0f,
+    //                               glm::vec3(5.0f)));
 }
 
 void Controller::processInput(Camera & camera,

@@ -11,8 +11,6 @@
 #include "plane.hpp"
 #include "euler_angles.hpp"
 
-#include <iostream>
-
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
 constexpr int KEY_A = 65;

@@ -272,10 +272,10 @@ float Scene::ggxTrowbridgeReitz(const float roughness_sqr,
     return D;
 }
 
-glm::vec3 Scene::fresnelSchlick(const float NL,
+glm::vec3 Scene::fresnelSchlick(const float cosTheta,
                                 const glm::vec3 & F0)
 {
-    return F0 + (1.0f - F0) * powf(1.0f - NL, 5.0f);
+    return F0 + (1.0f - F0) * powf(1.0f - cosTheta, 5.0f);
 }
 
 glm::vec3 Scene::PBR(const math::Intersection & nearest,
@@ -286,9 +286,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
 
     for (int i = 0, size = p_lights.size(); i != size; ++i)
     {
-        // vector from point to light
         glm::vec3 L = glm::normalize(p_lights[i].position - nearest.point);
-
         if (!isVisible(nearest, L)) continue;
 
         float roughness_sqr = (1.0f - material->glossiness) * 
@@ -299,22 +297,28 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // vector between L and V
         glm::vec3 H = glm::normalize(L + V);
 
-        float NL = fmax(0.0f, glm::dot(nearest.normal, L));
-        float NV = fmax(0.0f, glm::dot(nearest.normal, V));
-        float NH = fmax(0.0f, glm::dot(nearest.normal, H));
-    
+        float NL = glm::clamp(glm::dot(nearest.normal, L), 0.0f, 1.0f);
+        float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
+        float NH = glm::clamp(glm::dot(nearest.normal, H), 0.0f, 1.0f);
+        float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
+
         // GGX Cook-Torrance specular BRDF
         float G = ggxSmith(roughness_sqr, NL, NV);
         float D = ggxTrowbridgeReitz(roughness_sqr, NH);
-        glm::vec3 F = fresnelSchlick(NL, material->fresnel);
+        glm::vec3 F0 = glm::mix(INSULATOR_F0,
+                                material->albedo,
+                                material->metalness);
+        glm::vec3 F = fresnelSchlick(HL, F0);
 
         // epsilon to avoid division by zero
         glm::vec3 specular = 0.25f * D * F * G / (NV * NL + EPSILON);
 
         // Lambertian diffuse BRDF
-        glm::vec3 diffuse = material->albedo * (1.0f - F) / PI;
-
-        color += (specular + diffuse) * p_lights[i].material.albedo * NL;
+        // albedo * (1 - metalness), because metals haven't diffuse light
+        glm::vec3 diffuse = material->albedo * (1.0f - material->metalness) *
+            (1.0f - fresnelSchlick(NL, F0)) / PI;
+        
+        color += (diffuse + specular) * p_lights[i].material.albedo * NL;
     }
 
     return color;
@@ -333,7 +337,7 @@ glm::vec3 Scene::toneMappingACES(const glm::vec3 & hdr) const
     glm::vec3 v = m1 * hdr;    
     glm::vec3 a = v * (v + 0.0245786f) - 0.000090537f;
     glm::vec3 b = v * (0.983729f * v + 0.4329510f) + 0.238081f;
-    glm::vec3 ldr = clamp(m2 * (a / b), 0.0f, 1.0f);
+    glm::vec3 ldr = glm::clamp(m2 * (a / b), 0.0f, 1.0f);
 
     return ldr;
 }

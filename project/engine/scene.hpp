@@ -19,10 +19,11 @@
 constexpr bool SHADOWS = false;
 constexpr int HEX_BLACK = 0x000000;
 constexpr float LIGHT_SIZE = 10.0f;
-constexpr float AMBIENT = 0.005f;
+constexpr float AMBIENT = 0.05f;
 constexpr float EPSILON = 0.001f;
 constexpr float GAMMA = 2.2f;
 const float PI = atanf(1.0f) * 4.0f;
+constexpr glm::vec3 INSULATOR_F0 = glm::vec3(0.04f);
 
 class Scene
 {
@@ -167,7 +168,7 @@ public:
                    material(Material(color,
                                      0,
                                      0,
-                                     glm::vec3(0),
+                                     0,
                                      glm::vec3(0)))
         {}
 
@@ -209,7 +210,7 @@ public:
                   material(Material(color,
                                     0,
                                     0,
-                                    glm::vec3(0),
+                                    0,
                                     glm::vec3(0)))
         {}
 
@@ -362,9 +363,9 @@ public:
                    const float NV);
 
     float ggxTrowbridgeReitz(const float roughness_sqr,
-                          const float NH);
+                             const float NH);
 
-    glm::vec3 fresnelSchlick(const float NL,
+    glm::vec3 fresnelSchlick(const float cosTheta,
                              const glm::vec3 & F0);
 
     glm::vec3 PBR(const math::Intersection & nearest,

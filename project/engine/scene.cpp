@@ -316,9 +316,18 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // Lambertian diffuse BRDF
         // albedo * (1 - metalness), because metals haven't diffuse light
         glm::vec3 diffuse = material->albedo * (1.0f - material->metalness) *
-            (1.0f - fresnelSchlick(NL, F0)) / PI;
+                            (1.0f - fresnelSchlick(NL, F0)) / PI;
         
-        color += (diffuse + specular) * p_lights[i].material.albedo * NL;
+        // point light as solid angle
+        float p_light_radius_sqr = p_lights[i].radius * p_lights[i].radius;
+        float dist_to_light = glm::length(p_lights[i].position - nearest.point);
+        float w = PI *  p_light_radius_sqr /
+            (dist_to_light * dist_to_light - p_light_radius_sqr);
+
+        glm::vec3 radiance = p_lights[i].material.albedo * w;
+        
+        // color += (diffuse + specular) * p_lights[i].material.albedo * NL;
+        color += (diffuse + specular) * radiance * NL;
     }
 
     return color;
@@ -396,14 +405,15 @@ void Scene::render(Window & win, Camera & camera)
                 {
                     // result_color = blinnPhong(nearest, material, camera);
                     result_color = PBR(nearest, material, camera);
-                    result_color = camera.adjustExposure(result_color);
-                    result_color = toneMappingACES(result_color);                  
-                    result_color = gammaCorrection(result_color);
                 }
                 else
                 {
                     result_color = material->albedo;
-                }                
+                }
+
+                result_color = camera.adjustExposure(result_color);
+                result_color = toneMappingACES(result_color);                  
+                result_color = gammaCorrection(result_color);
 
                 pixels[y * width + x] = RGB(result_color.z * 255,
                                             result_color.y * 255,

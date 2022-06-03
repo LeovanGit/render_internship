@@ -16,9 +16,10 @@
 #include "material.hpp"
 #include "intersection.hpp"
 
+#include <iostream>
+
 constexpr bool SHADOWS = false;
 constexpr int HEX_BLACK = 0x000000;
-constexpr float LIGHT_SIZE = 10.0f;
 constexpr float AMBIENT = 0.05f;
 constexpr float EPSILON = 0.001f;
 constexpr float GAMMA = 2.2f;
@@ -177,7 +178,7 @@ public:
                        ObjRef & obj_ref,
                        Material *& material)
         {
-            math::Sphere sphere(LIGHT_SIZE, position);
+            math::Sphere sphere(radius, position);
 
             if (sphere.intersect(nearest, ray))
             {               
@@ -219,7 +220,7 @@ public:
                        ObjRef & obj_ref,
                        Material *& material)
         {
-            math::Sphere sphere(LIGHT_SIZE, position);
+            math::Sphere sphere(radius, position);
 
             if (sphere.intersect(nearest, ray))
             {               

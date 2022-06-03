@@ -135,24 +135,18 @@ void Controller::initScene()
 
     scene->p_lights.push_back(Scene::PointLight(
                                   glm::vec3(1000.0f, 1000.0f, -1000.0f),
-                                  350.0f,
-                                  glm::vec3(5.0f)));
+                                  35.0f,
+                                  glm::vec3(10000.0f)));
 
     scene->p_lights.push_back(Scene::PointLight(
                                   glm::vec3(-1000.0f, 1000.0f, -1000.0f),
-                                  350.0f,
-                                  glm::vec3(5.0f)));
+                                  15.0f,
+                                  glm::vec3(10000.0f)));
 
     scene->p_lights.push_back(Scene::PointLight(
                                   glm::vec3(0.0f, -1000.0f, -1000.0f),
-                                  350.0f,
-                                  glm::vec3(5.0f)));
-
-    // center
-    // scene->p_lights.push_back(Scene::PointLight(
-    //                               glm::vec3(0.0f, 0.0f, -1000.0f),
-    //                               350.0f,
-    //                               glm::vec3(5.0f)));
+                                  10.0f,
+                                  glm::vec3(10000.0f)));   
 }
 
 void Controller::processInput(Camera & camera,

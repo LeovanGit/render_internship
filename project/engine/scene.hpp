@@ -16,8 +16,6 @@
 #include "material.hpp"
 #include "intersection.hpp"
 
-#include <iostream>
-
 constexpr bool SHADOWS = false;
 constexpr int HEX_BLACK = 0x000000;
 constexpr float AMBIENT = 0.05f;

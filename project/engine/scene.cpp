@@ -184,20 +184,21 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
 {
     glm::vec3 color = material.albedo * AMBIENT;
 
+    float roughness_sqr = (1.0f - material.glossiness) * 
+                          (1.0f - material.glossiness);
+
+    glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
+    float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
+
     // POINT LIGHTS
     for (int i = 0, size = p_lights.size(); i != size; ++i)
     {
         glm::vec3 L = glm::normalize(p_lights[i].position - nearest.point);
         if (!isVisible(nearest, L)) continue;
 
-        float roughness_sqr = (1.0f - material.glossiness) * 
-                              (1.0f - material.glossiness);
-
-        glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
         glm::vec3 H = glm::normalize(L + V);
 
         float NL = glm::clamp(glm::dot(nearest.normal, L), 0.0f, 1.0f);
-        float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
         float NH = glm::clamp(glm::dot(nearest.normal, H), 0.0f, 1.0f);
         float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
 
@@ -220,7 +221,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // light as solid angle
         float light_radius_sqr = p_lights[i].radius * p_lights[i].radius;
         float L_length = glm::length(p_lights[i].position - nearest.point);
-        float w = PI *  light_radius_sqr /
+        float w = PI * light_radius_sqr /
                   (L_length * L_length - light_radius_sqr);
 
         glm::vec3 radiance = p_lights[i].color * p_lights[i].power * w;
@@ -234,14 +235,9 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         glm::vec3 L = -glm::normalize(d_lights[i].direction);
         if (!isVisible(nearest, L)) continue;
 
-        float roughness_sqr = (1.0f - material.glossiness) * 
-                              (1.0f - material.glossiness);
-
-        glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
         glm::vec3 H = glm::normalize(L + V);
 
         float NL = glm::clamp(glm::dot(nearest.normal, L), 0.0f, 1.0f);
-        float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
         float NH = glm::clamp(glm::dot(nearest.normal, H), 0.0f, 1.0f);
         float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
 
@@ -276,14 +272,9 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         if (glm::dot(-L, glm::normalize(s_lights[i].direction)) <
             cosf(glm::radians(s_lights[i].angle / 2))) continue;
 
-        float roughness_sqr = (1.0f - material.glossiness) * 
-                              (1.0f - material.glossiness);
-
-        glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
         glm::vec3 H = glm::normalize(L + V);
 
         float NL = glm::clamp(glm::dot(nearest.normal, L), 0.0f, 1.0f);
-        float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
         float NH = glm::clamp(glm::dot(nearest.normal, H), 0.0f, 1.0f);
         float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
 
@@ -306,7 +297,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // light as solid angle
         float light_radius_sqr = s_lights[i].radius * s_lights[i].radius;
         float L_length = glm::length(s_lights[i].position - nearest.point);
-        float w = PI *  light_radius_sqr /
+        float w = PI * light_radius_sqr /
                   (L_length * L_length - light_radius_sqr);
 
         glm::vec3 radiance = s_lights[i].color * s_lights[i].power * w;       

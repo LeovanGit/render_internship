@@ -10,6 +10,7 @@
 #include "sphere.hpp"
 #include "plane.hpp"
 #include "euler_angles.hpp"
+#include "material.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;

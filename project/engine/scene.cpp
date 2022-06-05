@@ -1,4 +1,5 @@
 #include "scene.hpp"
+#include "common.hpp"
 
 Scene::Scene(const std::vector<Sphere> & spheres,
              const std::vector<Plane> & planes,
@@ -225,8 +226,13 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
                   (L_length * L_length - light_radius_sqr);
 
         glm::vec3 radiance = p_lights[i].color * p_lights[i].power * w;
-        
-        color += (diffuse + specular) * radiance * NL;
+
+        glm::vec3 BRDF = diffuse + specular;
+        BRDF.x = fmin(1.0f, BRDF.x);
+        BRDF.y = fmin(1.0f, BRDF.y);
+        BRDF.z = fmin(1.0f, BRDF.z);
+
+        color += BRDF * radiance * NL;
     }
 
     // DIRECTIONAL LIGHTS
@@ -258,8 +264,13 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
                             (1.0f - fresnelSchlick(NL, F0)) / PI;
         
         glm::vec3 radiance = d_lights[i].color * d_lights[i].power;
-        
-        color += (diffuse + specular) * radiance * NL;
+
+        glm::vec3 BRDF = diffuse + specular;
+        BRDF.x = fmin(1.0f, BRDF.x);
+        BRDF.y = fmin(1.0f, BRDF.y);
+        BRDF.z = fmin(1.0f, BRDF.z);
+
+        color += BRDF * radiance * NL;
     }
 
     // SPOTLIGHTS
@@ -301,8 +312,13 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
                   (L_length * L_length - light_radius_sqr);
 
         glm::vec3 radiance = s_lights[i].color * s_lights[i].power * w;       
-        
-        color += (diffuse + specular) * radiance * NL;
+
+        glm::vec3 BRDF = diffuse + specular;
+        BRDF.x = fmin(1.0f, BRDF.x);
+        BRDF.y = fmin(1.0f, BRDF.y);
+        BRDF.z = fmin(1.0f, BRDF.z);
+
+        color += BRDF * radiance * NL;
     }
 
     return color;

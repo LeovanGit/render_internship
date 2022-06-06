@@ -183,7 +183,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
                      const Material & material,
                      const Camera & camera)
 {
-    glm::vec3 color = material.albedo * AMBIENT;
+    glm::vec3 color = material.emission + material.albedo * AMBIENT;
 
     float roughness_sqr = (1.0f - material.glossiness) * 
                           (1.0f - material.glossiness);
@@ -390,7 +390,7 @@ void Scene::render(Window & win, Camera & camera)
             if (findIntersection(nearest, ray, material, type))
             {
                 glm::vec3 result_color(0.0f, 0.0f, 0.0f);
-
+                
                 if (type != IntersectedType::POINT_LIGHT &&
                     type != IntersectedType::SPOT_LIGHT)
                 {
@@ -412,13 +412,14 @@ void Scene::render(Window & win, Camera & camera)
             else
             {
                 // ambient fog-rainy sky
-                glm::vec3 sky_color(109.0f, 106.0f, 92.0f);
-                // sky_color = camera.adjustExposure(sky_color);
-                // sky_color = toneMappingACES(sky_color);
+                glm::vec3 sky_color(0.353f, 0.5f, 0.533f);
+                sky_color = camera.adjustExposure(sky_color);
+                sky_color = toneMappingACES(sky_color);
+                sky_color = gammaCorrection(sky_color);
 
-                pixels[y * width + x] = RGB(sky_color.x,
-                                            sky_color.y,
-                                            sky_color.z);
+                pixels[y * width + x] = RGB(sky_color.z * 255,
+                                            sky_color.y * 255,
+                                            sky_color.x * 255);
             }
         }
     }

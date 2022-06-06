@@ -19,14 +19,17 @@ math::Basis::Basis(const glm::vec3 & x,
 glm::quat math::quatFromEuler(const EulerAngles & angles,
                               const Basis & basis)
 {
-    glm::quat q = glm::angleAxis(glm::radians(angles.roll), basis.z);
+    // this is Z then X then Y
+    // just multiplication should be written in reverse order
+    // because of glm is column major
+    glm::quat q = glm::angleAxis(glm::radians(angles.yaw), basis.y);
     q *= glm::angleAxis(glm::radians(angles.pitch), basis.x);
-    q *= glm::angleAxis(glm::radians(angles.yaw), basis.y);
+    q *= glm::angleAxis(glm::radians(angles.roll), basis.z);
 
     return q;
 }
 
-bool math::areAlmostEqual(float a, float b, float delta)
+bool math::areAlmostEqual(float a, float b, float epsilon)
 {
-    return std::fabs(a - b) < delta;
+    return std::fabs(a - b) < epsilon;
 }

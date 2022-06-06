@@ -184,8 +184,8 @@ public:
                 obj_ref.type = IntersectedType::POINT_LIGHT;
                 obj_ref.object = this;
                 material = Material(color,
-                                    0,
-                                    0,
+                                    0.0f,
+                                    0.0f,
                                     glm::vec3(0));
 
                 return true;

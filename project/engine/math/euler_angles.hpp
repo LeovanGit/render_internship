@@ -36,7 +36,7 @@ glm::quat quatFromEuler(const EulerAngles & angles,
                                                     glm::vec3(0, 1.0f, 0),
                                                     glm::vec3(0, 0, 1.0f)));
 
-bool areAlmostEqual(float a, float b, float delta);
+bool areAlmostEqual(float a, float b, float epsilon);
 } // namespace math
 
 #endif

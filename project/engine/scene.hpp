@@ -16,6 +16,9 @@
 #include "material.hpp"
 #include "intersection.hpp"
 
+#include "parallel_executor.hpp"
+#include <iostream>
+
 constexpr bool SHADOWS = false;
 constexpr int HEX_BLACK = 0x000000;
 constexpr float AMBIENT = 0.05f;
@@ -23,6 +26,11 @@ constexpr float EPSILON = 0.001f;
 constexpr float GAMMA = 2.2f;
 const float PI = atanf(1.0f) * 4.0f;
 constexpr glm::vec3 INSULATOR_F0 = glm::vec3(0.04f);
+
+const uint32_t numThreads = 
+    std::fmax(1,
+              std::fmax(int(ParallelExecutor::MAX_THREADS) - 4,
+                        int(ParallelExecutor::HALF_THREADS)));
 
 class Scene
 {

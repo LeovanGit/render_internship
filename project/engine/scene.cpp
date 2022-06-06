@@ -353,15 +353,7 @@ void Scene::render(Window & win, Camera & camera)
 { 
     SIZE pixels_size = win.getPixelsSize();
     int width = pixels_size.cx;
-    int height = pixels_size.cy;
-        
-    std::vector<int> & pixels = win.getPixels();
-
-    math::Intersection nearest;
-    nearest.reset();
-
-    math::Ray ray;
-    ray.origin = camera.getPosition();
+    int height = pixels_size.cy;       
 
     // find CS corner points in WS
     glm::vec3 bottom_left_WS = camera.generateWorldPointFromCS(-1.0f, -1.0f);
@@ -371,21 +363,46 @@ void Scene::render(Window & win, Camera & camera)
     glm::vec3 near_plane_right = bottom_right_WS - bottom_left_WS;
     glm::vec3 near_plane_top = top_left_WS - bottom_left_WS;
 
-    for (int y = 0; y != height; ++y)
-    {
-        for (int x = 0; x != width; ++x)
+    std::vector<int> & pixels = win.getPixels();
+
+    math::Intersection nearest;
+    nearest.reset();
+
+    math::Ray ray;
+    ray.origin = camera.getPosition();
+
+    Material material;
+    
+    IntersectedType type;
+
+    ParallelExecutor executor(numThreads);
+
+    auto func = [this,
+                 width,
+                 height,
+                 bottom_left_WS,
+                 near_plane_right,
+                 near_plane_top,
+                 &camera,
+                 &nearest,
+                 &ray,
+                 &material,
+                 &type,
+                 &pixels]
+        (uint32_t threadIndex,
+         uint32_t taskIndex)
         {
+            // current pixel coords
+            glm::vec2 xy(taskIndex % width,
+                         taskIndex / width);
+
             // normalized [0; 1]
-            glm::vec2 xy;
-            xy.x = float(x + 0.5f) / width;
-            xy.y = 1.0f - float(y + 0.5f) / height; // inversed
+            glm::vec2 xy_norm(float(xy.x + 0.5f) / width,
+                              1.0f - float(xy.y + 0.5f) / height); // inversed
 
             ray.direction = (bottom_left_WS +
-                             xy.x * near_plane_right +
-                             xy.y * near_plane_top) - ray.origin;
-
-            Material material;
-            IntersectedType type;
+                             xy_norm.x * near_plane_right +
+                             xy_norm.y * near_plane_top) - ray.origin;
 
             if (findIntersection(nearest, ray, material, type))
             {
@@ -405,9 +422,9 @@ void Scene::render(Window & win, Camera & camera)
 
                 result_color = gammaCorrection(result_color);
 
-                pixels[y * width + x] = RGB(result_color.z * 255,
-                                            result_color.y * 255,
-                                            result_color.x * 255);
+                pixels[xy.y * width + xy.x] = RGB(result_color.z * 255,
+                                                  result_color.y * 255,
+                                                  result_color.x * 255);
             }
             else
             {
@@ -417,12 +434,13 @@ void Scene::render(Window & win, Camera & camera)
                 sky_color = toneMappingACES(sky_color);
                 sky_color = gammaCorrection(sky_color);
 
-                pixels[y * width + x] = RGB(sky_color.z * 255,
-                                            sky_color.y * 255,
-                                            sky_color.x * 255);
+                pixels[xy.y * width + xy.x] = RGB(sky_color.z * 255,
+                                                  sky_color.y * 255,
+                                                  sky_color.x * 255);
             }
-        }
-    }
+        };
+    
+    executor.execute(func, width * height, 20);
 
     win.flush();
 }

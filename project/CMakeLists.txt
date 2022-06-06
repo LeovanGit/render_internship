@@ -21,7 +21,8 @@ set(SOURCES engine/main.cpp
             engine/scene.cpp
             engine/controller.cpp
             engine/camera.cpp
-            engine/material.cpp)
+            engine/material.cpp
+            engine/parallel_executor.cpp)
 
 set(MATH_SOURCES engine/math/ray.cpp
                  engine/math/intersection.cpp
@@ -36,7 +37,8 @@ set(HEADERS engine/window.hpp
             engine/scene.hpp
             engine/controller.hpp
             engine/camera.hpp
-            engine/material.hpp)
+            engine/material.hpp
+            engine/parallel_executor.hpp)
 
 set(MATH_HEADERS engine/math/ray.hpp
                  engine/math/intersection.hpp

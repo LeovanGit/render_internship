@@ -15,6 +15,7 @@
 #include "cube.hpp"
 #include "material.hpp"
 #include "intersection.hpp"
+#include "euler_angles.hpp"
 
 #include "parallel_executor.hpp"
 #include <iostream>
@@ -377,8 +378,8 @@ public:
     float ggxTrowbridgeReitz(const float roughness_sqr,
                              const float NH);
 
-    glm::vec3 fresnelSchlick(const float cosTheta,
-                             const glm::vec3 & F0);
+    glm::vec3 ggxSchlick(const float cosTheta,
+                         const glm::vec3 & F0);
 
     glm::vec3 PBR(const math::Intersection & nearest,
                   const Material & material,

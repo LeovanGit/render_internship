@@ -1,5 +1,5 @@
 #include "scene.hpp"
-#include "common.hpp"
+#include "euler_angles.hpp"
 
 Scene::Scene(const std::vector<Sphere> & spheres,
              const std::vector<Plane> & planes,
@@ -169,8 +169,8 @@ float Scene::ggxTrowbridgeReitz(const float roughness_sqr,
     return D;
 }
 
-glm::vec3 Scene::fresnelSchlick(const float cosTheta,
-                                const glm::vec3 & F0)
+glm::vec3 Scene::ggxSchlick(const float cosTheta,
+                            const glm::vec3 & F0)
 {
     return F0 + (1.0f - F0) * powf(1.0f - cosTheta, 5.0f);
 }
@@ -209,7 +209,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         glm::vec3 F0 = glm::mix(INSULATOR_F0,
                                 material.albedo,
                                 material.metalness);
-        glm::vec3 F = fresnelSchlick(HL, F0);
+        glm::vec3 F = ggxSchlick(HL, F0);
 
         // epsilon to avoid division by zero
         glm::vec3 specular = 0.25f * D * F * G / (NV * NL + EPSILON);
@@ -217,7 +217,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // Lambertian diffuse BRDF
         // albedo * (1 - metalness), because metals haven't diffuse light
         glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
-                            (1.0f - fresnelSchlick(NL, F0)) / PI;
+                            (1.0f - ggxSchlick(NL, F0)) / PI;
         
         // light as solid angle
         float light_radius_sqr = p_lights[i].radius * p_lights[i].radius;
@@ -226,6 +226,12 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
                   (L_length * L_length - light_radius_sqr);
 
         glm::vec3 radiance = p_lights[i].color * p_lights[i].power * w;
+
+        // if (math::areAlmostEqual(roughness_sqr, 0, EPSILON) &&
+        //     math::areAlmostEqual(NH, 1.0f, EPSILON))
+        //     specular = 0.25f * glm::vec3(1.0f) / (NV * NL + EPSILON);
+        // else
+        //     specular = glm::vec3(0.0f);
 
         glm::vec3 BRDF = diffuse + specular;
         BRDF.x = fmin(1.0f, BRDF.x);
@@ -253,7 +259,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         glm::vec3 F0 = glm::mix(INSULATOR_F0,
                                 material.albedo,
                                 material.metalness);
-        glm::vec3 F = fresnelSchlick(HL, F0);
+        glm::vec3 F = ggxSchlick(HL, F0);
 
         // epsilon to avoid division by zero
         glm::vec3 specular = 0.25f * D * F * G / (NV * NL + EPSILON);
@@ -261,7 +267,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // Lambertian diffuse BRDF
         // albedo * (1 - metalness), because metals haven't diffuse light
         glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
-                            (1.0f - fresnelSchlick(NL, F0)) / PI;
+                            (1.0f - ggxSchlick(NL, F0)) / PI;
         
         glm::vec3 radiance = d_lights[i].color * d_lights[i].power;
 
@@ -295,7 +301,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         glm::vec3 F0 = glm::mix(INSULATOR_F0,
                                 material.albedo,
                                 material.metalness);
-        glm::vec3 F = fresnelSchlick(HL, F0);
+        glm::vec3 F = ggxSchlick(HL, F0);
 
         // epsilon to avoid division by zero
         glm::vec3 specular = 0.25f * D * F * G / (NV * NL + EPSILON);
@@ -303,7 +309,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // Lambertian diffuse BRDF
         // albedo * (1 - metalness), because metals haven't diffuse light
         glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
-                            (1.0f - fresnelSchlick(NL, F0)) / PI;
+                            (1.0f - ggxSchlick(NL, F0)) / PI;
 
         // light as solid angle
         float light_radius_sqr = s_lights[i].radius * s_lights[i].radius;

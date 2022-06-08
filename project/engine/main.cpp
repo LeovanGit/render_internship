@@ -137,6 +137,18 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         {
             // wParam - key code
             controller.keys_log[wParam] = true;
+
+            if (wParam == KEY_R)
+            {
+                controller.scene->is_smooth_reflection = 
+                    !controller.scene->is_smooth_reflection;
+            }
+            if (wParam == KEY_G)
+            {
+                controller.scene->is_global_illumination = 
+                    !controller.scene->is_global_illumination;
+            }
+
             break;
         }
         case WM_KEYUP:

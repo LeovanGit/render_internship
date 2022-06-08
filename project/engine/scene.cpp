@@ -1,5 +1,11 @@
 #include "scene.hpp"
 #include "euler_angles.hpp"
+#include "material.hpp"
+
+namespace
+{
+    constexpr float epsilon = 0.000001f;
+} // namespace
 
 Scene::Scene(const std::vector<Sphere> & spheres,
              const std::vector<Plane> & planes,
@@ -12,20 +18,49 @@ Scene::Scene(const std::vector<Sphere> & spheres,
              cubes(cubes),
              d_lights(d_lights),
              p_lights(p_lights),
-             s_lights(s_lights)
+             s_lights(s_lights),
+             is_smooth_reflection(false),
+             is_global_illumination(false)
 {}
 
 bool Scene::findIntersection(math::Intersection & nearest,
                              const math::Ray & ray,
                              Material & material,
-                             IntersectedType & type)
+                             IntersectedType & type,
+                             bool include_lights)
 {
-    ObjRef obj_ref = { nullptr, IntersectedType::EMPTY };
+    ObjRef object = { nullptr, IntersectedType::EMPTY };
 
-    findIntersectionInternal(nearest, ray, obj_ref, material);
-    type = obj_ref.type;
+    findIntersectionInternal(nearest, ray, object, material, include_lights);
+    if (object.type == IntersectedType::EMPTY) return false;
 
-    return obj_ref.type != IntersectedType::EMPTY;
+    if (is_smooth_reflection && material.glossiness >= 0.9f)
+    {
+        math::Ray ray_reflected;
+        ray_reflected.origin = ray.origin + EPSILON * nearest.normal;
+        ray_reflected.direction = -glm::normalize(ray.reflect(nearest.normal));
+
+        float glossiness = material.glossiness;
+
+        if (findIntersection(nearest,
+                             ray_reflected,
+                             material,
+                             type,
+                             false))
+        {
+            // roughness[0, 0.1] -> intensity[max, min]
+            float intensity = 10.0f * glossiness - 9.0f;           
+            material.albedo *= intensity;
+
+            return true;
+        }
+        return false;
+    }
+    else
+    {
+        type = object.type;
+        return true;
+    }
 }
 
 bool Scene::findIntersection(const math::Ray & ray,
@@ -83,7 +118,8 @@ bool Scene::findIntersection(const math::Ray & ray,
 void Scene::findIntersectionInternal(math::Intersection & nearest,
                                      const math::Ray & ray,
                                      ObjRef & obj_ref,
-                                     Material & material)
+                                     Material & material,
+                                     bool include_lights)
 {
     nearest.reset();
 
@@ -101,6 +137,9 @@ void Scene::findIntersectionInternal(math::Intersection & nearest,
     {
         cubes[i].intersect(nearest, ray, obj_ref, material);
     }
+
+    // disable light sources reflection in mirrors
+    if (!include_lights) return;
 
     for (int i = 0, size = p_lights.size(); i != size; ++i)
     {
@@ -189,7 +228,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
                           (1.0f - material.glossiness);
 
     glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
-    float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
+    float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);        
 
     // POINT LIGHTS
     for (int i = 0, size = p_lights.size(); i != size; ++i)
@@ -212,28 +251,26 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         glm::vec3 F = ggxSchlick(HL, F0);
 
         // epsilon to avoid division by zero
-        glm::vec3 specular = 0.25f * D * F * G / (NV * NL + EPSILON);
+        glm::vec3 specular = 0.25f * D * F * G / (NV * NL + epsilon);
 
         // Lambertian diffuse BRDF
         // albedo * (1 - metalness), because metals haven't diffuse light
         glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
                             (1.0f - ggxSchlick(NL, F0)) / PI;
-        
+
+
         // light as solid angle
         float light_radius_sqr = p_lights[i].radius * p_lights[i].radius;
         float L_length = glm::length(p_lights[i].position - nearest.point);
         float w = PI * light_radius_sqr /
                   (L_length * L_length - light_radius_sqr);
 
-        glm::vec3 radiance = p_lights[i].color * p_lights[i].power * w;
-
-        // if (math::areAlmostEqual(roughness_sqr, 0, EPSILON) &&
-        //     math::areAlmostEqual(NH, 1.0f, EPSILON))
-        //     specular = 0.25f * glm::vec3(1.0f) / (NV * NL + EPSILON);
-        // else
-        //     specular = glm::vec3(0.0f);
+        glm::vec3 radiance = p_lights[i].color * p_lights[i].power * w / 2.0f * PI;
 
         glm::vec3 BRDF = diffuse + specular;
+
+        // clamp BRDF to avoid light reflection being brighter than
+        // a light source
         BRDF.x = fmin(1.0f, BRDF.x);
         BRDF.y = fmin(1.0f, BRDF.y);
         BRDF.z = fmin(1.0f, BRDF.z);
@@ -317,7 +354,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         float w = PI * light_radius_sqr /
                   (L_length * L_length - light_radius_sqr);
 
-        glm::vec3 radiance = s_lights[i].color * s_lights[i].power * w;       
+        glm::vec3 radiance = s_lights[i].color * s_lights[i].power * w / 2.0f * PI;
 
         glm::vec3 BRDF = diffuse + specular;
         BRDF.x = fmin(1.0f, BRDF.x);
@@ -434,8 +471,7 @@ void Scene::render(Window & win, Camera & camera)
             }
             else
             {
-                // ambient fog-rainy sky
-                glm::vec3 sky_color(0.353f, 0.5f, 0.533f);
+                glm::vec3 sky_color = COLOR_SKY;
                 sky_color = camera.adjustExposure(sky_color);
                 sky_color = toneMappingACES(sky_color);
                 sky_color = gammaCorrection(sky_color);

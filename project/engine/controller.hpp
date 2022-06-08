@@ -57,7 +57,7 @@ public:
     glm::vec3 movement_speed = glm::vec3(500.0f);
     glm::vec3 rotation_speed = glm::vec3(360.0f, 360.0f, 60.0f);
 
-    bool is_accelerated = false;
+    bool is_accelerated;
 
     class GrabbedObject
     {

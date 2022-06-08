@@ -18,6 +18,7 @@
 #include "euler_angles.hpp"
 
 #include "parallel_executor.hpp"
+
 #include <iostream>
 
 constexpr bool SHADOWS = false;
@@ -27,6 +28,8 @@ constexpr float EPSILON = 0.001f;
 constexpr float GAMMA = 2.2f;
 const float PI = atanf(1.0f) * 4.0f;
 constexpr glm::vec3 INSULATOR_F0 = glm::vec3(0.04f);
+// ambient fog-rainy sky
+constexpr glm::vec3 COLOR_SKY(0.353f, 0.5f, 0.533f);
 
 const uint32_t numThreads = 
     std::fmax(1,
@@ -333,6 +336,9 @@ public:
     std::vector<PointLight> p_lights;
     std::vector<SpotLight> s_lights;
 
+    bool is_smooth_reflection;
+    bool is_global_illumination;
+
 public:
     explicit Scene() = default;
 
@@ -347,7 +353,8 @@ public:
     bool findIntersection(math::Intersection & nearest,
                           const math::Ray & ray,
                           Material & material,
-                          IntersectedType & type);
+                          IntersectedType & type,
+                          bool include_lights = true);
 
     class IntersectionQuery
     {
@@ -395,7 +402,8 @@ protected:
     void findIntersectionInternal(math::Intersection & nearest,
                                   const math::Ray & ray,
                                   ObjRef & obj_ref,
-                                  Material & material);
+                                  Material & material,
+                                  bool include_lights = true);
 
 };
 

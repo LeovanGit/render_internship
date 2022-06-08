@@ -8,6 +8,8 @@ void Controller::init(Scene * scene)
     fixed_mouse = glm::vec2(0);
     delta_fixed_mouse = glm::vec2(0);
 
+    is_accelerated = false;
+
     for (int i = 0; i != KEYS_COUNT; ++i) keys_log[i] = false;
 }
 
@@ -34,23 +36,23 @@ void Controller::initScene()
     //     }
     // }
 
-            scene->spheres.push_back(
-                Scene::Sphere(100.0f,
-                              glm::vec3(0,
-                                        0,
-                                        0),
-                              Material(
-                                  glm::vec3(1.0f, 0.0f, 0.0f),
-                                  1.0f,
-                                  0.0f,
-                                  glm::vec3(0.0f))));
+    // scene->spheres.push_back(
+    //     Scene::Sphere(100.0f,
+    //                   glm::vec3(0,
+    //                             0,
+    //                             0),
+    //                   Material(
+    //                       glm::vec3(1.0f, 0.0f, 0.0f),
+    //                       0.9f,
+    //                       1.0f,
+    //                       glm::vec3(0.0f))));
 
     // LIGHTS
-    scene->p_lights.push_back(Scene::PointLight(
-                                  glm::vec3(1000.0f, 1000.0f, -1000.0f),
-                                  35.0f,
-                                  glm::vec3(1.0f, 1.0f, 1.0f),
-                                  10000.0f));
+    // scene->p_lights.push_back(Scene::PointLight(
+    //                               glm::vec3(1000.0f, 1000.0f, -1000.0f),
+    //                               35.0f,
+    //                               glm::vec3(1.0f, 1.0f, 1.0f),
+    //                               1000.0f));
 
     // scene->p_lights.push_back(Scene::PointLight(
     //                               glm::vec3(0.0f, -900.0f, -500.0f),
@@ -72,13 +74,13 @@ void Controller::initScene()
     //                               glm::vec3(0.0f, -1.0f, 1.0f)));
 
     // ADDITIONAL OBJECTS
-    // scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, 1.0f, 0.0f),
-    //                                      glm::vec3(0.0f, -1000.0f, 0.0f),
-    //                                      Material(
-    //                                          glm::vec3(0.3f),
-    //                                          0.2f,
-    //                                          0.0f,
-    //                                          glm::vec3(0.0f))));
+    scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, 1.0f, 0.0f),
+                                         glm::vec3(0.0f, -1000.0f, 0.0f),
+                                         Material(
+                                             glm::vec3(0.3f),
+                                             0.2f,
+                                             0.0f,
+                                             glm::vec3(0.0f))));
 
     // scene->cubes.push_back(Scene::Cube(glm::vec3(0, 0, -300.0f),
     //                                    math::EulerAngles(0, 0, 0),
@@ -88,6 +90,46 @@ void Controller::initScene()
     //                                        0.95f,
     //                                        1.0f,
     //                                        glm::vec3(0.0f))));
+
+    scene->spheres.push_back(
+        Scene::Sphere(100.0f,
+                      glm::vec3(0,
+                                0,
+                                0),
+                      Material(
+                          glm::vec3(1.0f, 0.0f, 0.0f),
+                          0.91f,
+                          0.0f,
+                          glm::vec3(0.0f))));
+
+    scene->spheres.push_back(
+        Scene::Sphere(100.0f,
+                      glm::vec3(300.0f,
+                                0,
+                                0),
+                      Material(
+                          glm::vec3(1.0f, 0.0f, 0.0f),
+                          1.0f,
+                          0.0f,
+                          glm::vec3(0.0f))));
+
+    scene->spheres.push_back(
+        Scene::Sphere(100.0f,
+                      glm::vec3(150.0f,
+                                0,
+                                -300.0f),
+                      Material(
+                          glm::vec3(1.0f, 0.0f, 0.0f),
+                          0.8f,
+                          0.0f,
+                          glm::vec3(0.0f))));
+
+    scene->p_lights.push_back(Scene::PointLight(
+                                  glm::vec3(1000.0f, 1000.0f, -1000.0f),
+                                  15.0f,
+                                  glm::vec3(1.0f),
+                                  10000.0f));
+
 }
 
 void Controller::processInput(Camera & camera,
@@ -208,14 +250,6 @@ void Controller::processInput(Camera & camera,
     if (keys_log[KEY_MINUS])
     {
         camera.EV_100 -= 0.1f;
-    }
-    if (keys_log[KEY_R])
-    {
-        // mirror mode
-    }
-    if (keys_log[KEY_G])
-    {
-        // rendering mode
     }
 }
 

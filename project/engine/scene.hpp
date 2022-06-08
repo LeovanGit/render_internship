@@ -156,18 +156,15 @@ public:
     class DirectionalLight
     {
     public:
-        DirectionalLight(const glm::vec3 & color,
-                         float power,
+        DirectionalLight(const glm::vec3 & radiance,
                          const glm::vec3 & direction) :
-                         color(color),
-                         power(power),
+                         radiance(radiance),
                          direction(direction)
         {}
         
         // without visualisation because nothing depends on its position
 
-        glm::vec3 color;
-        float power;
+        glm::vec3 radiance;
         glm::vec3 direction;
     };
 
@@ -175,13 +172,11 @@ public:
     {
     public:
         PointLight(const glm::vec3 & position,
-                   float radius,
-                   const glm::vec3 & color,
-                   float power) :
+                   const glm::vec3 & radiance,
+                   float radius) :
                    position(position),
-                   radius(radius),
-                   color(color),
-                   power(power)
+                   radiance(radiance),
+                   radius(radius)
         {}
 
         bool intersect(math::Intersection & nearest,
@@ -195,10 +190,10 @@ public:
             {               
                 obj_ref.type = IntersectedType::POINT_LIGHT;
                 obj_ref.object = this;
-                material = Material(color,
+                material = Material(radiance,
                                     0.0f,
                                     0.0f,
-                                    glm::vec3(0));
+                                    radiance);
 
                 return true;
             }
@@ -206,26 +201,23 @@ public:
         }
 
         glm::vec3 position;
+        glm::vec3 radiance;
         float radius;
-        glm::vec3 color;
-        float power;
     };
 
     class SpotLight
     {
     public:
         SpotLight(const glm::vec3 & position,
+                  const glm::vec3 & radiance,
                   float radius,
-                  const glm::vec3 & color,
-                  float power,
-                  float angle,
-                  const glm::vec3 & direction) :
+                  const glm::vec3 & direction,
+                  float angle) :
                   position(position),
-                  radius(radius),                  
-                  color(color),
-                  power(power),
-                  angle(angle),
-                  direction(direction)
+                  radiance(radiance),
+                  radius(radius),
+                  direction(direction),
+                  angle(angle)
         {}
 
         bool intersect(math::Intersection & nearest,
@@ -239,24 +231,21 @@ public:
             {               
                 obj_ref.type = IntersectedType::SPOT_LIGHT;
                 obj_ref.object = this;
-                material = Material(color,
+                material = Material(radiance,
                                     0,
                                     0,
-                                    glm::vec3(0));
+                                    radiance);
                 return true;
             }
             return false;
         }
 
         glm::vec3 position;
+        glm::vec3 radiance;
         float radius;
 
-        glm::vec3 color;
-        float power;
-
-        float angle;
         glm::vec3 direction;
-
+        float angle;
     };
 
     // ====================[OBJECT DECORATORS]====================

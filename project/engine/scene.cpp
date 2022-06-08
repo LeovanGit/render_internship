@@ -230,6 +230,10 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
     glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
     float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);        
 
+    glm::vec3 F0 = glm::mix(INSULATOR_F0,
+                            material.albedo,
+                            material.metalness);
+
     // POINT LIGHTS
     for (int i = 0, size = p_lights.size(); i != size; ++i)
     {
@@ -245,37 +249,27 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // GGX Cook-Torrance specular BRDF
         float G = ggxSmith(roughness_sqr, NL, NV);
         float D = ggxTrowbridgeReitz(roughness_sqr, NH);
-        glm::vec3 F0 = glm::mix(INSULATOR_F0,
-                                material.albedo,
-                                material.metalness);
         glm::vec3 F = ggxSchlick(HL, F0);
 
+        // clamp BRDF to avoid light reflection being brighter than
+        // a light source
         // epsilon to avoid division by zero
-        glm::vec3 specular = 0.25f * D * F * G / (NV * NL + epsilon);
-
+        // float D_normalized = fmin(1.0f, D / (4 * NV * NL + epsilon));   
+        // glm::vec3 specular = F * G * D_normalized;
+        glm::vec3 specular = 0.25f * F * G * D / (NV * NL + epsilon);
         // Lambertian diffuse BRDF
         // albedo * (1 - metalness), because metals haven't diffuse light
         glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
                             (1.0f - ggxSchlick(NL, F0)) / PI;
-
 
         // light as solid angle
         float light_radius_sqr = p_lights[i].radius * p_lights[i].radius;
         float L_length = glm::length(p_lights[i].position - nearest.point);
         float w = PI * light_radius_sqr /
                   (L_length * L_length - light_radius_sqr);
+        float attenuation = w / 2.0f * PI;
 
-        glm::vec3 radiance = p_lights[i].color * p_lights[i].power * w / 2.0f * PI;
-
-        glm::vec3 BRDF = diffuse + specular;
-
-        // clamp BRDF to avoid light reflection being brighter than
-        // a light source
-        BRDF.x = fmin(1.0f, BRDF.x);
-        BRDF.y = fmin(1.0f, BRDF.y);
-        BRDF.z = fmin(1.0f, BRDF.z);
-
-        color += BRDF * radiance * NL;
+        color += (diffuse + specular) * p_lights[i].radiance * attenuation * NL;
     }
 
     // DIRECTIONAL LIGHTS
@@ -293,27 +287,20 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // GGX Cook-Torrance specular BRDF
         float G = ggxSmith(roughness_sqr, NL, NV);
         float D = ggxTrowbridgeReitz(roughness_sqr, NH);
-        glm::vec3 F0 = glm::mix(INSULATOR_F0,
-                                material.albedo,
-                                material.metalness);
         glm::vec3 F = ggxSchlick(HL, F0);
 
+        // clamp BRDF to avoid light reflection being brighter than
+        // a light source
         // epsilon to avoid division by zero
-        glm::vec3 specular = 0.25f * D * F * G / (NV * NL + EPSILON);
+        float D_normalized = fmin(1.0f, D / (4 * NV * NL + epsilon));              
+        glm::vec3 specular = F * G * D_normalized;
 
         // Lambertian diffuse BRDF
         // albedo * (1 - metalness), because metals haven't diffuse light
         glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
                             (1.0f - ggxSchlick(NL, F0)) / PI;
         
-        glm::vec3 radiance = d_lights[i].color * d_lights[i].power;
-
-        glm::vec3 BRDF = diffuse + specular;
-        BRDF.x = fmin(1.0f, BRDF.x);
-        BRDF.y = fmin(1.0f, BRDF.y);
-        BRDF.z = fmin(1.0f, BRDF.z);
-
-        color += BRDF * radiance * NL;
+        color += (diffuse + specular) * d_lights[i].radiance * NL;
     }
 
     // SPOTLIGHTS
@@ -335,13 +322,13 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // GGX Cook-Torrance specular BRDF
         float G = ggxSmith(roughness_sqr, NL, NV);
         float D = ggxTrowbridgeReitz(roughness_sqr, NH);
-        glm::vec3 F0 = glm::mix(INSULATOR_F0,
-                                material.albedo,
-                                material.metalness);
         glm::vec3 F = ggxSchlick(HL, F0);
 
+        // clamp BRDF to avoid light reflection being brighter than
+        // a light source
         // epsilon to avoid division by zero
-        glm::vec3 specular = 0.25f * D * F * G / (NV * NL + EPSILON);
+        float D_normalized = fmin(1.0f, D / (4 * NV * NL + epsilon));              
+        glm::vec3 specular = F * G * D_normalized;
 
         // Lambertian diffuse BRDF
         // albedo * (1 - metalness), because metals haven't diffuse light
@@ -353,15 +340,9 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         float L_length = glm::length(s_lights[i].position - nearest.point);
         float w = PI * light_radius_sqr /
                   (L_length * L_length - light_radius_sqr);
+        float attenuation = w / 2.0f * PI;
 
-        glm::vec3 radiance = s_lights[i].color * s_lights[i].power * w / 2.0f * PI;
-
-        glm::vec3 BRDF = diffuse + specular;
-        BRDF.x = fmin(1.0f, BRDF.x);
-        BRDF.y = fmin(1.0f, BRDF.y);
-        BRDF.z = fmin(1.0f, BRDF.z);
-
-        color += BRDF * radiance * NL;
+        color += (diffuse + specular) * s_lights[i].radiance * attenuation * NL;
     }
 
     return color;
@@ -447,39 +428,29 @@ void Scene::render(Window & win, Camera & camera)
                              xy_norm.x * near_plane_right +
                              xy_norm.y * near_plane_top) - ray.origin;
 
+            glm::vec3 result_color = COLOR_SKY;
+
             if (findIntersection(nearest, ray, material, type))
-            {
-                glm::vec3 result_color(0.0f, 0.0f, 0.0f);
-                
+            {                
                 if (type != IntersectedType::POINT_LIGHT &&
                     type != IntersectedType::SPOT_LIGHT)
                 {
                     result_color = PBR(nearest, material, camera);
-                    result_color = camera.adjustExposure(result_color);
-                    result_color = toneMappingACES(result_color);
                 }
                 else
                 {
-                    result_color = material.albedo;
+                    result_color = material.emission;
                 }
-
-                result_color = gammaCorrection(result_color);
-
-                pixels[xy.y * width + xy.x] = RGB(result_color.z * 255,
-                                                  result_color.y * 255,
-                                                  result_color.x * 255);
             }
-            else
-            {
-                glm::vec3 sky_color = COLOR_SKY;
-                sky_color = camera.adjustExposure(sky_color);
-                sky_color = toneMappingACES(sky_color);
-                sky_color = gammaCorrection(sky_color);
 
-                pixels[xy.y * width + xy.x] = RGB(sky_color.z * 255,
-                                                  sky_color.y * 255,
-                                                  sky_color.x * 255);
-            }
+            // post-processing
+            result_color = camera.adjustExposure(result_color);
+            result_color = toneMappingACES(result_color);
+            result_color = gammaCorrection(result_color);
+
+            pixels[xy.y * width + xy.x] = RGB(result_color.z * 255,
+                                              result_color.y * 255,
+                                              result_color.x * 255);
         };
     
     executor.execute(func, width * height, 20);

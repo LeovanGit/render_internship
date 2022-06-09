@@ -157,15 +157,18 @@ public:
     {
     public:
         DirectionalLight(const glm::vec3 & radiance,
-                         const glm::vec3 & direction) :
+                         const glm::vec3 & direction,
+                         float solid_angle) :
                          radiance(radiance),
-                         direction(direction)
+                         direction(direction),
+                         solid_angle(solid_angle)
         {}
         
         // without visualisation because nothing depends on its position
 
         glm::vec3 radiance;
         glm::vec3 direction;
+        float solid_angle;
     };
 
     class PointLight
@@ -363,7 +366,20 @@ public:
     // if it's need
     bool findIntersection(const math::Ray & ray,
                           IntersectionQuery & query);
- 
+
+    glm::vec3 approximateClosestSphereDir(bool& intersects,
+                                          glm::vec3 reflectionDir,
+                                          float sphereCos,
+                                          glm::vec3 sphereRelPos,
+                                          glm::vec3 sphereDir,
+                                          float sphereDist,
+                                          float sphereRadius);
+    
+    void clampDirToHorizon(glm::vec3 & dir,
+                           float & NoD,
+                           glm::vec3 normal,
+                           float minNoD);
+
     bool isVisible(const math::Intersection & nearest,
                    const glm::vec3 & dir_to_light);
 

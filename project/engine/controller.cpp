@@ -48,8 +48,9 @@ void Controller::initScene()
                                   25.0f));
 
     scene->d_lights.push_back(Scene::DirectionalLight(
-                                  glm::vec3(0.5f),
-                                  glm::vec3(1.0f, -1.0f, 1.0f)));
+                                  glm::vec3(15000.0f),
+                                  glm::vec3(1.0f, -1.0f, 1.0f),
+                                  0.00006794f));
 
     scene->s_lights.push_back(Scene::SpotLight(
                                   glm::vec3(1000.0f, 0.0f, -300.0f),

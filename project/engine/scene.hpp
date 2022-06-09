@@ -215,12 +215,14 @@ public:
                   const glm::vec3 & radiance,
                   float radius,
                   const glm::vec3 & direction,
-                  float angle) :
+                  float inner_angle,
+                  float outer_angle) :
                   position(position),
                   radiance(radiance),
                   radius(radius),
                   direction(direction),
-                  angle(angle)
+                  inner_angle(inner_angle),
+                  outer_angle(outer_angle)
         {}
 
         bool intersect(math::Intersection & nearest,
@@ -243,12 +245,36 @@ public:
             return false;
         }
 
+        bool isPointIlluminated(const glm::vec3 & point)
+        {
+            glm::vec3 dir_to_point = glm::normalize(point - position);
+            float cosa = glm::dot(dir_to_point, glm::normalize(direction));
+            float cosb = cosf(glm::radians(outer_angle / 2.0f));
+
+            return cosa > cosb;
+        }
+
+        float calculateIntensity(const glm::vec3 & point)
+        {
+            glm::vec3 dir_to_point = glm::normalize(point - position);
+            float cosa = glm::dot(dir_to_point, glm::normalize(direction));
+
+            float outer_cos = cosf(glm::radians(outer_angle / 2.0f));
+            float inner_cos = cosf(glm::radians(inner_angle / 2.0f));
+
+            float intensity = (cosa - outer_cos) / (inner_cos - outer_cos);
+            
+            return glm::clamp(intensity, 0.0f, 1.0f);
+        }
+
         glm::vec3 position;
         glm::vec3 radiance;
         float radius;
 
         glm::vec3 direction;
-        float angle;
+        // in degrees
+        float inner_angle;
+        float outer_angle;
     };
 
     // ====================[OBJECT DECORATORS]====================

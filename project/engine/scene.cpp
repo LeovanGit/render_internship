@@ -347,9 +347,9 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         glm::vec3 L = glm::normalize(s_lights[i].position - nearest.point);
         if (!isVisible(nearest, L)) continue;
 
-        // check if nearest.point under the spotlight cone
-        if (glm::dot(-L, glm::normalize(s_lights[i].direction)) <
-            cosf(glm::radians(s_lights[i].angle / 2))) continue;
+        //if (!s_lights[i].isPointIlluminated(nearest.point)) continue;
+        float intensity = s_lights[i].calculateIntensity(nearest.point);
+        if (intensity <= 0) continue;
 
         glm::vec3 H = glm::normalize(L + V);
 
@@ -376,6 +376,10 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // epsilon to avoid division by 
         float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV * NL + epsilon));
         glm::vec3 specular = F * G * D_normalized;
+
+        // soft spotlight
+        specular *= intensity;
+        diffuse *= intensity;
 
         color += (diffuse * solid_angle + specular) * s_lights[i].radiance * NL;
     }

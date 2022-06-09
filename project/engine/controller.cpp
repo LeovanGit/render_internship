@@ -37,27 +37,28 @@ void Controller::initScene()
     }
 
     // LIGHTS
-    scene->p_lights.push_back(Scene::PointLight(
-                                  glm::vec3(1000.0f, 0.0f, -1000.0f),
-                                  glm::vec3(3000.0f),
-                                  50.0f));
+    // scene->p_lights.push_back(Scene::PointLight(
+    //                               glm::vec3(1000.0f, 0.0f, -1000.0f),
+    //                               glm::vec3(3000.0f),
+    //                               50.0f));
 
-    scene->p_lights.push_back(Scene::PointLight(
-                                  glm::vec3(-1000.0f, 0.0f, -1000.0f),
-                                  glm::vec3(2000.0f),
-                                  25.0f));
+    // scene->p_lights.push_back(Scene::PointLight(
+    //                               glm::vec3(-1000.0f, 0.0f, -1000.0f),
+    //                               glm::vec3(2000.0f),
+    //                               25.0f));
 
-    scene->d_lights.push_back(Scene::DirectionalLight(
-                                  glm::vec3(15000.0f),
-                                  glm::vec3(1.0f, -1.0f, 1.0f),
-                                  0.00006794f));
+    // scene->d_lights.push_back(Scene::DirectionalLight(
+    //                               glm::vec3(15000.0f),
+    //                               glm::vec3(1.0f, -1.0f, 1.0f),
+    //                               0.00006794f));
 
-    scene->s_lights.push_back(Scene::SpotLight(
-                                  glm::vec3(1000.0f, 0.0f, -300.0f),
-                                  glm::vec3(10000.0f, 5000.0f, 1000.0f),
-                                  20.0f,
-                                  glm::vec3(0.0f, -1.0f, 1.0f),
-                                  30.0f));
+    // scene->s_lights.push_back(Scene::SpotLight(
+    //                               glm::vec3(1000.0f, 0.0f, -300.0f),
+    //                               glm::vec3(1.0f, 0.5f, 0.1f) * 10000.0f,
+    //                               20.0f,
+    //                               glm::vec3(0.0f, -1.0f, 1.0f),
+    //                               30.0f,
+    //                               35.0f));
 
     // ADDITIONAL OBJECTS
     scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, 1.0f, 0.0f),
@@ -78,7 +79,7 @@ void Controller::initScene()
     //                                        glm::vec3(0.0f))));
 
     // THREE POINT LIGHTS
-    // float power = 3000.0f;
+    // float power = 5000.0f;
     // scene->p_lights.push_back(Scene::PointLight(
     //                               glm::vec3(1000.0f, 1000.0f, -1000.0f),
     //                               glm::vec3(power),
@@ -93,6 +94,24 @@ void Controller::initScene()
     //                               glm::vec3(0.0f, -1000.0f, -1000.0f),
     //                               glm::vec3(power),
     //                               25.0f));
+
+    // SPOTLIGHTS SOFT TEST
+    scene->s_lights.push_back(Scene::SpotLight(
+                                  glm::vec3(1000.0f, 0.0f, -300.0f),
+                                  glm::vec3(10000.0f),
+                                  20.0f,
+                                  glm::vec3(0.0f, -1.0f, 0.0f),
+                                  30.0f,
+                                  30.0f));
+
+    scene->s_lights.push_back(Scene::SpotLight(
+                                  glm::vec3(2000.0f, 0.0f, -300.0f),
+                                  glm::vec3(10000.0f),
+                                  20.0f,
+                                  glm::vec3(0.0f, -1.0f, 0.0f),
+                                  30.0f,
+                                  35.0f));
+
 }
 
 void Controller::processInput(Camera & camera,

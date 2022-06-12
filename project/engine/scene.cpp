@@ -256,7 +256,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         float L_length = glm::length(L);
         float solid_angle = (PI * light_radius_sqr) / (L_length * L_length);
 
-        // L2 considers size of the light source
+        // L2 considers size of the light source (use only for specular)
         bool intersects = false;
         glm::vec3 L2 = approximateClosestSphereDir(intersects,
                                                    V_reflected,
@@ -278,24 +278,29 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
 
         float NL2 = glm::clamp(glm::dot(nearest.normal, L2), 0.0f, 1.0f);
         float NH2 = glm::clamp(glm::dot(nearest.normal, H2), 0.0f, 1.0f);
+        float HL2 = glm::clamp(glm::dot(H, L2), 0.0f, 1.0f);
 
         // GGX Cook-Torrance specular BRDF
-        float G = ggxSmith(roughness_sqr, NL, NV);
+        // float G = ggxSmith(roughness_sqr, NL, NV);
         // float D = ggxTrowbridgeReitz(roughness_sqr, NH);
+        // glm::vec3 F = ggxSchlick(HL, material.fresnel);
+        float G = ggxSmith(roughness_sqr, NL2, NV);
         float D = ggxTrowbridgeReitz(roughness_sqr, NH2);
-        glm::vec3 F = ggxSchlick(HL, material.fresnel);
+        glm::vec3 F = ggxSchlick(HL2, material.fresnel);
+
+        // clamp NDF to avoid light reflection being brighter than
+        // a light source
+        // epsilon to avoid division by zero
+        // float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV * NL + epsilon));
+        // (/ NL2) in specular BRDF and (* NL2) in integral was reduced
+        float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV + epsilon));
+        glm::vec3 specular = F * G * D_normalized;
 
         // Lambertian diffuse BRDF
         glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
                             (1.0f - ggxSchlick(NL, material.fresnel)) / PI;
 
-        // clamp NDF to avoid light reflection being brighter than
-        // a light source
-        // epsilon to avoid division by zero
-        float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV * NL + epsilon));
-        glm::vec3 specular = F * G * D_normalized;
-
-        color += (diffuse * solid_angle + specular) * p_lights[i].radiance * NL;
+        color += (diffuse * solid_angle * NL + specular) * p_lights[i].radiance;
     }
 
     // DIRECTIONAL LIGHTS
@@ -346,7 +351,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         float L_length = glm::length(L);
         float solid_angle = (PI * light_radius_sqr) / (L_length * L_length);
 
-        // L2 considers size of the light source
+        // L2 considers size of the light source (use only for specular)
         bool intersects = false;
         glm::vec3 L2 = approximateClosestSphereDir(intersects,
                                                    V_reflected,
@@ -354,7 +359,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
                                                    L,
                                                    glm::normalize(L),
                                                    L_length,
-                                                   p_lights[i].radius);
+                                                   s_lights[i].radius);
 
         L = glm::normalize(L);
         glm::vec3 H = glm::normalize(L + V);
@@ -368,28 +373,33 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
 
         float NL2 = glm::clamp(glm::dot(nearest.normal, L2), 0.0f, 1.0f);
         float NH2 = glm::clamp(glm::dot(nearest.normal, H2), 0.0f, 1.0f);
+        float HL2 = glm::clamp(glm::dot(H, L2), 0.0f, 1.0f);
 
         // GGX Cook-Torrance specular BRDF
-        float G = ggxSmith(roughness_sqr, NL, NV);
+        // float G = ggxSmith(roughness_sqr, NL, NV);
         // float D = ggxTrowbridgeReitz(roughness_sqr, NH);
+        // glm::vec3 F = ggxSchlick(HL, material.fresnel);
+        float G = ggxSmith(roughness_sqr, NL2, NV);
         float D = ggxTrowbridgeReitz(roughness_sqr, NH2);
-        glm::vec3 F = ggxSchlick(HL, material.fresnel);
+        glm::vec3 F = ggxSchlick(HL2, material.fresnel);
+
+        // clamp NDF to avoid light reflection being brighter than
+        // a light source
+        // epsilon to avoid division by zero
+        // float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV * NL + epsilon));
+        // (/ NL2) in specular BRDF and (* NL2) in integral was reduced
+        float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV + epsilon));
+        glm::vec3 specular = F * G * D_normalized;
 
         // Lambertian diffuse BRDF
         glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
                             (1.0f - ggxSchlick(NL, material.fresnel)) / PI;
 
-        // clamp NDF to avoid light reflection being brighter than
-        // a light source
-        // epsilon to avoid division by zero
-        float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV * NL + epsilon));
-        glm::vec3 specular = F * G * D_normalized;
-
         // soft spotlight
         specular *= intensity;
         diffuse *= intensity;
 
-        color += (diffuse * solid_angle + specular) * s_lights[i].radiance * NL;
+        color += (diffuse * solid_angle * NL + specular) * s_lights[i].radiance;
     }
 
     if (is_smooth_reflection && 

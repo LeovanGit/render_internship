@@ -1,6 +1,4 @@
 #include "scene.hpp"
-#include "euler_angles.hpp"
-#include "material.hpp"
 
 namespace
 {
@@ -32,35 +30,9 @@ bool Scene::findIntersection(math::Intersection & nearest,
     ObjRef object = { nullptr, IntersectedType::EMPTY };
 
     findIntersectionInternal(nearest, ray, object, material, include_lights);
-    if (object.type == IntersectedType::EMPTY) return false;
 
-    if (is_smooth_reflection && material.glossiness >= 0.9f)
-    {
-        math::Ray ray_reflected;
-        ray_reflected.origin = ray.origin + EPSILON * nearest.normal;
-        ray_reflected.direction = -glm::normalize(ray.reflect(nearest.normal));
-
-        float glossiness = material.glossiness;
-
-        if (findIntersection(nearest,
-                             ray_reflected,
-                             material,
-                             type,
-                             false))
-        {
-            // roughness[0, 0.1] -> intensity[max, min]
-            float intensity = 10.0f * glossiness - 9.0f;           
-            material.albedo *= intensity;
-
-            return true;
-        }
-        return false;
-    }
-    else
-    {
-        type = object.type;
-        return true;
-    }
+    type = object.type;
+    return object.type != IntersectedType::EMPTY;
 }
 
 bool Scene::findIntersection(const math::Ray & ray,
@@ -259,7 +231,9 @@ glm::vec3 Scene::ggxSchlick(const float cosTheta,
 // D - distance to light source
 glm::vec3 Scene::PBR(const math::Intersection & nearest,
                      const Material & material,
-                     const Camera & camera)
+                     const Camera & camera,
+                     const math::Ray & ray,
+                     float depth)
 {
     glm::vec3 color = material.emission + material.albedo * AMBIENT;
 
@@ -267,41 +241,57 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
                           (1.0f - material.glossiness);
 
     glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
-    float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);        
+    float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
 
-    glm::vec3 F0 = glm::mix(INSULATOR_F0,
-                            material.albedo,
-                            material.metalness);
+    glm::vec3 V_reflected = math::reflect(V, nearest.normal);
 
     // POINT LIGHTS
     for (int i = 0, size = p_lights.size(); i != size; ++i)
     {
-        glm::vec3 L = glm::normalize(p_lights[i].position - nearest.point);
-        if (!isVisible(nearest, L)) continue;
+        glm::vec3 L = p_lights[i].position - nearest.point;
+        if (!isVisible(nearest, glm::normalize(L))) continue;
 
+        // light as solid angle
+        float light_radius_sqr = p_lights[i].radius * p_lights[i].radius;
+        float L_length = glm::length(L);
+        float solid_angle = (PI * light_radius_sqr) / (L_length * L_length);
+
+        // L2 considers size of the light source
+        bool intersects = false;
+        glm::vec3 L2 = approximateClosestSphereDir(intersects,
+                                                   V_reflected,
+                                                   glm::cos(solid_angle),
+                                                   L,
+                                                   glm::normalize(L),
+                                                   L_length,
+                                                   p_lights[i].radius);
+
+        L = glm::normalize(L);
         glm::vec3 H = glm::normalize(L + V);
 
         float NL = glm::clamp(glm::dot(nearest.normal, L), 0.0f, 1.0f);
         float NH = glm::clamp(glm::dot(nearest.normal, H), 0.0f, 1.0f);
         float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
 
+        clampDirToHorizon(L2, NL, nearest.normal, 0.0f);
+        glm::vec3 H2 = glm::normalize(L2 + V);
+
+        float NL2 = glm::clamp(glm::dot(nearest.normal, L2), 0.0f, 1.0f);
+        float NH2 = glm::clamp(glm::dot(nearest.normal, H2), 0.0f, 1.0f);
+
         // GGX Cook-Torrance specular BRDF
         float G = ggxSmith(roughness_sqr, NL, NV);
-        float D = ggxTrowbridgeReitz(roughness_sqr, NH);
-        glm::vec3 F = ggxSchlick(HL, F0);
-
-        // light as solid angle
-        float light_radius_sqr = p_lights[i].radius * p_lights[i].radius;
-        float L_length = glm::length(p_lights[i].position - nearest.point);
-        float solid_angle = (PI * light_radius_sqr) / (L_length * L_length);
+        // float D = ggxTrowbridgeReitz(roughness_sqr, NH);
+        float D = ggxTrowbridgeReitz(roughness_sqr, NH2);
+        glm::vec3 F = ggxSchlick(HL, material.fresnel);
 
         // Lambertian diffuse BRDF
         glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
-                            (1.0f - ggxSchlick(NL, F0)) / PI;
+                            (1.0f - ggxSchlick(NL, material.fresnel)) / PI;
 
         // clamp NDF to avoid light reflection being brighter than
         // a light source
-        // epsilon to avoid division by 
+        // epsilon to avoid division by zero
         float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV * NL + epsilon));
         glm::vec3 specular = F * G * D_normalized;
 
@@ -323,12 +313,12 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         // GGX Cook-Torrance specular BRDF
         float G = ggxSmith(roughness_sqr, NL, NV);
         float D = ggxTrowbridgeReitz(roughness_sqr, NH);
-        glm::vec3 F = ggxSchlick(HL, F0);
+        glm::vec3 F = ggxSchlick(HL, material.fresnel);
 
         // Lambertian diffuse BRDF
         // albedo * (1 - metalness), because metals haven't diffuse light
         glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
-                            (1.0f - ggxSchlick(NL, F0)) / PI;       
+                            (1.0f - ggxSchlick(NL, material.fresnel)) / PI;
 
         // clamp NDF to avoid light reflection being brighter than
         // a light source
@@ -344,36 +334,54 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
     // SPOTLIGHTS
     for (int i = 0, size = s_lights.size(); i != size; ++i)
     {
-        glm::vec3 L = glm::normalize(s_lights[i].position - nearest.point);
-        if (!isVisible(nearest, L)) continue;
+        glm::vec3 L = s_lights[i].position - nearest.point;
+        if (!isVisible(nearest, glm::normalize(L))) continue;
 
-        //if (!s_lights[i].isPointIlluminated(nearest.point)) continue;
+        // if (!s_lights[i].isPointIlluminated(nearest.point)) continue;
         float intensity = s_lights[i].calculateIntensity(nearest.point);
         if (intensity <= 0) continue;
 
+        // light as solid angle
+        float light_radius_sqr = s_lights[i].radius * s_lights[i].radius;
+        float L_length = glm::length(L);
+        float solid_angle = (PI * light_radius_sqr) / (L_length * L_length);
+
+        // L2 considers size of the light source
+        bool intersects = false;
+        glm::vec3 L2 = approximateClosestSphereDir(intersects,
+                                                   V_reflected,
+                                                   glm::cos(solid_angle),
+                                                   L,
+                                                   glm::normalize(L),
+                                                   L_length,
+                                                   p_lights[i].radius);
+
+        L = glm::normalize(L);
         glm::vec3 H = glm::normalize(L + V);
 
         float NL = glm::clamp(glm::dot(nearest.normal, L), 0.0f, 1.0f);
         float NH = glm::clamp(glm::dot(nearest.normal, H), 0.0f, 1.0f);
         float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
 
+        clampDirToHorizon(L2, NL, nearest.normal, 0.0f);
+        glm::vec3 H2 = glm::normalize(L2 + V);
+
+        float NL2 = glm::clamp(glm::dot(nearest.normal, L2), 0.0f, 1.0f);
+        float NH2 = glm::clamp(glm::dot(nearest.normal, H2), 0.0f, 1.0f);
+
         // GGX Cook-Torrance specular BRDF
         float G = ggxSmith(roughness_sqr, NL, NV);
-        float D = ggxTrowbridgeReitz(roughness_sqr, NH);
-        glm::vec3 F = ggxSchlick(HL, F0);
-
-        // light as solid angle
-        float light_radius_sqr = s_lights[i].radius * s_lights[i].radius;
-        float L_length = glm::length(s_lights[i].position - nearest.point);
-        float solid_angle = (PI * light_radius_sqr) / (L_length * L_length);
+        // float D = ggxTrowbridgeReitz(roughness_sqr, NH);
+        float D = ggxTrowbridgeReitz(roughness_sqr, NH2);
+        glm::vec3 F = ggxSchlick(HL, material.fresnel);
 
         // Lambertian diffuse BRDF
         glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
-                            (1.0f - ggxSchlick(NL, F0)) / PI;
+                            (1.0f - ggxSchlick(NL, material.fresnel)) / PI;
 
         // clamp NDF to avoid light reflection being brighter than
         // a light source
-        // epsilon to avoid division by 
+        // epsilon to avoid division by zero
         float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV * NL + epsilon));
         glm::vec3 specular = F * G * D_normalized;
 
@@ -382,6 +390,43 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         diffuse *= intensity;
 
         color += (diffuse * solid_angle + specular) * s_lights[i].radiance * NL;
+    }
+
+    if (is_smooth_reflection && 
+        material.glossiness > SMOOTHNESS_THRESHOLD &&
+        depth < RECURSION_DEPTH)
+    {
+        // roughness[0, 0.1] -> intensity[max, min]
+        float intensity = 10.0f * material.glossiness - 9.0f;
+
+        math::Ray ray_reflected;
+        ray_reflected.origin = nearest.point + EPSILON * nearest.normal;
+        ray_reflected.direction = 
+            glm::normalize(math::reflect(-ray.direction, nearest.normal));
+
+        math::Intersection nearest_reflected;
+        nearest_reflected.reset();
+
+        Material material_reflected;
+    
+        IntersectedType type_reflected;
+
+        if (findIntersection(nearest_reflected,
+                             ray_reflected,
+                             material_reflected,
+                             type_reflected,
+                             false))
+        {
+            color += PBR(nearest_reflected,
+                         material_reflected,
+                         camera,
+                         ray_reflected,
+                         depth + 1) * intensity;
+        }
+        else
+        {
+            color += COLOR_SKY * intensity;
+        }
     }
 
     return color;
@@ -419,9 +464,9 @@ void Scene::render(Window & win, Camera & camera)
     int height = pixels_size.cy;       
 
     // find CS corner points in WS
-    glm::vec3 bottom_left_WS = camera.generateWorldPointFromCS(-1.0f, -1.0f);
-    glm::vec3 bottom_right_WS = camera.generateWorldPointFromCS(1.0f, -1.0f);
-    glm::vec3 top_left_WS = camera.generateWorldPointFromCS(-1.0f, 1.0f);
+    glm::vec3 bottom_left_WS = camera.reproject(-1.0f, -1.0f);
+    glm::vec3 bottom_right_WS = camera.reproject(1.0f, -1.0f);
+    glm::vec3 top_left_WS = camera.reproject(-1.0f, 1.0f);
 
     glm::vec3 near_plane_right = bottom_right_WS - bottom_left_WS;
     glm::vec3 near_plane_top = top_left_WS - bottom_left_WS;
@@ -470,16 +515,8 @@ void Scene::render(Window & win, Camera & camera)
         glm::vec3 result_color = COLOR_SKY;
 
         if (findIntersection(nearest, ray, material, type))
-        {                
-            if (type != IntersectedType::POINT_LIGHT &&
-                type != IntersectedType::SPOT_LIGHT)
-            {
-                result_color = PBR(nearest, material, camera);
-            }
-            else
-            {
-                result_color = material.emission;
-            }
+        {
+            result_color = PBR(nearest, material, camera, ray);
         }
 
         // post-processing

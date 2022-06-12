@@ -6,7 +6,3 @@ math::Ray::Ray(const glm::vec3 & origin,
                direction(direction)
 {}
 
-glm::vec3 math::Ray::reflect(const glm::vec3 & normal) const
-{
-    return 2.0f * glm::dot(direction, normal) * normal - direction;
-}

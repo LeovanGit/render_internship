@@ -167,7 +167,8 @@ void Camera::updateMatrices()
     is_updated_matrices = true;
 }
 
-glm::vec3 Camera::generateWorldPointFromCS(float x, float y) const
+// generate WS point from CS
+glm::vec3 Camera::reproject(float x, float y) const
 {
     glm::vec4 point_h_cs(x, y, 1.0f, 1.0f);
     glm::vec4 point_h_ws = view_proj_matrix_inv * point_h_cs;

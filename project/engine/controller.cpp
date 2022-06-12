@@ -14,7 +14,9 @@ void Controller::init(Scene * scene)
 }
 
 void Controller::initScene()
-{ 
+{
+    glm::vec3 INSULATOR_F0 = glm::vec3(0.04f);
+
     // SPHERES GRID
     for (int row = 0; row != 7; ++row)
     {
@@ -22,6 +24,10 @@ void Controller::initScene()
         {
             float roughness = 0.01f + 0.99f / 6.0f * col;
             float metalness = 1.0f - 1.0f / 6.0f * row;
+
+            glm::vec3 F0 = glm::mix(INSULATOR_F0,
+                                    glm::vec3(1.0f, 0.0f, 0.0f), // albedo
+                                    metalness);
 
             scene->spheres.push_back(
                 Scene::Sphere(100.0f,
@@ -32,7 +38,8 @@ void Controller::initScene()
                                   glm::vec3(1.0f, 0.0f, 0.0f),
                                   1.0f - roughness,
                                   metalness,
-                                  glm::vec3(0.0f))));
+                                  glm::vec3(0.0f),
+                                  F0)));
         }
     }
 
@@ -56,7 +63,7 @@ void Controller::initScene()
     //                               glm::vec3(1000.0f, 0.0f, -300.0f),
     //                               glm::vec3(1.0f, 0.5f, 0.1f) * 10000.0f,
     //                               20.0f,
-    //                               glm::vec3(0.0f, -1.0f, 1.0f),
+    //                               glm::vec3(0.0f, -1.0f, 0.5f),
     //                               30.0f,
     //                               35.0f));
 
@@ -67,7 +74,8 @@ void Controller::initScene()
                                              glm::vec3(0.3f),
                                              0.2f,
                                              0.0f,
-                                             glm::vec3(0.0f))));
+                                             glm::vec3(0.0f),
+                                             glm::vec3(0.04f))));
 
     // scene->cubes.push_back(Scene::Cube(glm::vec3(0, 0, -300.0f),
     //                                    math::EulerAngles(0, 0, 0),
@@ -76,41 +84,42 @@ void Controller::initScene()
     //                                        glm::vec3(0, 1.0f, 0),
     //                                        0.95f,
     //                                        1.0f,
-    //                                        glm::vec3(0.0f))));
+    //                                        glm::vec3(0.0f),
+    //                                        glm::vec3(0.04f))));
 
     // THREE POINT LIGHTS
-    // float power = 5000.0f;
-    // scene->p_lights.push_back(Scene::PointLight(
-    //                               glm::vec3(1000.0f, 1000.0f, -1000.0f),
-    //                               glm::vec3(power),
-    //                               25.0f));
+    float power = 5000.0f;
+    scene->p_lights.push_back(Scene::PointLight(
+                                  glm::vec3(1000.0f, 1000.0f, -1000.0f),
+                                  glm::vec3(power),
+                                  25.0f));
 
-    // scene->p_lights.push_back(Scene::PointLight(
-    //                               glm::vec3(-1000.0f, 1000.0f, -1000.0f),
-    //                               glm::vec3(power),
-    //                               25.0f));
+    scene->p_lights.push_back(Scene::PointLight(
+                                  glm::vec3(-1000.0f, 1000.0f, -1000.0f),
+                                  glm::vec3(power),
+                                  25.0f));
 
-    // scene->p_lights.push_back(Scene::PointLight(
-    //                               glm::vec3(0.0f, -1000.0f, -1000.0f),
-    //                               glm::vec3(power),
-    //                               25.0f));
+    scene->p_lights.push_back(Scene::PointLight(
+                                  glm::vec3(0.0f, -950.0f, -1000.0f),
+                                  glm::vec3(power),
+                                  25.0f));
 
     // SPOTLIGHTS SOFT TEST
-    scene->s_lights.push_back(Scene::SpotLight(
-                                  glm::vec3(1000.0f, 0.0f, -300.0f),
-                                  glm::vec3(10000.0f),
-                                  20.0f,
-                                  glm::vec3(0.0f, -1.0f, 0.0f),
-                                  30.0f,
-                                  30.0f));
+    // scene->s_lights.push_back(Scene::SpotLight(
+    //                               glm::vec3(1000.0f, 0.0f, -300.0f),
+    //                               glm::vec3(10000.0f),
+    //                               20.0f,
+    //                               glm::vec3(0.0f, -1.0f, 0.0f),
+    //                               30.0f,
+    //                               30.0f));
 
-    scene->s_lights.push_back(Scene::SpotLight(
-                                  glm::vec3(2000.0f, 0.0f, -300.0f),
-                                  glm::vec3(10000.0f),
-                                  20.0f,
-                                  glm::vec3(0.0f, -1.0f, 0.0f),
-                                  30.0f,
-                                  35.0f));
+    // scene->s_lights.push_back(Scene::SpotLight(
+    //                               glm::vec3(2000.0f, 0.0f, -300.0f),
+    //                               glm::vec3(10000.0f),
+    //                               20.0f,
+    //                               glm::vec3(0.0f, -1.0f, 0.0f),
+    //                               30.0f,
+    //                               35.0f));
 
 }
 
@@ -191,8 +200,7 @@ void Controller::processInput(Camera & camera,
 
         math::Ray ray;
         ray.origin = camera.getPosition();
-        ray.direction = camera.generateWorldPointFromCS(xy.x, xy.y) -
-                        ray.origin;
+        ray.direction = camera.reproject(xy.x, xy.y) - ray.origin;
 
         if (!object.is_grabbed)
         {

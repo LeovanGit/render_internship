@@ -18,6 +18,12 @@ public:
 glm::vec3 origin;
 glm::vec3 direction;
 };
+
+inline glm::vec3 reflect(const glm::vec3 & ray,
+                         const glm::vec3 & normal)
+{
+    return 2.0f * glm::dot(ray, normal) * normal - ray;
+}
 } // namespace math
 
 #endif

@@ -27,14 +27,14 @@ constexpr float AMBIENT = 0.05f;
 constexpr float EPSILON = 0.001f;
 constexpr float GAMMA = 2.2f;
 const float PI = atanf(1.0f) * 4.0f;
-constexpr glm::vec3 INSULATOR_F0 = glm::vec3(0.04f);
 // ambient fog-rainy sky
 constexpr glm::vec3 COLOR_SKY(0.353f, 0.5f, 0.533f);
-
 const uint32_t numThreads = 
     std::fmax(1,
               std::fmax(int(ParallelExecutor::MAX_THREADS) - 4,
                         int(ParallelExecutor::HALF_THREADS)));
+constexpr float SMOOTHNESS_THRESHOLD = 0.9f;
+constexpr int RECURSION_DEPTH = 10;
 
 class Scene
 {
@@ -196,7 +196,8 @@ public:
                 material = Material(radiance,
                                     0.0f,
                                     0.0f,
-                                    radiance);
+                                    radiance,
+                                    glm::vec3(0));
 
                 return true;
             }
@@ -239,7 +240,9 @@ public:
                 material = Material(radiance,
                                     0,
                                     0,
-                                    radiance);
+                                    radiance,
+                                    glm::vec3(0));
+
                 return true;
             }
             return false;
@@ -421,7 +424,9 @@ public:
 
     glm::vec3 PBR(const math::Intersection & nearest,
                   const Material & material,
-                  const Camera & camera);
+                  const Camera & camera,
+                  const math::Ray & ray,
+                  float depth = 0);
 
     glm::vec3 toneMappingACES(const glm::vec3 & color) const;
 

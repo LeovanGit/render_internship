@@ -11,12 +11,14 @@ public:
     Material(const glm::vec3 & albedo,
              float glossiness,
              float metalness,
-             const glm::vec3 & emission);
+             const glm::vec3 & emission,
+             const glm::vec3 & fresnel);
 
     glm::vec3 albedo;
     float glossiness;
     float metalness;
     glm::vec3 emission;
+    glm::vec3 fresnel;
 };
 
 #endif

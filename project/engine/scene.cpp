@@ -252,15 +252,20 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         if (!isVisible(nearest, glm::normalize(L))) continue;
 
         // light as solid angle
-        float light_radius_sqr = p_lights[i].radius * p_lights[i].radius;
         float L_length = glm::length(L);
-        float solid_angle = (PI * light_radius_sqr) / (L_length * L_length);
+        float solid_angle = (PI * p_lights[i].radius * p_lights[i].radius) /
+                             (L_length * L_length);
+
+        // flat angle of solid angle:
+        // float angle = 2.0f * asinf(p_lights[i].radius / L_length);
+        // formula which depends on solid angle:
+        float angle = 2.0f * asinf(sqrtf(solid_angle / PI));
 
         // L2 considers size of the light source (use only for specular)
         bool intersects = false;
         glm::vec3 L2 = approximateClosestSphereDir(intersects,
                                                    V_reflected,
-                                                   glm::cos(solid_angle),
+                                                   glm::cos(angle),
                                                    L,
                                                    glm::normalize(L),
                                                    L_length,
@@ -347,15 +352,20 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         if (intensity <= 0) continue;
 
         // light as solid angle
-        float light_radius_sqr = s_lights[i].radius * s_lights[i].radius;
         float L_length = glm::length(L);
-        float solid_angle = (PI * light_radius_sqr) / (L_length * L_length);
+        float solid_angle = (PI * s_lights[i].radius * s_lights[i].radius) /
+                             (L_length * L_length);
+
+        // flat angle of solid angle:
+        // float angle = 2.0f * asinf(p_lights[i].radius / L_length);
+        // formula which depends on solid angle:
+        float angle = 2.0f * asinf(sqrtf(solid_angle / PI));
 
         // L2 considers size of the light source (use only for specular)
         bool intersects = false;
         glm::vec3 L2 = approximateClosestSphereDir(intersects,
                                                    V_reflected,
-                                                   glm::cos(solid_angle),
+                                                   glm::cos(angle),
                                                    L,
                                                    glm::normalize(L),
                                                    L_length,
@@ -421,6 +431,12 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
     
         IntersectedType type_reflected;
 
+        // G = 1
+        // D = 1
+        glm::vec3 H = glm::normalize(V + ray_reflected.direction);
+        float HL = glm::clamp(glm::dot(H, ray_reflected.direction), 0.0f, 1.0f);
+        glm::vec3 F = ggxSchlick(HL, material.fresnel);
+
         if (findIntersection(nearest_reflected,
                              ray_reflected,
                              material_reflected,
@@ -431,11 +447,11 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
                          material_reflected,
                          camera,
                          ray_reflected,
-                         depth + 1) * intensity;
+                         depth + 1) * F * intensity;
         }
         else
         {
-            color += COLOR_SKY * intensity;
+            color += COLOR_SKY * F * intensity;
         }
     }
 

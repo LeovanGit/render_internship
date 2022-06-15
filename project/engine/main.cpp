@@ -138,12 +138,13 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             // wParam - key code
             controller.keys_log[wParam] = true;
 
-            if (wParam == KEY_R)
+            // 30 bit of lParam is true if key was previously down
+            if (wParam == KEY_R && !(lParam & (1 << 30)))
             {
                 controller.scene->is_smooth_reflection = 
                     !controller.scene->is_smooth_reflection;
             }
-            if (wParam == KEY_G)
+            if (wParam == KEY_G && !(lParam & (1 << 30)))
             {
                 controller.scene->is_global_illumination = 
                     !controller.scene->is_global_illumination;

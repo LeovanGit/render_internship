@@ -22,6 +22,8 @@ public:
 class Basis
 {
 public:
+    Basis() = default;
+
     Basis(const glm::vec3 & x,
           const glm::vec3 & y,
           const glm::vec3 & z);

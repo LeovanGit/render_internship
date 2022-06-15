@@ -19,22 +19,25 @@
 
 #include "parallel_executor.hpp"
 
-#include <iostream>
-
 constexpr bool SHADOWS = false;
+
+constexpr float SMOOTHNESS_THRESHOLD = 0.9f;
+constexpr int RECURSION_DEPTH = 10;
+constexpr int SAMPLES_COUNT = 500;
+
 constexpr int HEX_BLACK = 0x000000;
+// ambient fog-rainy sky
+constexpr glm::vec3 COLOR_SKY(0.353f, 0.5f, 0.533f);
 constexpr float AMBIENT = 0.05f;
+
 constexpr float EPSILON = 0.001f;
 constexpr float GAMMA = 2.2f;
 const float PI = atanf(1.0f) * 4.0f;
-// ambient fog-rainy sky
-constexpr glm::vec3 COLOR_SKY(0.353f, 0.5f, 0.533f);
+
 const uint32_t numThreads = 
     std::fmax(1,
               std::fmax(int(ParallelExecutor::MAX_THREADS) - 4,
                         int(ParallelExecutor::HALF_THREADS)));
-constexpr float SMOOTHNESS_THRESHOLD = 0.9f;
-constexpr int RECURSION_DEPTH = 10;
 
 class Scene
 {
@@ -422,11 +425,24 @@ public:
     glm::vec3 ggxSchlick(const float cosTheta,
                          const glm::vec3 & F0);
 
+    // overloaded: for samples
+    glm::vec3 PBR(const glm::vec3 & N,
+                  const glm::vec3 & L,
+                  const glm::vec3 & V,
+                  const Material & material,
+                  const glm::vec3 & radiance);
+
+    // overloaded: approximation for one ray
     glm::vec3 PBR(const math::Intersection & nearest,
                   const Material & material,
                   const Camera & camera,
-                  const math::Ray & ray,
-                  float depth = 0);
+                  const math::Ray & ray);
+
+    glm::vec3 calculatePixelEnergy(const math::Intersection & nearest,
+                                   const Material & material,
+                                   const Camera & camera,
+                                   const math::Ray & ray,
+                                   float depth = 0);
 
     glm::vec3 toneMappingACES(const glm::vec3 & color) const;
 

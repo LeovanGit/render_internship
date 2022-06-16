@@ -1,10 +1,13 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
+#include <iostream>
+
 #include <vector>
 #include <cmath>
 #include <memory>
 #include "glm.hpp"
+#include "gtc/constants.hpp"
 
 #include "window.hpp"
 #include "camera.hpp"
@@ -16,28 +19,10 @@
 #include "material.hpp"
 #include "intersection.hpp"
 #include "euler_angles.hpp"
+#include "hemisphere_ray_generation.hpp"
+#include "constants.hpp"
 
 #include "parallel_executor.hpp"
-
-constexpr bool SHADOWS = false;
-
-constexpr float SMOOTHNESS_THRESHOLD = 0.9f;
-constexpr int RECURSION_DEPTH = 10;
-constexpr int SAMPLES_COUNT = 500;
-
-constexpr int HEX_BLACK = 0x000000;
-// ambient fog-rainy sky
-constexpr glm::vec3 COLOR_SKY(0.353f, 0.5f, 0.533f);
-constexpr float AMBIENT = 0.05f;
-
-constexpr float EPSILON = 0.001f;
-constexpr float GAMMA = 2.2f;
-const float PI = atanf(1.0f) * 4.0f;
-
-const uint32_t numThreads = 
-    std::fmax(1,
-              std::fmax(int(ParallelExecutor::MAX_THREADS) - 4,
-                        int(ParallelExecutor::HALF_THREADS)));
 
 class Scene
 {
@@ -197,7 +182,7 @@ public:
                 obj_ref.type = IntersectedType::POINT_LIGHT;
                 obj_ref.object = this;
                 material = Material(radiance,
-                                    0.0f,
+                                    1.0f,
                                     0.0f,
                                     radiance,
                                     glm::vec3(0));
@@ -205,6 +190,11 @@ public:
                 return true;
             }
             return false;
+        }
+
+        float calculateSolidAngle(float L_length)
+        {
+            return (glm::pi<float>() * radius * radius) / (L_length * L_length);
         }
 
         glm::vec3 position;
@@ -241,14 +231,19 @@ public:
                 obj_ref.type = IntersectedType::SPOT_LIGHT;
                 obj_ref.object = this;
                 material = Material(radiance,
-                                    0,
-                                    0,
+                                    1.0f,
+                                    0.0f,
                                     radiance,
                                     glm::vec3(0));
 
                 return true;
             }
             return false;
+        }
+
+        float calculateSolidAngle(float L_length)
+        {
+            return (glm::pi<float>() * radius * radius) / (L_length * L_length);
         }
 
         bool isPointIlluminated(const glm::vec3 & point)
@@ -260,7 +255,7 @@ public:
             return cosa > cosb;
         }
 
-        float calculateIntensity(const glm::vec3 & point)
+        float calculateAngularAttenuation(const glm::vec3 & point)
         {
             glm::vec3 dir_to_point = glm::normalize(point - position);
             float cosa = glm::dot(dir_to_point, glm::normalize(direction));
@@ -425,6 +420,19 @@ public:
 
     glm::vec3 ggxSchlick(const float cosTheta,
                          const glm::vec3 & F0);
+
+    // Lambertian diffuse BRDF
+    glm::vec3 LambertBRDF(const Material & material,
+                          float NL);
+
+    // GGX Cook-Torrance specular BRDF
+    glm::vec3 CookTorranceBRDF(float roughness_sqr,
+                               const glm::vec3 & fresnel,
+                               float NL,
+                               float NV,
+                               float NH,
+                               float HL,
+                               float solid_angle);
 
     // overloaded: for samples
     glm::vec3 PBR(const glm::vec3 & N,

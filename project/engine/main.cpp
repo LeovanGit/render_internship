@@ -137,19 +137,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         {
             // wParam - key code
             controller.keys_log[wParam] = true;
-
-            // 30 bit of lParam is true if key was previously down
-            if (wParam == KEY_R && !(lParam & (1 << 30)))
-            {
-                controller.scene->is_smooth_reflection = 
-                    !controller.scene->is_smooth_reflection;
-            }
-
             break;
         }
         case WM_KEYUP:
         {
             controller.keys_log[wParam] = false;
+            controller.was_released[wParam] = true;
             break;
         }
         case WM_RBUTTONDOWN:

@@ -31,7 +31,8 @@ set(MATH_SOURCES engine/math/ray.cpp
                  engine/math/triangle.cpp
                  engine/math/cube.cpp
                  engine/math/matrices.cpp
-                 engine/math/euler_angles.cpp)
+                 engine/math/euler_angles.cpp
+                 engine/math/hemisphere_ray_generation.cpp)
 
 set(HEADERS engine/window.hpp
             engine/scene.hpp
@@ -47,7 +48,9 @@ set(MATH_HEADERS engine/math/ray.hpp
                  engine/math/triangle.hpp
                  engine/math/cube.hpp
                  engine/math/matrices.hpp
-                 engine/math/euler_angles.hpp)
+                 engine/math/euler_angles.hpp
+                 engine/math/hemisphere_ray_generation.hpp
+                 engine/math/constants.hpp)
 
 add_executable(rt WIN32
                   ${SOURCES} ${MATH_SOURCES}

@@ -1,5 +1,10 @@
 #include "window.hpp"
 
+namespace
+{
+constexpr float quality = 2.0f;
+} // namespace
+
 void Window::init(HINSTANCE hInstance,
                   int pos_x, int pos_y,
                   int client_width, int client_height)

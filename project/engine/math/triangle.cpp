@@ -1,11 +1,6 @@
 #include "triangle.hpp"
 #include "euler_angles.hpp"
 
-namespace
-{
-    constexpr float epsilon = 0.000001f;
-} // namespace
-
 math::Triangle::Triangle(const glm::vec3 & normal,
                          const glm::vec3 & vertex_1,
                          const glm::vec3 & vertex_2,
@@ -21,7 +16,7 @@ bool math::Triangle::intersect(Intersection & nearest,
 {
     float cosa = glm::dot(normal, ray.direction);
     // ray || triangle
-    if (math::areAlmostEqual(cosa, 0, epsilon)) return false; 
+    if (math::areAlmostEqual(cosa, 0, math::SOME_SMALL_NUMBER)) return false; 
     
     float d = -glm::dot(normal, vertex_1);
     float t = -(d + glm::dot(normal, ray.origin)) / cosa;

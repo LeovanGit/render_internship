@@ -9,13 +9,13 @@ public:
     Material() = default;
 
     Material(const glm::vec3 & albedo,
-             float glossiness,
+             float roughness,
              float metalness,
              const glm::vec3 & emission,
              const glm::vec3 & fresnel);
 
     glm::vec3 albedo;
-    float glossiness;
+    float roughness;
     float metalness;
     glm::vec3 emission;
     glm::vec3 fresnel;

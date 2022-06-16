@@ -1,10 +1,22 @@
 #include "scene.hpp"
-#include "ray.hpp"
-#include <type_traits>
+#include "constants.hpp"
 
 namespace
 {
-    constexpr float epsilon = 0.000001f;
+constexpr bool SHADOWS = false;
+
+constexpr float ROUGHNESS_THRESHOLD = 0.1f;
+constexpr int RECURSION_DEPTH = 10;
+constexpr int SAMPLES_COUNT = 500;
+
+// ambient fog-rainy sky
+constexpr glm::vec3 COLOR_SKY(0.353f, 0.5f, 0.533f);
+constexpr float AMBIENT = 0.05f;
+
+const uint32_t numThreads = 
+    std::fmax(1,
+              std::fmax(int(ParallelExecutor::MAX_THREADS) - 4,
+                        int(ParallelExecutor::HALF_THREADS)));
 } // namespace
 
 Scene::Scene(const std::vector<Sphere> & spheres,
@@ -173,7 +185,7 @@ bool Scene::isVisible(const math::Intersection & nearest,
 
     math::Ray ray;
     ray.direction = dir_to_light;
-    ray.origin = nearest.point + EPSILON * nearest.normal;
+    ray.origin = nearest.point + math::EPSILON * nearest.normal;
 
     math::Intersection tmp;
     tmp.reset();
@@ -217,7 +229,7 @@ float Scene::ggxTrowbridgeReitz(const float roughness_sqr,
     
     float denom = NH_sqr * (roughness_sqr - 1.0f) + 1.0f;
 
-    float D = roughness_sqr / (PI * denom * denom);
+    float D = roughness_sqr / (glm::pi<float>()  * denom * denom);
 
     return D;
 }
@@ -226,6 +238,38 @@ glm::vec3 Scene::ggxSchlick(const float cosTheta,
                             const glm::vec3 & F0)
 {
     return F0 + (1.0f - F0) * powf(1.0f - cosTheta, 5.0f);
+}
+
+glm::vec3 Scene::LambertBRDF(const Material & material,
+                             float NL)
+{
+    glm::vec3 F = ggxSchlick(NL, material.fresnel);
+
+    return material.albedo *
+           (1.0f - material.metalness) *
+           (1.0f - F) * NL / glm::pi<float>();
+}
+
+glm::vec3 Scene::CookTorranceBRDF(float roughness_sqr,
+                                  const glm::vec3 & fresnel,
+                                  float NL,
+                                  float NV,
+                                  float NH,
+                                  float HL,
+                                  float solid_angle)
+{
+    float G = ggxSmith(roughness_sqr, NL, NV);
+    float D = ggxTrowbridgeReitz(roughness_sqr, NH);
+    glm::vec3 F = ggxSchlick(HL, fresnel);
+
+    // 1. clamp NDF to avoid light reflection being 
+    // brighter than a light source
+    // 2. NL was reduced with NL in integral!!!
+    float D_norm = fmin(1.0f,
+                        solid_angle * D /
+                        (4 * NV));
+
+    return D_norm * F * G;
 }
 
 // L - ray from intersection point to light source
@@ -237,8 +281,7 @@ glm::vec3 Scene::PBR(const glm::vec3 & N,
                      const Material & material,
                      const glm::vec3 & radiance)
 {
-    float roughness_sqr = (1.0f - material.glossiness) * 
-        (1.0f - material.glossiness);
+    float roughness_sqr = material.roughness * material.roughness;
 
     glm::vec3 H = glm::normalize(L + V);
 
@@ -247,18 +290,17 @@ glm::vec3 Scene::PBR(const glm::vec3 & N,
     float NH = glm::clamp(glm::dot(N, H), 0.0f, 1.0f);
     float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
 
-    // GGX Cook-Torrance specular BRDF
-    float G = ggxSmith(roughness_sqr, NL, NV);
-    float D = ggxTrowbridgeReitz(roughness_sqr, NH);
-    glm::vec3 F = ggxSchlick(HL, material.fresnel);
+    glm::vec3 specular = CookTorranceBRDF(roughness_sqr,
+                                          material.fresnel,
+                                          NL,
+                                          NV,
+                                          NH,
+                                          HL,
+                                          1.0f);
 
-    glm::vec3 specular = D * F * G / (4 * NV * NL + epsilon);
+    glm::vec3 diffuse = LambertBRDF(material, NL);
 
-    // Lambertian diffuse BRDF
-    glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
-                        (1.0f - ggxSchlick(NL, material.fresnel)) / PI;
-
-    return (diffuse + specular) * radiance * NL;
+    return (diffuse * NL + specular) * radiance;
 }
 
 // L - ray from intersection point to light source
@@ -271,77 +313,69 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
 {        
     glm::vec3 color(0);
 
-    float roughness_sqr = (1.0f - material.glossiness) * 
-                          (1.0f - material.glossiness);
-
+    float roughness_sqr = material.roughness * material.roughness;
+    
     glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
-    glm::vec3 V_reflected = math::reflect(V, nearest.normal);
+    glm::vec3 V_reflected = glm::reflect(-V, nearest.normal);
     float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
 
     // POINT LIGHTS
     for (int i = 0, size = p_lights.size(); i != size; ++i)
     {
         glm::vec3 L = p_lights[i].position - nearest.point;
-        if (!isVisible(nearest, glm::normalize(L))) continue;
+        float L_length = glm::length(L);
+        glm::vec3 L_norm = glm::normalize(L);
+
+        // shadows
+        if (!isVisible(nearest, L_norm)) continue;
 
         // light as solid angle
-        float L_length = glm::length(L);
-        float solid_angle = (PI * p_lights[i].radius * p_lights[i].radius) /
-                            (L_length * L_length);
+        float solid_angle = p_lights[i].calculateSolidAngle(L_length);
 
         // flat angle of solid angle:
-        // float angle = 2.0f * asinf(p_lights[i].radius / L_length);
-        // formula which depends on solid angle:
-        float angle = 2.0f * asinf(sqrtf(solid_angle / PI));
+        float cos_angle = 1.0f - 2.0f * solid_angle / glm::pi<float>();
 
-        // L2 considers size of the light source (use only for specular)
+        glm::vec3 H = glm::normalize(L_norm + V);
+        float NL = glm::clamp(glm::dot(nearest.normal, L_norm), 0.0f, 1.0f);
+
+        // L2 considers size of the light source (only for specular)
         bool intersects = false;
         glm::vec3 L2 = approximateClosestSphereDir(intersects,
                                                    V_reflected,
-                                                   glm::cos(angle),
+                                                   cos_angle,
                                                    L,
-                                                   glm::normalize(L),
+                                                   L_norm,
                                                    L_length,
                                                    p_lights[i].radius);
 
-        L = glm::normalize(L);
-        glm::vec3 H = glm::normalize(L + V);
-
-        float NL = glm::clamp(glm::dot(nearest.normal, L), 0.0f, 1.0f);
-        // float NH = glm::clamp(glm::dot(nearest.normal, H), 0.0f, 1.0f);
-        // float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
-
         clampDirToHorizon(L2, NL, nearest.normal, 0.0f);
+
         glm::vec3 H2 = glm::normalize(L2 + V);
 
         float NL2 = glm::clamp(glm::dot(nearest.normal, L2), 0.0f, 1.0f);
         float NH2 = glm::clamp(glm::dot(nearest.normal, H2), 0.0f, 1.0f);
         float HL2 = glm::clamp(glm::dot(H, L2), 0.0f, 1.0f);
 
-        // GGX Cook-Torrance specular BRDF
-        float G = ggxSmith(roughness_sqr, NL2, NV);
-        float D = ggxTrowbridgeReitz(roughness_sqr, NH2);
-        glm::vec3 F = ggxSchlick(HL2, material.fresnel);
+        glm::vec3 specular = CookTorranceBRDF(roughness_sqr,
+                                              material.fresnel,
+                                              NL2,
+                                              NV,
+                                              NH2,
+                                              HL2,
+                                              solid_angle);
 
-        // clamp NDF to avoid light reflection being brighter than
-        // a light source
-        // epsilon to avoid division by zero
-        // float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV * NL + epsilon));
-        // (/ NL2) in specular BRDF and (* NL2) in integral was reduced
-        float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV + epsilon));
-        glm::vec3 specular = F * G * D_normalized;
+        glm::vec3 diffuse = LambertBRDF(material, NL);
 
-        // Lambertian diffuse BRDF
-        glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
-                            (1.0f - ggxSchlick(NL, material.fresnel)) / PI;
-
-        color += (diffuse * solid_angle * NL + specular) * p_lights[i].radiance;
+        color += (diffuse * solid_angle * NL +
+                  specular) * p_lights[i].radiance;
     }
 
     // DIRECTIONAL LIGHTS
     for (int i = 0, size = d_lights.size(); i != size; ++i)
     {
         glm::vec3 L = -glm::normalize(d_lights[i].direction);
+
+        // shadows
         if (!isVisible(nearest, L)) continue;
 
         glm::vec3 H = glm::normalize(L + V);
@@ -350,92 +384,78 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         float NH = glm::clamp(glm::dot(nearest.normal, H), 0.0f, 1.0f);
         float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
 
-        // GGX Cook-Torrance specular BRDF
-        float G = ggxSmith(roughness_sqr, NL, NV);
-        float D = ggxTrowbridgeReitz(roughness_sqr, NH);
-        glm::vec3 F = ggxSchlick(HL, material.fresnel);
+        glm::vec3 specular = CookTorranceBRDF(roughness_sqr,
+                                              material.fresnel,
+                                              NL,
+                                              NV,
+                                              NH,
+                                              HL,
+                                              d_lights[i].solid_angle);
 
-        // Lambertian diffuse BRDF
-        glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
-                            (1.0f - ggxSchlick(NL, material.fresnel)) / PI;
-
-        // clamp NDF to avoid light reflection being brighter than
-        // a light source
-        // epsilon to avoid division by zero
-        float D_normalized = fmin(1.0f, d_lights[i].solid_angle * D /
-                                  (4 * NV * NL + epsilon));
-        glm::vec3 specular = F * G * D_normalized;
-
-        color += (diffuse * d_lights[i].solid_angle + specular) *
-                 d_lights[i].radiance * NL;
+        glm::vec3 diffuse = LambertBRDF(material, NL);
+        
+        color += (diffuse * d_lights[i].solid_angle * NL +
+                  specular) * d_lights[i].radiance;
     }
 
     // SPOTLIGHTS
     for (int i = 0, size = s_lights.size(); i != size; ++i)
     {
         glm::vec3 L = s_lights[i].position - nearest.point;
-        if (!isVisible(nearest, glm::normalize(L))) continue;
+        float L_length = glm::length(L);
+        glm::vec3 L_norm = glm::normalize(L);
+
+        // shadows
+        if (!isVisible(nearest, L)) continue;
 
         // if (!s_lights[i].isPointIlluminated(nearest.point)) continue;
-        float intensity = s_lights[i].calculateIntensity(nearest.point);
-        if (intensity <= 0) continue;
+        float angular_attenuation =
+            s_lights[i].calculateAngularAttenuation(nearest.point);
+        if (angular_attenuation <= 0) continue;
 
         // light as solid angle
-        float L_length = glm::length(L);
-        float solid_angle = (PI * s_lights[i].radius * s_lights[i].radius) /
-                            (L_length * L_length);
+        float solid_angle = s_lights[i].calculateSolidAngle(L_length);
 
         // flat angle of solid angle:
-        // float angle = 2.0f * asinf(p_lights[i].radius / L_length);
-        // formula which depends on solid angle:
-        float angle = 2.0f * asinf(sqrtf(solid_angle / PI));
+        float cos_angle = 1.0f - 2.0f * solid_angle / glm::pi<float>();
 
-        // L2 considers size of the light source (use only for specular)
+        glm::vec3 H = glm::normalize(L_norm + V);
+        float NL = glm::clamp(glm::dot(nearest.normal, L_norm), 0.0f, 1.0f);
+
+        // L2 considers size of the light source (only for specular)
         bool intersects = false;
         glm::vec3 L2 = approximateClosestSphereDir(intersects,
                                                    V_reflected,
-                                                   glm::cos(angle),
+                                                   cos_angle,
                                                    L,
-                                                   glm::normalize(L),
+                                                   L_norm,
                                                    L_length,
                                                    s_lights[i].radius);
 
-        L = glm::normalize(L);
-        glm::vec3 H = glm::normalize(L + V);
-
-        float NL = glm::clamp(glm::dot(nearest.normal, L), 0.0f, 1.0f);
-        // float NH = glm::clamp(glm::dot(nearest.normal, H), 0.0f, 1.0f);
-        // float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
-
         clampDirToHorizon(L2, NL, nearest.normal, 0.0f);
+
         glm::vec3 H2 = glm::normalize(L2 + V);
 
         float NL2 = glm::clamp(glm::dot(nearest.normal, L2), 0.0f, 1.0f);
         float NH2 = glm::clamp(glm::dot(nearest.normal, H2), 0.0f, 1.0f);
         float HL2 = glm::clamp(glm::dot(H, L2), 0.0f, 1.0f);
 
-        // GGX Cook-Torrance specular BRDF
-        float G = ggxSmith(roughness_sqr, NL2, NV);
-        float D = ggxTrowbridgeReitz(roughness_sqr, NH2);
-        glm::vec3 F = ggxSchlick(HL2, material.fresnel);
+        glm::vec3 specular = CookTorranceBRDF(roughness_sqr,
+                                              material.fresnel,
+                                              NL2,
+                                              NV,
+                                              NH2,
+                                              HL2,
+                                              solid_angle);
 
-        // clamp NDF to avoid light reflection being brighter than
-        // a light source
-        // epsilon to avoid division by zero
-        // float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV * NL + epsilon));
-        // (/ NL2) in specular BRDF and (* NL2) in integral was reduced
-        float D_normalized = fmin(1.0f, solid_angle * D / (4 * NV + epsilon));
-        glm::vec3 specular = F * G * D_normalized;
-
-        // Lambertian diffuse BRDF
-        glm::vec3 diffuse = material.albedo * (1.0f - material.metalness) *
-                            (1.0f - ggxSchlick(NL, material.fresnel)) / PI;
+        glm::vec3 diffuse = LambertBRDF(material, NL);
 
         // soft spotlight
-        specular *= intensity;
-        diffuse *= intensity;
+        specular *= angular_attenuation;
+        diffuse *= angular_attenuation;
 
-        color += (diffuse * solid_angle * NL + specular) * s_lights[i].radiance;
+        color += (diffuse * solid_angle * NL +
+                  specular) * s_lights[i].radiance;
     }
 
     return color;
@@ -468,7 +488,7 @@ glm::vec3 Scene::calculatePixelEnergy(const math::Intersection & nearest,
             glm::vec3 rand_point = math::generate_point_on_hemisphere(i, SAMPLES_COUNT);
             
             math::Ray ray_GI;
-            ray_GI.origin = nearest.point + EPSILON * nearest.normal;
+            ray_GI.origin = nearest.point + math::EPSILON * nearest.normal;
             // rotate hemisphere to our fragment normal
             ray_GI.direction = glm::normalize(transform * rand_point);
           
@@ -500,22 +520,22 @@ glm::vec3 Scene::calculatePixelEnergy(const math::Intersection & nearest,
             }
         }
 
-        color += ambient * 2.0f * PI / float(SAMPLES_COUNT);
+        color += ambient * 2.0f * glm::pi<float>() / float(SAMPLES_COUNT);
     }
     else color += material.albedo * AMBIENT;
 
     // MIRRORS
     if (is_smooth_reflection && 
-        material.glossiness > SMOOTHNESS_THRESHOLD &&
+        material.roughness < ROUGHNESS_THRESHOLD &&
         depth < RECURSION_DEPTH)
     {
         // roughness[0, 0.1] -> intensity[max, min]
-        float intensity = 10.0f * material.glossiness - 9.0f;
+        float intensity = 1.0f - 10.0f * material.roughness;
 
         math::Ray ray_reflected;
-        ray_reflected.origin = nearest.point + EPSILON * nearest.normal;
+        ray_reflected.origin = nearest.point + math::EPSILON * nearest.normal;
         ray_reflected.direction = 
-            glm::normalize(math::reflect(-ray.direction, nearest.normal));
+            glm::normalize(glm::reflect(ray.direction, nearest.normal));
 
         math::Intersection nearest_reflected;
         nearest_reflected.reset();
@@ -572,9 +592,9 @@ glm::vec3 Scene::toneMappingACES(const glm::vec3 & hdr) const
 
 glm::vec3 Scene::gammaCorrection(const glm::vec3 & color) const
 {
-    return glm::vec3(powf(color.x, 1.0f / GAMMA),
-                     powf(color.y, 1.0f / GAMMA),
-                     powf(color.z, 1.0f / GAMMA));
+    return glm::vec3(powf(color.x, 1.0f / math::GAMMA),
+                     powf(color.y, 1.0f / math::GAMMA),
+                     powf(color.z, 1.0f / math::GAMMA));
 }
 
 void Scene::render(Window & win, Camera & camera)

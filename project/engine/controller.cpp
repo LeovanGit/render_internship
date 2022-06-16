@@ -1,5 +1,16 @@
 #include "controller.hpp"
 
+enum class sceneTypes
+{
+    SPHERES_GRID,
+    CORNELL_BOX
+};
+
+namespace
+{
+constexpr sceneTypes scene_type = sceneTypes::SPHERES_GRID;
+} // namespace
+
 void Controller::init(Scene * scene)
 {
     this->scene = scene;
@@ -11,11 +22,14 @@ void Controller::init(Scene * scene)
     is_accelerated = false;
 
     for (int i = 0; i != KEYS_COUNT; ++i) keys_log[i] = false;
+    for (int i = 0; i != KEYS_COUNT; ++i) was_released[i] = true;
 }
 
 void Controller::initScene()
 {
     glm::vec3 INSULATOR_F0 = glm::vec3(0.04f);
+
+    if (scene_type == sceneTypes::CORNELL_BOX) goto cornell;
 
     // SPHERES GRID
     for (int row = 0; row != 7; ++row)
@@ -36,7 +50,7 @@ void Controller::initScene()
                                         0),
                               Material(
                                   glm::vec3(1.0f, 0.0f, 0.0f),
-                                  1.0f - roughness,
+                                  roughness,
                                   metalness,
                                   glm::vec3(0.0f),
                                   F0)));
@@ -126,84 +140,87 @@ void Controller::initScene()
     //                               30.0f,
     //                               35.0f));
 
+    return;
+
     // GLOBAL ILLUMINATION TEST: CORNELL BOX
-    // float offset = 500.0f;
-    // scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, 1.0f, 0.0f),
-    //                                      glm::vec3(0.0f, -offset, 0.0f),
-    //                                      Material(
-    //                                          glm::vec3(1.0f),
-    //                                          0.2f,
-    //                                          0.0f,
-    //                                          glm::vec3(0.0f),
-    //                                          glm::vec3(0.04f))));
+    cornell:
+    float offset = 500.0f;
+    scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, 1.0f, 0.0f),
+                                         glm::vec3(0.0f, -offset, 0.0f),
+                                         Material(
+                                             glm::vec3(1.0f),
+                                             0.2f,
+                                             0.0f,
+                                             glm::vec3(0.0f),
+                                             glm::vec3(0.04f))));
 
-    // scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, -1.0f, 0.0f),
-    //                                      glm::vec3(0.0f, offset, 0.0f),
-    //                                      Material(
-    //                                          glm::vec3(1.0f),
-    //                                          0.2f,
-    //                                          0.0f,
-    //                                          glm::vec3(0.0f),
-    //                                          glm::vec3(0.04f))));
+    scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, -1.0f, 0.0f),
+                                         glm::vec3(0.0f, offset, 0.0f),
+                                         Material(
+                                             glm::vec3(1.0f),
+                                             0.2f,
+                                             0.0f,
+                                             glm::vec3(0.0f),
+                                             glm::vec3(0.04f))));
 
-    // scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, 0.0f, -1.0f),
-    //                                      glm::vec3(0.0f, 0.0f, offset),
-    //                                      Material(
-    //                                          glm::vec3(1.0f),
-    //                                          0.2f,
-    //                                          0.0f,
-    //                                          glm::vec3(0.0f),
-    //                                          glm::vec3(0.04f))));
+    scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, 0.0f, -1.0f),
+                                         glm::vec3(0.0f, 0.0f, offset),
+                                         Material(
+                                             glm::vec3(1.0f),
+                                             0.2f,
+                                             0.0f,
+                                             glm::vec3(0.0f),
+                                             glm::vec3(0.04f))));
 
-    // scene->planes.push_back(Scene::Plane(glm::vec3(-1.0f, 0.0f, 0.0f),
-    //                                      glm::vec3(offset, 0.0f, 0.0f),
-    //                                      Material(
-    //                                          glm::vec3(0.0f, 1.0f, 0.0f),
-    //                                          0.2f,
-    //                                          0.0f,
-    //                                          glm::vec3(0.0f),
-    //                                          glm::vec3(0.04f))));
+    scene->planes.push_back(Scene::Plane(glm::vec3(-1.0f, 0.0f, 0.0f),
+                                         glm::vec3(offset, 0.0f, 0.0f),
+                                         Material(
+                                             glm::vec3(0.0f, 1.0f, 0.0f),
+                                             0.2f,
+                                             0.0f,
+                                             glm::vec3(0.0f),
+                                             glm::vec3(0.04f))));
 
-    // scene->planes.push_back(Scene::Plane(glm::vec3(1.0f, 0.0f, 0.0f),
-    //                                      glm::vec3(-offset, 0.0f, 0.0f),
-    //                                      Material(
-    //                                          glm::vec3(1.0f, 0.0f, 0.0f),
-    //                                          0.2f,
-    //                                          0.0f,
-    //                                          glm::vec3(0.0f),
-    //                                          glm::vec3(0.04f))));
+    scene->planes.push_back(Scene::Plane(glm::vec3(1.0f, 0.0f, 0.0f),
+                                         glm::vec3(-offset, 0.0f, 0.0f),
+                                         Material(
+                                             glm::vec3(1.0f, 0.0f, 0.0f),
+                                             0.2f,
+                                             0.0f,
+                                             glm::vec3(0.0f),
+                                             glm::vec3(0.04f))));
 
-    // scene->spheres.push_back(
-    //     Scene::Sphere(200.0f,
-    //                   glm::vec3(200.0f,
-    //                             -offset + 200.0f,
-    //                             0),
-    //                   Material(
-    //                       glm::vec3(0.0f, 0.0f, 1.0f),
-    //                       0.1f,
-    //                       0.2f,
-    //                       glm::vec3(0.0f),
-    //                       INSULATOR_F0)));
+    scene->spheres.push_back(
+        Scene::Sphere(200.0f,
+                      glm::vec3(200.0f,
+                                -offset + 200.0f,
+                                0),
+                      Material(
+                          glm::vec3(0.0f, 0.0f, 1.0f),
+                          0.9f,
+                          0.2f,
+                          glm::vec3(0.0f),
+                          INSULATOR_F0)));
 
-    // scene->spheres.push_back(
-    //     Scene::Sphere(150.0f,
-    //                   glm::vec3(-70.0f,
-    //                             -offset + 150.0f,
-    //                             -300.0f),
-    //                   Material(
-    //                       glm::vec3(1.0f),
-    //                       0.1f,
-    //                       0.2f,
-    //                       glm::vec3(0.0f),
-    //                       INSULATOR_F0)));
+    scene->spheres.push_back(
+        Scene::Sphere(150.0f,
+                      glm::vec3(-70.0f,
+                                -offset + 150.0f,
+                                -300.0f),
+                      Material(
+                          glm::vec3(1.0f),
+                          0.9f,
+                          0.2f,
+                          glm::vec3(0.0f),
+                          INSULATOR_F0)));
 
-    // scene->s_lights.push_back(Scene::SpotLight(
-    //                               glm::vec3(0),
-    //                               glm::vec3(10000.0f),
-    //                               20.0f,
-    //                               glm::vec3(-1.0f, 1.0f, 1.0f),
-    //                               40.0f,
-    //                               50.0f));
+    scene->s_lights.push_back(Scene::SpotLight(
+                                  glm::vec3(0),
+                                  glm::vec3(10000.0f),
+                                  20.0f,
+                                  glm::vec3(-1.0f, 1.0f, 1.0f),
+                                  40.0f,
+                                  50.0f));
 }
 
 void Controller::processInput(Camera & camera,
@@ -318,11 +335,11 @@ void Controller::processInput(Camera & camera,
     }
     if (keys_log[KEY_PLUS])
     {
-        camera.EV_100 += 0.1f;
+        camera.EV_100 += 6.0f * delta_time;
     }
     if (keys_log[KEY_MINUS])
     {
-        camera.EV_100 -= 0.1f;
+        camera.EV_100 -= 6.0f * delta_time;
     }
     if (keys_log[KEY_G] && !scene->is_global_illumination)
     {
@@ -332,6 +349,14 @@ void Controller::processInput(Camera & camera,
     else if (!keys_log[KEY_G])
     {
         scene->is_global_illumination = false;
+    }
+    if (keys_log[KEY_R])
+    {
+        if (was_released[KEY_R])
+        {
+            scene->is_smooth_reflection = !scene->is_smooth_reflection;
+            was_released[KEY_R] = false;
+        }
     }
 }
 

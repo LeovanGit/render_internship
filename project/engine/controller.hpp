@@ -1,6 +1,6 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
-
+#include <iostream>
 #include <vector>
 #include "glm.hpp"
 

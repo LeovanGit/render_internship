@@ -144,11 +144,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                 controller.scene->is_smooth_reflection = 
                     !controller.scene->is_smooth_reflection;
             }
-            if (wParam == KEY_G && !(lParam & (1 << 30)))
-            {
-                controller.scene->is_global_illumination = 
-                    !controller.scene->is_global_illumination;
-            }
 
             break;
         }

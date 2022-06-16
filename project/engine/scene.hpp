@@ -362,6 +362,7 @@ public:
 
     bool is_smooth_reflection;
     bool is_global_illumination;
+    bool is_image_ready;
 
 public:
     explicit Scene() = default;

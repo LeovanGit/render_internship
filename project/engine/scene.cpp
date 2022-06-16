@@ -1,5 +1,6 @@
 #include "scene.hpp"
 #include "ray.hpp"
+#include <type_traits>
 
 namespace
 {
@@ -19,7 +20,8 @@ Scene::Scene(const std::vector<Sphere> & spheres,
              p_lights(p_lights),
              s_lights(s_lights),
              is_smooth_reflection(false),
-             is_global_illumination(false)
+             is_global_illumination(false),
+             is_image_ready(false)
 {}
 
 bool Scene::findIntersection(math::Intersection & nearest,
@@ -576,7 +578,9 @@ glm::vec3 Scene::gammaCorrection(const glm::vec3 & color) const
 }
 
 void Scene::render(Window & win, Camera & camera)
-{ 
+{
+    if (is_global_illumination && is_image_ready) return;
+
     SIZE pixels_size = win.getPixelsSize();
     int width = pixels_size.cx;
     int height = pixels_size.cy;       
@@ -650,5 +654,7 @@ void Scene::render(Window & win, Camera & camera)
     executor.execute(func, width * height, 20);
 
     win.flush();
+
+    if (is_global_illumination) is_image_ready = true;
 }
 

@@ -25,12 +25,12 @@ glm::vec3 math::generate_point_on_hemisphere(int sample,
 
     // for hemisphere
     float theta = acosf(1.0f - (2.0f * sample + 1.0f) / (2.0f * samples_count));
-    float phi = 2 * glm::pi<float>() * sample / glm::golden_ratio<float>();
+    float phi = 2 * math::PI * sample / math::GOLDEN_RATIO;
 
     // convert spherical to Cartesian coordinates, r = 1
-    glm::vec3 point(cos(phi) * sin(theta),
-                    sin(phi) * sin(theta),
-                    cos(theta));
+    glm::vec3 point(cosf(phi) * sinf(theta),
+                    sinf(phi) * sinf(theta),
+                    cosf(theta));
 
     // !!! in spherical coordinates: Up = z, Right = x, Forward = -y
     // !!! in engine coordinates: Up = y, Right = x, Forward = z

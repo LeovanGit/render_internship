@@ -2,7 +2,7 @@
 #define HEMISPHERE_RAY_GENERAION_HPP
 
 #include "glm.hpp"
-#include "gtc/constants.hpp"
+#include "constants.hpp"
 
 namespace math
 {

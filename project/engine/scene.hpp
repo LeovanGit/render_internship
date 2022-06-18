@@ -1,13 +1,10 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
-#include <iostream>
-
 #include <vector>
 #include <cmath>
 #include <memory>
 #include "glm.hpp"
-#include "gtc/constants.hpp"
 
 #include "window.hpp"
 #include "camera.hpp"
@@ -194,7 +191,11 @@ public:
 
         float calculateSolidAngle(float L_length)
         {
-            return (glm::pi<float>() * radius * radius) / (L_length * L_length);
+            float R_sqr = L_length * L_length - radius * radius;
+            float cosa = sqrtf(R_sqr) / L_length;
+            float S = 2.0f * math::PI * R_sqr * (1.0f - cosa);
+                        
+            return S / R_sqr;
         }
 
         glm::vec3 position;
@@ -243,7 +244,11 @@ public:
 
         float calculateSolidAngle(float L_length)
         {
-            return (glm::pi<float>() * radius * radius) / (L_length * L_length);
+            float R_sqr = L_length * L_length - radius * radius;
+            float cosa = sqrtf(R_sqr) / L_length;
+            float S = 2.0f * math::PI * R_sqr * (1.0f - cosa);
+                        
+            return S / R_sqr;
         }
 
         bool isPointIlluminated(const glm::vec3 & point)

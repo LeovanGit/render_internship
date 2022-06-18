@@ -229,7 +229,7 @@ float Scene::ggxTrowbridgeReitz(const float roughness_sqr,
     
     float denom = NH_sqr * (roughness_sqr - 1.0f) + 1.0f;
 
-    float D = roughness_sqr / (glm::pi<float>()  * denom * denom);
+    float D = roughness_sqr / (math::PI  * denom * denom);
 
     return D;
 }
@@ -247,7 +247,7 @@ glm::vec3 Scene::LambertBRDF(const Material & material,
 
     return material.albedo *
            (1.0f - material.metalness) *
-           (1.0f - F) * NL / glm::pi<float>();
+           (1.0f - F) * NL / math::PI;
 }
 
 glm::vec3 Scene::CookTorranceBRDF(float roughness_sqr,
@@ -333,7 +333,8 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         float solid_angle = p_lights[i].calculateSolidAngle(L_length);
 
         // flat angle of solid angle:
-        float cos_angle = 1.0f - 2.0f * solid_angle / glm::pi<float>();
+        float sina = p_lights[i].radius / L_length;
+        float cos_angle = 1.0f - 2.0f * sina * sina;
 
         glm::vec3 H = glm::normalize(L_norm + V);
         float NL = glm::clamp(glm::dot(nearest.normal, L_norm), 0.0f, 1.0f);
@@ -417,7 +418,8 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         float solid_angle = s_lights[i].calculateSolidAngle(L_length);
 
         // flat angle of solid angle:
-        float cos_angle = 1.0f - 2.0f * solid_angle / glm::pi<float>();
+        float sina = s_lights[i].radius / L_length;
+        float cos_angle = 1.0f - 2.0f * sina * sina;
 
         glm::vec3 H = glm::normalize(L_norm + V);
         float NL = glm::clamp(glm::dot(nearest.normal, L_norm), 0.0f, 1.0f);
@@ -520,7 +522,7 @@ glm::vec3 Scene::calculatePixelEnergy(const math::Intersection & nearest,
             }
         }
 
-        color += ambient * 2.0f * glm::pi<float>() / float(SAMPLES_COUNT);
+        color += ambient * 2.0f * math::PI / float(SAMPLES_COUNT);
     }
     else color += material.albedo * AMBIENT;
 
@@ -658,7 +660,13 @@ void Scene::render(Window & win, Camera & camera)
 
         if (findIntersection(nearest, ray, material, type))
         {
-            result_color = calculatePixelEnergy(nearest, material, camera, ray);
+            if (type == IntersectedType::POINT_LIGHT ||
+                type == IntersectedType::POINT_LIGHT)
+            {
+                result_color = material.emission;
+            }
+            else
+                result_color = calculatePixelEnergy(nearest, material, camera, ray);
         }
 
         // post-processing

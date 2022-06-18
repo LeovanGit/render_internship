@@ -193,9 +193,8 @@ public:
         {
             float R_sqr = L_length * L_length - radius * radius;
             float cosa = sqrtf(R_sqr) / L_length;
-            float S = 2.0f * math::PI * R_sqr * (1.0f - cosa);
-                        
-            return S / R_sqr;
+
+            return 2.0f * math::PI * (1.0f - cosa);
         }
 
         glm::vec3 position;
@@ -246,9 +245,8 @@ public:
         {
             float R_sqr = L_length * L_length - radius * radius;
             float cosa = sqrtf(R_sqr) / L_length;
-            float S = 2.0f * math::PI * R_sqr * (1.0f - cosa);
-                        
-            return S / R_sqr;
+
+            return 2.0f * math::PI * (1.0f - cosa);
         }
 
         bool isPointIlluminated(const glm::vec3 & point)

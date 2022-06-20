@@ -334,7 +334,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
 
         // flat angle of solid angle:
         float sina = p_lights[i].radius / L_length;
-        float cos_angle = 1.0f - 2.0f * sina * sina;
+        float cosa = sqrtf(1.0f - sina * sina);
 
         glm::vec3 H = glm::normalize(L_norm + V);
         float NL = glm::clamp(glm::dot(nearest.normal, L_norm), 0.0f, 1.0f);
@@ -343,7 +343,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         bool intersects = false;
         glm::vec3 L2 = approximateClosestSphereDir(intersects,
                                                    V_reflected,
-                                                   cos_angle,
+                                                   cosa,
                                                    L,
                                                    L_norm,
                                                    L_length,
@@ -419,7 +419,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
 
         // flat angle of solid angle:
         float sina = s_lights[i].radius / L_length;
-        float cos_angle = 1.0f - 2.0f * sina * sina;
+        float cosa = sqrtf(1.0f - sina * sina);
 
         glm::vec3 H = glm::normalize(L_norm + V);
         float NL = glm::clamp(glm::dot(nearest.normal, L_norm), 0.0f, 1.0f);
@@ -428,7 +428,7 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
         bool intersects = false;
         glm::vec3 L2 = approximateClosestSphereDir(intersects,
                                                    V_reflected,
-                                                   cos_angle,
+                                                   cosa,
                                                    L,
                                                    L_norm,
                                                    L_length,

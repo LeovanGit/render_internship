@@ -247,7 +247,10 @@ void Controller::processInput(Camera & camera,
         if(keys_log[i] == true)
         {
             if (scene->is_image_ready)
+            {
                 scene->is_global_illumination = false;
+                scene->is_image_ready = false;
+            }
             
             break;
         }

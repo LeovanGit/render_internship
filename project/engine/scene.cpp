@@ -8,7 +8,7 @@ constexpr bool SHADOWS = false;
 
 constexpr float ROUGHNESS_THRESHOLD = 0.1f;
 constexpr int RECURSION_DEPTH = 10;
-constexpr int SAMPLES_COUNT = 2000;
+constexpr int SAMPLES_COUNT = 100;
 
 // ambient fog-rainy sky
 constexpr glm::vec3 COLOR_SKY(0.353f, 0.5f, 0.533f);

@@ -8,7 +8,7 @@ constexpr bool SHADOWS = false;
 
 constexpr float ROUGHNESS_THRESHOLD = 0.1f;
 constexpr int RECURSION_DEPTH = 10;
-constexpr int SAMPLES_COUNT = 500;
+constexpr int SAMPLES_COUNT = 2000;
 
 // ambient fog-rainy sky
 constexpr glm::vec3 COLOR_SKY(0.353f, 0.5f, 0.533f);
@@ -552,12 +552,13 @@ glm::vec3 Scene::calculatePixelEnergy(const math::Intersection & nearest,
                                  type_GI,
                                  false))
             {
-                glm::vec3 L = nearest_GI.point - nearest.point;
+                glm::vec3 radiance = PBR(nearest_GI,
+                                         material_GI,
+                                         camera,
+                                         ray_GI);
 
-                glm::vec3 radiance = material_GI.albedo;
-
+                glm::vec3 L = glm::normalize(nearest_GI.point - nearest.point);
                 glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
-                L = glm::normalize(L);
 
                 ambient += PBR(nearest.normal,
                                L,

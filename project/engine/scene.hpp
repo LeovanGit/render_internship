@@ -191,6 +191,10 @@ public:
 
         float calculateSolidAngle(float L_length)
         {
+            // to avoid black points in mirrors mode
+            // when light source partially in some object
+            L_length = fmax(L_length, radius);
+
             float R_sqr = L_length * L_length - radius * radius;
             float cosa = sqrtf(R_sqr) / L_length;
 
@@ -243,6 +247,10 @@ public:
 
         float calculateSolidAngle(float L_length)
         {
+            // to avoid black points in mirrors mode
+            // when light source partially in some object
+            L_length = fmax(L_length, radius);
+
             float R_sqr = L_length * L_length - radius * radius;
             float cosa = sqrtf(R_sqr) / L_length;
 

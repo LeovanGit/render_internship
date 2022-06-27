@@ -226,7 +226,7 @@ void Controller::initScene()
 
     scene->s_lights.push_back(Scene::SpotLight(
                                   glm::vec3(0),
-                                  glm::vec3(10000.0f),
+                                  glm::vec3(50000.0f),
                                   20.0f,
                                   glm::vec3(-1.0f, 1.0f, 1.0f),
                                   40.0f,
@@ -240,6 +240,18 @@ void Controller::processInput(Camera & camera,
     RECT client_area = win.getClientSize();
     int width = client_area.right - client_area.left;
     int height = client_area.bottom - client_area.top;
+
+    // was any user input
+    for (int i = 0; i != KEYS_COUNT; ++i)
+    {
+        if(keys_log[i] == true)
+        {
+            if (scene->is_image_ready)
+                scene->is_global_illumination = false;
+            
+            break;
+        }
+    }
 
     if (keys_log[KEY_W])
     {
@@ -351,14 +363,12 @@ void Controller::processInput(Camera & camera,
     {
         camera.EV_100 -= 6.0f * delta_time;
     }
-    if (keys_log[KEY_G] && !scene->is_global_illumination)
+    if (keys_log[KEY_G] && 
+        !scene->is_global_illumination && 
+        !scene->is_image_ready)
     {
         scene->is_global_illumination = true;
         scene->is_image_ready = false;
-    }
-    else if (!keys_log[KEY_G])
-    {
-        scene->is_global_illumination = false;
     }
     if (keys_log[KEY_R])
     {

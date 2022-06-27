@@ -1,5 +1,6 @@
 #include "scene.hpp"
 #include "constants.hpp"
+#include "intersection.hpp"
 
 namespace
 {
@@ -200,6 +201,188 @@ bool Scene::isVisible(const math::Intersection & nearest,
            !found_intersection; // for directional
 }
 
+glm::vec3 Scene::calculatePointLights(const math::Intersection & nearest,
+                                      const Camera & camera,
+                                      const Material & material)
+{
+    glm::vec3 color(0);
+
+    float roughness_sqr = material.roughness * material.roughness;
+
+    glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
+    glm::vec3 V_reflected = glm::reflect(-V, nearest.normal);
+    float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
+
+    for (int i = 0, size = p_lights.size(); i != size; ++i)
+    {
+        glm::vec3 L = p_lights[i].position - nearest.point;
+        float L_length = glm::length(L);
+        glm::vec3 L_norm = glm::normalize(L);
+
+        // shadows
+        if (!isVisible(nearest, L_norm)) continue;
+
+        // light as solid angle
+        float solid_angle = p_lights[i].calculateSolidAngle(L_length);
+
+        // angular diameter of solid angle:
+        float sina = p_lights[i].radius / L_length;
+        float cosa = sqrtf(1.0f - sina * sina);
+
+        glm::vec3 H = glm::normalize(L_norm + V);
+        float NL = glm::clamp(glm::dot(nearest.normal, L_norm), 0.0f, 1.0f);
+
+        // L2 considers size of the light source (only for specular)
+        bool intersects = false;
+        glm::vec3 L2 = approximateClosestSphereDir(intersects,
+                                                   V_reflected,
+                                                   cosa,
+                                                   L,
+                                                   L_norm,
+                                                   L_length,
+                                                   p_lights[i].radius);
+
+        clampDirToHorizon(L2, NL, nearest.normal, 0.0f);
+
+        glm::vec3 H2 = glm::normalize(L2 + V);
+
+        float NL2 = glm::clamp(glm::dot(nearest.normal, L2), 0.0f, 1.0f);
+        float NH2 = glm::clamp(glm::dot(nearest.normal, H2), 0.0f, 1.0f);
+        float HL2 = glm::clamp(glm::dot(H, L2), 0.0f, 1.0f);
+
+        glm::vec3 specular = CookTorranceBRDF(roughness_sqr,
+                                              material.fresnel,
+                                              NL2,
+                                              NV,
+                                              NH2,
+                                              HL2,
+                                              solid_angle);
+
+        glm::vec3 diffuse = LambertBRDF(material, NL);
+
+        color += (diffuse * solid_angle * NL +
+                  specular) * p_lights[i].radiance;
+    }
+
+    return color;
+}
+
+glm::vec3 Scene::calculateSpotLights(const math::Intersection & nearest,
+                                     const Camera & camera,
+                                     const Material & material)
+{
+    glm::vec3 color(0);
+
+    float roughness_sqr = material.roughness * material.roughness;
+    
+    glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
+    glm::vec3 V_reflected = glm::reflect(-V, nearest.normal);
+    float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
+
+    for (int i = 0, size = s_lights.size(); i != size; ++i)
+    {
+        glm::vec3 L = s_lights[i].position - nearest.point;
+        float L_length = glm::length(L);
+        glm::vec3 L_norm = glm::normalize(L);
+
+        // shadows
+        if (!isVisible(nearest, L)) continue;
+
+        // if (!s_lights[i].isPointIlluminated(nearest.point)) continue;
+        float angular_attenuation =
+            s_lights[i].calculateAngularAttenuation(nearest.point);
+        if (angular_attenuation <= 0) continue;
+
+        // light as solid angle
+        float solid_angle = s_lights[i].calculateSolidAngle(L_length);
+
+        // angular diameter of solid angle:
+        float sina = s_lights[i].radius / L_length;
+        float cosa = sqrtf(1.0f - sina * sina);
+
+        glm::vec3 H = glm::normalize(L_norm + V);
+        float NL = glm::clamp(glm::dot(nearest.normal, L_norm), 0.0f, 1.0f);
+
+        // L2 considers size of the light source (only for specular)
+        bool intersects = false;
+        glm::vec3 L2 = approximateClosestSphereDir(intersects,
+                                                   V_reflected,
+                                                   cosa,
+                                                   L,
+                                                   L_norm,
+                                                   L_length,
+                                                   s_lights[i].radius);
+
+        clampDirToHorizon(L2, NL, nearest.normal, 0.0f);
+
+        glm::vec3 H2 = glm::normalize(L2 + V);
+
+        float NL2 = glm::clamp(glm::dot(nearest.normal, L2), 0.0f, 1.0f);
+        float NH2 = glm::clamp(glm::dot(nearest.normal, H2), 0.0f, 1.0f);
+        float HL2 = glm::clamp(glm::dot(H, L2), 0.0f, 1.0f);
+
+        glm::vec3 specular = CookTorranceBRDF(roughness_sqr,
+                                              material.fresnel,
+                                              NL2,
+                                              NV,
+                                              NH2,
+                                              HL2,
+                                              solid_angle);
+
+        glm::vec3 diffuse = LambertBRDF(material, NL);
+
+        // soft spotlight
+        specular *= angular_attenuation;
+        diffuse *= angular_attenuation;
+
+        color += (diffuse * solid_angle * NL +
+                  specular) * s_lights[i].radiance;
+    }
+
+    return color;
+}
+
+glm::vec3 Scene::calculateDirectionalLights(const math::Intersection & nearest,
+                                            const Camera & camera,
+                                            const Material & material)
+{
+    glm::vec3 color(0);
+
+    float roughness_sqr = material.roughness * material.roughness;
+    
+    glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
+    float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
+
+    for (int i = 0, size = d_lights.size(); i != size; ++i)
+    {
+        glm::vec3 L = -glm::normalize(d_lights[i].direction);
+
+        // shadows
+        if (!isVisible(nearest, L)) continue;
+
+        glm::vec3 H = glm::normalize(L + V);
+
+        float NL = glm::clamp(glm::dot(nearest.normal, L), 0.0f, 1.0f);
+        float NH = glm::clamp(glm::dot(nearest.normal, H), 0.0f, 1.0f);
+        float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
+
+        glm::vec3 specular = CookTorranceBRDF(roughness_sqr,
+                                              material.fresnel,
+                                              NL,
+                                              NV,
+                                              NH,
+                                              HL,
+                                              d_lights[i].solid_angle);
+
+        glm::vec3 diffuse = LambertBRDF(material, NL);
+        
+        color += (diffuse * d_lights[i].solid_angle * NL +
+                  specular) * d_lights[i].radiance;
+    }
+
+    return color;
+}
+
 float Scene::ggxSmith(const float roughness_sqr,
                       const float NL,
                       const float NV)
@@ -313,152 +496,14 @@ glm::vec3 Scene::PBR(const math::Intersection & nearest,
 {        
     glm::vec3 color(0);
 
-    float roughness_sqr = material.roughness * material.roughness;
-    
-    glm::vec3 V = glm::normalize(camera.getPosition() - nearest.point);
-    glm::vec3 V_reflected = glm::reflect(-V, nearest.normal);
-    float NV = glm::clamp(glm::dot(nearest.normal, V), 0.0f, 1.0f);
-
     // POINT LIGHTS
-    for (int i = 0, size = p_lights.size(); i != size; ++i)
-    {
-        glm::vec3 L = p_lights[i].position - nearest.point;
-        float L_length = glm::length(L);
-        glm::vec3 L_norm = glm::normalize(L);
-
-        // shadows
-        if (!isVisible(nearest, L_norm)) continue;
-
-        // light as solid angle
-        float solid_angle = p_lights[i].calculateSolidAngle(L_length);
-
-        // flat angle of solid angle:
-        float sina = p_lights[i].radius / L_length;
-        float cosa = sqrtf(1.0f - sina * sina);
-
-        glm::vec3 H = glm::normalize(L_norm + V);
-        float NL = glm::clamp(glm::dot(nearest.normal, L_norm), 0.0f, 1.0f);
-
-        // L2 considers size of the light source (only for specular)
-        bool intersects = false;
-        glm::vec3 L2 = approximateClosestSphereDir(intersects,
-                                                   V_reflected,
-                                                   cosa,
-                                                   L,
-                                                   L_norm,
-                                                   L_length,
-                                                   p_lights[i].radius);
-
-        clampDirToHorizon(L2, NL, nearest.normal, 0.0f);
-
-        glm::vec3 H2 = glm::normalize(L2 + V);
-
-        float NL2 = glm::clamp(glm::dot(nearest.normal, L2), 0.0f, 1.0f);
-        float NH2 = glm::clamp(glm::dot(nearest.normal, H2), 0.0f, 1.0f);
-        float HL2 = glm::clamp(glm::dot(H, L2), 0.0f, 1.0f);
-
-        glm::vec3 specular = CookTorranceBRDF(roughness_sqr,
-                                              material.fresnel,
-                                              NL2,
-                                              NV,
-                                              NH2,
-                                              HL2,
-                                              solid_angle);
-
-        glm::vec3 diffuse = LambertBRDF(material, NL);
-
-        color += (diffuse * solid_angle * NL +
-                  specular) * p_lights[i].radiance;
-    }
-
-    // DIRECTIONAL LIGHTS
-    for (int i = 0, size = d_lights.size(); i != size; ++i)
-    {
-        glm::vec3 L = -glm::normalize(d_lights[i].direction);
-
-        // shadows
-        if (!isVisible(nearest, L)) continue;
-
-        glm::vec3 H = glm::normalize(L + V);
-
-        float NL = glm::clamp(glm::dot(nearest.normal, L), 0.0f, 1.0f);
-        float NH = glm::clamp(glm::dot(nearest.normal, H), 0.0f, 1.0f);
-        float HL = glm::clamp(glm::dot(H, L), 0.0f, 1.0f);
-
-        glm::vec3 specular = CookTorranceBRDF(roughness_sqr,
-                                              material.fresnel,
-                                              NL,
-                                              NV,
-                                              NH,
-                                              HL,
-                                              d_lights[i].solid_angle);
-
-        glm::vec3 diffuse = LambertBRDF(material, NL);
-        
-        color += (diffuse * d_lights[i].solid_angle * NL +
-                  specular) * d_lights[i].radiance;
-    }
+    color += calculatePointLights(nearest, camera, material);
 
     // SPOTLIGHTS
-    for (int i = 0, size = s_lights.size(); i != size; ++i)
-    {
-        glm::vec3 L = s_lights[i].position - nearest.point;
-        float L_length = glm::length(L);
-        glm::vec3 L_norm = glm::normalize(L);
+    color += calculateSpotLights(nearest, camera, material);
 
-        // shadows
-        if (!isVisible(nearest, L)) continue;
-
-        // if (!s_lights[i].isPointIlluminated(nearest.point)) continue;
-        float angular_attenuation =
-            s_lights[i].calculateAngularAttenuation(nearest.point);
-        if (angular_attenuation <= 0) continue;
-
-        // light as solid angle
-        float solid_angle = s_lights[i].calculateSolidAngle(L_length);
-
-        // flat angle of solid angle:
-        float sina = s_lights[i].radius / L_length;
-        float cosa = sqrtf(1.0f - sina * sina);
-
-        glm::vec3 H = glm::normalize(L_norm + V);
-        float NL = glm::clamp(glm::dot(nearest.normal, L_norm), 0.0f, 1.0f);
-
-        // L2 considers size of the light source (only for specular)
-        bool intersects = false;
-        glm::vec3 L2 = approximateClosestSphereDir(intersects,
-                                                   V_reflected,
-                                                   cosa,
-                                                   L,
-                                                   L_norm,
-                                                   L_length,
-                                                   s_lights[i].radius);
-
-        clampDirToHorizon(L2, NL, nearest.normal, 0.0f);
-
-        glm::vec3 H2 = glm::normalize(L2 + V);
-
-        float NL2 = glm::clamp(glm::dot(nearest.normal, L2), 0.0f, 1.0f);
-        float NH2 = glm::clamp(glm::dot(nearest.normal, H2), 0.0f, 1.0f);
-        float HL2 = glm::clamp(glm::dot(H, L2), 0.0f, 1.0f);
-
-        glm::vec3 specular = CookTorranceBRDF(roughness_sqr,
-                                              material.fresnel,
-                                              NL2,
-                                              NV,
-                                              NH2,
-                                              HL2,
-                                              solid_angle);
-
-        glm::vec3 diffuse = LambertBRDF(material, NL);
-
-        // soft spotlight
-        specular *= angular_attenuation;
-        diffuse *= angular_attenuation;
-
-        color += (diffuse * solid_angle * NL +
-                  specular) * s_lights[i].radiance;
-    }
+    // DIRECTIONAL LIGHTS
+    color += calculateDirectionalLights(nearest, camera, material);
 
     return color;
 }
@@ -519,7 +564,7 @@ glm::vec3 Scene::calculatePixelEnergy(const math::Intersection & nearest,
                                V,
                                material,
                                radiance);
-            }
+            }        
         }
 
         color += ambient * 2.0f * math::PI / float(SAMPLES_COUNT);
@@ -661,7 +706,7 @@ void Scene::render(Window & win, Camera & camera)
         if (findIntersection(nearest, ray, material, type))
         {
             if (type == IntersectedType::POINT_LIGHT ||
-                type == IntersectedType::POINT_LIGHT)
+                type == IntersectedType::SPOT_LIGHT)
             {
                 result_color = material.emission;
             }

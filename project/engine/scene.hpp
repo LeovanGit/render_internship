@@ -414,6 +414,18 @@ public:
     bool isVisible(const math::Intersection & nearest,
                    const glm::vec3 & dir_to_light);
 
+    glm::vec3 calculatePointLights(const math::Intersection & nearest,
+                                   const Camera & camera,
+                                   const Material & material);
+
+    glm::vec3 calculateSpotLights(const math::Intersection & nearest,
+                                  const Camera & camera,
+                                  const Material & material);
+
+    glm::vec3 calculateDirectionalLights(const math::Intersection & nearest,
+                                         const Camera & camera,
+                                         const Material & material);
+
     float ggxSmith(const float roughness_sqr,
                    const float NL,
                    const float NV);

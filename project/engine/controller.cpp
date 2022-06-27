@@ -46,8 +46,8 @@ void Controller::initScene()
             scene->spheres.push_back(
                 Scene::Sphere(100.0f,
                               glm::vec3(-660.0f + 220.0f * col,
-                                        660.0f - 220.0f * row,
-                                        0),
+                                        0,
+                                        660.0f - 220.0f * row),
                               Material(
                                   glm::vec3(1.0f, 0.0f, 0.0f),
                                   roughness,
@@ -59,18 +59,18 @@ void Controller::initScene()
 
     // LIGHTS
     scene->p_lights.push_back(Scene::PointLight(
-                                  glm::vec3(1000.0f, 0.0f, -1000.0f),
+                                  glm::vec3(1000.0f, 1000.0f, 0.0f),
                                   glm::vec3(3000.0f),
                                   50.0f));
 
     scene->p_lights.push_back(Scene::PointLight(
-                                  glm::vec3(-1000.0f, 0.0f, -1000.0f),
+                                  glm::vec3(-1000.0f, 1000.0f, 0.0f),
                                   glm::vec3(2000.0f),
                                   25.0f));
 
     scene->d_lights.push_back(Scene::DirectionalLight(
                                   glm::vec3(15000.0f),
-                                  glm::vec3(1.0f, -1.0f, 1.0f),
+                                  glm::vec3(1.0f, -1.0f, -1.0f),
                                   0.00006794f));
 
     scene->s_lights.push_back(Scene::SpotLight(
@@ -86,20 +86,30 @@ void Controller::initScene()
                                          glm::vec3(0.0f, -1000.0f, 0.0f),
                                          Material(
                                              glm::vec3(0.3f),
-                                             0.2f,
+                                             0.8f,
                                              0.0f,
                                              glm::vec3(0.0f),
-                                             glm::vec3(0.04f))));
+                                             INSULATOR_F0)));
 
-    // scene->cubes.push_back(Scene::Cube(glm::vec3(0, 0, -300.0f),
-    //                                    math::EulerAngles(0, 0, 0),
-    //                                    glm::vec3(100.0f),
-    //                                    Material(
-    //                                        glm::vec3(0, 1.0f, 0),
-    //                                        0.95f,
-    //                                        1.0f,
-    //                                        glm::vec3(0.0f),
-    //                                        glm::vec3(0.04f))));
+    scene->cubes.push_back(Scene::Cube(glm::vec3(1000.0f, 0.0f, 600.0f),
+                                       math::EulerAngles(0, 0, 0),
+                                       glm::vec3(100.0f),
+                                       Material(
+                                           glm::vec3(1.0f),
+                                           1.0f,
+                                           0.0f,
+                                           glm::vec3(0.0f),
+                                           INSULATOR_F0)));
+
+    scene->cubes.push_back(Scene::Cube(glm::vec3(1000.0f, 0.0f, 100.0f),
+                                       math::EulerAngles(0, 0, 0),
+                                       glm::vec3(100.0f),
+                                       Material(
+                                           glm::vec3(1.0f, 0.71f, 0.29f),
+                                           0.05f,
+                                           1.0f,
+                                           glm::vec3(0.0f),
+                                           glm::vec3(1.0f, 0.71f, 0.29f))));
 
     // FOUR EQUAL POINT LIGHTS
     // float power = 5000.0f;

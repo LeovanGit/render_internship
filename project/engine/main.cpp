@@ -32,7 +32,7 @@ auto start_time = std::chrono::steady_clock::now();
 float delta_time = 0;
 
 // CREATE CAMERA
-Camera camera(glm::vec3(0, 0, -1000.0f),
+Camera camera(glm::vec3(0, 0, -1500.0f),
               glm::vec3(0, 1.0f, 0), // up
               glm::vec3(0, 0, 1.0f)); // forward
 

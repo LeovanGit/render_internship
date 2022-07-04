@@ -96,26 +96,18 @@ void Globals::initVBO()
 
     HRESULT result = s_device->CreateBuffer(&vbo_desc,
                                             NULL,
-                                            &s_vbo);
+                                            m_vbo.reset());
     assert(result >= 0 && "CreateBuffer");
 
     // copy vertices into the buffer
     // ms contain info about the buffer, 
     // ms.pData - pointer to the buffer's location
     D3D11_MAPPED_SUBRESOURCE ms;
-    s_device_context->Map(s_vbo, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+    s_device_context->Map(m_vbo.ptr(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
     memcpy(ms.pData, vertices, sizeof(vertices));
-    s_device_context->Unmap(s_vbo, NULL);
-}
+    s_device_context->Unmap(m_vbo.ptr(), NULL);
 
-void Globals::cleanD3D()
-{
-    if (s_device) s_device->Release();
-    if (s_device_context) s_device_context->Release();
-    if (s_factory) s_factory->Release();
-
-    if (s_vbo) s_vbo->Release();
-    if (s_input_layout) s_input_layout->Release();
+    s_vbo = m_vbo.ptr();
 }
 
 } // namespace engine

@@ -30,8 +30,6 @@ public:
 
     void initVBO();
 
-    void cleanD3D();
-
     DxResPtr<IDXGIFactory> m_factory;
     DxResPtr<IDXGIFactory5> m_factory5;
 
@@ -42,6 +40,8 @@ public:
     DxResPtr<ID3D11DeviceContext4> m_device_context4;
 
     DxResPtr<ID3D11Debug> m_device_debug;
+
+    DxResPtr<ID3D11Buffer> m_vbo;
 };
 } // namespace engine
 

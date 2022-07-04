@@ -134,7 +134,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
         }
     }
     exit:
-    globals.cleanD3D();
+    // no need to clean COM objects,
+    // because DxResPtr does that it in the destructor!
+
     // return this part of the WM_QUIT message to Windows
     return msg.wParam;
 }

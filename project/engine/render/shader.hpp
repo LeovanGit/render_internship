@@ -30,6 +30,8 @@ public:
 
     DxResPtr<ID3D11VertexShader> vert_shader;
     DxResPtr<ID3D11PixelShader> frag_shader;
+
+    DxResPtr<ID3D11InputLayout> m_input_layout;
 };
 } // namespace engine
 

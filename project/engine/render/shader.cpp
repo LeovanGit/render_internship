@@ -94,7 +94,9 @@ void Shader::init(const engine::windows::Window & win,
                                 2,
                                 vert_shader_buffer->GetBufferPointer(),
                                 vert_shader_buffer->GetBufferSize(),
-                                &s_input_layout);
+                                m_input_layout.reset());
+
+    s_input_layout = m_input_layout.ptr();
 
     s_device_context->IASetInputLayout(s_input_layout);
 }

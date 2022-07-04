@@ -1,11 +1,14 @@
 #include "material.hpp"
 
 Material::Material(const glm::vec3 & albedo,
-                   float specular, 
-                   float glossiness, 
-                   const glm::vec3 & emission) :
+                   float roughness,
+                   float metalness,
+                   const glm::vec3 & emission,
+                   const glm::vec3 & fresnel) :
                    albedo(albedo),
-                   specular(specular),
-                   glossiness(glossiness),
-                   emission(emission) {}
+                   roughness(roughness),
+                   metalness(metalness),
+                   emission(emission),
+                   fresnel(fresnel)
+{}
 

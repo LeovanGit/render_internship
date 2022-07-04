@@ -17,6 +17,10 @@ Camera::Camera(const glm::vec3 & position,
     rotation = glm::quat_cast(glm::mat3(view_matrix_inv));
 
     is_updated_basis = false;
+
+    is_roll_enabled = false;
+
+    EV_100 = 2.0f;
 }
 
 void Camera::setPerspective(float fovy,
@@ -97,11 +101,7 @@ void Camera::addWorldPosition(const glm::vec3 & position)
 
 void Camera::setWorldAngles(const math::EulerAngles & angles)
 {
-    math::Basis basis(glm::vec3(1.0f, 0, 0),
-                      glm::vec3(0, 1.0f, 0),
-                      glm::vec3(0, 0, 1.0f));
-
-    rotation = math::quatFromEuler(angles, basis);
+    rotation = math::quatFromEuler(angles);
     //glm::normalize(rotation);
 
     is_updated_basis = false;
@@ -110,11 +110,7 @@ void Camera::setWorldAngles(const math::EulerAngles & angles)
 
 void Camera::addWorldAngles(const math::EulerAngles & angles)
 {
-    math::Basis basis(glm::vec3(1.0f, 0, 0),
-                      glm::vec3(0, 1.0f, 0),
-                      glm::vec3(0, 0, 1.0f));
-
-    rotation = math::quatFromEuler(angles, basis) * rotation;
+    rotation = math::quatFromEuler(angles) * rotation;
     // glm::normalize(rotation);
 
     is_updated_basis = false;
@@ -123,11 +119,17 @@ void Camera::addWorldAngles(const math::EulerAngles & angles)
 
 void Camera::addRelativeAngles(const math::EulerAngles & angles)
 {
-    math::Basis camera_basis(getRight(),
-                             getUp(),
-                             getForward());
+    math::Basis basis(getRight(),
+                      glm::vec3(0, 1.0f, 0),
+                      glm::vec3(0, 0, 0));
 
-    rotation = math::quatFromEuler(angles, camera_basis) * rotation;
+    if (is_roll_enabled)
+    {
+        basis.y = getUp();
+        basis.z = getForward();
+    }
+
+    rotation = math::quatFromEuler(angles, basis) * rotation;
     // glm::normalize(rotation);
 
     is_updated_basis = false;
@@ -165,7 +167,8 @@ void Camera::updateMatrices()
     is_updated_matrices = true;
 }
 
-glm::vec3 Camera::generateWorldPointFromCS(float x, float y) const
+// generate WS point from CS
+glm::vec3 Camera::reproject(float x, float y) const
 {
     glm::vec4 point_h_cs(x, y, 1.0f, 1.0f);
     glm::vec4 point_h_ws = view_proj_matrix_inv * point_h_cs;
@@ -173,4 +176,16 @@ glm::vec3 Camera::generateWorldPointFromCS(float x, float y) const
     glm::vec3 point_ws = glm::vec3(point_h_ws) / point_h_ws.w;
 
     return point_ws;
+}
+
+glm::vec3 Camera::adjustExposure(const glm::vec3 & color) const
+{
+    // sensor sensitivity
+    constexpr float S = 100.0f;
+
+    // lens and vignetting attenuation
+    constexpr float q = 0.65f;
+
+    float luminance_max = (78.0f / (q * S)) * powf(2.0f, EV_100);
+    return color * (1.0f / luminance_max);
 }

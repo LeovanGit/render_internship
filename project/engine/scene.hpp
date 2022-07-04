@@ -15,13 +15,11 @@
 #include "cube.hpp"
 #include "material.hpp"
 #include "intersection.hpp"
+#include "euler_angles.hpp"
+#include "hemisphere_ray_generation.hpp"
+#include "constants.hpp"
 
-constexpr bool SHADOWS = true;
-
-constexpr int HEX_BLACK = 0x000000;
-constexpr float LIGHT_SIZE = 10.0f;
-constexpr float AMBIENT = 0.1f;
-constexpr float DELTA = 0.001f;
+#include "parallel_executor.hpp"
 
 class Scene
 {
@@ -61,13 +59,13 @@ public:
         bool intersect(math::Intersection & nearest,
                        const math::Ray & ray,
                        ObjRef & obj_ref,
-                       Material *& material)
+                       Material & material)
         {
             if (math::Sphere::intersect(nearest, ray))
             {
                 obj_ref.type = IntersectedType::SPHERE;
                 obj_ref.object = this;
-                material = &(this->material);
+                material = this->material;
 
                 return true;
             }
@@ -84,7 +82,7 @@ public:
     public:
         Plane(const glm::vec3 & normal,
               const glm::vec3 & origin,
-              Material & material) :
+              const Material & material) :
               math::Plane(normal, origin),
               material(material)
             {}
@@ -92,13 +90,13 @@ public:
         bool intersect(math::Intersection & nearest,
                        const math::Ray & ray,
                        ObjRef & obj_ref,
-                       Material *& material)
+                       Material & material)
         {
             if (math::Plane::intersect(nearest, ray))
             {
                 obj_ref.type = IntersectedType::PLANE;
                 obj_ref.object = this;
-                material = &(this->material);
+                material = this->material;
 
                 return true;
             }
@@ -115,8 +113,8 @@ public:
     public:
         Cube(const glm::vec3 & position,
              const math::EulerAngles & angles,
-             glm::vec3 scale,
-             Material material) :
+             const glm::vec3 & scale,
+             const Material & material) :
              math::Cube(position, angles, scale),
              material(material)
             {}
@@ -124,13 +122,13 @@ public:
         bool intersect(math::Intersection & nearest,
                        const math::Ray & ray,
                        ObjRef & obj_ref,
-                       Material *& material)
+                       Material & material)
         {
             if (math::Cube::intersect(nearest, ray))
             {
                 obj_ref.type = IntersectedType::CUBE;
                 obj_ref.object = this;
-                material = &(this->material);
+                material = this->material;
 
                 return true;
             }
@@ -143,90 +141,152 @@ public:
     class DirectionalLight
     {
     public:
-        DirectionalLight(const glm::vec3 & direction,
-                         const glm::vec3 & color) :
+        DirectionalLight(const glm::vec3 & radiance,
+                         const glm::vec3 & direction,
+                         float solid_angle) :
+                         radiance(radiance),
                          direction(direction),
-                         color(color)
+                         solid_angle(solid_angle)
         {}
         
         // without visualisation because nothing depends on its position
 
+        glm::vec3 radiance;
         glm::vec3 direction;
-        glm::vec3 color;
+        float solid_angle;
     };
 
     class PointLight
     {
     public:
         PointLight(const glm::vec3 & position,
-                   float radius,
-                   const glm::vec3 & color) :
+                   const glm::vec3 & radiance,
+                   float radius) :
                    position(position),
-                   radius(radius),
-                   material(Material(color, 0, 0, glm::vec3(0)))
+                   radiance(radiance),
+                   radius(radius)
         {}
 
         bool intersect(math::Intersection & nearest,
                        const math::Ray & ray,
                        ObjRef & obj_ref,
-                       Material *& material)
+                       Material & material)
         {
-            math::Sphere sphere(LIGHT_SIZE, position);
+            math::Sphere sphere(radius, position);
 
             if (sphere.intersect(nearest, ray))
             {               
                 obj_ref.type = IntersectedType::POINT_LIGHT;
                 obj_ref.object = this;
-                material = &(this->material);                
+                material = Material(radiance,
+                                    1.0f,
+                                    0.0f,
+                                    radiance,
+                                    glm::vec3(0));
 
                 return true;
             }
             return false;
         }
 
+        float calculateSolidAngle(float L_length)
+        {
+            // to avoid black points in mirrors mode
+            // when light source partially in some object
+            L_length = fmax(L_length, radius);
+
+            float R_sqr = L_length * L_length - radius * radius;
+            float cosa = sqrtf(R_sqr) / L_length;
+
+            return 2.0f * math::PI * (1.0f - cosa);
+        }
+
         glm::vec3 position;
+        glm::vec3 radiance;
         float radius;
-        Material material;
     };
 
     class SpotLight
     {
     public:
         SpotLight(const glm::vec3 & position,
+                  const glm::vec3 & radiance,
                   float radius,
-                  float angle,
                   const glm::vec3 & direction,
-                  const glm::vec3 & color) :
+                  float inner_angle,
+                  float outer_angle) :
                   position(position),
+                  radiance(radiance),
                   radius(radius),
-                  angle(angle),
                   direction(direction),
-                  material(Material(color, 0, 0, glm::vec3(0)))
+                  inner_angle(inner_angle),
+                  outer_angle(outer_angle)
         {}
 
         bool intersect(math::Intersection & nearest,
                        const math::Ray & ray,
                        ObjRef & obj_ref,
-                       Material *& material)
+                       Material & material)
         {
-            math::Sphere sphere(LIGHT_SIZE, position);
+            math::Sphere sphere(radius, position);
 
             if (sphere.intersect(nearest, ray))
             {               
                 obj_ref.type = IntersectedType::SPOT_LIGHT;
                 obj_ref.object = this;
-                material = &(this->material);
+                material = Material(radiance,
+                                    1.0f,
+                                    0.0f,
+                                    radiance,
+                                    glm::vec3(0));
 
                 return true;
             }
             return false;
         }
 
+        float calculateSolidAngle(float L_length)
+        {
+            // to avoid black points in mirrors mode
+            // when light source partially in some object
+            L_length = fmax(L_length, radius);
+
+            float R_sqr = L_length * L_length - radius * radius;
+            float cosa = sqrtf(R_sqr) / L_length;
+
+            return 2.0f * math::PI * (1.0f - cosa);
+        }
+
+        bool isPointIlluminated(const glm::vec3 & point)
+        {
+            glm::vec3 dir_to_point = glm::normalize(point - position);
+            float cosa = glm::dot(dir_to_point, glm::normalize(direction));
+            float cosb = cosf(glm::radians(outer_angle / 2.0f));
+
+            return cosa > cosb;
+        }
+
+        float calculateAngularAttenuation(const glm::vec3 & point)
+        {
+            glm::vec3 dir_to_point = glm::normalize(point - position);
+            float cosa = glm::dot(dir_to_point, glm::normalize(direction));
+
+            float outer_cos = cosf(glm::radians(outer_angle / 2.0f));
+            float inner_cos = cosf(glm::radians(inner_angle / 2.0f));
+
+            float intensity = (cosa - outer_cos) / (inner_cos - outer_cos);
+            
+            return glm::clamp(intensity, 0.0f, 1.0f);
+        }
+
         glm::vec3 position;
+        glm::vec3 radiance;
         float radius;
-        float angle;
+
         glm::vec3 direction;
-        Material material;
+        // in degrees
+        float inner_angle;
+        float outer_angle;
     };
 
     // ====================[OBJECT DECORATORS]====================
@@ -306,6 +366,10 @@ public:
     std::vector<PointLight> p_lights;
     std::vector<SpotLight> s_lights;
 
+    bool is_smooth_reflection;
+    bool is_global_illumination;
+    bool is_image_ready;
+
 public:
     explicit Scene() = default;
 
@@ -319,8 +383,9 @@ public:
     // overloaded: for render only
     bool findIntersection(math::Intersection & nearest,
                           const math::Ray & ray,
-                          Material *& material,
-                          IntersectedType & type);
+                          Material & material,
+                          IntersectedType & type,
+                          bool include_lights = true);
 
     class IntersectionQuery
     {
@@ -328,7 +393,7 @@ public:
         IntersectionQuery() = default;
 
         math::Intersection nearest;
-        Material * material;
+        Material material;
 
         // passing by pointer allows to define if
         // smth additional needs to be returned
@@ -340,13 +405,80 @@ public:
     // if it's need
     bool findIntersection(const math::Ray & ray,
                           IntersectionQuery & query);
- 
+
+    glm::vec3 approximateClosestSphereDir(bool& intersects,
+                                          glm::vec3 reflectionDir,
+                                          float sphereCos,
+                                          glm::vec3 sphereRelPos,
+                                          glm::vec3 sphereDir,
+                                          float sphereDist,
+                                          float sphereRadius);
+    
+    void clampDirToHorizon(glm::vec3 & dir,
+                           float & NoD,
+                           glm::vec3 normal,
+                           float minNoD);
+
     bool isVisible(const math::Intersection & nearest,
                    const glm::vec3 & dir_to_light);
 
-    glm::vec3 blinnPhong(const math::Intersection & nearest,
-                         const Material * material,
-                         const Camera & camera);
+    glm::vec3 calculatePointLights(const math::Intersection & nearest,
+                                   const Camera & camera,
+                                   const Material & material);
+
+    glm::vec3 calculateSpotLights(const math::Intersection & nearest,
+                                  const Camera & camera,
+                                  const Material & material);
+
+    glm::vec3 calculateDirectionalLights(const math::Intersection & nearest,
+                                         const Camera & camera,
+                                         const Material & material);
+
+    float ggxSmith(const float roughness_sqr,
+                   const float NL,
+                   const float NV);
+
+    float ggxTrowbridgeReitz(const float roughness_sqr,
+                             const float NH);
+
+    glm::vec3 ggxSchlick(const float cosTheta,
+                         const glm::vec3 & F0);
+
+    // Lambertian diffuse BRDF
+    glm::vec3 LambertBRDF(const Material & material,
+                          float NL);
+
+    // GGX Cook-Torrance specular BRDF
+    glm::vec3 CookTorranceBRDF(float roughness_sqr,
+                               const glm::vec3 & fresnel,
+                               float NL,
+                               float NV,
+                               float NH,
+                               float HL,
+                               float solid_angle);
+
+    // overloaded: for samples
+    glm::vec3 PBR(const glm::vec3 & N,
+                  const glm::vec3 & L,
+                  const glm::vec3 & V,
+                  const Material & material,
+                  const glm::vec3 & radiance);
+
+    // overloaded: approximation for one ray
+    glm::vec3 PBR(const math::Intersection & nearest,
+                  const Material & material,
+                  const Camera & camera,
+                  const math::Ray & ray);
+
+    glm::vec3 calculatePixelEnergy(const math::Intersection & nearest,
+                                   const Material & material,
+                                   const Camera & camera,
+                                   const math::Ray & ray,
+                                   float depth = 0);
+
+    glm::vec3 toneMappingACES(const glm::vec3 & color) const;
+
+    glm::vec3 gammaCorrection(const glm::vec3 & color) const;
 
     void render(Window & win, Camera & camera);
 
@@ -354,7 +486,8 @@ protected:
     void findIntersectionInternal(math::Intersection & nearest,
                                   const math::Ray & ray,
                                   ObjRef & obj_ref,
-                                  Material *& material);
+                                  Material & material,
+                                  bool include_lights = true);
 
 };
 

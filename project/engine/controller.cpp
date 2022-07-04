@@ -1,5 +1,16 @@
 #include "controller.hpp"
 
+enum class sceneTypes
+{
+    SPHERES_GRID,
+    CORNELL_BOX
+};
+
+namespace
+{
+constexpr sceneTypes scene_type = sceneTypes::SPHERES_GRID;
+} // namespace
+
 void Controller::init(Scene * scene)
 {
     this->scene = scene;
@@ -8,100 +19,218 @@ void Controller::init(Scene * scene)
     fixed_mouse = glm::vec2(0);
     delta_fixed_mouse = glm::vec2(0);
 
+    is_accelerated = false;
+
     for (int i = 0; i != KEYS_COUNT; ++i) keys_log[i] = false;
+    for (int i = 0; i != KEYS_COUNT; ++i) was_released[i] = true;
 }
 
 void Controller::initScene()
 {
-    // CREATE MATERIALS
-    enum Materials
+    glm::vec3 INSULATOR_F0 = glm::vec3(0.04f);
+
+    if (scene_type == sceneTypes::CORNELL_BOX) goto cornell;
+
+    // SPHERES GRID
+    for (int row = 0; row != 7; ++row)
     {
-        GLOSSY_BLUE,
-        MATTE_GREY,
-        MATTE_RED,
-        MATTE_WHITE,
-        HALF_GLOSSY_GREEN,
-        GLOSSY_RED,
-    };
+        for (int col = 0; col != 7; ++col)
+        {
+            float roughness = 0.01f + 0.99f / 6.0f * col;
+            float metalness = 1.0f - 1.0f / 6.0f * row;
 
-    std::vector<Material> materials;
-    // glossy blue
-    materials.push_back(Material(glm::vec3(0.4f, 0.0f, 0.0f),
-                                 1.0f,
-                                 128.0f,
-                                 glm::vec3(0.0f, 0.0f, 0.0f)));
-    // matte grey
-    materials.push_back(Material(glm::vec3(0.5f, 0.5f, 0.5f),
-                                 0,
-                                 0,
-                                 glm::vec3(0, 0, 0)));
-    // matte red
-    materials.push_back(Material(glm::vec3(0.0f, 0.0f, 0.8f),
-                                 0.2f,
-                                 16.0f,
-                                 glm::vec3(0.0f, 0.0f, 0.0f)));
-    // matte white
-    materials.push_back(Material(glm::vec3(1.0f, 1.0f, 1.0f),
-                                 0.2f,
-                                 16.0f,
-                                 glm::vec3(0.0f, 0.0f, 0.0f)));
+            glm::vec3 F0 = glm::mix(INSULATOR_F0,
+                                    glm::vec3(1.0f, 0.0f, 0.0f), // albedo
+                                    metalness);
 
-    // half-glossy green
-    materials.push_back(Material(glm::vec3(0.0f, 0.4f, 0.0f),
-                                 0.6f,
-                                 72.0f,
-                                 glm::vec3(0.0f, 0.0f, 0.0f)));
-    // glossy red
-    materials.push_back(Material(glm::vec3(0.0f, 0.0f, 0.8f),
-                                 1.0f,
-                                 128.0f,
-                                 glm::vec3(0.0f, 0.0f, 0.0f)));
+            scene->spheres.push_back(
+                Scene::Sphere(100.0f,
+                              glm::vec3(-660.0f + 220.0f * col,
+                                        0,
+                                        660.0f - 220.0f * row),
+                              Material(
+                                  glm::vec3(1.0f, 0.0f, 0.0f),
+                                  roughness,
+                                  metalness,
+                                  glm::vec3(0.0f),
+                                  F0)));
+        }
+    }
 
-    // CREATE PLANES
-    // floor
-    scene->planes.push_back(Scene::Plane(glm::vec3(0, 1.0f, 0),
-                                         glm::vec3(0, -100.0f, 0),
-                                         materials[MATTE_GREY]));
+    // LIGHTS
+    scene->p_lights.push_back(Scene::PointLight(
+                                  glm::vec3(1000.0f, 1000.0f, 0.0f),
+                                  glm::vec3(3000.0f),
+                                  50.0f));
 
-    // CREATE SPHERES
-    scene->spheres.push_back(Scene::Sphere(80.0f,
-                                           glm::vec3(0, -20.0f, 0),
-                                           materials[GLOSSY_BLUE]));
+    scene->p_lights.push_back(Scene::PointLight(
+                                  glm::vec3(-1000.0f, 1000.0f, 0.0f),
+                                  glm::vec3(2000.0f),
+                                  25.0f));
 
-    scene->spheres.push_back(Scene::Sphere(100.0f,
-                                           glm::vec3(-180.0f, 200.0f, 100.0f),
-                                           materials[MATTE_RED]));
-
-    scene->spheres.push_back(Scene::Sphere(120.0f,
-                                           glm::vec3(300.0f, 20.0f, 100.0f),
-                                           materials[HALF_GLOSSY_GREEN]));
-
-    // CREATE CUBES
-    scene->cubes.push_back(Scene::Cube(glm::vec3(-180.0f, 0, 100.0f),
-                                       math::EulerAngles(45.0f, 0.0f, 0.0f),
-                                       glm::vec3(100.0f, 100.0f, 100.0f),
-                                       materials[MATTE_WHITE]));
-
-    scene->cubes.push_back(Scene::Cube(glm::vec3(-350.0f, -25.0f, -70.0f),
-                                       math::EulerAngles(45.0f, 0.0f, 0.0f),
-                                       glm::vec3(75.0f, 75.0f, 75.0f),
-                                       materials[GLOSSY_RED]));
-
-    // CREATE LIGHTS
-    scene->p_lights.push_back(Scene::PointLight(glm::vec3(-400.0, 250.0f, -300.0f),
-                                                350.0f,
-                                                glm::vec3(0.8f)));
-    
     scene->d_lights.push_back(Scene::DirectionalLight(
-                                  glm::normalize(glm::vec3(1.0f, -1.0f, 1.0f)),
-                                  glm::vec3(0.15f)));
+                                  glm::vec3(15000.0f),
+                                  glm::vec3(1.0f, -1.0f, -1.0f),
+                                  0.00006794f));
 
     scene->s_lights.push_back(Scene::SpotLight(
-                                  glm::vec3(200, 200, -300),
-                                  400.0f,
-                                  55.0f,
-                                  glm::normalize(glm::vec3(0, -1.0f, 1.0f)),
-                                  glm::vec3(0.1f, 0.5f, 1.0f)));
+                                  glm::vec3(1000.0f, 0.0f, -300.0f),
+                                  glm::vec3(1.0f, 0.5f, 0.1f) * 10000.0f,
+                                  20.0f,
+                                  glm::vec3(0.0f, -1.0f, 0.5f),
+                                  30.0f,
+                                  35.0f));
+
+    // additional OBJECTS
+    scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, 1.0f, 0.0f),
+                                         glm::vec3(0.0f, -1000.0f, 0.0f),
+                                         Material(
+                                             glm::vec3(0.3f),
+                                             0.8f,
+                                             0.0f,
+                                             glm::vec3(0.0f),
+                                             INSULATOR_F0)));
+
+    scene->cubes.push_back(Scene::Cube(glm::vec3(1000.0f, 0.0f, 600.0f),
+                                       math::EulerAngles(0, 0, 0),
+                                       glm::vec3(100.0f),
+                                       Material(
+                                           glm::vec3(1.0f),
+                                           1.0f,
+                                           0.0f,
+                                           glm::vec3(0.0f),
+                                           INSULATOR_F0)));
+
+    scene->cubes.push_back(Scene::Cube(glm::vec3(1000.0f, 0.0f, 100.0f),
+                                       math::EulerAngles(0, 0, 0),
+                                       glm::vec3(100.0f),
+                                       Material(
+                                           glm::vec3(1.0f, 0.71f, 0.29f),
+                                           0.05f,
+                                           1.0f,
+                                           glm::vec3(0.0f),
+                                           glm::vec3(1.0f, 0.71f, 0.29f))));
+
+    // FOUR EQUAL POINT LIGHTS
+    // float power = 5000.0f;
+    // scene->p_lights.push_back(Scene::PointLight(
+    //                               glm::vec3(-700.0f, 700.0f, -700.0f),
+    //                               glm::vec3(power),
+    //                               25.0f));
+
+    // scene->p_lights.push_back(Scene::PointLight(
+    //                               glm::vec3(-700.0f, -700.0f, -700.0f),
+    //                               glm::vec3(power),
+    //                               25.0f));
+
+    // scene->p_lights.push_back(Scene::PointLight(
+    //                               glm::vec3(700.0f, 700.0f, -700.0f),
+    //                               glm::vec3(power),
+    //                               25.0f));
+
+    // scene->p_lights.push_back(Scene::PointLight(
+    //                               glm::vec3(700.0f, -700.0f, -700.0f),
+    //                               glm::vec3(power),
+    //                               25.0f));
+
+    // SPOTLIGHTS SOFT TEST
+    // scene->s_lights.push_back(Scene::SpotLight(
+    //                               glm::vec3(1000.0f, 0.0f, -300.0f),
+    //                               glm::vec3(10000.0f),
+    //                               20.0f,
+    //                               glm::vec3(0.0f, -1.0f, 0.0f),
+    //                               30.0f,
+    //                               30.0f));
+
+    // scene->s_lights.push_back(Scene::SpotLight(
+    //                               glm::vec3(2000.0f, 0.0f, -300.0f),
+    //                               glm::vec3(10000.0f),
+    //                               20.0f,
+    //                               glm::vec3(0.0f, -1.0f, 0.0f),
+    //                               30.0f,
+    //                               35.0f));
+
+    return;
+
+    // GLOBAL ILLUMINATION TEST: CORNELL BOX
+    cornell:
+    float offset = 500.0f;
+    scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, 1.0f, 0.0f),
+                                         glm::vec3(0.0f, -offset, 0.0f),
+                                         Material(
+                                             glm::vec3(1.0f),
+                                             0.2f,
+                                             0.0f,
+                                             glm::vec3(0.0f),
+                                             glm::vec3(0.04f))));
+
+    scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, -1.0f, 0.0f),
+                                         glm::vec3(0.0f, offset, 0.0f),
+                                         Material(
+                                             glm::vec3(1.0f),
+                                             0.2f,
+                                             0.0f,
+                                             glm::vec3(0.0f),
+                                             glm::vec3(0.04f))));
+
+    scene->planes.push_back(Scene::Plane(glm::vec3(0.0f, 0.0f, -1.0f),
+                                         glm::vec3(0.0f, 0.0f, offset),
+                                         Material(
+                                             glm::vec3(1.0f),
+                                             0.2f,
+                                             0.0f,
+                                             glm::vec3(0.0f),
+                                             glm::vec3(0.04f))));
+
+    scene->planes.push_back(Scene::Plane(glm::vec3(-1.0f, 0.0f, 0.0f),
+                                         glm::vec3(offset, 0.0f, 0.0f),
+                                         Material(
+                                             glm::vec3(0.0f, 1.0f, 0.0f),
+                                             0.2f,
+                                             0.0f,
+                                             glm::vec3(0.0f),
+                                             glm::vec3(0.04f))));
+
+    scene->planes.push_back(Scene::Plane(glm::vec3(1.0f, 0.0f, 0.0f),
+                                         glm::vec3(-offset, 0.0f, 0.0f),
+                                         Material(
+                                             glm::vec3(1.0f, 0.0f, 0.0f),
+                                             0.2f,
+                                             0.0f,
+                                             glm::vec3(0.0f),
+                                             glm::vec3(0.04f))));
+
+    scene->spheres.push_back(
+        Scene::Sphere(200.0f,
+                      glm::vec3(200.0f,
+                                -offset + 200.0f,
+                                0),
+                      Material(
+                          glm::vec3(0.0f, 0.0f, 1.0f),
+                          0.9f,
+                          0.2f,
+                          glm::vec3(0.0f),
+                          INSULATOR_F0)));
+
+    scene->spheres.push_back(
+        Scene::Sphere(150.0f,
+                      glm::vec3(-70.0f,
+                                -offset + 150.0f,
+                                -300.0f),
+                      Material(
+                          glm::vec3(1.0f),
+                          0.9f,
+                          0.2f,
+                          glm::vec3(0.0f),
+                          INSULATOR_F0)));
+
+    scene->s_lights.push_back(Scene::SpotLight(
+                                  glm::vec3(0),
+                                  glm::vec3(50000.0f),
+                                  20.0f,
+                                  glm::vec3(-1.0f, 1.0f, 1.0f),
+                                  40.0f,
+                                  50.0f));
 }
 
 void Controller::processInput(Camera & camera,
@@ -111,6 +240,21 @@ void Controller::processInput(Camera & camera,
     RECT client_area = win.getClientSize();
     int width = client_area.right - client_area.left;
     int height = client_area.bottom - client_area.top;
+
+    // was any user input
+    for (int i = 0; i != KEYS_COUNT; ++i)
+    {
+        if(keys_log[i] == true)
+        {
+            if (scene->is_image_ready)
+            {
+                scene->is_global_illumination = false;
+                scene->is_image_ready = false;
+            }
+            
+            break;
+        }
+    }
 
     if (keys_log[KEY_W])
     {
@@ -132,15 +276,31 @@ void Controller::processInput(Camera & camera,
         glm::vec3 offset = camera.getRight() * -movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
-    if (keys_log[KEY_SPACE])
+    if (keys_log[KEY_Q])
+    {
+        glm::vec3 offset = camera.getUp() * -movement_speed * delta_time;
+        camera.addWorldPosition(offset);
+    }
+    if (keys_log[KEY_E])
     {
         glm::vec3 offset = camera.getUp() * movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
-    if (keys_log[KEY_CTRL])
+    if (keys_log[KEY_SHIFT])
     {
-        glm::vec3 offset = camera.getUp() * -movement_speed * delta_time;
-        camera.addWorldPosition(offset);
+        if (!is_accelerated)
+        {
+            movement_speed *= 5.0f;
+            is_accelerated = true;
+        }
+    }
+    else
+    {
+        if(is_accelerated)
+        {
+            movement_speed /= 5.0f;
+            is_accelerated = false;
+        }
     }
     if (keys_log[KEY_LMOUSE])
     {	
@@ -155,22 +315,6 @@ void Controller::processInput(Camera & camera,
 
         camera.addRelativeAngles(euler);
     }
-    if (keys_log[KEY_Q])
-    {
-        math::EulerAngles euler(0,
-                                0,
-                                rotation_speed.z * delta_time);
-                
-        camera.addRelativeAngles(euler);
-    }
-    if (keys_log[KEY_E])
-    {
-        math::EulerAngles euler(0,
-                                0,
-                                -rotation_speed.z * delta_time);
-                
-        camera.addRelativeAngles(euler);
-    }
     if (keys_log[KEY_RMOUSE])
     {
         camera.updateMatrices();
@@ -181,8 +325,7 @@ void Controller::processInput(Camera & camera,
 
         math::Ray ray;
         ray.origin = camera.getPosition();
-        ray.direction = camera.generateWorldPointFromCS(xy.x, xy.y) -
-                        ray.origin;
+        ray.direction = camera.reproject(xy.x, xy.y) - ray.origin;
 
         if (!object.is_grabbed)
         {
@@ -213,6 +356,29 @@ void Controller::processInput(Camera & camera,
         {
             object.is_grabbed = false;
             object.mover.reset();
+        }
+    }
+    if (keys_log[KEY_PLUS])
+    {
+        camera.EV_100 += 6.0f * delta_time;
+    }
+    if (keys_log[KEY_MINUS])
+    {
+        camera.EV_100 -= 6.0f * delta_time;
+    }
+    if (keys_log[KEY_G] && 
+        !scene->is_global_illumination && 
+        !scene->is_image_ready)
+    {
+        scene->is_global_illumination = true;
+        scene->is_image_ready = false;
+    }
+    if (keys_log[KEY_R])
+    {
+        if (was_released[KEY_R])
+        {
+            scene->is_smooth_reflection = !scene->is_smooth_reflection;
+            was_released[KEY_R] = false;
         }
     }
 }

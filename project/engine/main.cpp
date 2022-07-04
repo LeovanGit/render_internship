@@ -32,7 +32,7 @@ auto start_time = std::chrono::steady_clock::now();
 float delta_time = 0;
 
 // CREATE CAMERA
-Camera camera(glm::vec3(0, 0, -1000.0f),
+Camera camera(glm::vec3(0, 0, -1500.0f),
               glm::vec3(0, 1.0f, 0), // up
               glm::vec3(0, 0, 1.0f)); // forward
 
@@ -142,6 +142,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         case WM_KEYUP:
         {
             controller.keys_log[wParam] = false;
+            controller.was_released[wParam] = true;
             break;
         }
         case WM_RBUTTONDOWN:
@@ -171,6 +172,13 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         case WM_MOUSEMOVE:
         {
             controller.calcMouseMovement(lParam);
+            break;
+        }
+	case WM_MOUSEWHEEL:
+        {
+            float wheel_delta = GET_WHEEL_DELTA_WPARAM(wParam);
+            if (wheel_delta >= 0) controller.movement_speed *= 1.1f;
+            else controller.movement_speed /= 1.1f;
             break;
         }
         break;

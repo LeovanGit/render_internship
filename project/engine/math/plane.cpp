@@ -1,11 +1,6 @@
 #include "plane.hpp"
 #include "euler_angles.hpp"
 
-namespace
-{
-    constexpr float delta = 0.000001f;
-} // namespace
-
 math::Plane::Plane(const glm::vec3 & normal,
                    const glm::vec3 & origin) :
                    normal(normal),
@@ -17,7 +12,7 @@ bool math::Plane::intersect(math::Intersection & nearest,
 {
     // ray || plane
     float d = glm::dot(normal, ray.direction);
-    if (math::areAlmostEqual(d, 0, delta)) return false;
+    if (math::areAlmostEqual(d, 0, math::SOME_SMALL_NUMBER)) return false;
     
     float t = glm::dot((origin - ray.origin), normal) / d;
 

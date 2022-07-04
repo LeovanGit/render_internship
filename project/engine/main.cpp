@@ -1,18 +1,18 @@
-#include <windows.h>
-#include <windowsx.h>
 #include <chrono>
 #include <vector>
-#include "euler_angles.hpp"
-#include "glm.hpp"
 #include <string>
+#include "glm.hpp"
 
 #include "window.hpp"
-#include "scene.hpp"
-#include "controller.hpp"
-#include "matrices.hpp"
-#include "material.hpp"
-#include "camera.hpp"
-#include "sphere.hpp"
+// #include "scene.hpp"
+// #include "controller.hpp"
+// #include "matrices.hpp"
+// #include "material.hpp"
+// #include "camera.hpp"
+// #include "sphere.hpp"
+// #include "euler_angles.hpp"
+#include "globals.hpp"
+#include "shader.hpp"
 
 namespace
 {
@@ -24,17 +24,18 @@ LRESULT CALLBACK WindowProc(HWND hWnd,
                             WPARAM wParam,
                             LPARAM lParam);
 
-Window win;
-Scene scene;
-Controller controller;
+engine::windows::Window win;
+// Scene scene;
+// Controller controller;
+engine::Shader shader;
 
 auto start_time = std::chrono::steady_clock::now();
 float delta_time = 0;
 
 // CREATE CAMERA
-Camera camera(glm::vec3(0, 0, -1500.0f),
-              glm::vec3(0, 1.0f, 0), // up
-              glm::vec3(0, 0, 1.0f)); // forward
+// Camera camera(glm::vec3(0, 0, -1500.0f),
+//               glm::vec3(0, 1.0f, 0), // up
+//               glm::vec3(0, 0, 1.0f)); // forward
 
 bool frameTimeElapsed()
 {
@@ -57,6 +58,16 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    LPSTR lpCmdLine,
                    int nCmdShow)
 {
+    // INIT DIRECT3D
+    engine::Globals globals;
+    globals.initD3D();
+    globals.initVBO();
+   
+    // SHADER
+    shader.init(win,
+                L"../engine/shaders/shader.vert",
+                L"../engine/shaders/shader.frag");
+
     // REGISTER WINDOW CLASS
     WNDCLASSEX wclass;
     ZeroMemory(&wclass, sizeof(WNDCLASSEX));
@@ -66,24 +77,23 @@ int WINAPI WinMain(HINSTANCE hInstance,
     wclass.lpfnWndProc = WindowProc;
     wclass.hInstance = hInstance;
     wclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wclass.hbrBackground = (HBRUSH)COLOR_WINDOW;
     wclass.lpszClassName = "window_class_1";
 
     RegisterClassEx(&wclass);
 
     // CREATE WINDOW
-    win.init(hInstance, 300.0f, 300.0f, 384.0f, 216.0f);
-
-    ShowWindow(win.handle, nCmdShow);
+    win.init(hInstance, 300.0f, 300.0f, 600.0f, 600.0f);
 
     // CREATE SCENE
-    controller.init(&scene);                                        
-    controller.initScene();
+    // controller.init(&scene);                                        
+    // controller.initScene();
 
-    camera.setPerspective(45.0f,
-                          384.0f / 216.0f,
-                          10.0f,
-                          1000.0f);
+    // camera.setPerspective(45.0f,
+    //                       384.0f / 216.0f,
+    //                       10.0f,
+    //                       1000.0f);
+
+    ShowWindow(win.handle, nCmdShow);
 
     // MAIN LOOP (EVENT HANDLING)
     MSG msg;
@@ -105,12 +115,15 @@ int WINAPI WinMain(HINSTANCE hInstance,
             std::string fps_str = "FPS: " + std::to_string(fps);
             SetWindowTextA(win.handle, TEXT(fps_str.c_str()));
 
-            controller.processInput(camera, delta_time, win);
-            camera.updateMatrices();
-            controller.scene->render(win, camera);
+            // controller.processInput(camera, delta_time, win);
+            // camera.updateMatrices();
+            // controller.scene->render(win, camera);
+            
+            win.renderFrame();
         }
     }
     exit:
+    globals.cleanD3D();
     // return this part of the WM_QUIT message to Windows
     return msg.wParam;
 }
@@ -127,58 +140,58 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         case WM_SIZE:
         {
             win.resize(LOWORD(lParam), HIWORD(lParam));
-            camera.setPerspective(45.0f,
-                                  float(LOWORD(lParam)) / HIWORD(lParam),
-                                  10.0f,
-                                  1000.0f);
+            // camera.setPerspective(45.0f,
+            //                       float(LOWORD(lParam)) / HIWORD(lParam),
+            //                       10.0f,
+            //                       1000.0f);
             break;
         }
         case WM_KEYDOWN:
         {
             // wParam - key code
-            controller.keys_log[wParam] = true;
+            // controller.keys_log[wParam] = true;
             break;
         }
         case WM_KEYUP:
         {
-            controller.keys_log[wParam] = false;
-            controller.was_released[wParam] = true;
+            // controller.keys_log[wParam] = false;
+            // controller.was_released[wParam] = true;
             break;
         }
         case WM_RBUTTONDOWN:
         {
-            controller.keys_log[KEY_RMOUSE] = true;
+            // controller.keys_log[KEY_RMOUSE] = true;
             break;
         }
         case WM_RBUTTONUP:
         {
-            controller.keys_log[KEY_RMOUSE] = false;
+            // controller.keys_log[KEY_RMOUSE] = false;
             break;
         }
         case WM_LBUTTONDOWN:
         {
             // fix mouse
-            controller.fixed_mouse.x = controller.mouse.x;
-            controller.fixed_mouse.y = controller.mouse.y;
+            // controller.fixed_mouse.x = controller.mouse.x;
+            // controller.fixed_mouse.y = controller.mouse.y;
 
-            controller.keys_log[KEY_LMOUSE] = true;
+            // controller.keys_log[KEY_LMOUSE] = true;
             break;
         }
         case WM_LBUTTONUP:
         {
-            controller.keys_log[KEY_LMOUSE] = false;
+            // controller.keys_log[KEY_LMOUSE] = false;
             break;
         }
         case WM_MOUSEMOVE:
         {
-            controller.calcMouseMovement(lParam);
+            // controller.calcMouseMovement(lParam);
             break;
         }
 	case WM_MOUSEWHEEL:
         {
-            float wheel_delta = GET_WHEEL_DELTA_WPARAM(wParam);
-            if (wheel_delta >= 0) controller.movement_speed *= 1.1f;
-            else controller.movement_speed /= 1.1f;
+            // float wheel_delta = GET_WHEEL_DELTA_WPARAM(wParam);
+            // if (wheel_delta >= 0) controller.movement_speed *= 1.1f;
+            // else controller.movement_speed /= 1.1f;
             break;
         }
         break;

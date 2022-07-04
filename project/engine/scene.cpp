@@ -645,7 +645,8 @@ glm::vec3 Scene::gammaCorrection(const glm::vec3 & color) const
                      powf(color.z, 1.0f / math::GAMMA));
 }
 
-void Scene::render(Window & win, Camera & camera)
+void Scene::render(engine::windows::Window & win,
+                   Camera & camera)
 {
     if (is_global_illumination && is_image_ready) return;
 
@@ -727,7 +728,7 @@ void Scene::render(Window & win, Camera & camera)
     
     executor.execute(func, width * height, 20);
 
-    win.flush();
+    // win.flush();
 
     if (is_global_illumination) is_image_ready = true;
 }

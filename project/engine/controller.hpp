@@ -40,7 +40,7 @@ public:
 
     void processInput(Camera & camera,
                       const float delta_time,
-                      const Window & win);
+                      const engine::windows::Window & win);
 
     void calcMouseMovement(LPARAM lParam);
 

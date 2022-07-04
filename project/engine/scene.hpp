@@ -480,7 +480,8 @@ public:
 
     glm::vec3 gammaCorrection(const glm::vec3 & color) const;
 
-    void render(Window & win, Camera & camera);
+    void render(engine::windows::Window & win,
+                Camera & camera);
 
 protected:
     void findIntersectionInternal(math::Intersection & nearest,

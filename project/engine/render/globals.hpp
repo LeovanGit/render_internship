@@ -1,16 +1,26 @@
 #ifndef GLOBALS_HPP
 #define GLOBALS_HPP
 
+#include "win_def.hpp"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+#include <d3d11_4.h>
 #include <cassert>
 #include <iostream>
 
 #include "dx_res_ptr.hpp"
 #include "d3d.hpp"
 
+#include "win_undef.hpp"
+
 #pragma comment(lib, "dxgi.lib")
 
 namespace engine
 {
+// Singleton for global rendering resources
 class Globals
 {
 public:

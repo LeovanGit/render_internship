@@ -17,6 +17,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(INC engine engine/math engine/render glm)
 include_directories(${INC})
 
+set(SHADERS engine/shaders/shader.frag
+            engine/shaders/shader.vert)
+
 set(SOURCES engine/main.cpp
             engine/scene.cpp
             engine/controller.cpp
@@ -71,11 +74,13 @@ set(MATH_HEADERS engine/math/ray.hpp
 
 add_executable(rt WIN32
                   engine/main.cpp
-                  ${RENDER_HEADERS} ${RENDER_SOURCES})
+                  ${RENDER_HEADERS} ${RENDER_SOURCES}
+                  ${SHADERS})
 
 source_group("Source Files/math" FILES ${MATH_SOURCES})
 source_group("Header Files/math" FILES ${MATH_HEADERS})
 
-source_group("Source Files/window" FILES ${RENDER_SOURCES})
-source_group("Header Files/window" FILES ${RENDER_HEADERS})
+source_group("Source Files/render" FILES ${RENDER_SOURCES})
+source_group("Header Files/render" FILES ${RENDER_HEADERS})
 
+source_group("shaders" FILES ${SHADERS})

@@ -1,11 +1,21 @@
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
+#include "win_def.hpp"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 #include <iostream>
 
 #include "dx_res_ptr.hpp"
 #include "window.hpp"
 #include "d3d.hpp"
+
+#pragma comment( lib, "d3dcompiler.lib" )
+
+#include "win_undef.hpp"
 
 namespace engine
 {

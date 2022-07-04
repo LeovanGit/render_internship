@@ -34,7 +34,7 @@ void Globals::initD3D()
             DXGI_ADAPTER_DESC1 desc;
             adapter->GetDesc1(&desc);
             
-            std::cout << "\nGPU #" << index << desc.Description << "\n";
+            std::cout << "\nGPU #" << index << " " << desc.Description << "\n";
         }
     }
 

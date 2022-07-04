@@ -1,7 +1,4 @@
 #include "window.hpp"
-#include "d3d.hpp"
-#include "shader.hpp"
-#include <d3d11.h>
 
 namespace
 {
@@ -19,8 +16,6 @@ void Window::init(HINSTANCE hInstance,
     this->pos_y = pos_y;
     this->client_width = client_width;
     this->client_height = client_height;
-    this->pixels_width = client_width / QUALITY;
-    this->pixels_height = client_height / QUALITY;
 
     // calculate the window size consided on client area
     RECT window = {0, 0, client_width, client_height};
@@ -111,8 +106,6 @@ void Window::initBackBuffer()
                                               m_render_target.reset());
 
     assert(result >= 0 && "CreateRenderTargetView");
-
-    s_device_context->OMSetRenderTargets(1, m_render_target.get(), NULL);
 }
 
 void Window::initViewport()
@@ -134,8 +127,6 @@ void Window::resize(int width, int height)
     initViewport();
 }
 
-std::vector<int> & Window::getPixels() { return pixels; }
-
 RECT Window::getSize() const
 {
     RECT window;
@@ -150,14 +141,6 @@ RECT Window::getClientSize() const
     return client;
 }
 
-SIZE Window::getPixelsSize() const
-{
-    SIZE pixels_size;
-    pixels_size.cx = pixels_width;
-    pixels_size.cy = pixels_height;
-    return pixels_size;
-}
-
 void Window::renderFrame()
 {
     s_device_context->OMSetRenderTargets(1, m_render_target.get(), NULL);
@@ -169,8 +152,8 @@ void Window::renderFrame()
 
     // RENDER TO BACK BUFFER
     // which VBO to use
-    UINT stride = sizeof(Vertex);
-    UINT offset = 0;
+    uint32_t stride = sizeof(Vertex);
+    uint32_t offset = 0;
     s_device_context->IASetVertexBuffers(0, 1, &s_vbo, &stride, &offset);
 
     // which type of primitive to use (triangles)

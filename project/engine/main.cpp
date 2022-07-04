@@ -1,9 +1,17 @@
+#include "win_def.hpp"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 #include <chrono>
 #include <vector>
 #include <string>
 #include "glm.hpp"
 
-#include "window.hpp"
+#include <windows.h>
+#include <windowsx.h>
+
 // #include "scene.hpp"
 // #include "controller.hpp"
 // #include "matrices.hpp"
@@ -11,23 +19,25 @@
 // #include "camera.hpp"
 // #include "sphere.hpp"
 // #include "euler_angles.hpp"
+#include "window.hpp"
 #include "globals.hpp"
 #include "shader.hpp"
+
+#include "win_undef.hpp"
 
 namespace
 {
 constexpr float FRAME_DURATION = 1.0f / 60.0f;
+
+engine::windows::Window win;
+// Scene scene;
+// Controller controller;
 } // namespace
 
 LRESULT CALLBACK WindowProc(HWND hWnd,
                             UINT message,
                             WPARAM wParam,
                             LPARAM lParam);
-
-engine::windows::Window win;
-// Scene scene;
-// Controller controller;
-engine::Shader shader;
 
 auto start_time = std::chrono::steady_clock::now();
 float delta_time = 0;
@@ -64,6 +74,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     globals.initVBO();
    
     // SHADER
+    engine::Shader shader;
     shader.init(win,
                 L"../engine/shaders/shader.vert",
                 L"../engine/shaders/shader.frag");
@@ -137,9 +148,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             PostQuitMessage(0);
             break;
         }
+        case WM_MOVE:
+        {
+            win.pos_x = LOWORD(lParam);
+            win.pos_y = HIWORD(lParam);
+            break;
+        }
         case WM_SIZE:
         {
             win.resize(LOWORD(lParam), HIWORD(lParam));
+            
             // camera.setPerspective(45.0f,
             //                       float(LOWORD(lParam)) / HIWORD(lParam),
             //                       10.0f,

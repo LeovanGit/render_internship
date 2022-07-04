@@ -7,12 +7,9 @@ void Shader::init(const engine::windows::Window & win,
                   WCHAR * frag_filename)
 {
     HRESULT result;
-    ID3D10Blob * errorMessage(0);
-    ID3D10Blob * vertexShaderBuffer(0);
-    ID3D10Blob * pixelShaderBuffer(0);
-    D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
-    unsigned int numElements;
-    D3D11_BUFFER_DESC matrixBufferDesc;
+    ID3D10Blob * error_message(0);
+    ID3D10Blob * vert_shader_buffer(0);
+    ID3D10Blob * frag_shader_buffer(0);
 
     // Compile the vertex shader code
     result = D3DCompileFromFile(vert_filename,
@@ -22,13 +19,13 @@ void Shader::init(const engine::windows::Window & win,
                                 "vs_5_0",
                                 D3D10_SHADER_ENABLE_STRICTNESS,
                                 0,
-                                &vertexShaderBuffer,
-                                &errorMessage);
+                                &vert_shader_buffer,
+                                &error_message);
 
     if(FAILED(result))
     {
-        if (errorMessage) std::cout << "\nVERTEX SHADER COMPILATION ERROR:\n"
-                                    << (char *)errorMessage->GetBufferPointer()
+        if (error_message) std::cout << "\nVERTEX SHADER COMPILATION ERROR:\n"
+                                    << (char *)error_message->GetBufferPointer()
                                     << "\n\n";
         else std::cout << "\nVERTEX SHADER NOT FOUND\n";
         assert(result >= 0);
@@ -42,28 +39,28 @@ void Shader::init(const engine::windows::Window & win,
                                 "ps_5_0",
                                 D3D10_SHADER_ENABLE_STRICTNESS,
                                 0,
-                                &pixelShaderBuffer,
-                                &errorMessage);
+                                &frag_shader_buffer,
+                                &error_message);
 
     if(FAILED(result))
     {
-        if (errorMessage) std::cout << "\nFRAGMENT SHADER COMPILATION ERROR:\n" 
-                                    << (char *)errorMessage->GetBufferPointer()
+        if (error_message) std::cout << "\nFRAGMENT SHADER COMPILATION ERROR:\n" 
+                                    << (char *)error_message->GetBufferPointer()
                                     << "\n\n";
         else std::cout << "FRAGMENT SHADER NOT FOUND\n";
         assert(result >= 0);
     }
 
     // Create the vertex shader from the buffer
-    result = s_device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(),
-                                          vertexShaderBuffer->GetBufferSize(),
+    result = s_device->CreateVertexShader(vert_shader_buffer->GetBufferPointer(),
+                                          vert_shader_buffer->GetBufferSize(),
                                           NULL,
                                           vert_shader.reset());
     assert(result >= 0 && "CreateVertexShader");
 
     // Create the fragment shader from the buffer
-    result = s_device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(),
-                                         pixelShaderBuffer->GetBufferSize(),
+    result = s_device->CreatePixelShader(frag_shader_buffer->GetBufferPointer(),
+                                         frag_shader_buffer->GetBufferSize(),
                                          NULL,
                                          frag_shader.reset());
     assert(result >= 0 && "CreatePixelShader");
@@ -95,8 +92,8 @@ void Shader::init(const engine::windows::Window & win,
 
     s_device->CreateInputLayout(ied,
                                 2,
-                                vertexShaderBuffer->GetBufferPointer(),
-                                vertexShaderBuffer->GetBufferSize(),
+                                vert_shader_buffer->GetBufferPointer(),
+                                vert_shader_buffer->GetBufferSize(),
                                 &s_input_layout);
 
     s_device_context->IASetInputLayout(s_input_layout);

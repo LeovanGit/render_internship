@@ -40,13 +40,9 @@ public:
 
     void resize(int width, int height);
 
-    std::vector<int> & getPixels();
-
     RECT getSize() const;
 
     RECT getClientSize() const;
-
-    SIZE getPixelsSize() const;
 
     void renderFrame();
 
@@ -59,11 +55,6 @@ public:
 private:    
     int client_width;
     int client_height;
-
-    int pixels_width;
-    int pixels_height;
-
-    std::vector<int> pixels;
 
     DxResPtr<IDXGISwapChain1> m_swapchain;
     DxResPtr<ID3D11Texture2D> m_backbuffer;

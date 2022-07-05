@@ -1,4 +1,5 @@
 #include "globals.hpp"
+#include <d3d11.h>
 
 // Say NVidia or AMD driver to prefer a dedicated GPU instead of an integrated
 // This has effect on laptops
@@ -89,23 +90,22 @@ void Globals::initVBO()
     D3D11_BUFFER_DESC vbo_desc;
     ZeroMemory(&vbo_desc, sizeof(vbo_desc));
 
-    vbo_desc.Usage = D3D11_USAGE_DYNAMIC;
+    vbo_desc.Usage = D3D11_USAGE_IMMUTABLE;
     vbo_desc.ByteWidth = sizeof(Vertex) * 3;
     vbo_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vbo_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    vbo_desc.CPUAccessFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA vertices_data;
+    ZeroMemory(&vertices_data, sizeof(vertices_data));
+
+    vertices_data.pSysMem = vertices;
+    vertices_data.SysMemPitch = 0;
+    vertices_data.SysMemSlicePitch = 0;
 
     HRESULT result = s_device->CreateBuffer(&vbo_desc,
-                                            NULL,
+                                            &vertices_data,
                                             m_vbo.reset());
     assert(result >= 0 && "CreateBuffer");
-
-    // copy vertices into the buffer
-    // ms contain info about the buffer, 
-    // ms.pData - pointer to the buffer's location
-    D3D11_MAPPED_SUBRESOURCE ms;
-    s_device_context->Map(m_vbo.ptr(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
-    memcpy(ms.pData, vertices, sizeof(vertices));
-    s_device_context->Unmap(m_vbo.ptr(), NULL);
 
     s_vbo = m_vbo.ptr();
 }

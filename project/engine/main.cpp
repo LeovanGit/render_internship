@@ -72,7 +72,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     engine::Globals globals;
     globals.initD3D();
     globals.initVBO();
-   
+
     // SHADER
     engine::Shader shader;
     shader.init(win,

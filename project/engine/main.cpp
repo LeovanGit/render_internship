@@ -69,15 +69,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    int nCmdShow)
 {
     // INIT DIRECT3D
-    engine::Globals globals;
-    globals.initD3D();
-    globals.initVBO();
+    engine::Globals * globals = engine::Globals::getInstance();
+    globals->initD3D();
+    globals->initVBO();
 
     // SHADER
     engine::Shader shader;
-    shader.init(win,
-                L"../engine/shaders/shader.vert",
-                L"../engine/shaders/shader.frag");
+    shader.init(L"../engine/shaders/shader.hlsl");
 
     // REGISTER WINDOW CLASS
     WNDCLASSEX wclass;

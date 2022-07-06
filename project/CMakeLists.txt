@@ -17,8 +17,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(INC engine engine/math engine/render glm)
 include_directories(${INC})
 
-set(SHADERS engine/shaders/shader.frag
-            engine/shaders/shader.vert)
+set(SHADERS engine/shaders/shader.hlsl)
+set_source_files_properties(${SHADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 set(SOURCES engine/main.cpp
             engine/scene.cpp
@@ -28,7 +28,6 @@ set(SOURCES engine/main.cpp
             engine/parallel_executor.cpp)
 
 set(RENDER_SOURCES engine/render/window.cpp
-                   engine/render/d3d.cpp
                    engine/render/globals.cpp
                    engine/render/shader.cpp)
 
@@ -49,7 +48,6 @@ set(HEADERS engine/scene.hpp
             engine/parallel_executor.hpp)
 
 set(RENDER_HEADERS engine/render/window.hpp
-                   engine/render/d3d.hpp
                    engine/render/dx_res_ptr.hpp
                    engine/render/globals.hpp
                    engine/render/shader.hpp

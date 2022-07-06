@@ -11,9 +11,9 @@
 
 #include "dx_res_ptr.hpp"
 #include "window.hpp"
-#include "d3d.hpp"
+#include "globals.hpp"
 
-#pragma comment( lib, "d3dcompiler.lib" )
+#pragma comment(lib, "d3dcompiler.lib")
 
 #include "win_undef.hpp"
 
@@ -24,14 +24,12 @@ class Shader
 public:
     Shader() = default;
 
-    void init(const engine::windows::Window & win,
-              WCHAR * vert_filename,
-              WCHAR * frag_filename);
+    void init(WCHAR * shader_filename);
 
     DxResPtr<ID3D11VertexShader> vert_shader;
     DxResPtr<ID3D11PixelShader> frag_shader;
 
-    DxResPtr<ID3D11InputLayout> m_input_layout;
+    DxResPtr<ID3D11InputLayout> input_layout;
 };
 } // namespace engine
 

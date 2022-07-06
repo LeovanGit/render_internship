@@ -2,9 +2,7 @@
 
 namespace engine
 {
-void Shader::init(const engine::windows::Window & win,
-                  WCHAR * vert_filename,
-                  WCHAR * frag_filename)
+void Shader::init(WCHAR * shader_filename)
 {
     HRESULT result;
     ID3D10Blob * error_message(0);
@@ -12,12 +10,12 @@ void Shader::init(const engine::windows::Window & win,
     ID3D10Blob * frag_shader_buffer(0);
 
     // Compile the vertex shader code
-    result = D3DCompileFromFile(vert_filename,
+    result = D3DCompileFromFile(shader_filename,
                                 NULL,
                                 NULL,
-                                "vertexShader",
+                                "vertexShader", // entry point
                                 "vs_5_0",
-                                D3D10_SHADER_ENABLE_STRICTNESS,
+                                D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
                                 0,
                                 &vert_shader_buffer,
                                 &error_message);
@@ -32,12 +30,12 @@ void Shader::init(const engine::windows::Window & win,
     }
 
     // Compile the fragment shader code
-    result = D3DCompileFromFile(frag_filename,
+    result = D3DCompileFromFile(shader_filename,
                                 NULL,
                                 NULL,
-                                "fragmentShader",
+                                "fragmentShader", // entry point
                                 "ps_5_0",
-                                D3D10_SHADER_ENABLE_STRICTNESS,
+                                D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
                                 0,
                                 &frag_shader_buffer,
                                 &error_message);
@@ -51,23 +49,28 @@ void Shader::init(const engine::windows::Window & win,
         assert(result >= 0);
     }
 
+    // get access to global render variables
+    Globals * globals = Globals::getInstance();
+
     // Create the vertex shader from the buffer
-    result = s_device->CreateVertexShader(vert_shader_buffer->GetBufferPointer(),
-                                          vert_shader_buffer->GetBufferSize(),
-                                          NULL,
-                                          vert_shader.reset());
+    result = globals->device5->
+        CreateVertexShader(vert_shader_buffer->GetBufferPointer(),
+                           vert_shader_buffer->GetBufferSize(),
+                           NULL,
+                           vert_shader.reset());
     assert(result >= 0 && "CreateVertexShader");
 
     // Create the fragment shader from the buffer
-    result = s_device->CreatePixelShader(frag_shader_buffer->GetBufferPointer(),
-                                         frag_shader_buffer->GetBufferSize(),
-                                         NULL,
-                                         frag_shader.reset());
+    result = globals->device5->
+        CreatePixelShader(frag_shader_buffer->GetBufferPointer(),
+                          frag_shader_buffer->GetBufferSize(),
+                          NULL,
+                          frag_shader.reset());
     assert(result >= 0 && "CreatePixelShader");
 
     // activate shaders
-    s_device_context->VSSetShader(vert_shader.ptr(), 0, 0);
-    s_device_context->PSSetShader(frag_shader.ptr(), 0, 0);
+    globals->device_context4->VSSetShader(vert_shader.ptr(), 0, 0);
+    globals->device_context4->PSSetShader(frag_shader.ptr(), 0, 0);
 
     // CREATE VAO (INPUT LAYOUT)
     D3D11_INPUT_ELEMENT_DESC ied[] =
@@ -90,14 +93,12 @@ void Shader::init(const engine::windows::Window & win,
          0},
     };
 
-    s_device->CreateInputLayout(ied,
-                                2,
-                                vert_shader_buffer->GetBufferPointer(),
-                                vert_shader_buffer->GetBufferSize(),
-                                m_input_layout.reset());
+    globals->device5->CreateInputLayout(ied,
+                                        2,
+                                        vert_shader_buffer->GetBufferPointer(),
+                                        vert_shader_buffer->GetBufferSize(),
+                                        input_layout.reset());
 
-    s_input_layout = m_input_layout.ptr();
-
-    s_device_context->IASetInputLayout(s_input_layout);
+    globals->device_context4->IASetInputLayout(input_layout);
 }
 } // namespace engine

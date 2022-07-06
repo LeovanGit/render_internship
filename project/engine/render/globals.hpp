@@ -12,7 +12,6 @@
 #include <iostream>
 
 #include "dx_res_ptr.hpp"
-#include "d3d.hpp"
 
 #include "win_undef.hpp"
 
@@ -20,28 +19,41 @@
 
 namespace engine
 {
+struct Vertex
+{
+    float x;
+    float y;
+    float z;
+    float color[4];
+};
+
 // Singleton for global rendering resources
-class Globals
+// NAIVE SINGLETON -> not for multithreading!!!
+class Globals final
 {
 public:
-    Globals() = default;
+    // deleted methods should be public for better error messages
+    Globals(const Globals & other) = delete;
+    void operator=(const Globals & other) = delete;
+
+    static Globals * getInstance();
 
     void initD3D();
 
     void initVBO();
 
-    DxResPtr<IDXGIFactory> m_factory;
-    DxResPtr<IDXGIFactory5> m_factory5;
+    DxResPtr<IDXGIFactory5> factory5;
+    DxResPtr<ID3D11Device5> device5;
+    DxResPtr<ID3D11DeviceContext4> device_context4;
+    DxResPtr<ID3D11Debug> device_debug;
+    DxResPtr<ID3D11Buffer> vbo;
 
-    DxResPtr<ID3D11Device> m_device;
-    DxResPtr<ID3D11Device5> m_device5;
+private:
+    Globals() = default;
 
-    DxResPtr<ID3D11DeviceContext> m_device_context;
-    DxResPtr<ID3D11DeviceContext4> m_device_context4;
-
-    DxResPtr<ID3D11Debug> m_device_debug;
-
-    DxResPtr<ID3D11Buffer> m_vbo;
+    DxResPtr<IDXGIFactory> factory;
+    DxResPtr<ID3D11Device> device;
+    DxResPtr<ID3D11DeviceContext> device_context;
 };
 } // namespace engine
 

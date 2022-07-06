@@ -62,12 +62,16 @@ void Window::initSwapChain()
     scd.Width = 0; // auto sizing
     scd.Height = 0;
 
-    HRESULT result = s_factory->CreateSwapChainForHwnd(s_device,
-                                                       handle,
-                                                       &scd,
-                                                       NULL,
-                                                       NULL,
-                                                       m_swapchain.reset());
+    // get access to global render variables
+    Globals * globals = Globals::getInstance();
+
+    HRESULT result = globals->factory5->
+        CreateSwapChainForHwnd(globals->device5,
+                               handle,
+                               &scd,
+                               NULL,
+                               NULL,
+                               m_swapchain.reset());
 
     assert(result >= 0 && "CreateSwapChainForHwnd");
 }
@@ -100,10 +104,14 @@ void Window::initBackBuffer()
     pTextureInterface->GetDesc(&m_backbuffer_desc);
     pTextureInterface->Release();
 
+    // get access to global render variables
+    Globals * globals = Globals::getInstance();
+
     // CREATE RENDER TARGET
-    result = s_device->CreateRenderTargetView(m_backbuffer.ptr(),
-                                              NULL,
-                                              m_render_target.reset());
+    result = globals->device5->
+        CreateRenderTargetView(m_backbuffer.ptr(),
+                               NULL,
+                               m_render_target.reset());
 
     assert(result >= 0 && "CreateRenderTargetView");
 }
@@ -143,24 +151,32 @@ RECT Window::getClientSize() const
 
 void Window::renderFrame()
 {
-    s_device_context->OMSetRenderTargets(1, m_render_target.get(), NULL);
-    s_device_context->RSSetViewports(1, &viewport);
+    // get access to global render variables
+    Globals * globals = Globals::getInstance();
+
+    globals->device_context4->OMSetRenderTargets(1, m_render_target.get(), NULL);
+    globals->device_context4->RSSetViewports(1, &viewport);
 
     // fill the back buffer to a background color
-    s_device_context->ClearRenderTargetView(m_render_target.ptr(),
-                                            BACKGROUND);
+    globals->device_context4->ClearRenderTargetView(m_render_target.ptr(),
+                                                    BACKGROUND);
 
     // RENDER TO BACK BUFFER
     // which VBO to use
     uint32_t stride = sizeof(Vertex);
     uint32_t offset = 0;
-    s_device_context->IASetVertexBuffers(0, 1, &s_vbo, &stride, &offset);
+    globals->device_context4->IASetVertexBuffers(0,
+                                                 1,
+                                                 globals->vbo.get(),
+                                                 &stride,
+                                                 &offset);
 
     // which type of primitive to use (triangles)
-    s_device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    globals->device_context4->
+        IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // draw VBO to the back buffer
-    s_device_context->Draw(3, 0);
+    globals->device_context4->Draw(3, 0);
 
     // switch the back buffer and the front buffer
     m_swapchain->Present(0, 0);

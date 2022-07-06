@@ -3,8 +3,6 @@
 
 #include <utility>
 
-#include "d3d.hpp"
-
 namespace engine
 {
 // A helping struct holding a raw pointer to a D3D resource

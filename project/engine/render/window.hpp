@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "dx_res_ptr.hpp"
-#include "d3d.hpp"
+#include "globals.hpp"
 
 #include "win_undef.hpp"
 

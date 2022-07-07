@@ -1,6 +1,4 @@
 #include "camera.hpp"
-#include "euler_angles.hpp"
-#include "gtc/quaternion.hpp"
 
 Camera::Camera(const glm::vec3 & position,
                const glm::vec3 & up,
@@ -31,12 +29,11 @@ void Camera::setPerspective(float fovy,
     float p1 = 1 / tanf(fovy / 2);
     float p0 = p1 / aspect;
 
-    // reversed depth!
     proj_matrix = glm::mat4
         (p0, 0,  0,                            0,
          0,  p1, 0,                            0,
-         0,  0,  near / (near - far),          1.0f,
-         0,  0,  (-far * near) / (near - far), 0);
+         0,  0,  far / (far - near),           1.0f,
+         0,  0,  (-near * far) / (far - near), 0);
 
     proj_matrix_inv = glm::inverse(proj_matrix);
 
@@ -47,6 +44,7 @@ glm::vec3 Camera::getPosition() const
 {
     return glm::vec3(view_matrix_inv[3][0],
                      view_matrix_inv[3][1],
+
                      view_matrix_inv[3][2]);
 }
 

@@ -97,21 +97,73 @@ void Globals::initD3D()
 
 void Globals::initVBO()
 {
-    std::array<Vertex, 6> vertices =
+    float floor_size = 100.0f;
+
+    std::array<Vertex, 42> vertices =
     {
         //     POSITION                COLOR
-        Vertex{ 0.0f,    0.5f,  0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
-        Vertex{ 0.433f, -0.25f, 0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
-        Vertex{-0.433f, -0.25f, 0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
+        // front
+        Vertex{-0.5f, 0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{0.5f,  0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{0.5f, -0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        Vertex{ 0.0f,    0.5f,  0.2f, {1.0f, 0.0f, 0.0f, 1.0f}},
-        Vertex{ 0.0f,   -0.5f,  0.2f, {1.0f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f,   -0.5f,  0.2f, {1.0f, 0.0f, 0.0f, 1.0f}},
+        Vertex{0.5f,  -0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f, -0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f,  0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        // FULL SCREEN TRIANGLE (FOR SKYBOX)
-        // Vertex{ 3.0f,   -1.0f,  0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
-        // Vertex{-1.0f,   -1.0f,  0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
-        // Vertex{-1.0f,    3.0f,  0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
+        // right
+        Vertex{0.5f, 0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{0.5f, 0.5f,   0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+
+        Vertex{0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{0.5f, 0.5f,   0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{0.5f, -0.5f,   0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+
+        // left
+        Vertex{-0.5f,  0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f,  0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+
+        Vertex{-0.5f,  0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f, -0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+
+        // back
+        Vertex{ 0.5f,  0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f,  0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{ 0.5f, -0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+
+        Vertex{ 0.5f, -0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f,  0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f, -0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+
+        // top
+        Vertex{ 0.5f, 0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{ 0.5f, 0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f, 0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+
+        Vertex{-0.5f, 0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f, 0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{ 0.5f, 0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+
+        // down
+        Vertex{ 0.5f, -0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{ 0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+
+        Vertex{-0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{ 0.5f, -0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f, -0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+
+        // floor
+        Vertex{-floor_size, -10.0f, -floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
+        Vertex{-floor_size, -10.0f,  floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
+        Vertex{ floor_size, -10.0f,  floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
+
+        Vertex{-floor_size, -10.0f, -floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
+        Vertex{ floor_size, -10.0f,  floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
+        Vertex{ floor_size, -10.0f, -floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
     };
 
     // contain properties of the VBO
@@ -133,6 +185,27 @@ void Globals::initVBO()
     HRESULT result = device5->CreateBuffer(&vbo_desc,
                                            &vertices_data,
                                            vbo.reset());
+    assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::setConstBuffer(const Camera & camera)
+{
+    // fill const buffer data
+    const_buffer_data.proj_view = camera.getViewProj();
+
+    if (const_buffer.valid()) return;
+    // constant buffer description
+    D3D11_BUFFER_DESC cb_desc;
+    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+    cb_desc.ByteWidth = sizeof(const_buffer_data);
+    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb_desc.MiscFlags = 0;
+    cb_desc.StructureByteStride = 0;
+    
+    HRESULT result = device5->CreateBuffer(&cb_desc,
+                                           NULL,
+                                           const_buffer.get());
     assert(result >= 0 && "CreateBuffer");
 }
 } // namespace engine

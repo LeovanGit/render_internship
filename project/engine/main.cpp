@@ -13,15 +13,15 @@
 #include <windowsx.h>
 
 // #include "scene.hpp"
-// #include "controller.hpp"
 // #include "matrices.hpp"
 // #include "material.hpp"
-// #include "camera.hpp"
 // #include "sphere.hpp"
 // #include "euler_angles.hpp"
 #include "window.hpp"
 #include "globals.hpp"
 #include "shader.hpp"
+#include "camera.hpp"
+#include "controller.hpp"
 
 #include "win_undef.hpp"
 
@@ -31,7 +31,12 @@ constexpr float FRAME_DURATION = 1.0f / 60.0f;
 
 engine::windows::Window win;
 // Scene scene;
-// Controller controller;
+Controller controller;
+
+// CREATE CAMERA
+Camera camera(glm::vec3(0, 0, -3.0f),
+              glm::vec3(0, 1.0f, 0), // up
+              glm::vec3(0, 0, 1.0f)); // forward
 } // namespace
 
 LRESULT CALLBACK WindowProc(HWND hWnd,
@@ -41,11 +46,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd,
 
 auto start_time = std::chrono::steady_clock::now();
 float delta_time = 0;
-
-// CREATE CAMERA
-// Camera camera(glm::vec3(0, 0, -1500.0f),
-//               glm::vec3(0, 1.0f, 0), // up
-//               glm::vec3(0, 0, 1.0f)); // forward
 
 bool frameTimeElapsed()
 {
@@ -94,16 +94,18 @@ int WINAPI WinMain(HINSTANCE hInstance,
     RegisterClassEx(&wclass);
 
     // CREATE WINDOW
-    win.init(hInstance, 300.0f, 300.0f, 600.0f, 600.0f);
+    win.init(hInstance, 100.0f, 100.0f, 1280.0f, 720.0f);
 
     // CREATE SCENE
     // controller.init(&scene);                                        
     // controller.initScene();
 
-    // camera.setPerspective(45.0f,
-    //                       384.0f / 216.0f,
-    //                       10.0f,
-    //                       1000.0f);
+    camera.setPerspective(45.0f,
+                          1280.0f / 720.0f,
+                          10.0f,
+                          1000.0f);
+
+    globals->setConstBuffer(camera);
 
     ShowWindow(win.handle, nCmdShow);
 
@@ -127,10 +129,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
             std::string fps_str = "FPS: " + std::to_string(fps);
             SetWindowTextA(win.handle, TEXT(fps_str.c_str()));
 
-            // controller.processInput(camera, delta_time, win);
-            // camera.updateMatrices();
-            // controller.scene->render(win, camera);
-            
+            controller.processInput(camera, delta_time, win);
+            camera.updateMatrices();
+            globals->setConstBuffer(camera);
+            // controller.scene->render(win, camera);            
             win.renderFrame();
         }
     }
@@ -164,22 +166,22 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         {
             win.resize(LOWORD(lParam), HIWORD(lParam));
             
-            // camera.setPerspective(45.0f,
-            //                       float(LOWORD(lParam)) / HIWORD(lParam),
-            //                       10.0f,
-            //                       1000.0f);
+            camera.setPerspective(45.0f,
+                                  float(LOWORD(lParam)) / HIWORD(lParam),
+                                  0.1f,
+                                  1000.0f);
             break;
         }
         case WM_KEYDOWN:
         {
             // wParam - key code
-            // controller.keys_log[wParam] = true;
+            controller.keys_log[wParam] = true;
             break;
         }
         case WM_KEYUP:
         {
-            // controller.keys_log[wParam] = false;
-            // controller.was_released[wParam] = true;
+            controller.keys_log[wParam] = false;
+            controller.was_released[wParam] = true;
             break;
         }
         case WM_RBUTTONDOWN:
@@ -195,27 +197,27 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         case WM_LBUTTONDOWN:
         {
             // fix mouse
-            // controller.fixed_mouse.x = controller.mouse.x;
-            // controller.fixed_mouse.y = controller.mouse.y;
+            controller.fixed_mouse.x = controller.mouse.x;
+            controller.fixed_mouse.y = controller.mouse.y;
 
-            // controller.keys_log[KEY_LMOUSE] = true;
+            controller.keys_log[KEY_LMOUSE] = true;
             break;
         }
         case WM_LBUTTONUP:
         {
-            // controller.keys_log[KEY_LMOUSE] = false;
+            controller.keys_log[KEY_LMOUSE] = false;
             break;
         }
         case WM_MOUSEMOVE:
         {
-            // controller.calcMouseMovement(lParam);
+            controller.calcMouseMovement(lParam);
             break;
         }
 	case WM_MOUSEWHEEL:
         {
-            // float wheel_delta = GET_WHEEL_DELTA_WPARAM(wParam);
-            // if (wheel_delta >= 0) controller.movement_speed *= 1.1f;
-            // else controller.movement_speed /= 1.1f;
+            float wheel_delta = GET_WHEEL_DELTA_WPARAM(wParam);
+            if (wheel_delta >= 0) controller.movement_speed *= 1.1f;
+            else controller.movement_speed /= 1.1f;
             break;
         }
         break;

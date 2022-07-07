@@ -6,7 +6,7 @@
 
 #include "matrices.hpp"
 #include "euler_angles.hpp"
-#include "ray.hpp"
+// #include "ray.hpp"
 
 class Camera
 {

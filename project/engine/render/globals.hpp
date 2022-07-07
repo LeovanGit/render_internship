@@ -11,8 +11,10 @@
 #include <cassert>
 #include <iostream>
 #include <array>
+#include "glm.hpp"
 
 #include "dx_res_ptr.hpp"
+#include "camera.hpp"
 
 #include "win_undef.hpp"
 
@@ -26,6 +28,11 @@ struct Vertex
     float y;
     float z;
     float color[4];
+};
+
+struct ConstBufferData
+{
+    glm::mat4 proj_view;
 };
 
 // Singleton for global rendering resources
@@ -47,11 +54,17 @@ public:
 
     void initVBO();
 
+    void setConstBuffer(const Camera & camera);
+
     DxResPtr<IDXGIFactory5> factory5;
     DxResPtr<ID3D11Device5> device5;
     DxResPtr<ID3D11DeviceContext4> device_context4;
     DxResPtr<ID3D11Debug> device_debug;
+
     DxResPtr<ID3D11Buffer> vbo;
+
+    DxResPtr<ID3D11Buffer> const_buffer;
+    ConstBufferData const_buffer_data;
 
 private:
     Globals() = default;

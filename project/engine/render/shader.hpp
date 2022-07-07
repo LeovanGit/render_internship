@@ -8,6 +8,7 @@
 #endif
 
 #include <iostream>
+#include "glm.hpp"
 
 #include "dx_res_ptr.hpp"
 #include "window.hpp"

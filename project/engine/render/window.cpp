@@ -177,9 +177,33 @@ RECT Window::getClientSize() const
 
 void Window::renderFrame()
 {
+    HRESULT result;
+
     // get access to global render variables
     Globals * globals = Globals::getInstance();
 
+    // map and write data to const buffer
+    // ms.pData - pointer to the buffer's data location
+    D3D11_MAPPED_SUBRESOURCE ms;
+    result = globals->device_context4->Map(globals->const_buffer.ptr(),
+                                           NULL,
+                                           D3D11_MAP_WRITE_DISCARD,
+                                           NULL,
+                                           &ms);
+    assert(result >= 0 && "Map");
+
+    memcpy(ms.pData,
+           &globals->const_buffer_data,
+           sizeof(globals->const_buffer_data));
+
+    globals->device_context4->Unmap(globals->const_buffer.ptr(), NULL);
+
+    // set the const buffer to vertex shader with updated values
+    globals->device_context4->VSSetConstantBuffers(0,
+                                                   1,
+                                                   globals->const_buffer.get());
+
+    // set render target, depth buffer and viewport
     globals->device_context4->OMSetRenderTargets(1,
                                                  m_render_target.get(),
                                                  depth_stencil_view.ptr());
@@ -212,7 +236,7 @@ void Window::renderFrame()
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // draw VBO to the back buffer
-    globals->device_context4->Draw(6, 0);
+    globals->device_context4->Draw(42, 0);
 
     // switch the back buffer and the front buffer
     m_swapchain->Present(0, 0);

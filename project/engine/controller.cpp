@@ -235,7 +235,7 @@ void Controller::initScene()
 
 void Controller::processInput(Camera & camera,
                               const float delta_time,
-                              const Window & win)
+                              const engine::windows::Window & win)
 {
     RECT client_area = win.getClientSize();
     int width = client_area.right - client_area.left;

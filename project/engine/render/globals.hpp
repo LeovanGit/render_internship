@@ -36,7 +36,11 @@ public:
     Globals(const Globals & other) = delete;
     void operator=(const Globals & other) = delete;
 
+    static void initGlobals();
+
     static Globals * getInstance();
+
+    static void deleteGlobals();
 
     void initD3D();
 
@@ -50,6 +54,9 @@ public:
 
 private:
     Globals() = default;
+    ~Globals() = default;
+
+    static Globals * instance;
 
     DxResPtr<IDXGIFactory> factory;
     DxResPtr<ID3D11Device> device;

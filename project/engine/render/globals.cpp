@@ -10,11 +10,25 @@ extern "C"
 
 namespace engine
 {
+Globals * Globals::instance = nullptr;
+
+void Globals::initGlobals()
+{
+    if (!instance) instance = new Globals();
+}
+
 Globals * Globals::getInstance()
 {
-    // constructed on first use
-    static Globals instance;
-    return &instance;
+    return instance;
+}
+
+void Globals::deleteGlobals()
+{
+    if (instance)
+    {
+        delete instance;
+        instance = nullptr;
+    }
 }
 
 void Globals::initD3D()

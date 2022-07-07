@@ -68,6 +68,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    LPSTR lpCmdLine,
                    int nCmdShow)
 {
+    // INIT SINGLETONS
+    engine::Globals::initGlobals();
+
     // INIT DIRECT3D
     engine::Globals * globals = engine::Globals::getInstance();
     globals->initD3D();
@@ -134,6 +137,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
     exit:
     // no need to clean COM objects,
     // because DxResPtr does that it in the destructor!
+
+    // DELETE SINGLETONS
+    engine::Globals::deleteGlobals();
 
     // return this part of the WM_QUIT message to Windows
     return msg.wParam;

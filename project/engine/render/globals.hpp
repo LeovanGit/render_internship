@@ -10,6 +10,7 @@
 #include <d3d11_4.h>
 #include <cassert>
 #include <iostream>
+#include <array>
 
 #include "dx_res_ptr.hpp"
 

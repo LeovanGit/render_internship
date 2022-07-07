@@ -97,12 +97,21 @@ void Globals::initD3D()
 
 void Globals::initVBO()
 {
-    Vertex vertices[] =
+    std::array<Vertex, 6> vertices =
     {
         //     POSITION                COLOR
-        Vertex{ 0.0f,    0.5f,  0.0f, {1.0f, 0.0f, 0.0f, 1.0f}},
-        Vertex{ 0.433f, -0.25f, 0.0f, {0.0f, 1.0f, 0.0f, 1.0f}},
-        Vertex{-0.433f, -0.25f, 0.0f, {0.0f, 0.0f, 1.0f, 1.0f}}
+        Vertex{ 0.0f,    0.5f,  0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
+        Vertex{ 0.433f, -0.25f, 0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
+        Vertex{-0.433f, -0.25f, 0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
+
+        Vertex{ 0.0f,    0.5f,  0.2f, {1.0f, 0.0f, 0.0f, 1.0f}},
+        Vertex{ 0.0f,   -0.5f,  0.2f, {1.0f, 0.0f, 0.0f, 1.0f}},
+        Vertex{-0.5f,   -0.5f,  0.2f, {1.0f, 0.0f, 0.0f, 1.0f}},
+
+        // FULL SCREEN TRIANGLE (FOR SKYBOX)
+        // Vertex{ 3.0f,   -1.0f,  0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
+        // Vertex{-1.0f,   -1.0f,  0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
+        // Vertex{-1.0f,    3.0f,  0.0f, {0.0f, 0.0f, 1.0f, 1.0f}},
     };
 
     // contain properties of the VBO
@@ -110,14 +119,14 @@ void Globals::initVBO()
     ZeroMemory(&vbo_desc, sizeof(vbo_desc));
 
     vbo_desc.Usage = D3D11_USAGE_IMMUTABLE;
-    vbo_desc.ByteWidth = sizeof(Vertex) * 3;
+    vbo_desc.ByteWidth = sizeof(Vertex) * vertices.size();
     vbo_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vbo_desc.CPUAccessFlags = 0;
 
     D3D11_SUBRESOURCE_DATA vertices_data;
     ZeroMemory(&vertices_data, sizeof(vertices_data));
 
-    vertices_data.pSysMem = vertices;
+    vertices_data.pSysMem = vertices.data();
     vertices_data.SysMemPitch = 0;
     vertices_data.SysMemSlicePitch = 0;
 

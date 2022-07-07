@@ -60,8 +60,12 @@ private:
     DxResPtr<IDXGISwapChain1> m_swapchain;
     DxResPtr<ID3D11Texture2D> m_backbuffer;
     D3D11_TEXTURE2D_DESC m_backbuffer_desc;
+
     DxResPtr<ID3D11RenderTargetView> m_render_target;
     D3D11_VIEWPORT viewport;
+
+    DxResPtr<ID3D11Texture2D> depth_stencil_buffer;
+    DxResPtr<ID3D11DepthStencilView> depth_stencil_view;
 };
 } // namespace engine::windows
 

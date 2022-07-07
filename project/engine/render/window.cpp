@@ -45,10 +45,7 @@ void Window::initSwapChain()
 {
     // holds information about the swap chain
     DXGI_SWAP_CHAIN_DESC1 scd;
-    // init the entire scd with zeros
     memset(&scd, 0, sizeof(DXGI_SWAP_CHAIN_DESC1));
-
-    // fill the swap chain description struct
     scd.AlphaMode = DXGI_ALPHA_MODE::DXGI_ALPHA_MODE_UNSPECIFIED;
     scd.BufferCount = 2;
     scd.BufferUsage = DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -114,6 +111,33 @@ void Window::initBackBuffer()
                                m_render_target.reset());
 
     assert(result >= 0 && "CreateRenderTargetView");
+
+    // CREATE DEPTH BUFFER
+    // depth/stencil buffer description
+    D3D11_TEXTURE2D_DESC dsb_desc;
+    dsb_desc.Width = client_width;
+    dsb_desc.Height = client_height;
+    dsb_desc.MipLevels = 1;
+    dsb_desc.ArraySize = 1;
+    dsb_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    dsb_desc.SampleDesc.Count = 1;
+    dsb_desc.SampleDesc.Quality = 0;
+    dsb_desc.Usage = D3D11_USAGE_DEFAULT;
+    dsb_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    dsb_desc.CPUAccessFlags = 0; 
+    dsb_desc.MiscFlags = 0;
+
+    // create texture for depth buffer
+    result = globals->device5->CreateTexture2D(&dsb_desc,
+                                               NULL,
+                                               depth_stencil_buffer.reset());
+    assert(result >= 0 && "CreateTexture2D");
+
+    // create depth stencil view
+    result = globals->device5->CreateDepthStencilView(depth_stencil_buffer.ptr(),
+                                                      NULL,
+                                                      depth_stencil_view.reset());
+    assert(result >= 0 && "CreateDepthStencilView");
 }
 
 void Window::initViewport()
@@ -124,6 +148,8 @@ void Window::initViewport()
     viewport.TopLeftY = 0;
     viewport.Width = client_width;
     viewport.Height = client_height;
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
 }
 
 void Window::resize(int width, int height)
@@ -154,12 +180,22 @@ void Window::renderFrame()
     // get access to global render variables
     Globals * globals = Globals::getInstance();
 
-    globals->device_context4->OMSetRenderTargets(1, m_render_target.get(), NULL);
+    globals->device_context4->OMSetRenderTargets(1,
+                                                 m_render_target.get(),
+                                                 depth_stencil_view.ptr());
+
     globals->device_context4->RSSetViewports(1, &viewport);
 
     // fill the back buffer to a background color
     globals->device_context4->ClearRenderTargetView(m_render_target.ptr(),
                                                     BACKGROUND);
+
+    // clear depth\stencil buffer
+    globals->device_context4->ClearDepthStencilView(depth_stencil_view.ptr(),
+                                                    D3D11_CLEAR_DEPTH |
+                                                    D3D11_CLEAR_STENCIL,
+                                                    1.0f,
+                                                    0);
 
     // RENDER TO BACK BUFFER
     // which VBO to use
@@ -176,7 +212,7 @@ void Window::renderFrame()
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // draw VBO to the back buffer
-    globals->device_context4->Draw(3, 0);
+    globals->device_context4->Draw(6, 0);
 
     // switch the back buffer and the front buffer
     m_swapchain->Present(0, 0);

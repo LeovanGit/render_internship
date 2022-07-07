@@ -75,12 +75,11 @@ void Shader::init(WCHAR * shader_filename)
     // CREATE VAO (INPUT LAYOUT)
     D3D11_INPUT_ELEMENT_DESC ied[] =
     {
-        // use D3D11_APPEND_ALIGNED_ELEMENT to auto calculate offset
         {"POSITION",
          0,
          DXGI_FORMAT_R32G32B32_FLOAT,
          0,
-         0,
+         D3D11_APPEND_ALIGNED_ELEMENT, // offset
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
 
@@ -88,7 +87,7 @@ void Shader::init(WCHAR * shader_filename)
          0,
          DXGI_FORMAT_R32G32B32A32_FLOAT,
          0,
-         12, // offset
+         D3D11_APPEND_ALIGNED_ELEMENT,
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
     };

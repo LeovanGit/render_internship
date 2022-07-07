@@ -136,7 +136,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     }
     exit:
     // no need to clean COM objects,
-    // because DxResPtr does that it in the destructor!
+    // because DxResPtr does it in the destructor!
 
     // DELETE SINGLETONS
     engine::Globals::deleteGlobals();

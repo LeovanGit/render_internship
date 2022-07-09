@@ -24,10 +24,8 @@ namespace engine
 {
 struct Vertex
 {
-    float x;
-    float y;
-    float z;
-    float color[4];
+    float position[3];
+    float uv[2];
 };
 
 struct ConstBufferData

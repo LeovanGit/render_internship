@@ -5,6 +5,7 @@
 
 #include "globals.hpp"
 #include "dx_res_ptr.hpp"
+#include <d3d11.h>
 
 namespace engine
 {
@@ -22,9 +23,12 @@ public:
 
     static void del();
 
+    void initSampler();
+
     void loadNewTexture(WCHAR * texture_filename);
 
     DxResPtr<ID3D11ShaderResourceView> texture_view;
+    DxResPtr<ID3D11SamplerState> sampler_state;
 
 private:
     TextureManager() = default;

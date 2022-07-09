@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "texture_manager.hpp"
 
 namespace
 {
@@ -220,6 +221,15 @@ void Window::renderFrame()
                                                     D3D11_CLEAR_STENCIL,
                                                     1.0f,
                                                     0);
+
+    // bind sampler and texture to fragment shader
+    TextureManager * tex_man = TextureManager::getInstance();
+    globals->device_context4->PSSetSamplers(0,
+                                            1,
+                                            tex_man->sampler_state.get());
+    globals->device_context4->PSSetShaderResources(0,
+                                                   1,
+                                                   tex_man->texture_view.get());
 
     // RENDER TO BACK BUFFER
     // which VBO to use

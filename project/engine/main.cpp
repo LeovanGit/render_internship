@@ -83,8 +83,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
     shader.init(L"../engine/shaders/shader.hlsl");
 
     // TEXTURE
-    engine::TextureManager * tm = engine::TextureManager::getInstance();
-    tm->loadNewTexture(L"../textures/neon_grid.dds");
+    engine::TextureManager * tex_man = engine::TextureManager::getInstance();
+    tex_man->loadNewTexture(L"../textures/brick.dds");
 
     // REGISTER WINDOW CLASS
     WNDCLASSEX wclass;

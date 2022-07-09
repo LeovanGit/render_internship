@@ -101,69 +101,69 @@ void Globals::initVBO()
 
     std::array<Vertex, 42> vertices =
     {
-        //     POSITION                COLOR
+        //     POSITION                UV
         // front
-        Vertex{-0.5f, 0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{0.5f,  0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{0.5f, -0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{{-0.5f, 0.5f,  -0.5f}, {0.0f, 1.0f}},
+        Vertex{{0.5f,  0.5f,  -0.5f}, {1.0f, 1.0f}},
+        Vertex{{0.5f, -0.5f,  -0.5f}, {1.0f, 0.0f}},
 
-        Vertex{0.5f,  -0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f, -0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f,  0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{{0.5f,  -0.5f,  -0.5f}, {1.0f, 0.0f}},
+        Vertex{{-0.5f, -0.5f,  -0.5f}, {0.0f, 0.0f}},
+        Vertex{{-0.5f,  0.5f,  -0.5f}, {0.0f, 1.0f}},
 
-        // right
-        Vertex{0.5f, 0.5f,  -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{0.5f, 0.5f,   0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // // right
+        // Vertex{{0.5f, 0.5f,  -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{0.5f, 0.5f,   0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        Vertex{0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{0.5f, 0.5f,   0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{0.5f, -0.5f,   0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{0.5f,  0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{0.5f, -0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        // left
-        Vertex{-0.5f,  0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f,  0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // // left
+        // Vertex{{-0.5f,  0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f,  0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        Vertex{-0.5f,  0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f, -0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f,  0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f, -0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        // back
-        Vertex{ 0.5f,  0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f,  0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{ 0.5f, -0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // // back
+        // Vertex{{ 0.5f,  0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f,  0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{ 0.5f, -0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        Vertex{ 0.5f, -0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f,  0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f, -0.5f, 0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{ 0.5f, -0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f,  0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f, -0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        // top
-        Vertex{ 0.5f, 0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{ 0.5f, 0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f, 0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // // top
+        // Vertex{{ 0.5f, 0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{ 0.5f, 0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f, 0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        Vertex{-0.5f, 0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f, 0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{ 0.5f, 0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f, 0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f, 0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{ 0.5f, 0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        // down
-        Vertex{ 0.5f, -0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{ 0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // // down
+        // Vertex{{ 0.5f, -0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{ 0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        Vertex{-0.5f, -0.5f, -0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{ 0.5f, -0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
-        Vertex{-0.5f, -0.5f,  0.5f, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{ 0.5f, -0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // Vertex{{-0.5f, -0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
 
-        // floor
-        Vertex{-floor_size, -10.0f, -floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
-        Vertex{-floor_size, -10.0f,  floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
-        Vertex{ floor_size, -10.0f,  floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
+        // // floor
+        // Vertex{{-floor_size, -10.0f, -floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
+        // Vertex{{-floor_size, -10.0f,  floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
+        // Vertex{{ floor_size, -10.0f,  floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
 
-        Vertex{-floor_size, -10.0f, -floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
-        Vertex{ floor_size, -10.0f,  floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
-        Vertex{ floor_size, -10.0f, -floor_size, {0.5f, 0.5f, 0.5f, 1.0f}},
+        // Vertex{{-floor_size, -10.0f, -floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
+        // Vertex{{ floor_size, -10.0f,  floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
+        // Vertex{{ floor_size, -10.0f, -floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
     };
 
     // contain properties of the VBO

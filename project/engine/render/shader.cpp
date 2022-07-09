@@ -26,7 +26,7 @@ void Shader::init(WCHAR * shader_filename)
                                     << (char *)error_message->GetBufferPointer()
                                     << "\n\n";
         else std::cout << "\nVERTEX SHADER NOT FOUND\n";
-        assert(result >= 0);
+        assert(result >= 0 && "D3DCompileFromFile vertex shader");
     }
 
     // Compile the fragment shader code
@@ -46,7 +46,7 @@ void Shader::init(WCHAR * shader_filename)
                                     << (char *)error_message->GetBufferPointer()
                                     << "\n\n";
         else std::cout << "FRAGMENT SHADER NOT FOUND\n";
-        assert(result >= 0);
+        assert(result >= 0 && "D3DCompileFromFile fragment shader");
     }
 
     // get access to global render variables
@@ -83,9 +83,9 @@ void Shader::init(WCHAR * shader_filename)
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
 
-        {"COLOR",
+        {"UV",
          0,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         DXGI_FORMAT_R32G32_FLOAT,
          0,
          D3D11_APPEND_ALIGNED_ELEMENT,
          D3D11_INPUT_PER_VERTEX_DATA,

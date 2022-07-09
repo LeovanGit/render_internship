@@ -16,6 +16,7 @@
 
 #include "dx_res_ptr.hpp"
 #include "globals.hpp"
+#include "texture_manager.hpp"
 
 #include "win_undef.hpp"
 

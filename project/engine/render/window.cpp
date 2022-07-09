@@ -246,7 +246,7 @@ void Window::renderFrame()
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // draw VBO to the back buffer
-    globals->device_context4->Draw(42, 0);
+    globals->device_context4->Draw(36, 0);
 
     // switch the back buffer and the front buffer
     m_swapchain->Present(0, 0);

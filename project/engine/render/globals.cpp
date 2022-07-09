@@ -97,73 +97,64 @@ void Globals::initD3D()
 
 void Globals::initVBO()
 {
-    float floor_size = 100.0f;
+    float obj_size = 4.0f;
 
-    std::array<Vertex, 42> vertices =
+    std::array<Vertex, 36> vertices =
     {
         //     POSITION                UV
         // front
-        Vertex{{-0.5f, 0.5f,  -0.5f}, {0.0f, 1.0f}},
-        Vertex{{0.5f,  0.5f,  -0.5f}, {1.0f, 1.0f}},
-        Vertex{{0.5f, -0.5f,  -0.5f}, {1.0f, 0.0f}},
+        Vertex{{-obj_size, obj_size,  -obj_size}, {0.0f, 1.0f}},
+        Vertex{{obj_size,  obj_size,  -obj_size}, {1.0f, 1.0f}},
+        Vertex{{obj_size, -obj_size,  -obj_size}, {1.0f, 0.0f}},
 
-        Vertex{{0.5f,  -0.5f,  -0.5f}, {1.0f, 0.0f}},
-        Vertex{{-0.5f, -0.5f,  -0.5f}, {0.0f, 0.0f}},
-        Vertex{{-0.5f,  0.5f,  -0.5f}, {0.0f, 1.0f}},
+        Vertex{{obj_size,  -obj_size,  -obj_size}, {1.0f, 0.0f}},
+        Vertex{{-obj_size, -obj_size,  -obj_size}, {0.0f, 0.0f}},
+        Vertex{{-obj_size,  obj_size,  -obj_size}, {0.0f, 1.0f}},
 
-        // // right
-        // Vertex{{0.5f, 0.5f,  -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{0.5f, 0.5f,   0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // right
+        Vertex{{obj_size, obj_size,  -obj_size}, {0.0f, 1.0f}},
+        Vertex{{obj_size, obj_size,   obj_size}, {1.0f, 1.0f}},
+        Vertex{{obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
 
-        // Vertex{{0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{0.5f,  0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{0.5f, -0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{{obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
+        Vertex{{obj_size,  obj_size,  obj_size}, {1.0f, 1.0f}},
+        Vertex{{obj_size, -obj_size,  obj_size}, {1.0f, 0.0f}},
 
-        // // left
-        // Vertex{{-0.5f,  0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{-0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{-0.5f,  0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // left
+        Vertex{{-obj_size,  obj_size, -obj_size}, {1.0f, 1.0f}},
+        Vertex{{-obj_size, -obj_size, -obj_size}, {1.0f, 0.0f}},
+        Vertex{{-obj_size,  obj_size,  obj_size}, {0.0f, 1.0f}},
 
-        // Vertex{{-0.5f,  0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{-0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{-0.5f, -0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{{-obj_size,  obj_size,  obj_size}, {0.0f, 1.0f}},
+        Vertex{{-obj_size, -obj_size, -obj_size}, {1.0f, 0.0f}},
+        Vertex{{-obj_size, -obj_size,  obj_size}, {0.0f, 0.0f}},
 
-        // // back
-        // Vertex{{ 0.5f,  0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{-0.5f,  0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{ 0.5f, -0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // back
+        Vertex{{ obj_size,  obj_size, obj_size}, {1.0f, 1.0f}},
+        Vertex{{-obj_size,  obj_size, obj_size}, {0.0f, 1.0f}},
+        Vertex{{ obj_size, -obj_size, obj_size}, {1.0f, 0.0f}},
 
-        // Vertex{{ 0.5f, -0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{-0.5f,  0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{-0.5f, -0.5f, 0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{{ obj_size, -obj_size, obj_size}, {1.0f, 0.0f}},
+        Vertex{{-obj_size,  obj_size, obj_size}, {0.0f, 1.0f}},
+        Vertex{{-obj_size, -obj_size, obj_size}, {0.0f, 0.0f}},
 
-        // // top
-        // Vertex{{ 0.5f, 0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{ 0.5f, 0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{-0.5f, 0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // top
+        Vertex{{ obj_size, obj_size,  obj_size}, {1.0f, 1.0f}},
+        Vertex{{ obj_size, obj_size, -obj_size}, {1.0f, 0.0f}},
+        Vertex{{-obj_size, obj_size, -obj_size}, {0.0f, 0.0f}},
 
-        // Vertex{{-0.5f, 0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{-0.5f, 0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{ 0.5f, 0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        Vertex{{-obj_size, obj_size, -obj_size}, {0.0f, 0.0f}},
+        Vertex{{-obj_size, obj_size,  obj_size}, {0.0f, 1.0f}},
+        Vertex{{ obj_size, obj_size,  obj_size}, {1.0f, 1.0f}},
 
-        // // down
-        // Vertex{{ 0.5f, -0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{-0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{ 0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
+        // down
+        Vertex{{ obj_size, -obj_size,  obj_size}, {1.0f, 1.0f}},
+        Vertex{{-obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
+        Vertex{{ obj_size, -obj_size, -obj_size}, {1.0f, 0.0f}},
 
-        // Vertex{{-0.5f, -0.5f, -0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{ 0.5f, -0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-        // Vertex{{-0.5f, -0.5f,  0.5f}, {0.5f, 0.0f, 0.0f, 1.0f}},
-
-        // // floor
-        // Vertex{{-floor_size, -10.0f, -floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
-        // Vertex{{-floor_size, -10.0f,  floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
-        // Vertex{{ floor_size, -10.0f,  floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
-
-        // Vertex{{-floor_size, -10.0f, -floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
-        // Vertex{{ floor_size, -10.0f,  floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
-        // Vertex{{ floor_size, -10.0f, -floor_size}, {0.5f, 0.5f, 0.5f, 1.0f}},
+        Vertex{{-obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
+        Vertex{{ obj_size, -obj_size,  obj_size}, {1.0f, 1.0f}},
+        Vertex{{-obj_size, -obj_size,  obj_size}, {0.0f, 1.0f}},
     };
 
     // contain properties of the VBO

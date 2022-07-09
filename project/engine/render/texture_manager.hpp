@@ -28,6 +28,7 @@ public:
     void loadNewTexture(WCHAR * texture_filename);
 
     DxResPtr<ID3D11ShaderResourceView> texture_view;
+
     DxResPtr<ID3D11SamplerState> sampler_state;
 
 private:

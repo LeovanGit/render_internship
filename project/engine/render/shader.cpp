@@ -5,6 +5,7 @@ namespace engine
 void Shader::init(WCHAR * shader_filename)
 {
     HRESULT result;
+
     ID3D10Blob * error_message(0);
     ID3D10Blob * vert_shader_buffer(0);
     ID3D10Blob * frag_shader_buffer(0);
@@ -12,9 +13,10 @@ void Shader::init(WCHAR * shader_filename)
     // Compile the vertex shader code
     result = D3DCompileFromFile(shader_filename,
                                 NULL,
-                                NULL,
+                                D3D_COMPILE_STANDARD_FILE_INCLUDE,
                                 "vertexShader", // entry point
                                 "vs_5_0",
+                                // for graphics debugging tools like RenderDoc:
                                 D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
                                 0,
                                 &vert_shader_buffer,

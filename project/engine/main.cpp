@@ -35,7 +35,7 @@ engine::windows::Window win;
 Controller controller;
 
 // CREATE CAMERA
-Camera camera(glm::vec3(0, 0, -3.0f),
+Camera camera(glm::vec3(0, 0, -15.0f),
               glm::vec3(0, 1.0f, 0), // up
               glm::vec3(0, 0, 1.0f)); // forward
 } // namespace
@@ -78,13 +78,15 @@ int WINAPI WinMain(HINSTANCE hInstance,
     globals->initD3D();
     globals->initVBO();
 
+    engine::TextureManager * tex_man = engine::TextureManager::getInstance();
+    tex_man->initSampler();
+
     // SHADER
     engine::Shader shader;
     shader.init(L"../engine/shaders/shader.hlsl");
 
     // TEXTURE
-    engine::TextureManager * tex_man = engine::TextureManager::getInstance();
-    tex_man->loadNewTexture(L"../textures/brick.dds");
+    tex_man->loadNewTexture(L"../textures/neon_grid.dds");
 
     // REGISTER WINDOW CLASS
     WNDCLASSEX wclass;

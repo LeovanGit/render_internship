@@ -36,7 +36,6 @@ struct ConstBufferData
 };
 
 // Singleton for global rendering resources
-// NAIVE SINGLETON -> not for multithreading!!!
 class Globals final
 {
 public:
@@ -44,11 +43,11 @@ public:
     Globals(const Globals & other) = delete;
     void operator=(const Globals & other) = delete;
 
-    static void initGlobals();
+    static void init();
 
     static Globals * getInstance();
 
-    static void deleteGlobals();
+    static void del();
 
     void initD3D();
 

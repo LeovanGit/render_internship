@@ -12,7 +12,7 @@ namespace engine
 {
 Globals * Globals::instance = nullptr;
 
-void Globals::initGlobals()
+void Globals::init()
 {
     if (!instance) instance = new Globals();
 }
@@ -22,7 +22,7 @@ Globals * Globals::getInstance()
     return instance;
 }
 
-void Globals::deleteGlobals()
+void Globals::del()
 {
     if (instance)
     {

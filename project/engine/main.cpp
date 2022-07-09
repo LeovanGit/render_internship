@@ -20,6 +20,7 @@
 #include "window.hpp"
 #include "globals.hpp"
 #include "shader.hpp"
+#include "texture_manager.hpp"
 #include "camera.hpp"
 #include "controller.hpp"
 
@@ -69,7 +70,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    int nCmdShow)
 {
     // INIT SINGLETONS
-    engine::Globals::initGlobals();
+    engine::Globals::init();
+    engine::TextureManager::init(); // TextureManager depends on Globals!!!
 
     // INIT DIRECT3D
     engine::Globals * globals = engine::Globals::getInstance();
@@ -79,6 +81,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
     // SHADER
     engine::Shader shader;
     shader.init(L"../engine/shaders/shader.hlsl");
+
+    // TEXTURE
+    engine::TextureManager * tm = engine::TextureManager::getInstance();
+    tm->loadNewTexture(L"../textures/neon_grid.dds");
 
     // REGISTER WINDOW CLASS
     WNDCLASSEX wclass;
@@ -140,8 +146,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
     // no need to clean COM objects,
     // because DxResPtr does it in the destructor!
 
-    // DELETE SINGLETONS
-    engine::Globals::deleteGlobals();
+    // DELETE SINGLETONS (in reverse order!!!)
+    engine::TextureManager::del();
+    engine::Globals::del();
 
     // return this part of the WM_QUIT message to Windows
     return msg.wParam;

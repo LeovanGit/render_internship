@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
-cbuffer cb : register(b0)
+cbuffer PerFrame : register(b0)
 {
-    row_major float4x4 proj_view : packoffset(c0);
+    row_major float4x4 g_proj_view : packoffset(c0);
 };
 
 struct VS_INPUT
@@ -24,7 +24,7 @@ PS_INPUT vertexShader(VS_INPUT input)
     PS_INPUT output = (PS_INPUT)0;
 
     output.color = input.color;
-    output.pos = mul(float4(input.pos, 1.0f), proj_view);
+    output.pos = mul(float4(input.pos, 1.0f), g_proj_view);
 
     return output;
 }

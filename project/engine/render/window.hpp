@@ -10,13 +10,13 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <d3d11_4.h>
-#include <d3dcompiler.h>
 #include <cassert>
 #include <vector>
 
 #include "dx_res_ptr.hpp"
 #include "globals.hpp"
 #include "texture_manager.hpp"
+#include "shader_manager.hpp"
 
 #include "win_undef.hpp"
 

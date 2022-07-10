@@ -57,5 +57,4 @@ void TextureManager::loadNewTexture(WCHAR * texture_filename)
                                           texture_view.get());
     assert(result >= 0 && "CreateDDSTextureFromFile");
 }
-
 } // namespace engine

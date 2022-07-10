@@ -179,12 +179,11 @@ RECT Window::getClientSize() const
 void Window::renderFrame()
 {
     HRESULT result;
-
-    // get access to global render variables
     Globals * globals = Globals::getInstance();
+    TextureManager * tex_mgr = TextureManager::getInstance();
+    ShaderManager * shader_mgr = ShaderManager::getInstance();
 
-    // map and write data to const buffer
-    // ms.pData - pointer to the buffer's data location
+    // write new data to const buffer
     D3D11_MAPPED_SUBRESOURCE ms;
     result = globals->device_context4->Map(globals->const_buffer.ptr(),
                                            NULL,
@@ -199,39 +198,43 @@ void Window::renderFrame()
 
     globals->device_context4->Unmap(globals->const_buffer.ptr(), NULL);
 
-    // set the const buffer to vertex shader with updated values
+    // bind const buffer with updated values to vertex shader
     globals->device_context4->VSSetConstantBuffers(0,
                                                    1,
                                                    globals->const_buffer.get());
 
-    // set render target, depth buffer and viewport
+    // set render target and depth buffer
     globals->device_context4->OMSetRenderTargets(1,
                                                  m_render_target.get(),
                                                  depth_stencil_view.ptr());
 
+    // set viewport
     globals->device_context4->RSSetViewports(1, &viewport);
 
-    // fill the back buffer to a background color
+    // fill the back buffer with background color
     globals->device_context4->ClearRenderTargetView(m_render_target.ptr(),
                                                     BACKGROUND);
 
-    // clear depth\stencil buffer
+    // clear depth buffer
     globals->device_context4->ClearDepthStencilView(depth_stencil_view.ptr(),
                                                     D3D11_CLEAR_DEPTH |
                                                     D3D11_CLEAR_STENCIL,
                                                     1.0f,
                                                     0);
 
-    // bind sampler and texture to fragment shader
-    TextureManager * tex_man = TextureManager::getInstance();
+    // bind sampler to fragment shader
     globals->device_context4->PSSetSamplers(0,
                                             1,
-                                            tex_man->sampler_state.get());
+                                            tex_mgr->sampler_state.get());
+    
+    // bind texture to fragment shader
     globals->device_context4->PSSetShaderResources(0,
                                                    1,
-                                                   tex_man->texture_view.get());
+                                                   tex_mgr->texture_view.get());
 
-    // RENDER TO BACK BUFFER
+    // bind shader and input layout
+    shader_mgr->useShader(0);
+
     // which VBO to use
     uint32_t stride = sizeof(Vertex);
     uint32_t offset = 0;

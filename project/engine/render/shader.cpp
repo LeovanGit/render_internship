@@ -2,7 +2,7 @@
 
 namespace engine
 {
-void Shader::init(WCHAR * shader_filename)
+Shader::Shader(WCHAR * shader_filename)
 {
     HRESULT result;
 
@@ -25,8 +25,8 @@ void Shader::init(WCHAR * shader_filename)
     if(FAILED(result))
     {
         if (error_message) std::cout << "\nVERTEX SHADER COMPILATION ERROR:\n"
-                                    << (char *)error_message->GetBufferPointer()
-                                    << "\n\n";
+                                     << (char *)error_message->GetBufferPointer()
+                                     << "\n\n";
         else std::cout << "\nVERTEX SHADER NOT FOUND\n";
         assert(result >= 0 && "D3DCompileFromFile vertex shader");
     }
@@ -45,8 +45,8 @@ void Shader::init(WCHAR * shader_filename)
     if(FAILED(result))
     {
         if (error_message) std::cout << "\nFRAGMENT SHADER COMPILATION ERROR:\n" 
-                                    << (char *)error_message->GetBufferPointer()
-                                    << "\n\n";
+                                     << (char *)error_message->GetBufferPointer()
+                                     << "\n\n";
         else std::cout << "FRAGMENT SHADER NOT FOUND\n";
         assert(result >= 0 && "D3DCompileFromFile fragment shader");
     }
@@ -69,10 +69,6 @@ void Shader::init(WCHAR * shader_filename)
                           NULL,
                           frag_shader.reset());
     assert(result >= 0 && "CreatePixelShader");
-
-    // activate shaders
-    globals->device_context4->VSSetShader(vert_shader.ptr(), 0, 0);
-    globals->device_context4->PSSetShader(frag_shader.ptr(), 0, 0);
 
     // CREATE VAO (INPUT LAYOUT)
     D3D11_INPUT_ELEMENT_DESC ied[] =
@@ -99,7 +95,15 @@ void Shader::init(WCHAR * shader_filename)
                                         vert_shader_buffer->GetBufferPointer(),
                                         vert_shader_buffer->GetBufferSize(),
                                         input_layout.reset());
+}
 
+void Shader::activate()
+{
+    Globals * globals = Globals::getInstance();
+
+    // bind shaders and input layout
+    globals->device_context4->VSSetShader(vert_shader.ptr(), 0, 0);
+    globals->device_context4->PSSetShader(frag_shader.ptr(), 0, 0);
     globals->device_context4->IASetInputLayout(input_layout);
 }
 } // namespace engine

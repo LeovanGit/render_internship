@@ -12,7 +12,12 @@ struct DxResPtr
     DxResPtr() { m_ptr = nullptr; }
     ~DxResPtr() { release(); }
 
-    DxResPtr(const DxResPtr& other) { *this = other; }
+    DxResPtr(const DxResPtr& other)
+    {
+        //*this = other; 
+        m_ptr = other.m_ptr;
+        m_ptr->AddRef();
+    }
     DxResPtr& operator=(const DxResPtr& other)
     { 
         if (m_ptr) m_ptr->Release();

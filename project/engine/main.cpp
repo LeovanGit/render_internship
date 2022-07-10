@@ -21,6 +21,7 @@
 #include "globals.hpp"
 #include "shader.hpp"
 #include "texture_manager.hpp"
+#include "shader_manager.hpp"
 #include "camera.hpp"
 #include "controller.hpp"
 
@@ -71,22 +72,22 @@ int WINAPI WinMain(HINSTANCE hInstance,
 {
     // INIT SINGLETONS
     engine::Globals::init();
-    engine::TextureManager::init(); // TextureManager depends on Globals!!!
+    engine::ShaderManager::init(); // ShaderManager depends on Globals
+    engine::TextureManager::init(); // TextureManager depends on Globals
 
-    // INIT DIRECT3D
     engine::Globals * globals = engine::Globals::getInstance();
+    engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
+    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+
     globals->initD3D();
     globals->initVBO();
 
-    engine::TextureManager * tex_man = engine::TextureManager::getInstance();
-    tex_man->initSampler();
-
-    // SHADER
-    engine::Shader shader;
-    shader.init(L"../engine/shaders/shader.hlsl");
-
-    // TEXTURE
-    tex_man->loadNewTexture(L"../textures/neon_grid.dds");
+    // SHADERS
+    shader_mgr->registerShader(L"../engine/shaders/cube.hlsl");
+    
+    // TEXTURES
+    tex_mgr->initSampler();
+    tex_mgr->loadNewTexture(L"../textures/neon_grid.dds");
 
     // REGISTER WINDOW CLASS
     WNDCLASSEX wclass;
@@ -150,6 +151,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // DELETE SINGLETONS (in reverse order!!!)
     engine::TextureManager::del();
+    engine::ShaderManager::del();
     engine::Globals::del();
 
     // return this part of the WM_QUIT message to Windows

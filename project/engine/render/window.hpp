@@ -38,6 +38,8 @@ public:
 
     void initBackBuffer();
 
+    void initDepthBuffer();
+
     void initViewport();
 
     void resize(int width, int height);

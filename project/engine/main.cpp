@@ -1,4 +1,5 @@
 #include "win_def.hpp"
+#include <d3d11.h>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -83,11 +84,32 @@ int WINAPI WinMain(HINSTANCE hInstance,
     globals->initVBO();
 
     // SHADERS
-    shader_mgr->registerShader(L"../engine/shaders/cube.hlsl");
+    D3D11_INPUT_ELEMENT_DESC ied[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         D3D11_APPEND_ALIGNED_ELEMENT, // offset
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TEXCOORD",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         0,
+         D3D11_APPEND_ALIGNED_ELEMENT,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+    };
+    shader_mgr->registerShader(L"../engine/shaders/cube.hlsl", ied);
+    shader_mgr->registerShader(L"../engine/shaders/skybox.hlsl", ied);
+    shader_mgr->registerShader(L"../engine/shaders/floor.hlsl", ied);
     
     // TEXTURES
-    tex_mgr->initSampler();
-    tex_mgr->loadNewTexture(L"../textures/neon_grid.dds");
+    tex_mgr->registerTexture(L"../textures/rubik_cube.dds");
+    tex_mgr->registerTexture(L"../textures/skybox.dds");
+    tex_mgr->registerTexture(L"../textures/prototype_grid.dds");
 
     // REGISTER WINDOW CLASS
     WNDCLASSEX wclass;
@@ -109,10 +131,11 @@ int WINAPI WinMain(HINSTANCE hInstance,
     // controller.init(&scene);                                        
     // controller.initScene();
 
-    camera.setPerspective(45.0f,
+    camera.setPerspective(glm::radians(45.0f),
                           1280.0f / 720.0f,
-                          10.0f,
+                          1.0f,
                           1000.0f);
+    camera.updateMatrices();
 
     globals->setConstBuffer(camera);
 
@@ -177,9 +200,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         {
             win.resize(LOWORD(lParam), HIWORD(lParam));
             
-            camera.setPerspective(45.0f,
+            camera.setPerspective(glm::radians(45.0f),
                                   float(LOWORD(lParam)) / HIWORD(lParam),
-                                  0.1f,
+                                  1.0f,
                                   1000.0f);
             break;
         }

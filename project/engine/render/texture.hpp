@@ -1,0 +1,22 @@
+#ifndef TEXTURE_HPP
+#define TEXTURE_HPP
+
+#include "DDSTextureLoader11.h"
+#include "globals.hpp"
+#include "dx_res_ptr.hpp"
+#include <d3d11.h>
+
+namespace engine
+{
+class Texture
+{
+public:
+    Texture(WCHAR * texture_filename);
+
+    DxResPtr<ID3D11ShaderResourceView> texture_view;
+    DxResPtr<ID3D11SamplerState> sampler_state;
+private:
+};
+} // namespace engine
+
+#endif

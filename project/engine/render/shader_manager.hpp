@@ -25,17 +25,18 @@ public:
 
     void registerShader(const Shader & shader);
 
-    void registerShader(WCHAR * filename);
+    void registerShader(WCHAR * filename,
+                        D3D11_INPUT_ELEMENT_DESC input_desc[]);
 
     void useShader(int index);
-
-    std::vector<Shader> shaders;
-
+       
 private:
     ShaderManager() = default;
     ~ShaderManager() = default;
 
     static ShaderManager * instance;
+
+    std::vector<Shader> shaders;
 };
 } // namespace engine
 

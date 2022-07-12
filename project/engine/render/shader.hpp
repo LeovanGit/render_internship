@@ -24,7 +24,8 @@ namespace engine
 class Shader
 {
 public:
-    Shader(WCHAR * shader_filename);
+    Shader(WCHAR * shader_filename,
+           D3D11_INPUT_ELEMENT_DESC input_desc[]);
 
     void activate();
 

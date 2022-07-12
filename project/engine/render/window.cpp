@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "ext/matrix_clip_space.hpp"
 #include "texture_manager.hpp"
 
 namespace
@@ -40,6 +41,7 @@ void Window::init(HINSTANCE hInstance,
     initSwapChain();
     initBackBuffer();
     initViewport();
+    initDepthBuffer();
 }
 
 void Window::initSwapChain()
@@ -112,10 +114,16 @@ void Window::initBackBuffer()
                                m_render_target.reset());
 
     assert(result >= 0 && "CreateRenderTargetView");
+}
 
-    // CREATE DEPTH BUFFER
-    // depth/stencil buffer description
+void Window::initDepthBuffer()
+{
+    HRESULT result;
+    Globals * globals = Globals::getInstance();
+
+    // create depth buffer
     D3D11_TEXTURE2D_DESC dsb_desc;
+    ZeroMemory(&dsb_desc, sizeof(dsb_desc));
     dsb_desc.Width = client_width;
     dsb_desc.Height = client_height;
     dsb_desc.MipLevels = 1;
@@ -128,15 +136,20 @@ void Window::initBackBuffer()
     dsb_desc.CPUAccessFlags = 0; 
     dsb_desc.MiscFlags = 0;
 
-    // create texture for depth buffer
     result = globals->device5->CreateTexture2D(&dsb_desc,
                                                NULL,
                                                depth_stencil_buffer.reset());
     assert(result >= 0 && "CreateTexture2D");
 
     // create depth stencil view
+    D3D11_DEPTH_STENCIL_VIEW_DESC dsv_desc;
+    ZeroMemory(&dsv_desc, sizeof(dsv_desc));
+    dsv_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    dsv_desc.Texture2D.MipSlice = 0;
+
     result = globals->device5->CreateDepthStencilView(depth_stencil_buffer.ptr(),
-                                                      NULL,
+                                                      &dsv_desc,
                                                       depth_stencil_view.reset());
     assert(result >= 0 && "CreateDepthStencilView");
 }
@@ -225,12 +238,13 @@ void Window::renderFrame()
     // bind sampler to fragment shader
     globals->device_context4->PSSetSamplers(0,
                                             1,
-                                            tex_mgr->sampler_state.get());
+                                            tex_mgr->getTexture(0).sampler_state.get());
     
     // bind texture to fragment shader
-    globals->device_context4->PSSetShaderResources(0,
-                                                   1,
-                                                   tex_mgr->texture_view.get());
+    globals->device_context4->
+        PSSetShaderResources(0,
+                             1,
+                             tex_mgr->getTexture(0).texture_view.get());
 
     // bind shader and input layout
     shader_mgr->useShader(0);
@@ -250,6 +264,38 @@ void Window::renderFrame()
 
     // draw VBO to the back buffer
     globals->device_context4->Draw(36, 0);
+
+    // DRAW FULLSCREEN TRIANGLE (WITHOUT VBO -> GENERATED IN SHADER)
+    shader_mgr->useShader(1);
+
+    // bind skybox sampler to fragment shader
+    globals->device_context4->PSSetSamplers(0,
+                                            1,
+                                            tex_mgr->getTexture(1).sampler_state.get());
+
+    // bind skybox cubemap to fragment shader
+    globals->device_context4->
+        PSSetShaderResources(0,
+                             1,
+                             tex_mgr->getTexture(1).texture_view.get());
+
+    globals->device_context4->Draw(3, 0);
+
+    // DRAW FLOOR
+    shader_mgr->useShader(2);
+
+    // bind sampler to fragment shader
+    globals->device_context4->PSSetSamplers(0,
+                                            1,
+                                            tex_mgr->getTexture(2).sampler_state.get());
+    
+    // bind texture to fragment shader
+    globals->device_context4->
+        PSSetShaderResources(0,
+                             1,
+                             tex_mgr->getTexture(2).texture_view.get());
+
+    globals->device_context4->Draw(6, 0);
 
     // switch the back buffer and the front buffer
     m_swapchain->Present(0, 0);

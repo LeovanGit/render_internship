@@ -26,7 +26,12 @@ struct DxResPtr
         return *this;
     }
 
-    DxResPtr(DxResPtr&& other) noexcept { *this = std::move(other); }
+    DxResPtr(DxResPtr&& other) noexcept
+    {
+        // *this = std::move(other);
+        m_ptr = other.m_ptr;
+        m_ptr->AddRef();
+    }
     DxResPtr& operator=(DxResPtr&& other) noexcept
     {
         if (m_ptr) m_ptr->Release();

@@ -1,11 +1,12 @@
 #ifndef TEXTURE_MANAGER_HPP
 #define TEXTURE_MANAGER_HPP
 
-#include "DDSTextureLoader11.h"
-
 #include "globals.hpp"
 #include "dx_res_ptr.hpp"
 #include <d3d11.h>
+#include <vector>
+
+#include "texture.hpp"
 
 namespace engine
 {
@@ -23,18 +24,19 @@ public:
 
     static void del();
 
-    void initSampler();
+    void registerTexture(const Texture & texture);
 
-    void loadNewTexture(WCHAR * texture_filename);
+    void registerTexture(WCHAR * texture_filename);
 
-    DxResPtr<ID3D11ShaderResourceView> texture_view;
-    DxResPtr<ID3D11SamplerState> sampler_state;
+    Texture & getTexture(int index);
 
 private:
     TextureManager() = default;
     ~TextureManager() = default;
 
     static TextureManager * instance;
+
+    std::vector<Texture> textures;
 };
 } // namespace engine
 

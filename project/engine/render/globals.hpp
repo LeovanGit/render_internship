@@ -28,9 +28,13 @@ struct Vertex
     float uv[2];
 };
 
+// size must be multiple of 16
 struct ConstBufferData
 {
-    glm::mat4 proj_view;
+    glm::mat4 g_proj_view;
+    glm::vec3 g_camera_pos;
+    float padding_0;
+    glm::vec4 g_frustum_corners[3];
 };
 
 // Singleton for global rendering resources

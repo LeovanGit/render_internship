@@ -181,8 +181,17 @@ void Globals::initVBO()
 
 void Globals::setConstBuffer(const Camera & camera)
 {
+    // find CS corner points in WS
+    glm::vec3 bottom_left_WS = camera.reproject(-1.0f, -1.0f);
+    glm::vec3 top_left_WS = camera.reproject(-1.0f, 1.0f);
+    glm::vec3 bottom_right_WS = camera.reproject(1.0f, -1.0f);
+
     // fill const buffer data
-    const_buffer_data.proj_view = camera.getViewProj();
+    const_buffer_data.g_proj_view = camera.getViewProj();
+    const_buffer_data.g_camera_pos = camera.getPosition();
+    const_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);
+    const_buffer_data.g_frustum_corners[1] = glm::vec4(top_left_WS, 1.0f);
+    const_buffer_data.g_frustum_corners[2] = glm::vec4(bottom_right_WS, 1.0f);
 
     if (const_buffer.valid()) return;
     // constant buffer description
@@ -196,7 +205,7 @@ void Globals::setConstBuffer(const Camera & camera)
     
     HRESULT result = device5->CreateBuffer(&cb_desc,
                                            NULL,
-                                           const_buffer.get());
+                                           const_buffer.reset());
     assert(result >= 0 && "CreateBuffer");
 }
 } // namespace engine

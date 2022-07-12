@@ -44,7 +44,6 @@ glm::vec3 Camera::getPosition() const
 {
     return glm::vec3(view_matrix_inv[3][0],
                      view_matrix_inv[3][1],
-
                      view_matrix_inv[3][2]);
 }
 
@@ -168,7 +167,7 @@ void Camera::updateMatrices()
 // generate WS point from CS
 glm::vec3 Camera::reproject(float x, float y) const
 {
-    glm::vec4 point_h_cs(x, y, 1.0f, 1.0f);
+    glm::vec4 point_h_cs(x, y, 0.0f, 1.0f);
     glm::vec4 point_h_ws = view_proj_matrix_inv * point_h_cs;
 
     glm::vec3 point_ws = glm::vec3(point_h_ws) / point_h_ws.w;

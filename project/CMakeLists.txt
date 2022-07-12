@@ -23,7 +23,8 @@ set(INC engine
 include_directories(${INC})
 
 set(SHADERS engine/shaders/cube.hlsl
-            engine/shaders/globals.hlsl)
+            engine/shaders/globals.hlsl
+            engine/shaders/skybox.hlsl)
 
 set(HEADERS engine/controller.hpp
             engine/camera.hpp)
@@ -40,6 +41,7 @@ set(RENDER_HEADERS engine/render/window.hpp
                    engine/render/win_def.hpp
                    engine/render/win_undef.hpp
                    directx_texture_loader/DDSTextureLoader11.h
+                   engine/render/texture.hpp
                    engine/render/texture_manager.hpp)
 
 set(RENDER_SOURCES engine/render/window.cpp
@@ -47,6 +49,7 @@ set(RENDER_SOURCES engine/render/window.cpp
                    engine/render/shader.cpp
                    engine/render/shader_manager.cpp
                    directx_texture_loader/DDSTextureLoader11.cpp
+                   engine/render/texture.cpp
                    engine/render/texture_manager.cpp)
 
 set(MATH_HEADERS engine/math/matrices.hpp

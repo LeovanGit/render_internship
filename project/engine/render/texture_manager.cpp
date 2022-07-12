@@ -26,35 +26,19 @@ void TextureManager::del()
     }
 }
 
-void TextureManager::initSampler()
+void TextureManager::registerTexture(const Texture & texture)
 {
-    Globals * globals = Globals::getInstance();    
-    
-    D3D11_SAMPLER_DESC sampler_desc;
-    ZeroMemory(&sampler_desc, sizeof(sampler_desc));
-
-    sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampler_desc.MinLOD = 0;
-    sampler_desc.MaxLOD = D3D11_FLOAT32_MAX; // unlimited mipmap levels
-
-    HRESULT result = 
-        globals->device5->CreateSamplerState(&sampler_desc,
-                                             sampler_state.reset());
-    assert(result >= 0 && "CreateSamplerState");
+    textures.push_back(texture);
 }
 
-void TextureManager::loadNewTexture(WCHAR * texture_filename)
+void TextureManager::registerTexture(WCHAR * texture_filename)
 {
-    Globals * globals = Globals::getInstance();
+    Texture texture(texture_filename);
+    textures.push_back(texture);
+}
 
-    HRESULT result = 
-        DirectX::CreateDDSTextureFromFile(globals->device5.ptr(),
-                                          texture_filename,
-                                          nullptr,
-                                          texture_view.get());
-    assert(result >= 0 && "CreateDDSTextureFromFile");
+Texture & TextureManager::getTexture(int index)
+{
+    return textures[index];
 }
 } // namespace engine

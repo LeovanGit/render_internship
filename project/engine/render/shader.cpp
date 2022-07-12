@@ -11,11 +11,13 @@ Shader::Shader(WCHAR * shader_filename,
     ID3D10Blob * error_message(0);
     ID3D10Blob * vert_shader_buffer(0);
     ID3D10Blob * frag_shader_buffer(0);
+    
+    ShaderIncluder includer(L"../engine/shaders/");
 
     // Compile the vertex shader code
     result = D3DCompileFromFile(shader_filename,
                                 NULL,
-                                D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                                &includer,
                                 "vertexShader", // entry point
                                 "vs_5_0",
                                 // for graphics debugging tools like RenderDoc:
@@ -36,7 +38,7 @@ Shader::Shader(WCHAR * shader_filename,
     // Compile the fragment shader code
     result = D3DCompileFromFile(shader_filename,
                                 NULL,
-                                NULL,
+                                &includer,
                                 "fragmentShader", // entry point
                                 "ps_5_0",
                                 D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,

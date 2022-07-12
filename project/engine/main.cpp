@@ -37,7 +37,7 @@ engine::windows::Window win;
 Controller controller;
 
 // CREATE CAMERA
-Camera camera(glm::vec3(0, 0, -15.0f),
+Camera camera(glm::vec3(0.0f, 0.0f, -15.0f),
               glm::vec3(0, 1.0f, 0), // up
               glm::vec3(0, 0, 1.0f)); // forward
 } // namespace

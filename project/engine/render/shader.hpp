@@ -14,6 +14,7 @@
 #include "d3d11_4.h"
 #include <d3dcompiler.h>
 #include "globals.hpp"
+#include "shader_includer.hpp"
 
 #pragma comment(lib, "d3dcompiler.lib")
 

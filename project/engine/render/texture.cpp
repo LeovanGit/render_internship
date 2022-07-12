@@ -1,4 +1,5 @@
 #include "texture.hpp"
+#include <d3d11.h>
 
 namespace engine
 {
@@ -19,6 +20,8 @@ Texture::Texture(WCHAR * texture_filename)
     ZeroMemory(&sampler_desc, sizeof(sampler_desc));
 
     sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    // sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
+    // sampler_desc.MaxAnisotropy = 16;
     sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
     sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
     sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;

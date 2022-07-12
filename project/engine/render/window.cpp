@@ -172,6 +172,7 @@ void Window::resize(int width, int height)
     client_height = height;
 
     initBackBuffer();
+    initDepthBuffer();
     initViewport();
 }
 
@@ -233,7 +234,7 @@ void Window::renderFrame()
                                                     D3D11_CLEAR_DEPTH |
                                                     D3D11_CLEAR_STENCIL,
                                                     1.0f,
-                                                    0);
+                                                    0.0f);
 
     // bind sampler to fragment shader
     globals->device_context4->PSSetSamplers(0,

@@ -1,11 +1,4 @@
-cbuffer PerFrame : register(b0)
-{
-    column_major float4x4 g_proj_view;
-    float3 g_camera_position;
-    float padding_0;
-    // 0 - bottom_left, 1 - top_left, 2 - bottom_right
-    float4 g_frustum_corners[3];
-};
+#include "globals.hlsl"
 
 struct PS_INPUT
 {
@@ -29,7 +22,7 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID)
     PS_INPUT output;
     // 1.0f -> draw skybox on far frustum plane
     // posCS need only for rasterizator
-    output.posCS = float4(vertexCS[vertex_index], 0.99f, 1.0f);
+    output.posCS = float4(vertexCS[vertex_index], 0.999f, 1.0f);
    
     float3 dx = g_frustum_corners[2] - g_frustum_corners[0];
     float3 dy = g_frustum_corners[1] - g_frustum_corners[0];

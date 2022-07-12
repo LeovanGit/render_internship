@@ -42,7 +42,8 @@ set(RENDER_HEADERS engine/render/window.hpp
                    engine/render/win_undef.hpp
                    directx_texture_loader/DDSTextureLoader11.h
                    engine/render/texture.hpp
-                   engine/render/texture_manager.hpp)
+                   engine/render/texture_manager.hpp
+                   engine/render/shader_includer.hpp)
 
 set(RENDER_SOURCES engine/render/window.cpp
                    engine/render/globals.cpp
@@ -50,7 +51,8 @@ set(RENDER_SOURCES engine/render/window.cpp
                    engine/render/shader_manager.cpp
                    directx_texture_loader/DDSTextureLoader11.cpp
                    engine/render/texture.cpp
-                   engine/render/texture_manager.cpp)
+                   engine/render/texture_manager.cpp
+                   engine/render/shader_includer.cpp)
 
 set(MATH_HEADERS engine/math/matrices.hpp
                  engine/math/euler_angles.hpp)

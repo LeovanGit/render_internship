@@ -1,7 +1,4 @@
-cbuffer PerFrame : register(b0)
-{
-    column_major float4x4 g_proj_view;
-};
+#include "globals.hlsl"
 
 struct VS_INPUT
 {

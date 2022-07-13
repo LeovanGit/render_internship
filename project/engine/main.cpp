@@ -1,5 +1,4 @@
 #include "win_def.hpp"
-#include <d3d11.h>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -102,9 +101,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
     };
-    shader_mgr->registerShader(L"../engine/shaders/cube.hlsl", ied);
-    shader_mgr->registerShader(L"../engine/shaders/skybox.hlsl", ied);
-    shader_mgr->registerShader(L"../engine/shaders/floor.hlsl", ied);
+    shader_mgr->registerShader(L"../engine/shaders/", L"cube.hlsl", ied);
+    shader_mgr->registerShader(L"../engine/shaders/", L"skybox.hlsl", nullptr);
+    shader_mgr->registerShader(L"../engine/shaders/", L"floor.hlsl", nullptr);
     
     // TEXTURES
     tex_mgr->registerTexture(L"../textures/rubik_cube.dds");
@@ -198,12 +197,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         }
         case WM_SIZE:
         {
-            win.resize(LOWORD(lParam), HIWORD(lParam));
+            if (wParam != SIZE_MINIMIZED)
+            {
+                win.resize(LOWORD(lParam), HIWORD(lParam));
             
-            camera.setPerspective(glm::radians(45.0f),
-                                  float(LOWORD(lParam)) / HIWORD(lParam),
-                                  1.0f,
-                                  1000.0f);
+                camera.setPerspective(glm::radians(45.0f),
+                                      float(LOWORD(lParam)) / HIWORD(lParam),
+                                      1.0f,
+                                      1000.0f);
+            }
+
             break;
         }
         case WM_KEYDOWN:

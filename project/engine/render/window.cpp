@@ -1,6 +1,4 @@
 #include "window.hpp"
-#include "ext/matrix_clip_space.hpp"
-#include "texture_manager.hpp"
 
 namespace
 {
@@ -86,7 +84,7 @@ void Window::initBackBuffer()
 
         // before ResizeBuffers(), backbuffers must be released!!!
         HRESULT result = m_swapchain->ResizeBuffers(0,
-                                                    0, // auto sizing
+                                                    0, // auto size
                                                     0,
                                                     DXGI_FORMAT_UNKNOWN,
                                                     0);

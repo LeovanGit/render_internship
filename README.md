@@ -1,6 +1,6 @@
 # TEXTURE FILTERING
 
-### MAGNIFICATION
+## MAGNIFICATION
 
 ![mag](img/magnification.png)
 
@@ -8,7 +8,7 @@
 
 ![min](img/minification.png)
 
-### ANISOTROPIC
+## ANISOTROPIC
 
 ![af](img/anisotropic.png)
 

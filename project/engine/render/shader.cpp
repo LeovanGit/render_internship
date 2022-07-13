@@ -1,9 +1,9 @@
 #include "shader.hpp"
-#include <d3d11.h>
 
 namespace engine
 {
-Shader::Shader(WCHAR * shader_filename,
+Shader::Shader(WCHAR * path,
+               WCHAR * filename,
                D3D11_INPUT_ELEMENT_DESC input_desc[])
 {
     HRESULT result;
@@ -12,10 +12,15 @@ Shader::Shader(WCHAR * shader_filename,
     ID3D10Blob * vert_shader_buffer(0);
     ID3D10Blob * frag_shader_buffer(0);
     
-    ShaderIncluder includer(L"../engine/shaders/");
+    ShaderIncluder includer(path);
+    
+    // create full path to shader
+    std::wstring shader_path = std::wstring(path);
+    if (shader_path.back() == '/') shader_path += std::wstring(filename);
+    else shader_path += L'/' + std::wstring(filename);
 
     // Compile the vertex shader code
-    result = D3DCompileFromFile(shader_filename,
+    result = D3DCompileFromFile(shader_path.c_str(),
                                 NULL,
                                 &includer,
                                 "vertexShader", // entry point
@@ -36,7 +41,7 @@ Shader::Shader(WCHAR * shader_filename,
     }
 
     // Compile the fragment shader code
-    result = D3DCompileFromFile(shader_filename,
+    result = D3DCompileFromFile(shader_path.c_str(),
                                 NULL,
                                 &includer,
                                 "fragmentShader", // entry point
@@ -75,11 +80,13 @@ Shader::Shader(WCHAR * shader_filename,
     assert(result >= 0 && "CreatePixelShader");
 
     // CREATE INPUT LAYOUT (VAO)
-    globals->device5->CreateInputLayout(input_desc,
-                                        2,
-                                        vert_shader_buffer->GetBufferPointer(),
-                                        vert_shader_buffer->GetBufferSize(),
-                                        input_layout.reset());
+    if (input_desc)
+        globals->device5->
+            CreateInputLayout(input_desc,
+                              2,
+                              vert_shader_buffer->GetBufferPointer(),
+                              vert_shader_buffer->GetBufferSize(),
+                              input_layout.reset());
 }
 
 void Shader::activate()

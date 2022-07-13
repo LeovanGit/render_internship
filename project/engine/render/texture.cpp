@@ -1,5 +1,4 @@
 #include "texture.hpp"
-#include <d3d11.h>
 
 namespace engine
 {
@@ -7,7 +6,6 @@ Texture::Texture(WCHAR * texture_filename)
 {
     HRESULT result;
     Globals * globals = Globals::getInstance();
-
 
     result = DirectX::CreateDDSTextureFromFile(globals->device5.ptr(),
                                                texture_filename,

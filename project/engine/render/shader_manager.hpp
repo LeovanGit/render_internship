@@ -25,8 +25,9 @@ public:
 
     void registerShader(const Shader & shader);
 
-    void registerShader(WCHAR * filename,
-                        D3D11_INPUT_ELEMENT_DESC input_desc[]);
+    void registerShader(WCHAR * path,
+                        WCHAR * filename,
+                        D3D11_INPUT_ELEMENT_DESC input_desc[] = nullptr);
 
     void useShader(int index);
        

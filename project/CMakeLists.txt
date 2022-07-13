@@ -22,9 +22,13 @@ set(INC engine
 
 include_directories(${INC})
 
+set(TEX_LOADER directx_texture_loader/DDSTextureLoader11.h
+               directx_texture_loader/DDSTextureLoader11.cpp)
+
 set(SHADERS engine/shaders/cube.hlsl
             engine/shaders/globals.hlsl
-            engine/shaders/skybox.hlsl)
+            engine/shaders/skybox.hlsl
+            engine/shaders/floor.hlsl)
 
 set(HEADERS engine/controller.hpp
             engine/camera.hpp)
@@ -40,7 +44,6 @@ set(RENDER_HEADERS engine/render/window.hpp
                    engine/render/shader_manager.hpp
                    engine/render/win_def.hpp
                    engine/render/win_undef.hpp
-                   directx_texture_loader/DDSTextureLoader11.h
                    engine/render/texture.hpp
                    engine/render/texture_manager.hpp
                    engine/render/shader_includer.hpp)
@@ -49,7 +52,6 @@ set(RENDER_SOURCES engine/render/window.cpp
                    engine/render/globals.cpp
                    engine/render/shader.cpp
                    engine/render/shader_manager.cpp
-                   directx_texture_loader/DDSTextureLoader11.cpp
                    engine/render/texture.cpp
                    engine/render/texture_manager.cpp
                    engine/render/shader_includer.cpp)
@@ -64,7 +66,8 @@ add_executable(rt WIN32
                   ${HEADERS} ${SOURCES}
                   ${MATH_HEADERS} ${MATH_SOURCES}
                   ${RENDER_HEADERS} ${RENDER_SOURCES}
-                  ${SHADERS})
+                  ${SHADERS}
+                  ${TEX_LOADER})
 
 # does not participate in the compilation
 set_source_files_properties(${SHADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -76,3 +79,4 @@ source_group("Source Files/render" FILES ${RENDER_SOURCES})
 source_group("Header Files/render" FILES ${RENDER_HEADERS})
 
 source_group("shaders" FILES ${SHADERS})
+source_group("directx_texture_loader" FILES ${TEX_LOADER})

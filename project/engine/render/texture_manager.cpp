@@ -1,7 +1,4 @@
 #include "texture_manager.hpp"
-#include <d3d11.h>
-#include <d3d11_3.h>
-#include <minwinbase.h>
 
 namespace engine
 {
@@ -34,7 +31,7 @@ void TextureManager::registerTexture(const Texture & texture)
 void TextureManager::registerTexture(WCHAR * texture_filename)
 {
     Texture texture(texture_filename);
-    textures.push_back(texture);
+    textures.push_back(std::move(texture));
 }
 
 Texture & TextureManager::getTexture(int index)

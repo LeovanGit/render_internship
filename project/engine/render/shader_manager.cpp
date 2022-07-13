@@ -28,11 +28,12 @@ void ShaderManager::registerShader(const Shader & shader)
     shaders.push_back(shader);
 }
 
-void ShaderManager::registerShader(WCHAR * filename,
+void ShaderManager::registerShader(WCHAR * path,
+                                   WCHAR * filename,
                                    D3D11_INPUT_ELEMENT_DESC input_desc[])
 {
-    Shader shader(filename, input_desc);
-    shaders.push_back(shader);
+    Shader shader(path, filename, input_desc);
+    shaders.push_back(std::move(shader));
 }
 
 void ShaderManager::useShader(int index)

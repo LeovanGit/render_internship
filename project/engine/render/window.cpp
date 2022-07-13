@@ -150,6 +150,16 @@ void Window::initDepthBuffer()
                                                       &dsv_desc,
                                                       depth_stencil_view.reset());
     assert(result >= 0 && "CreateDepthStencilView");
+
+    D3D11_DEPTH_STENCIL_DESC dss_desc;
+    ZeroMemory(&dss_desc, sizeof(dss_desc));
+    dss_desc.DepthEnable = true;
+    dss_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
+    dss_desc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
+
+    result = globals->device5->CreateDepthStencilState(&dss_desc,
+                                                       depth_stencil_state.reset());
+    assert(result >= 0 && "CreateDepthStencilState");
 }
 
 void Window::initViewport()
@@ -219,6 +229,10 @@ void Window::renderFrame()
     globals->device_context4->OMSetRenderTargets(1,
                                                  m_render_target.get(),
                                                  depth_stencil_view.ptr());
+
+    // set depth stencil state
+    globals->device_context4->OMSetDepthStencilState(depth_stencil_state.ptr(),
+                                                     0);
 
     // set viewport
     globals->device_context4->RSSetViewports(1, &viewport);

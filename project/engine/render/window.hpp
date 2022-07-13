@@ -69,6 +69,7 @@ private:
 
     DxResPtr<ID3D11Texture2D> depth_stencil_buffer;
     DxResPtr<ID3D11DepthStencilView> depth_stencil_view;
+    DxResPtr<ID3D11DepthStencilState> depth_stencil_state;
 };
 } // namespace engine::windows
 

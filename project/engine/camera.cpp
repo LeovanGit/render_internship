@@ -29,11 +29,12 @@ void Camera::setPerspective(float fovy,
     float p1 = 1 / tanf(fovy / 2);
     float p0 = p1 / aspect;
 
+    // reversed depth
     proj_matrix = glm::mat4
         (p0, 0,  0,                            0,
          0,  p1, 0,                            0,
-         0,  0,  far / (far - near),           1.0f,
-         0,  0,  (-near * far) / (far - near), 0);
+         0,  0,  near / (near - far),           1.0f,
+         0,  0,  (-far * near) / (near - far), 0);
 
     proj_matrix_inv = glm::inverse(proj_matrix);
 
@@ -167,7 +168,8 @@ void Camera::updateMatrices()
 // generate WS point from CS
 glm::vec3 Camera::reproject(float x, float y) const
 {
-    glm::vec4 point_h_cs(x, y, 0.0f, 1.0f);
+    // z = 1.0f -> on near plane (reversed depth)
+    glm::vec4 point_h_cs(x, y, 1.0f, 1.0f);
     glm::vec4 point_h_ws = view_proj_matrix_inv * point_h_cs;
 
     glm::vec3 point_ws = glm::vec3(point_h_ws) / point_h_ws.w;

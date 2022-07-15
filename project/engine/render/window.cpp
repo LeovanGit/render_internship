@@ -155,7 +155,7 @@ void Window::initDepthBuffer()
     ZeroMemory(&dss_desc, sizeof(dss_desc));
     dss_desc.DepthEnable = true;
     dss_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
-    dss_desc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
+    dss_desc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_GREATER_EQUAL;
 
     result = globals->device5->CreateDepthStencilState(&dss_desc,
                                                        depth_stencil_state.reset());
@@ -245,7 +245,7 @@ void Window::renderFrame()
     globals->device_context4->ClearDepthStencilView(depth_stencil_view.ptr(),
                                                     D3D11_CLEAR_DEPTH |
                                                     D3D11_CLEAR_STENCIL,
-                                                    1.0f,
+                                                    0.0f, // reversed depth
                                                     0.0f);
 
     // bind sampler to fragment shader

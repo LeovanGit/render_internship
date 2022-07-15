@@ -1,6 +1,14 @@
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
+// for graphics debugging tools (like RenderDoc)
+#if (NDEBUG || defined(FORCE_SKIP_SHADER_OPTIMIZATIONS))
+    #define SHADER_OPTIMIZATIONS 0
+#else
+    #define SHADER_OPTIMIZATIONS D3DCOMPILE_DEBUG |\
+                                 D3DCOMPILE_SKIP_OPTIMIZATION
+#endif
+
 #include "win_def.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN

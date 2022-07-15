@@ -1,4 +1,6 @@
 #include "shader.hpp"
+#include <winbase.h>
+#include <winnt.h>
 
 namespace engine
 {
@@ -25,8 +27,7 @@ Shader::Shader(WCHAR * path,
                                 &includer,
                                 "vertexShader", // entry point
                                 "vs_5_0",
-                                // for graphics debugging tools like RenderDoc:
-                                D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+                                SHADER_OPTIMIZATIONS,
                                 0,
                                 &vert_shader_buffer,
                                 &error_message);
@@ -46,7 +47,7 @@ Shader::Shader(WCHAR * path,
                                 &includer,
                                 "fragmentShader", // entry point
                                 "ps_5_0",
-                                D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+                                SHADER_OPTIMIZATIONS,
                                 0,
                                 &frag_shader_buffer,
                                 &error_message);

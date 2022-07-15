@@ -53,13 +53,13 @@ void ShaderIncluder::readFile(FileData & filedata)
 
     if (file.is_open())
     {
-		char symbol = 0;
+        char symbol = 0;
 
-		while (file.get(symbol))
-		{
+        while (file.get(symbol))
+        {
             filedata.push_back(symbol);
-		}
+        }
 
-		file.close();
+        file.close();
     }
 }

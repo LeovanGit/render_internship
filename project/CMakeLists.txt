@@ -18,7 +18,9 @@ set(INC engine
         engine/math
         engine/render
         glm
-        directx_texture_loader)
+        directx_texture_loader
+        spdlog
+        .)
 
 include_directories(${INC})
 

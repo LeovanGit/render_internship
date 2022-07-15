@@ -12,6 +12,7 @@
 #include <iostream>
 #include <array>
 #include "glm.hpp"
+#include "spdlog.h"
 
 #include "dx_res_ptr.hpp"
 #include "camera.hpp"

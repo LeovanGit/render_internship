@@ -1,7 +1,6 @@
 #include "globals.hpp"
 
-// Say NVidia or AMD driver to prefer a dedicated GPU instead of an integrated
-// This has effect on laptops
+// Say NVidia/AMD driver to prefer a dedicated GPU instead of an integrated
 extern "C"
 {
     _declspec(dllexport) uint32_t NvOptimusEnablement = 1;
@@ -15,6 +14,7 @@ Globals * Globals::instance = nullptr;
 void Globals::init()
 {
     if (!instance) instance = new Globals();
+    else spdlog::error("Globals::init() was called twice!");
 }
 
 Globals * Globals::getInstance()
@@ -29,6 +29,7 @@ void Globals::del()
         delete instance;
         instance = nullptr;
     }
+    else spdlog::error("Globals::del() was called twice!");
 }
 
 void Globals::initD3D()

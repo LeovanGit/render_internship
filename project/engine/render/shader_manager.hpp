@@ -1,7 +1,9 @@
 #ifndef SHADER_MANAGER_HPP
 #define SHADER_MANAGER_HPP
 
-#include <vector>
+#include <unordered_map>
+#include <string>
+#include "spdlog.h"
 
 #include "globals.hpp"
 #include "dx_res_ptr.hpp"
@@ -23,13 +25,15 @@ public:
 
     static void del();
 
-    void registerShader(const Shader & shader);
+    void registerShader(const std::string & key,
+                        const Shader & shader);
 
-    void registerShader(WCHAR * path,
+    void registerShader(const std::string & key,
+                        WCHAR * path,
                         WCHAR * filename,
                         D3D11_INPUT_ELEMENT_DESC input_desc[] = nullptr);
 
-    void useShader(int index);
+    void useShader(const std::string & key);
        
 private:
     ShaderManager() = default;
@@ -37,7 +41,7 @@ private:
 
     static ShaderManager * instance;
 
-    std::vector<Shader> shaders;
+    std::unordered_map<std::string, Shader> shaders;
 };
 } // namespace engine
 

@@ -249,18 +249,19 @@ void Window::renderFrame()
                                                     0.0f);
 
     // bind sampler to fragment shader
-    globals->device_context4->PSSetSamplers(0,
-                                            1,
-                                            tex_mgr->getTexture(0).sampler_state.get());
+    globals->device_context4->
+        PSSetSamplers(0,
+                      1,
+                      tex_mgr->getTexture("cube").sampler_state.get());
     
     // bind texture to fragment shader
     globals->device_context4->
         PSSetShaderResources(0,
                              1,
-                             tex_mgr->getTexture(0).texture_view.get());
+                             tex_mgr->getTexture("cube").texture_view.get());
 
     // bind shader and input layout
-    shader_mgr->useShader(0);
+    shader_mgr->useShader("cube");
 
     // which VBO to use
     uint32_t stride = sizeof(Vertex);
@@ -279,34 +280,36 @@ void Window::renderFrame()
     globals->device_context4->Draw(36, 0);
 
     // DRAW FULLSCREEN TRIANGLE (WITHOUT VBO -> GENERATED IN SHADER)
-    shader_mgr->useShader(1);
+    shader_mgr->useShader("skybox");
 
     // bind skybox sampler to fragment shader
-    globals->device_context4->PSSetSamplers(0,
-                                            1,
-                                            tex_mgr->getTexture(1).sampler_state.get());
+    globals->device_context4->
+        PSSetSamplers(0,
+                      1,
+                      tex_mgr->getTexture("skybox").sampler_state.get());
 
     // bind skybox cubemap to fragment shader
     globals->device_context4->
         PSSetShaderResources(0,
                              1,
-                             tex_mgr->getTexture(1).texture_view.get());
+                             tex_mgr->getTexture("skybox").texture_view.get());
 
     globals->device_context4->Draw(3, 0);
 
     // DRAW FLOOR
-    shader_mgr->useShader(2);
+    shader_mgr->useShader("floor");
 
     // bind sampler to fragment shader
-    globals->device_context4->PSSetSamplers(0,
-                                            1,
-                                            tex_mgr->getTexture(2).sampler_state.get());
+    globals->device_context4->
+        PSSetSamplers(0,
+                      1,
+                      tex_mgr->getTexture("floor").sampler_state.get());
     
     // bind texture to fragment shader
     globals->device_context4->
         PSSetShaderResources(0,
                              1,
-                             tex_mgr->getTexture(2).texture_view.get());
+                             tex_mgr->getTexture("floor").texture_view.get());
 
     globals->device_context4->Draw(6, 0);
 

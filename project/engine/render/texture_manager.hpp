@@ -4,7 +4,9 @@
 #include "globals.hpp"
 #include "dx_res_ptr.hpp"
 #include <d3d11.h>
-#include <vector>
+#include <unordered_map>
+#include <string>
+#include "spdlog.h"
 
 #include "texture.hpp"
 
@@ -24,11 +26,13 @@ public:
 
     static void del();
 
-    void registerTexture(const Texture & texture);
+    void registerTexture(const std::string & key,
+                         const Texture & texture);
 
-    void registerTexture(WCHAR * texture_filename);
+    void registerTexture(const std::string & key,
+                         WCHAR * texture_filename);
 
-    Texture & getTexture(int index);
+    Texture & getTexture(const std::string & key);
 
 private:
     TextureManager() = default;
@@ -36,7 +40,7 @@ private:
 
     static TextureManager * instance;
 
-    std::vector<Texture> textures;
+    std::unordered_map<std::string, Texture> textures;
 };
 } // namespace engine
 

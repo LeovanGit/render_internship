@@ -7,6 +7,7 @@ ShaderManager * ShaderManager::instance = nullptr;
 void ShaderManager::init()
 {
     if (!instance) instance = new ShaderManager();
+    else spdlog::error("ShaderManager::init() was called twice!");
 }
 
 ShaderManager * ShaderManager::getInstance()
@@ -21,23 +22,31 @@ void ShaderManager::del()
         delete instance;
         instance = nullptr;
     }
+    else spdlog::error("ShaderManager::del() was called twice!");
 }
 
-void ShaderManager::registerShader(const Shader & shader)
+void ShaderManager::registerShader(const std::string & key,
+                                   const Shader & shader)
 {
-    shaders.push_back(shader);
+    shaders.emplace(key, shader);
 }
 
-void ShaderManager::registerShader(WCHAR * path,
+void ShaderManager::registerShader(const std::string & key,
+                                   WCHAR * path,
                                    WCHAR * filename,
                                    D3D11_INPUT_ELEMENT_DESC input_desc[])
 {
-    Shader shader(path, filename, input_desc);
-    shaders.push_back(std::move(shader));
+    // will call copy constructor (construct temp and then copy):
+    // shaders.emplace(key, Shader(path, filename, input_desc));
+
+    // just construct inside:
+    shaders.emplace(std::piecewise_construct,
+                    std::forward_as_tuple(key),
+                    std::forward_as_tuple(path, filename, input_desc));
 }
 
-void ShaderManager::useShader(int index)
+void ShaderManager::useShader(const std::string & key)
 {
-    shaders[index].activate();
+    shaders.find(key)->second.activate();
 }
 } // namespace engine

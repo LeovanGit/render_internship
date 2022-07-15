@@ -89,7 +89,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
          0,
          DXGI_FORMAT_R32G32B32_FLOAT,
          0,
-         D3D11_APPEND_ALIGNED_ELEMENT, // offset
+         D3D11_APPEND_ALIGNED_ELEMENT, // auto offset
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
 
@@ -101,14 +101,31 @@ int WINAPI WinMain(HINSTANCE hInstance,
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
     };
-    shader_mgr->registerShader(L"../engine/shaders/", L"cube.hlsl", ied);
-    shader_mgr->registerShader(L"../engine/shaders/", L"skybox.hlsl", nullptr);
-    shader_mgr->registerShader(L"../engine/shaders/", L"floor.hlsl", nullptr);
+
+    engine::Shader shader(L"../engine/shaders/",
+                          L"cube.hlsl",
+                          ied);
+    shader_mgr->registerShader("cucu", shader);
+
+    shader_mgr->registerShader("cube",
+                               L"../engine/shaders/",
+                               L"cube.hlsl",
+                               ied);
+
+    shader_mgr->registerShader("skybox",
+                               L"../engine/shaders/",
+                               L"skybox.hlsl",
+                               nullptr);
+
+    shader_mgr->registerShader("floor",
+                               L"../engine/shaders/",
+                               L"floor.hlsl",
+                               nullptr);
     
     // TEXTURES
-    tex_mgr->registerTexture(L"../textures/rubik_cube.dds");
-    tex_mgr->registerTexture(L"../textures/skybox.dds");
-    tex_mgr->registerTexture(L"../textures/prototype_grid.dds");
+    tex_mgr->registerTexture("cube", L"../textures/rubik_cube.dds");
+    tex_mgr->registerTexture("skybox", L"../textures/skybox.dds");
+    tex_mgr->registerTexture("floor", L"../textures/prototype_grid.dds");
 
     // REGISTER WINDOW CLASS
     WNDCLASSEX wclass;

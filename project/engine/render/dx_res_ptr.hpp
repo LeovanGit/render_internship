@@ -14,7 +14,6 @@ struct DxResPtr
 
     DxResPtr(const DxResPtr& other)
     {
-        // call operator=
         // *this = other; 
 
         m_ptr = other.m_ptr;
@@ -30,11 +29,7 @@ struct DxResPtr
 
     DxResPtr(DxResPtr&& other) noexcept
     {
-        // call move operator=
-        // *this = std::move(other);
-
-        m_ptr = other.m_ptr;
-        other.m_ptr = nullptr;
+        *this = std::move(other);
     }
     DxResPtr& operator=(DxResPtr&& other) noexcept
     {

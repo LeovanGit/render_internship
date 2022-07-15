@@ -2,11 +2,11 @@
 #define SHADER_HPP
 
 // for graphics debugging tools (like RenderDoc)
-#if (NDEBUG || defined(FORCE_SKIP_SHADER_OPTIMIZATIONS))
-    #define SHADER_OPTIMIZATIONS 0
+#if (!NDEBUG || defined(FORCE_SKIP_SHADER_OPTIMIZATIONS))
+    #define SKIP_SHADER_OPTIMIZATIONS D3DCOMPILE_DEBUG |\
+                                      D3DCOMPILE_SKIP_OPTIMIZATION
 #else
-    #define SHADER_OPTIMIZATIONS D3DCOMPILE_DEBUG |\
-                                 D3DCOMPILE_SKIP_OPTIMIZATION
+    #define SKIP_SHADER_OPTIMIZATIONS 0
 #endif
 
 #include "win_def.hpp"

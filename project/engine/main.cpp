@@ -102,11 +102,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
          0},
     };
 
-    engine::Shader shader(L"../engine/shaders/",
-                          L"cube.hlsl",
-                          ied);
-    shader_mgr->registerShader("cucu", shader);
-
     shader_mgr->registerShader("cube",
                                L"../engine/shaders/",
                                L"cube.hlsl",

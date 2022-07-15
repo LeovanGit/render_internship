@@ -40,9 +40,7 @@ void ShaderManager::registerShader(const std::string & key,
     // shaders.emplace(key, Shader(path, filename, input_desc));
 
     // just construct inside:
-    shaders.emplace(std::piecewise_construct,
-                    std::forward_as_tuple(key),
-                    std::forward_as_tuple(path, filename, input_desc));
+    shaders.try_emplace(key, path, filename, input_desc);
 }
 
 void ShaderManager::useShader(const std::string & key)

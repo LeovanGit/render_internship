@@ -38,9 +38,7 @@ void TextureManager::registerTexture(const std::string & key,
     // textures.emplace(key, Shader(texture_filename));
 
     // just construct inside:
-    textures.emplace(std::piecewise_construct,
-                    std::forward_as_tuple(key),
-                    std::forward_as_tuple(texture_filename));
+    textures.try_emplace(key, texture_filename);
 }
 
 Texture & TextureManager::getTexture(const std::string & key)

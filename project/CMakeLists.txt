@@ -14,18 +14,18 @@ add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
 # enable VS folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(TEX_LOADER directx_texture_loader/DDSTextureLoader11.h
+               directx_texture_loader/DDSTextureLoader11.cpp)
+
 set(INC engine
         engine/math
         engine/render
-        glm
+        glm/glm
         directx_texture_loader
-        spdlog
-        .)
+        spdlog/include
+        spdlog/include/spdlog)
 
 include_directories(${INC})
-
-set(TEX_LOADER directx_texture_loader/DDSTextureLoader11.h
-               directx_texture_loader/DDSTextureLoader11.cpp)
 
 set(SHADERS engine/shaders/cube.hlsl
             engine/shaders/globals.hlsl

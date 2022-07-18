@@ -1,0 +1,6 @@
+[submodule "project/glm"]
+	path = project/glm
+	url = https://github.com/g-truc/glm
+[submodule "project/spdlog"]
+	path = project/spdlog
+	url = https://github.com/gabime/spdlog

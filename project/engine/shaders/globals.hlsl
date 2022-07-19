@@ -6,3 +6,5 @@ cbuffer PerFrame : register(b0)
     // 0 - bottom_left, 1 - top_left, 2 - bottom_right
     float4 g_frustum_corners[3];
 };
+
+SamplerState g_sampler;

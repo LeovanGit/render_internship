@@ -10,7 +10,6 @@
 #include <d3d11_4.h>
 #include <cassert>
 #include <iostream>
-#include <array>
 #include "glm.hpp"
 #include "spdlog.h"
 
@@ -30,7 +29,7 @@ struct Vertex
 };
 
 // size must be multiple of 16
-struct ConstBufferData
+struct PerFrameBufferData
 {
     glm::mat4 g_proj_view;
     glm::vec3 g_camera_pos;
@@ -56,7 +55,9 @@ public:
 
     void initVBO();
 
-    void setConstBuffer(const Camera & camera);
+    void setPerFrameBuffer(const Camera & camera);
+
+    void updatePerFrameBuffer();
 
     DxResPtr<IDXGIFactory5> factory5;
     DxResPtr<ID3D11Device5> device5;
@@ -65,8 +66,8 @@ public:
 
     DxResPtr<ID3D11Buffer> vbo;
 
-    DxResPtr<ID3D11Buffer> const_buffer;
-    ConstBufferData const_buffer_data;
+    DxResPtr<ID3D11Buffer> per_frame_buffer;
+    PerFrameBufferData per_frame_buffer_data;
 
 private:
     Globals() = default;

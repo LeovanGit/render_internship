@@ -1,9 +1,6 @@
 #ifndef TEXTURE_MANAGER_HPP
 #define TEXTURE_MANAGER_HPP
 
-#include "globals.hpp"
-#include "dx_res_ptr.hpp"
-#include <d3d11.h>
 #include <unordered_map>
 #include <string>
 #include "spdlog.h"
@@ -26,11 +23,18 @@ public:
 
     static void del();
 
+    void registerSampler(const std::string & key,
+                         const D3D11_SAMPLER_DESC & sampler_desc);
+
+    void useSampler(const std::string & key);
+
     void registerTexture(const std::string & key,
                          const Texture & texture);
 
     void registerTexture(const std::string & key,
                          WCHAR * texture_filename);
+
+    void useTexture(const std::string & key);
 
     Texture & getTexture(const std::string & key);
 
@@ -41,6 +45,8 @@ private:
     static TextureManager * instance;
 
     std::unordered_map<std::string, Texture> textures;
+
+    std::unordered_map<std::string, DxResPtr<ID3D11SamplerState>> samplers;
 };
 } // namespace engine
 

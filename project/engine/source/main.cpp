@@ -4,26 +4,17 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#include <windows.h>
+#include <windowsx.h>
 #include <chrono>
-#include <vector>
 #include <string>
 #include "glm.hpp"
 
-#include <windows.h>
-#include <windowsx.h>
-
-// #include "scene.hpp"
-// #include "matrices.hpp"
-// #include "material.hpp"
-// #include "sphere.hpp"
-// #include "euler_angles.hpp"
 #include "window.hpp"
-#include "globals.hpp"
-#include "shader.hpp"
-#include "texture_manager.hpp"
-#include "shader_manager.hpp"
 #include "camera.hpp"
 #include "controller.hpp"
+#include "scene.hpp"
+#include "engine.hpp"
 
 #include "win_undef.hpp"
 
@@ -32,7 +23,7 @@ namespace
 constexpr float FRAME_DURATION = 1.0f / 60.0f;
 
 engine::windows::Window win;
-// Scene scene;
+engine::Scene scene;
 Controller controller;
 
 // CREATE CAMERA
@@ -70,57 +61,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    LPSTR lpCmdLine,
                    int nCmdShow)
 {
-    // INIT SINGLETONS
-    engine::Globals::init();
-    engine::ShaderManager::init(); // ShaderManager depends on Globals
-    engine::TextureManager::init(); // TextureManager depends on Globals
-
-    engine::Globals * globals = engine::Globals::getInstance();
-    engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
-    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
-
-    globals->initD3D();
-    globals->initVBO();
-
-    // SHADERS
-    D3D11_INPUT_ELEMENT_DESC ied[] =
-    {
-        {"POSITION",
-         0,
-         DXGI_FORMAT_R32G32B32_FLOAT,
-         0,
-         D3D11_APPEND_ALIGNED_ELEMENT, // auto offset
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0},
-
-        {"TEXCOORD",
-         0,
-         DXGI_FORMAT_R32G32_FLOAT,
-         0,
-         D3D11_APPEND_ALIGNED_ELEMENT,
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0},
-    };
-
-    shader_mgr->registerShader("cube",
-                               L"../engine/shaders/",
-                               L"cube.hlsl",
-                               ied);
-
-    shader_mgr->registerShader("skybox",
-                               L"../engine/shaders/",
-                               L"skybox.hlsl",
-                               nullptr);
-
-    shader_mgr->registerShader("floor",
-                               L"../engine/shaders/",
-                               L"floor.hlsl",
-                               nullptr);
-    
-    // TEXTURES
-    tex_mgr->registerTexture("cube", L"../textures/rubik_cube.dds");
-    tex_mgr->registerTexture("skybox", L"../textures/skybox.dds");
-    tex_mgr->registerTexture("floor", L"../textures/prototype_grid.dds");
+    // INIT ENGINE
+    engine::Engine::init();
 
     // REGISTER WINDOW CLASS
     WNDCLASSEX wclass;
@@ -139,16 +81,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
     win.init(hInstance, 100.0f, 100.0f, 1280.0f, 720.0f);
 
     // CREATE SCENE
-    // controller.init(&scene);                                        
-    // controller.initScene();
-
-    camera.setPerspective(glm::radians(45.0f),
-                          1280.0f / 720.0f,
-                          1.0f,
-                          1000.0f);
-    camera.updateMatrices();
-
-    globals->setConstBuffer(camera);
+    controller.init(scene);
+    controller.initScene(camera);
 
     ShowWindow(win.handle, nCmdShow);
 
@@ -174,19 +108,15 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
             controller.processInput(camera, delta_time, win);
             camera.updateMatrices();
-            globals->setConstBuffer(camera);
-            // controller.scene->render(win, camera);            
-            win.renderFrame();
+            controller.scene->renderFrame(win, camera);
         }
     }
     exit:
     // no need to clean COM objects,
     // because DxResPtr does it in the destructor!
 
-    // DELETE SINGLETONS (in reverse order!!!)
-    engine::TextureManager::del();
-    engine::ShaderManager::del();
-    engine::Globals::del();
+    // CLEAN ENGINE
+    engine::Engine::del();
 
     // return this part of the WM_QUIT message to Windows
     return msg.wParam;

@@ -6,7 +6,6 @@ struct PS_INPUT
     float2 uv : TEXCOORD;
 };
 
-SamplerState g_sampler;
 Texture2D g_texture;
 
 //------------------------------------------------------------------------------

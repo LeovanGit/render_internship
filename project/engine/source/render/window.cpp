@@ -2,7 +2,6 @@
 
 namespace
 {
-constexpr float QUALITY = 2.0f;
 constexpr float BACKGROUND[4] = {0.4f, 0.44f, 0.4f, 1.0f};
 } // namespace
 
@@ -198,32 +197,25 @@ RECT Window::getClientSize() const
     return client;
 }
 
-void Window::renderFrame()
+void Window::clearFrame()
 {
-    HRESULT result;
     Globals * globals = Globals::getInstance();
-    TextureManager * tex_mgr = TextureManager::getInstance();
-    ShaderManager * shader_mgr = ShaderManager::getInstance();
 
-    // write new data to const buffer
-    D3D11_MAPPED_SUBRESOURCE ms;
-    result = globals->device_context4->Map(globals->const_buffer.ptr(),
-                                           NULL,
-                                           D3D11_MAP_WRITE_DISCARD,
-                                           NULL,
-                                           &ms);
-    assert(result >= 0 && "Map");
+    // fill the back buffer with background color
+    globals->device_context4->ClearRenderTargetView(m_render_target.ptr(),
+                                                    BACKGROUND);
 
-    memcpy(ms.pData,
-           &globals->const_buffer_data,
-           sizeof(globals->const_buffer_data));
+    // clear depth buffer by 0
+    globals->device_context4->ClearDepthStencilView(depth_stencil_view.ptr(),
+                                                    D3D11_CLEAR_DEPTH |
+                                                    D3D11_CLEAR_STENCIL,
+                                                    0.0f, // reversed depth
+                                                    0.0f);
+}
 
-    globals->device_context4->Unmap(globals->const_buffer.ptr(), NULL);
-
-    // bind const buffer with updated values to vertex shader
-    globals->device_context4->VSSetConstantBuffers(0,
-                                                   1,
-                                                   globals->const_buffer.get());
+void Window::bindRT()
+{
+    Globals * globals = Globals::getInstance();
 
     // set render target and depth buffer
     globals->device_context4->OMSetRenderTargets(1,
@@ -236,83 +228,10 @@ void Window::renderFrame()
 
     // set viewport
     globals->device_context4->RSSetViewports(1, &viewport);
+}
 
-    // fill the back buffer with background color
-    globals->device_context4->ClearRenderTargetView(m_render_target.ptr(),
-                                                    BACKGROUND);
-
-    // clear depth buffer
-    globals->device_context4->ClearDepthStencilView(depth_stencil_view.ptr(),
-                                                    D3D11_CLEAR_DEPTH |
-                                                    D3D11_CLEAR_STENCIL,
-                                                    0.0f, // reversed depth
-                                                    0.0f);
-
-    // bind sampler to fragment shader
-    globals->device_context4->
-        PSSetSamplers(0,
-                      1,
-                      tex_mgr->getTexture("cube").sampler_state.get());
-    
-    // bind texture to fragment shader
-    globals->device_context4->
-        PSSetShaderResources(0,
-                             1,
-                             tex_mgr->getTexture("cube").texture_view.get());
-
-    // bind shader and input layout
-    shader_mgr->useShader("cube");
-
-    // which VBO to use
-    uint32_t stride = sizeof(Vertex);
-    uint32_t offset = 0;
-    globals->device_context4->IASetVertexBuffers(0,
-                                                 1,
-                                                 globals->vbo.get(),
-                                                 &stride,
-                                                 &offset);
-
-    // which type of primitive to use (triangles)
-    globals->device_context4->
-        IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    // draw VBO to the back buffer
-    globals->device_context4->Draw(36, 0);
-
-    // DRAW FULLSCREEN TRIANGLE (WITHOUT VBO -> GENERATED IN SHADER)
-    shader_mgr->useShader("skybox");
-
-    // bind skybox sampler to fragment shader
-    globals->device_context4->
-        PSSetSamplers(0,
-                      1,
-                      tex_mgr->getTexture("skybox").sampler_state.get());
-
-    // bind skybox cubemap to fragment shader
-    globals->device_context4->
-        PSSetShaderResources(0,
-                             1,
-                             tex_mgr->getTexture("skybox").texture_view.get());
-
-    globals->device_context4->Draw(3, 0);
-
-    // DRAW FLOOR
-    shader_mgr->useShader("floor");
-
-    // bind sampler to fragment shader
-    globals->device_context4->
-        PSSetSamplers(0,
-                      1,
-                      tex_mgr->getTexture("floor").sampler_state.get());
-    
-    // bind texture to fragment shader
-    globals->device_context4->
-        PSSetShaderResources(0,
-                             1,
-                             tex_mgr->getTexture("floor").texture_view.get());
-
-    globals->device_context4->Draw(6, 0);
-
+void Window::switchBuffer()
+{
     // switch the back buffer and the front buffer
     m_swapchain->Present(0, 0);
 }

@@ -11,12 +11,9 @@
 #include <windowsx.h>
 #include <d3d11_4.h>
 #include <cassert>
-#include <vector>
 
 #include "dx_res_ptr.hpp"
 #include "globals.hpp"
-#include "texture_manager.hpp"
-#include "shader_manager.hpp"
 
 #include "win_undef.hpp"
 
@@ -48,7 +45,11 @@ public:
 
     RECT getClientSize() const;
 
-    void renderFrame();
+    void clearFrame();
+
+    void bindRT();
+
+    void switchBuffer();
 
     HWND handle;
     HDC hdc;
@@ -56,7 +57,7 @@ public:
     int pos_x;
     int pos_y;
 
-private:    
+private:
     int client_width;
     int client_height;
 

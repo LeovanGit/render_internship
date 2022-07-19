@@ -1,6 +1,6 @@
 #include "globals.hpp"
 
-// Say NVidia/AMD driver to prefer a dedicated GPU instead of an integrated
+// Say Nvidia/AMD driver to prefer a dedicated GPU instead of an integrated
 extern "C"
 {
     _declspec(dllexport) uint32_t NvOptimusEnablement = 1;
@@ -13,7 +13,13 @@ Globals * Globals::instance = nullptr;
 
 void Globals::init()
 {
-    if (!instance) instance = new Globals();
+    if (!instance)
+    {
+        instance = new Globals();
+
+        instance->initD3D();
+        instance->initVBO();
+    }
     else spdlog::error("Globals::init() was called twice!");
 }
 
@@ -102,7 +108,7 @@ void Globals::initVBO()
 
     std::array<Vertex, 36> vertices =
     {
-        //     POSITION                UV
+        //     POSITION                           UV
         // front
         Vertex{{-obj_size, obj_size,  -obj_size}, {0.0f, 1.0f}},
         Vertex{{obj_size,  obj_size,  -obj_size}, {1.0f, 1.0f}},
@@ -180,7 +186,7 @@ void Globals::initVBO()
     assert(result >= 0 && "CreateBuffer");
 }
 
-void Globals::setConstBuffer(const Camera & camera)
+void Globals::setPerFrameBuffer(const Camera & camera)
 {
     // find CS corner points in WS
     glm::vec3 bottom_left_WS = camera.reproject(-1.0f, -1.0f);
@@ -188,17 +194,17 @@ void Globals::setConstBuffer(const Camera & camera)
     glm::vec3 bottom_right_WS = camera.reproject(1.0f, -1.0f);
 
     // fill const buffer data
-    const_buffer_data.g_proj_view = camera.getViewProj();
-    const_buffer_data.g_camera_pos = camera.getPosition();
-    const_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);
-    const_buffer_data.g_frustum_corners[1] = glm::vec4(top_left_WS, 1.0f);
-    const_buffer_data.g_frustum_corners[2] = glm::vec4(bottom_right_WS, 1.0f);
+    per_frame_buffer_data.g_proj_view = camera.getViewProj();
+    per_frame_buffer_data.g_camera_pos = camera.getPosition();
+    per_frame_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);
+    per_frame_buffer_data.g_frustum_corners[1] = glm::vec4(top_left_WS, 1.0f);
+    per_frame_buffer_data.g_frustum_corners[2] = glm::vec4(bottom_right_WS, 1.0f);
 
-    if (const_buffer.valid()) return;
+    if (per_frame_buffer.valid()) return;
     // constant buffer description
     D3D11_BUFFER_DESC cb_desc;
     cb_desc.Usage = D3D11_USAGE_DYNAMIC;
-    cb_desc.ByteWidth = sizeof(const_buffer_data);
+    cb_desc.ByteWidth = sizeof(per_frame_buffer_data);
     cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     cb_desc.MiscFlags = 0;
@@ -206,7 +212,32 @@ void Globals::setConstBuffer(const Camera & camera)
     
     HRESULT result = device5->CreateBuffer(&cb_desc,
                                            NULL,
-                                           const_buffer.reset());
+                                           per_frame_buffer.reset());
     assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::updatePerFrameBuffer()
+{
+    HRESULT result;
+
+    // write new data to const buffer
+    D3D11_MAPPED_SUBRESOURCE ms;
+    result = device_context4->Map(per_frame_buffer.ptr(),
+                                  NULL,
+                                  D3D11_MAP_WRITE_DISCARD,
+                                  NULL,
+                                  &ms);
+    assert(result >= 0 && "Map");
+
+    memcpy(ms.pData,
+           &per_frame_buffer_data,
+           sizeof(per_frame_buffer_data));
+
+    device_context4->Unmap(per_frame_buffer.ptr(), NULL);
+
+    // bind const buffer with updated values to vertex shader
+    device_context4->VSSetConstantBuffers(0,
+                                          1,
+                                          per_frame_buffer.get());
 }
 } // namespace engine

@@ -47,4 +47,9 @@ void ShaderManager::useShader(const std::string & key)
 {
     shaders.find(key)->second.activate();
 }
+
+Shader & ShaderManager::getShader(const std::string & key)
+{
+    return shaders.find(key)->second;
+}
 } // namespace engine

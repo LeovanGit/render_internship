@@ -5,7 +5,6 @@
 #include <string>
 #include "spdlog.h"
 
-#include "globals.hpp"
 #include "dx_res_ptr.hpp"
 #include "shader.hpp"
 
@@ -34,6 +33,8 @@ public:
                         D3D11_INPUT_ELEMENT_DESC input_desc[] = nullptr);
 
     void useShader(const std::string & key);
+
+    Shader & getShader(const std::string & key);
        
 private:
     ShaderManager() = default;

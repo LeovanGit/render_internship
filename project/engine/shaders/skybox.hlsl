@@ -6,7 +6,6 @@ struct PS_INPUT
     float3 dirWS : DIRECTION_WS;
 };
 
-SamplerState g_sampler;
 TextureCube g_skybox;
 
 //------------------------------------------------------------------------------

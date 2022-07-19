@@ -13,8 +13,9 @@ class Texture
 public:
     Texture(WCHAR * texture_filename);
 
+    void activate();
+
     DxResPtr<ID3D11ShaderResourceView> texture_view;
-    DxResPtr<ID3D11SamplerState> sampler_state;
 private:
 };
 } // namespace engine

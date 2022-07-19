@@ -1,16 +1,16 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
-#include <vector>
 #include "glm.hpp"
 
 #include "window.hpp"
 #include "camera.hpp"
 #include "euler_angles.hpp"
-// #include "scene.hpp"
-// #include "sphere.hpp"
-// #include "plane.hpp"
-// #include "material.hpp"
+#include "scene.hpp"
+#include "sky.hpp"
+#include "globals.hpp"
+#include "shader_manager.hpp"
+#include "texture_manager.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -34,10 +34,9 @@ class Controller
 public:
     Controller() = default;
 
-    // void init(Scene * scene);
-    void init();
+    void init(engine::Scene & scene);
 
-    // void initScene();
+    void initScene(Camera & camera);
 
     void processInput(Camera & camera,
                       const float delta_time,
@@ -45,7 +44,7 @@ public:
 
     void calcMouseMovement(LPARAM lParam);
 
-    // Scene * scene;
+    engine::Scene * scene;
 
     glm::vec2 mouse;
     glm::vec2 fixed_mouse;
@@ -58,17 +57,6 @@ public:
     glm::vec3 rotation_speed = glm::vec3(360.0f, 360.0f, 60.0f);
 
     bool is_accelerated;
-
-    // class GrabbedObject
-    // {
-    // public:
-    //     GrabbedObject() = default;
-        
-    //     bool is_grabbed = false;
-    //     float t;
-    //     glm::vec3 point;
-    //     std::unique_ptr<Scene::IObjectMover> mover;
-    // } object;
 };
 
 #endif

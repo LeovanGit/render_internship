@@ -13,8 +13,8 @@ void Sky::render()
 {
     Globals * globals = Globals::getInstance();
 
-    m_shader->activate();
-    m_texture->activate();
+    m_shader->bind();
+    m_texture->bind();
     globals->device_context4->Draw(3, 0);
 }
 } // namespace engine

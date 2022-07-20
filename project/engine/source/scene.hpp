@@ -16,7 +16,7 @@ public:
     Scene() = default;
 
     void renderFrame(windows::Window & window,
-                     Camera & camera);
+                     const Camera & camera);
 
     Sky m_sky;
 };

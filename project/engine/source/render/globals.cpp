@@ -19,6 +19,7 @@ void Globals::init()
 
         instance->initD3D();
         instance->initVBO();
+        instance->initSamplers();
     }
     else spdlog::error("Globals::init() was called twice!");
 }
@@ -36,6 +37,17 @@ void Globals::del()
         instance = nullptr;
     }
     else spdlog::error("Globals::del() was called twice!");
+}
+
+void Globals::bind(const Camera & camera)
+{
+    setPerFrameBuffer(camera);
+    updatePerFrameBuffer();
+
+    // bind sampler to fragment shader
+    device_context4->PSSetSamplers(0,
+                                   1,
+                                   sampler.get());
 }
 
 void Globals::initD3D()
@@ -184,6 +196,24 @@ void Globals::initVBO()
                                            &vertices_data,
                                            vbo.reset());
     assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::initSamplers()
+{
+    D3D11_SAMPLER_DESC sampler_desc;
+    ZeroMemory(&sampler_desc, sizeof(sampler_desc));
+    sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    // sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
+    // sampler_desc.MaxAnisotropy = 16;
+    sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    sampler_desc.MinLOD = 0;
+    sampler_desc.MaxLOD = D3D11_FLOAT32_MAX; // unlimited mipmap levels
+
+    HRESULT result = device5->CreateSamplerState(&sampler_desc,
+                                                 sampler.reset());
+    assert(result >= 0 && "CreateSamplerState");
 }
 
 void Globals::setPerFrameBuffer(const Camera & camera)

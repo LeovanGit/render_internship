@@ -37,7 +37,7 @@ public:
            WCHAR * filename,
            D3D11_INPUT_ELEMENT_DESC input_desc[] = nullptr);
 
-    void activate();
+    void bind();
 
     DxResPtr<ID3D11VertexShader> vert_shader;
     DxResPtr<ID3D11PixelShader> frag_shader;

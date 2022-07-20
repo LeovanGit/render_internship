@@ -13,7 +13,7 @@ class Texture
 public:
     Texture(WCHAR * texture_filename);
 
-    void activate();
+    void bind();
 
     DxResPtr<ID3D11ShaderResourceView> texture_view;
 private:

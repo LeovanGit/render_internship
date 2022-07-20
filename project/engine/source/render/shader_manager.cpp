@@ -45,7 +45,7 @@ void ShaderManager::registerShader(const std::string & key,
 
 void ShaderManager::useShader(const std::string & key)
 {
-    shaders.find(key)->second.activate();
+    shaders.find(key)->second.bind();
 }
 
 Shader & ShaderManager::getShader(const std::string & key)

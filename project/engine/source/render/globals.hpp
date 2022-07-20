@@ -51,9 +51,13 @@ public:
 
     static void del();
 
+    void bind(const Camera & camera);
+
     void initD3D();
 
     void initVBO();
+
+    void initSamplers();
 
     void setPerFrameBuffer(const Camera & camera);
 
@@ -68,6 +72,8 @@ public:
 
     DxResPtr<ID3D11Buffer> per_frame_buffer;
     PerFrameBufferData per_frame_buffer_data;
+
+    DxResPtr<ID3D11SamplerState> sampler;
 
 private:
     Globals() = default;

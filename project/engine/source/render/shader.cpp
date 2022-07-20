@@ -88,7 +88,7 @@ Shader::Shader(WCHAR * path,
                               input_layout.reset());
 }
 
-void Shader::activate()
+void Shader::bind()
 {
     Globals * globals = Globals::getInstance();
 

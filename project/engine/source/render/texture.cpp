@@ -14,7 +14,7 @@ Texture::Texture(WCHAR * texture_filename)
     assert(result >= 0 && "CreateDDSTextureFromFile");
 }
 
-void Texture::activate()
+void Texture::bind()
 {
     Globals * globals = Globals::getInstance();
 

@@ -3,20 +3,17 @@
 namespace engine
 {
 void Scene::renderFrame(windows::Window & window,
-                        Camera & camera)
+                        const Camera & camera)
 {
     HRESULT result;
     Globals * globals = Globals::getInstance();
     TextureManager * tex_mgr = TextureManager::getInstance();
     ShaderManager * shader_mgr = ShaderManager::getInstance();
 
-    globals->setPerFrameBuffer(camera);
-    globals->updatePerFrameBuffer();
+    globals->bind(camera);
 
     window.bindRT();
     window.clearFrame();
-
-    tex_mgr->useSampler("main");
 
     // ====> DRAW CUBE
     tex_mgr->useTexture("cube");

@@ -23,11 +23,6 @@ public:
 
     static void del();
 
-    void registerSampler(const std::string & key,
-                         const D3D11_SAMPLER_DESC & sampler_desc);
-
-    void useSampler(const std::string & key);
-
     void registerTexture(const std::string & key,
                          const Texture & texture);
 
@@ -45,8 +40,6 @@ private:
     static TextureManager * instance;
 
     std::unordered_map<std::string, Texture> textures;
-
-    std::unordered_map<std::string, DxResPtr<ID3D11SamplerState>> samplers;
 };
 } // namespace engine
 

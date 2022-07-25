@@ -11,6 +11,7 @@
 #include "globals.hpp"
 #include "shader_manager.hpp"
 #include "texture_manager.hpp"
+#include "model_manager.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;

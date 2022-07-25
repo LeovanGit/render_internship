@@ -7,6 +7,7 @@
 #include "globals.hpp"
 #include "texture_manager.hpp"
 #include "shader_manager.hpp"
+#include "model_manager.hpp"
 
 namespace engine
 {

@@ -23,6 +23,7 @@ void Controller::initScene(Camera & camera)
 
     engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
 
     // CREATE SHADERS
     D3D11_INPUT_ELEMENT_DESC ied[] =
@@ -67,6 +68,9 @@ void Controller::initScene(Camera & camera)
     // CREATE SKY
     scene->m_sky.init(shader_mgr->getShader("skybox"),
                       tex_mgr->getTexture("skybox"));
+
+    // CREATE MODELS
+    model_mgr->registerModel("cube", L"../engine/assets/Knight/Knight.fbx");
 }
 
 void Controller::processInput(Camera & camera,

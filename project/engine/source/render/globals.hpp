@@ -22,12 +22,6 @@
 
 namespace engine
 {
-struct Vertex
-{
-    float position[3];
-    float uv[2];
-};
-
 // size must be multiple of 16
 struct PerFrameBufferData
 {
@@ -55,8 +49,6 @@ public:
 
     void initD3D();
 
-    void initVBO();
-
     void initSamplers();
 
     void setPerFrameBuffer(const Camera & camera);
@@ -67,8 +59,6 @@ public:
     DxResPtr<ID3D11Device5> device5;
     DxResPtr<ID3D11DeviceContext4> device_context4;
     DxResPtr<ID3D11Debug> device_debug;
-
-    DxResPtr<ID3D11Buffer> vbo;
 
     DxResPtr<ID3D11Buffer> per_frame_buffer;
     PerFrameBufferData per_frame_buffer_data;

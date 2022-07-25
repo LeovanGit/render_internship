@@ -9,6 +9,7 @@ void Scene::renderFrame(windows::Window & window,
     Globals * globals = Globals::getInstance();
     TextureManager * tex_mgr = TextureManager::getInstance();
     ShaderManager * shader_mgr = ShaderManager::getInstance();
+    ModelManager * model_mgr = ModelManager::getInstance();
 
     globals->bind(camera);
 
@@ -18,16 +19,8 @@ void Scene::renderFrame(windows::Window & window,
     // ====> DRAW CUBE
     tex_mgr->useTexture("cube");
     shader_mgr->useShader("cube");
-
-    // which VBO to use
-    uint32_t stride = sizeof(Vertex);
-    uint32_t offset = 0;
-    globals->device_context4->IASetVertexBuffers(0,
-                                                 1,
-                                                 globals->vbo.get(),
-                                                 &stride,
-                                                 &offset);
-
+    model_mgr->useModel("cube");
+    
     // which type of primitive to use (triangles)
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

@@ -57,17 +57,19 @@ source_group("Source Files/source" FILES ${SOURCES})
 
 # --------------------[SOURCE/RENDER]--------------------
 set(RENDER_HEADERS engine/source/render/window.hpp
+                   engine/source/render/win_def.hpp
+                   engine/source/render/win_undef.hpp
                    engine/source/render/dx_res_ptr.hpp
                    engine/source/render/globals.hpp
                    engine/source/render/shader.hpp
                    engine/source/render/shader_manager.hpp
-                   engine/source/render/win_def.hpp
-                   engine/source/render/win_undef.hpp
                    engine/source/render/texture.hpp
                    engine/source/render/texture_manager.hpp
                    engine/source/render/shader_includer.hpp
                    engine/source/render/engine.hpp
-                   engine/source/render/sky.hpp)
+                   engine/source/render/sky.hpp
+                   engine/source/render/model.hpp
+                   engine/source/render/model_manager.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/globals.cpp
@@ -77,7 +79,9 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/texture_manager.cpp
                    engine/source/render/shader_includer.cpp
                    engine/source/render/engine.cpp
-                   engine/source/render/sky.cpp)
+                   engine/source/render/sky.cpp
+                   engine/source/render/model.cpp
+                   engine/source/render/model_manager.cpp)
 
 source_group("Header Files/source/render" FILES ${RENDER_HEADERS})
 source_group("Source Files/source/render" FILES ${RENDER_SOURCES})

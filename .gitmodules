@@ -4,3 +4,6 @@
 [submodule "project/spdlog"]
 	path = project/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "project/assimp"]
+	path = project/assimp
+	url = https://github.com/assimp/assimp

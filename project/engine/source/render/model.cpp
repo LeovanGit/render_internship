@@ -2,9 +2,30 @@
 
 namespace engine
 {
-Model::Model(WCHAR * model_filename)
+Model::Model(const std::string & model_filename)
 {
     Globals * globals = Globals::getInstance();
+
+    // LOAD ASSIMP SCENE
+    Assimp::Importer importer;
+    
+    uint32_t flags(aiProcess_Triangulate |
+                   aiProcess_GenBoundingBoxes |
+                   aiProcess_ConvertToLeftHanded |
+                   aiProcess_CalcTangentSpace);
+    
+    const aiScene * ai_scene = importer.ReadFile(model_filename,
+                                              flags);
+    // importer.GetErrorString() for more information
+    assert(ai_scene && "Assimp::Importer::ReadFile()");
+
+    int num_meshes = ai_scene->mNumMeshes;
+
+    // LOAD VERTEX DATA
+    for (int i = 0; i != num_meshes; ++i)
+    {
+
+    }
     
     float obj_size = 4.0f;
 

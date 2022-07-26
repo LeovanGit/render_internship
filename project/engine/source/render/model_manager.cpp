@@ -32,7 +32,7 @@ void ModelManager::registerModel(const std::string & key,
 }
 
 void ModelManager::registerModel(const std::string & key,
-                                 WCHAR * model_filename)
+                                 const std::string & model_filename)
 {
     models.try_emplace(key, model_filename);
 }

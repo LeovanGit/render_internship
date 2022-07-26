@@ -26,7 +26,7 @@ public:
                        const Model & model);
 
     void registerModel(const std::string & key,
-                       WCHAR * model_filename);
+                       const std::string & model_filename);
 
     void useModel(const std::string & key);
 

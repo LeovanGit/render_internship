@@ -2,6 +2,10 @@
 #define MODEL_HPP
 
 #include <d3d11_4.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <cassert>
 
 #include "dx_res_ptr.hpp"
 #include "globals.hpp"
@@ -17,7 +21,7 @@ struct Vertex
 class Model
 {
 public:
-    Model(WCHAR * model_filename);
+    Model(const std::string & model_filename);
 
     void bind();
     

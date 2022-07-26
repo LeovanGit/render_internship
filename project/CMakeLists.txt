@@ -21,7 +21,10 @@ set(INC engine/source
         glm/glm
         directx_texture_loader
         spdlog/include
-        spdlog/include/spdlog)
+        spdlog/include/spdlog
+        assimp/include
+        build/assimp/include # config.h appears only after compilation
+      )
 
 include_directories(${INC})
 
@@ -106,3 +109,15 @@ add_executable(rt WIN32
 
 # set rt in VS as startup project
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT rt)
+
+# ------------------[ASSIMP COMPILATION]---------------
+add_subdirectory(assimp)
+target_link_libraries(rt assimp)
+
+# copy .dll to .exe directory (post-build event)
+# $<CONFIGURATION> means Debug/Release directory
+# depends on cmake --build . --config Debug/Release
+add_custom_command(TARGET rt POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${PROJECT_SOURCE_DIR}/build/assimp/bin/$<CONFIGURATION>"
+  "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")

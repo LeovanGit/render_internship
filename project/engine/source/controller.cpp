@@ -70,7 +70,7 @@ void Controller::initScene(Camera & camera)
                       tex_mgr->getTexture("skybox"));
 
     // CREATE MODELS
-    model_mgr->registerModel("cube", L"../engine/assets/Knight/Knight.fbx");
+    model_mgr->registerModel("cube", "../engine/assets/Knight/Knight.fbx");
 }
 
 void Controller::processInput(Camera & camera,

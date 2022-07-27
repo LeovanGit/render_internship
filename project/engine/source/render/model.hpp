@@ -9,15 +9,11 @@
 
 #include "dx_res_ptr.hpp"
 #include "globals.hpp"
+#include "vertex_buffer.hpp"
+#include "index_buffer.hpp"
 
 namespace engine
 {
-struct Vertex
-{
-    float position[3];
-    float uv[2];
-};
-
 class Model
 {
 public:
@@ -25,7 +21,9 @@ public:
 
     void bind();
     
-    DxResPtr<ID3D11Buffer> vertex_buffer;
+    VertexBuffer<Vertex> vertex_buffer;
+    IndexBuffer index_buffer;
+    // uint32_t num_meshes;
 };
 } // namespace engine
 

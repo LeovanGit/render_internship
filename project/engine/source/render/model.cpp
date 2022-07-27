@@ -6,119 +6,89 @@ Model::Model(const std::string & model_filename)
 {
     Globals * globals = Globals::getInstance();
 
-    // LOAD ASSIMP SCENE
-    Assimp::Importer importer;
+    // // LOAD ASSIMP SCENE
+    // Assimp::Importer importer;
     
-    uint32_t flags(aiProcess_Triangulate |
-                   aiProcess_GenBoundingBoxes |
-                   aiProcess_ConvertToLeftHanded |
-                   aiProcess_CalcTangentSpace);
+    // uint32_t flags(aiProcess_Triangulate |
+    //                aiProcess_GenBoundingBoxes |
+    //                aiProcess_ConvertToLeftHanded |
+    //                aiProcess_CalcTangentSpace);
     
-    const aiScene * ai_scene = importer.ReadFile(model_filename,
-                                              flags);
-    // importer.GetErrorString() for more information
-    assert(ai_scene && "Assimp::Importer::ReadFile()");
+    // const aiScene * ai_scene = importer.ReadFile(model_filename,
+    //                                              flags);
+    // // importer.GetErrorString() for more information
+    // assert(ai_scene && "Assimp::Importer::ReadFile()");
 
-    int num_meshes = ai_scene->mNumMeshes;
+    // uint32_t num_meshes = ai_scene->mNumMeshes;
 
-    // LOAD VERTEX DATA
-    for (int i = 0; i != num_meshes; ++i)
-    {
-
-    }
-    
+    // CREATE VERTEX BUFFER
     float obj_size = 4.0f;
-
-    std::array<Vertex, 36> vertices =
+    Vertex vertices[] =
     {
+        // UV with a little offset to disable wrapping
         //     POSITION                           UV
-        // front
-        Vertex{{-obj_size, obj_size,  -obj_size}, {0.0f, 1.0f}},
-        Vertex{{obj_size,  obj_size,  -obj_size}, {1.0f, 1.0f}},
-        Vertex{{obj_size, -obj_size,  -obj_size}, {1.0f, 0.0f}},
+        Vertex{{-obj_size, -obj_size, -obj_size}, {0.01f, 0.99f}},
+        Vertex{{-obj_size,  obj_size, -obj_size}, {0.01f, 0.01f}},
+        Vertex{{ obj_size,  obj_size, -obj_size}, {0.99f, 0.01f}},
+        Vertex{{ obj_size, -obj_size, -obj_size}, {0.99f, 0.99f}},
+        Vertex{{ obj_size, -obj_size,  obj_size}, {0.01f, 0.99f}},
+        Vertex{{ obj_size,  obj_size,  obj_size}, {0.01f, 0.01f}},
+        Vertex{{-obj_size,  obj_size,  obj_size}, {0.99f, 0.01f}},
+        Vertex{{-obj_size, -obj_size,  obj_size}, {0.99f, 0.99f}},
 
-        Vertex{{obj_size,  -obj_size,  -obj_size}, {1.0f, 0.0f}},
-        Vertex{{-obj_size, -obj_size,  -obj_size}, {0.0f, 0.0f}},
-        Vertex{{-obj_size,  obj_size,  -obj_size}, {0.0f, 1.0f}},
-
-        // right
-        Vertex{{obj_size, obj_size,  -obj_size}, {0.0f, 1.0f}},
-        Vertex{{obj_size, obj_size,   obj_size}, {1.0f, 1.0f}},
-        Vertex{{obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
-
-        Vertex{{obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
-        Vertex{{obj_size,  obj_size,  obj_size}, {1.0f, 1.0f}},
-        Vertex{{obj_size, -obj_size,  obj_size}, {1.0f, 0.0f}},
-
-        // left
-        Vertex{{-obj_size,  obj_size, -obj_size}, {1.0f, 1.0f}},
-        Vertex{{-obj_size, -obj_size, -obj_size}, {1.0f, 0.0f}},
-        Vertex{{-obj_size,  obj_size,  obj_size}, {0.0f, 1.0f}},
-
-        Vertex{{-obj_size,  obj_size,  obj_size}, {0.0f, 1.0f}},
-        Vertex{{-obj_size, -obj_size, -obj_size}, {1.0f, 0.0f}},
-        Vertex{{-obj_size, -obj_size,  obj_size}, {0.0f, 0.0f}},
-
-        // back
-        Vertex{{ obj_size,  obj_size, obj_size}, {1.0f, 1.0f}},
-        Vertex{{-obj_size,  obj_size, obj_size}, {0.0f, 1.0f}},
-        Vertex{{ obj_size, -obj_size, obj_size}, {1.0f, 0.0f}},
-
-        Vertex{{ obj_size, -obj_size, obj_size}, {1.0f, 0.0f}},
-        Vertex{{-obj_size,  obj_size, obj_size}, {0.0f, 1.0f}},
-        Vertex{{-obj_size, -obj_size, obj_size}, {0.0f, 0.0f}},
-
-        // top
-        Vertex{{ obj_size, obj_size,  obj_size}, {1.0f, 1.0f}},
-        Vertex{{ obj_size, obj_size, -obj_size}, {1.0f, 0.0f}},
-        Vertex{{-obj_size, obj_size, -obj_size}, {0.0f, 0.0f}},
-
-        Vertex{{-obj_size, obj_size, -obj_size}, {0.0f, 0.0f}},
-        Vertex{{-obj_size, obj_size,  obj_size}, {0.0f, 1.0f}},
-        Vertex{{ obj_size, obj_size,  obj_size}, {1.0f, 1.0f}},
-
-        // down
-        Vertex{{ obj_size, -obj_size,  obj_size}, {1.0f, 1.0f}},
-        Vertex{{-obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
-        Vertex{{ obj_size, -obj_size, -obj_size}, {1.0f, 0.0f}},
-
-        Vertex{{-obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
-        Vertex{{ obj_size, -obj_size,  obj_size}, {1.0f, 1.0f}},
-        Vertex{{-obj_size, -obj_size,  obj_size}, {0.0f, 1.0f}},
+        // additional vertices for texturing top and bot
+        Vertex{{ obj_size,  obj_size,  obj_size}, {0.99f, 0.99f}},
+        Vertex{{-obj_size,  obj_size,  obj_size}, {0.01f, 0.99f}},
+        Vertex{{ obj_size, -obj_size,  obj_size}, {0.99f, 0.01f}},
+        Vertex{{-obj_size, -obj_size,  obj_size}, {0.01f, 0.01f}},
     };
 
-    // contain properties of the VBO
-    D3D11_BUFFER_DESC vbo_desc;
-    ZeroMemory(&vbo_desc, sizeof(vbo_desc));
+    vertex_buffer.init(vertices, 12);
+    
+    // CREATE INDEX BUFFER
+    int indices[] =
+    {
+        // front
+        0, 1, 3,
+        1, 2, 3,
 
-    vbo_desc.Usage = D3D11_USAGE_IMMUTABLE;
-    vbo_desc.ByteWidth = sizeof(Vertex) * vertices.size();
-    vbo_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vbo_desc.CPUAccessFlags = 0;
+        // right
+        3, 2, 5,
+        4, 3, 5,
+        
+        // top
+        8, 2, 1,
+        1, 9, 8,
+        
+        // back
+        5, 6, 4,
+        6, 7, 4,
 
-    D3D11_SUBRESOURCE_DATA vertices_data;
-    ZeroMemory(&vertices_data, sizeof(vertices_data));
+        // left
+        6, 1, 0,
+        0, 7, 6,
 
-    vertices_data.pSysMem = vertices.data();
-    vertices_data.SysMemPitch = 0;
-    vertices_data.SysMemSlicePitch = 0;
-
-    HRESULT result = globals->device5->CreateBuffer(&vbo_desc,
-                                                    &vertices_data,
-                                                    vertex_buffer.reset());
-    assert(result >= 0 && "CreateBuffer");    
+        // bot
+        0, 3, 10,
+        0, 10, 7        
+    };
+    
+    index_buffer.init(indices, 36);
 }
 
 void Model::bind()
 {
     Globals * globals = Globals::getInstance();
     
-    uint32_t stride = sizeof(Vertex);
-    uint32_t offset = 0;
     globals->device_context4->IASetVertexBuffers(0,
                                                  1,
-                                                 vertex_buffer.get(),
-                                                 &stride,
-                                                 &offset);
+                                                 vertex_buffer.get_data().get(),
+                                                 &vertex_buffer.get_stride(),
+                                                 &vertex_buffer.get_offset());
+
+    globals->device_context4->IASetIndexBuffer(index_buffer.get_data().ptr(),
+                                               DXGI_FORMAT_R32_UINT,
+                                               0);
+
 }
 } // namespace engine

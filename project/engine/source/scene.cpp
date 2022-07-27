@@ -26,7 +26,7 @@ void Scene::renderFrame(windows::Window & window,
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // draw VBO to the back buffer
-    globals->device_context4->Draw(36, 0);
+    globals->device_context4->DrawIndexed(36, 0, 0);
 
     // ====> DRAW SKY
     m_sky.render();

@@ -72,7 +72,9 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/engine.hpp
                    engine/source/render/sky.hpp
                    engine/source/render/model.hpp
-                   engine/source/render/model_manager.hpp)
+                   engine/source/render/model_manager.hpp
+                   engine/source/render/vertex_buffer.hpp
+                   engine/source/render/index_buffer.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/globals.cpp
@@ -84,7 +86,8 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/engine.cpp
                    engine/source/render/sky.cpp
                    engine/source/render/model.cpp
-                   engine/source/render/model_manager.cpp)
+                   engine/source/render/model_manager.cpp
+                   engine/source/render/index_buffer.cpp)
 
 source_group("Header Files/source/render" FILES ${RENDER_HEADERS})
 source_group("Source Files/source/render" FILES ${RENDER_SOURCES})

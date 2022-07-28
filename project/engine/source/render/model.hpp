@@ -20,8 +20,10 @@ class Model
 public:
     struct Mesh
     {
-        VertexBuffer<Vertex> vertex_buffer;
-        IndexBuffer index_buffer;
+        uint32_t vertex_count;
+        uint32_t index_count;
+        uint32_t vertex_offset;
+        uint32_t index_offset;
     };
     
     Model(const std::string & model_filename);
@@ -32,6 +34,8 @@ public:
     
 protected:
     std::vector<Mesh> meshes;
+    VertexBuffer<Vertex> vertex_buffer;
+    IndexBuffer index_buffer;
 };
 } // namespace engine
 

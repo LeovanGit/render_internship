@@ -12,28 +12,38 @@ Model::Model(const std::string & model_filename)
     Assimp::Importer importer;
     
     uint32_t flags(aiProcess_Triangulate |
-                   aiProcess_GenBoundingBoxes |
-                   aiProcess_ConvertToLeftHanded |
-                   aiProcess_CalcTangentSpace);
+                   aiProcess_ConvertToLeftHanded);
     
     const aiScene * ai_scene = importer.ReadFile(model_filename,
                                                  flags);
     // importer.GetErrorString() for more information
     assert(ai_scene && "Assimp::Importer::ReadFile()");
    
-    meshes.resize(ai_scene->mNumMeshes);
+    meshes.resize(ai_scene->mNumMeshes);    
+    
+    std::vector<Vertex> vertices;
+    std::vector<int> indices;
+
+    uint32_t vertex_sum = 0;
+    uint32_t index_sum = 0;
     
     for (uint32_t m = 0; m != ai_scene->mNumMeshes; ++m)
     {        
         aiMesh *& src_mesh = ai_scene->mMeshes[m];
         Mesh & dst_mesh = meshes[m];
 
-        std::vector<Vertex> vertices;
-        std::vector<int> indices;
-
         // aiNode * node = ai_scene->mRootNode; // ->mTransform
         // aiMatrix4x4 mesh_to_model = node->mTransformation.Transpose();
         //const Mat4 transform = reinterpret_cast<const Mat4&>(node->mTransformation.Transpose());
+
+        dst_mesh.vertex_count = src_mesh->mNumVertices;
+        dst_mesh.index_count = src_mesh->mNumFaces * 3; // triangles
+
+        dst_mesh.vertex_offset = vertex_sum;
+        dst_mesh.index_offset = index_sum;
+
+        vertex_sum += dst_mesh.vertex_count;
+        index_sum += dst_mesh.index_count;
         
         // read vertex data
         for (uint32_t v = 0; v != src_mesh->mNumVertices; ++v)
@@ -50,7 +60,6 @@ Model::Model(const std::string & model_filename)
             
             vertices.push_back(vertex);
         }
-        dst_mesh.vertex_buffer.init(vertices.data(), vertices.size());
 
         // read index data
         for (uint32_t f = 0; f != src_mesh->mNumFaces; ++f)
@@ -62,10 +71,13 @@ Model::Model(const std::string & model_filename)
                 indices.push_back(face.mIndices[i]);
             }
         }
-        dst_mesh.index_buffer.init(indices.data(), indices.size());
     }
+    
+    vertex_buffer.init(vertices.data(), vertices.size());
+    index_buffer.init(indices.data(), indices.size());
+    
     // // CREATE VERTEX BUFFER
-    // float obj_size = 4.0f;
+    // float obj_size = 0.4f;
     // Vertex vertices[] =
     // {
     //     // UV with a little offset to disable wrapping
@@ -113,7 +125,7 @@ Model::Model(const std::string & model_filename)
 
     //     // bot
     //     0, 3, 10,
-    //     0, 10, 7        
+    //     0, 10, 7 
     // };
     
     // index_buffer.init(indices, 36);
@@ -123,15 +135,15 @@ void Model::bind()
 {
     Globals * globals = Globals::getInstance();
     
-    // globals->device_context4->IASetVertexBuffers(0,
-    //                                              1,
-    //                                              vertex_buffer.get_data().get(),
-    //                                              &vertex_buffer.get_stride(),
-    //                                              &vertex_buffer.get_offset());
+    globals->device_context4->IASetVertexBuffers(0,
+                                                 1,
+                                                 vertex_buffer.get_data().get(),
+                                                 &vertex_buffer.get_stride(),
+                                                 &vertex_buffer.get_offset());
 
-    // globals->device_context4->IASetIndexBuffer(index_buffer.get_data().ptr(),
-    //                                            DXGI_FORMAT_R32_UINT,
-    //                                            0);
+    globals->device_context4->IASetIndexBuffer(index_buffer.get_data().ptr(),
+                                               DXGI_FORMAT_R32_UINT,
+                                               0);
 }
 
 std::vector<Model::Mesh> & Model::get_meshes()

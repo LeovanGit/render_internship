@@ -41,4 +41,9 @@ void ModelManager::useModel(const std::string & key)
 {
     models.find(key)->second.bind();
 }
+
+Model & ModelManager::getModel(const std::string & key)
+{
+    return models.find(key)->second;
+}
 } // namespace engine

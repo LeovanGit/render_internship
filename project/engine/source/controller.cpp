@@ -32,7 +32,7 @@ void Controller::initScene(Camera & camera)
          0,
          DXGI_FORMAT_R32G32B32_FLOAT,
          0,
-         D3D11_APPEND_ALIGNED_ELEMENT, // auto offset
+         0,
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
 
@@ -40,14 +40,14 @@ void Controller::initScene(Camera & camera)
          0,
          DXGI_FORMAT_R32G32_FLOAT,
          0,
-         D3D11_APPEND_ALIGNED_ELEMENT,
+         12, // 3 floats of 4 bytes
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
     };
 
-    shader_mgr->registerShader("cube",
+    shader_mgr->registerShader("opaque",
                                L"../engine/shaders/",
-                               L"cube.hlsl",
+                               L"opaque.hlsl",
                                ied);
 
     shader_mgr->registerShader("skybox",
@@ -62,6 +62,17 @@ void Controller::initScene(Camera & camera)
     
     // CREATE TEXTURES
     tex_mgr->registerTexture("cube", L"../engine/assets/rubik_cube.dds");
+
+    tex_mgr->registerTexture("cape", L"../engine/assets/Knight/dds/Cape_BaseColor.dds");
+    tex_mgr->registerTexture("eye", L"../engine/assets/Knight/dds/Eye_BaseColor.dds");
+    tex_mgr->registerTexture("fur", L"../engine/assets/Knight/dds/Fur_BaseColor.dds");
+    tex_mgr->registerTexture("glove", L"../engine/assets/Knight/dds/Glove_BaseColor.dds");
+    tex_mgr->registerTexture("head", L"../engine/assets/Knight/dds/Head_BaseColor.dds");
+    tex_mgr->registerTexture("helmet", L"../engine/assets/Knight/dds/Helmet_BaseColor.dds");
+    tex_mgr->registerTexture("legs", L"../engine/assets/Knight/dds/Legs_BaseColor.dds");
+    tex_mgr->registerTexture("skirt", L"../engine/assets/Knight/dds/Skirt_BaseColor.dds");
+    tex_mgr->registerTexture("torso", L"../engine/assets/Knight/dds/Torso_BaseColor.dds");
+    
     tex_mgr->registerTexture("skybox", L"../engine/assets/skybox.dds");
     tex_mgr->registerTexture("floor", L"../engine/assets/prototype_grid.dds");
 
@@ -70,7 +81,7 @@ void Controller::initScene(Camera & camera)
                       tex_mgr->getTexture("skybox"));
 
     // CREATE MODELS
-    model_mgr->registerModel("cube", "../engine/assets/Knight/Knight.fbx");
+    model_mgr->registerModel("knight", "../engine/assets/Knight/Knight.fbx");
 }
 
 void Controller::processInput(Camera & camera,

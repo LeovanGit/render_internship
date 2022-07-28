@@ -35,7 +35,7 @@ set(TEX_LOADER directx_texture_loader/DDSTextureLoader11.h
 source_group("directx_texture_loader" FILES ${TEX_LOADER})
 
 # --------------------[SHADERS]--------------------
-set(SHADERS engine/shaders/cube.hlsl
+set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/globals.hlsl
             engine/shaders/skybox.hlsl
             engine/shaders/floor.hlsl)

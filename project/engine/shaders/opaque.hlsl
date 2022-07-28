@@ -19,9 +19,17 @@ Texture2D g_texture;
 //------------------------------------------------------------------------------
 PS_INPUT vertexShader(VS_INPUT input)
 {
+    float4x4 scale = float4x4(10.0f, 0.0f, 0.0f, 0.0f,
+                              0.0f, 10.0f, 0.0f, 0.0f,
+                              0.0f, 0.0f, 10.0f, 0.0f,
+                              0.0f, 0.0f, 0.0f, 1.0f);
+
+    
     PS_INPUT output;
     output.uv = input.uv;
-    output.pos = mul(g_proj_view, float4(input.pos, 1.0f));
+    // output.pos = mul(mul(mul(float4(input.pos, 1.0f), scale), mesh_to_model), g_proj_view);
+    output.pos = mul(mul(float4(input.pos, 1.0f), scale), g_proj_view);
+    //output.pos = mul(g_proj_view, float4(input.pos, 1.0f));
 
     return output;
 }

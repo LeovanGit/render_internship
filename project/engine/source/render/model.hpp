@@ -6,6 +6,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <cassert>
+#include <vector>
 
 #include "dx_res_ptr.hpp"
 #include "globals.hpp"
@@ -17,13 +18,20 @@ namespace engine
 class Model
 {
 public:
+    struct Mesh
+    {
+        VertexBuffer<Vertex> vertex_buffer;
+        IndexBuffer index_buffer;
+    };
+    
     Model(const std::string & model_filename);
 
     void bind();
+
+    std::vector<Mesh> & get_meshes();
     
-    VertexBuffer<Vertex> vertex_buffer;
-    IndexBuffer index_buffer;
-    // uint32_t num_meshes;
+protected:
+    std::vector<Mesh> meshes;
 };
 } // namespace engine
 

@@ -18,10 +18,12 @@ public:
     void init(int indices[],
               uint32_t size);
 
-    DxResPtr<ID3D11Buffer> & get_data() { return data; }
+    const DxResPtr<ID3D11Buffer> & get_data() const;
+    uint32_t get_size() const;
     
 private:
     DxResPtr<ID3D11Buffer> data;
+    uint32_t size;
 };
 } // namespace engine
 

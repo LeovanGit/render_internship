@@ -30,6 +30,8 @@ public:
 
     void useModel(const std::string & key);
 
+    Model & getModel(const std::string & key);
+
 private:
     ModelManager() = default;
     ~ModelManager() = default;

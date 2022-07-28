@@ -44,16 +44,19 @@ public:
                                                         data.reset());
         assert(result >= 0 && "CreateBuffer(vertex)");
 
+        this->size = size;
         stride = sizeof(Vertex);
         offset = 0;
     }
 
     DxResPtr<ID3D11Buffer> & get_data() { return data; }
-    uint32_t & get_stride() { return stride; }
-    uint32_t & get_offset() { return offset; }
+    uint32_t get_size() const { return size; }
+    const uint32_t & get_stride() const { return stride; }
+    const uint32_t & get_offset() const { return offset; }
 
 private:
     DxResPtr<ID3D11Buffer> data;
+    uint32_t size;
     uint32_t stride;
     uint32_t offset;
 };

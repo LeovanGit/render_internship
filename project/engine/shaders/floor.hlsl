@@ -33,7 +33,7 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID)
                     {0.0f, 0.0f}};
 
     PS_INPUT output;
-    output.pos = mul(g_proj_view, float4(vertexWS[vertex_index], 1.0f));
+    output.pos = mul(float4(vertexWS[vertex_index], 1.0f), g_proj_view);
     output.uv = uv[vertex_index];
     
     return output;

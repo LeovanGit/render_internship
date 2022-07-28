@@ -24,5 +24,18 @@ void IndexBuffer::init(int indices[],
                                                     &indices_data,
                                                     data.reset());
     assert(result >= 0 && "CreateBuffer(index)");
+
+    this->size = size;
 }
+
+const DxResPtr<ID3D11Buffer> & IndexBuffer::get_data() const
+{
+    return data;
+}
+
+uint32_t IndexBuffer::get_size() const
+{
+    return size;
+}
+
 } // namespace engine

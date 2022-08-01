@@ -74,7 +74,9 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/model.hpp
                    engine/source/render/model_manager.hpp
                    engine/source/render/vertex_buffer.hpp
-                   engine/source/render/index_buffer.hpp)
+                   engine/source/render/index_buffer.hpp
+                   engine/source/render/opaque_instances.hpp
+                   engine/source/render/mesh_system.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/globals.cpp
@@ -87,17 +89,21 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/sky.cpp
                    engine/source/render/model.cpp
                    engine/source/render/model_manager.cpp
-                   engine/source/render/index_buffer.cpp)
+                   engine/source/render/index_buffer.cpp
+                   engine/source/render/opaque_instances.cpp
+                   engine/source/render/mesh_system.cpp)
 
 source_group("Header Files/source/render" FILES ${RENDER_HEADERS})
 source_group("Source Files/source/render" FILES ${RENDER_SOURCES})
 
 # --------------------[SOURCE/MATH]--------------------
 set(MATH_HEADERS engine/source/math/matrices.hpp
-                 engine/source/math/euler_angles.hpp)
+                 engine/source/math/euler_angles.hpp
+                 engine/source/math/matrices.hpp)
 
 set(MATH_SOURCES engine/source/math/matrices.cpp
-                 engine/source/math/euler_angles.cpp)
+                 engine/source/math/euler_angles.cpp
+                 engine/source/math/matrices.cpp)
 
 source_group("Header Files/source/math" FILES ${MATH_HEADERS})
 source_group("Source Files/source/math" FILES ${MATH_SOURCES})

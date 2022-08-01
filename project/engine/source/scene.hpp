@@ -3,11 +3,12 @@
 
 #include "window.hpp"
 #include "camera.hpp"
-#include "sky.hpp"
 #include "globals.hpp"
 #include "texture_manager.hpp"
 #include "shader_manager.hpp"
 #include "model_manager.hpp"
+#include "sky.hpp"
+#include "mesh_system.hpp"
 
 namespace engine
 {
@@ -19,7 +20,8 @@ public:
     void renderFrame(windows::Window & window,
                      const Camera & camera);
 
-    Sky m_sky;
+    Sky sky;
+    MeshSystem mesh_system;
 };
 } // namespace engine
 

@@ -28,6 +28,15 @@ void IndexBuffer::init(int indices[],
     this->size = size;
 }
 
+void IndexBuffer::bind()
+{
+    Globals * globals = Globals::getInstance();
+
+    globals->device_context4->IASetIndexBuffer(data.ptr(),
+                                               DXGI_FORMAT_R32_UINT,
+                                               0);
+}
+
 const DxResPtr<ID3D11Buffer> & IndexBuffer::get_data() const
 {
     return data;

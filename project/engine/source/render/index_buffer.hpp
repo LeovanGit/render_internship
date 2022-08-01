@@ -18,6 +18,8 @@ public:
     void init(int indices[],
               uint32_t size);
 
+    void bind();
+    
     const DxResPtr<ID3D11Buffer> & get_data() const;
     uint32_t get_size() const;
     

@@ -9,29 +9,39 @@
 
 namespace engine
 {
-struct Vertex
+enum class BufferType
 {
-    glm::vec3 position;
-    glm::vec2 uv;
+    VERTEX,
+    INSTANCE
 };
 
 template <class T>
 class VertexBuffer
-{
-public:
+{    
+public:    
     VertexBuffer() = default;
     
-    void init(T * vertices, uint32_t size)
+    void init(T * vertices, uint32_t size, BufferType type)
     {
         Globals * globals = Globals::getInstance();
-    
-        // CREATE VERTEX BUFFER
+
         D3D11_BUFFER_DESC vbo_desc;
         ZeroMemory(&vbo_desc, sizeof(vbo_desc));
-        vbo_desc.Usage = D3D11_USAGE_IMMUTABLE;
-        vbo_desc.ByteWidth = sizeof(Vertex) * size;
-        vbo_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        vbo_desc.CPUAccessFlags = 0;
+
+        if (type == BufferType::VERTEX)
+        {
+            vbo_desc.Usage = D3D11_USAGE_IMMUTABLE;
+            vbo_desc.ByteWidth = sizeof(T) * size;
+            vbo_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+            vbo_desc.CPUAccessFlags = 0;
+        }
+        else
+        {
+            vbo_desc.Usage = D3D11_USAGE_DYNAMIC;
+            vbo_desc.ByteWidth = sizeof(T) * size;
+            vbo_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+            vbo_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        }
 
         D3D11_SUBRESOURCE_DATA vertices_data;
         ZeroMemory(&vertices_data, sizeof(vertices_data));
@@ -45,8 +55,20 @@ public:
         assert(result >= 0 && "CreateBuffer(vertex)");
 
         this->size = size;
-        stride = sizeof(Vertex);
+        stride = sizeof(T);
         offset = 0;
+    }
+
+    void bind(uint32_t start_slot, uint32_t buffers_count)
+    {
+        Globals * globals = Globals::getInstance();
+
+        globals->device_context4->IASetVertexBuffers(start_slot,
+                                                     buffers_count,
+                                                     data.get(),
+                                                     &stride,
+                                                     &offset);
+
     }
 
     DxResPtr<ID3D11Buffer> & get_data() { return data; }

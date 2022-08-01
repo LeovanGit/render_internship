@@ -18,7 +18,13 @@ namespace engine
 class Model
 {
 public:
-    struct Mesh
+    struct Vertex
+    {
+        glm::vec3 position;
+        glm::vec2 uv;
+    };
+
+    struct MeshRange
     {
         uint32_t vertex_count;
         uint32_t index_count;
@@ -30,10 +36,10 @@ public:
 
     void bind();
 
-    std::vector<Mesh> & get_meshes();
+    MeshRange & get_mesh(uint32_t index);
     
 protected:
-    std::vector<Mesh> meshes;
+    std::vector<MeshRange> meshes;
     VertexBuffer<Vertex> vertex_buffer;
     IndexBuffer index_buffer;
 };

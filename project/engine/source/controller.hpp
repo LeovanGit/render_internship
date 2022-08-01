@@ -6,12 +6,15 @@
 #include "window.hpp"
 #include "camera.hpp"
 #include "euler_angles.hpp"
+#include "matrices.hpp"
 #include "scene.hpp"
 #include "sky.hpp"
 #include "globals.hpp"
 #include "shader_manager.hpp"
 #include "texture_manager.hpp"
 #include "model_manager.hpp"
+#include "mesh_system.hpp"
+#include "opaque_instances.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;

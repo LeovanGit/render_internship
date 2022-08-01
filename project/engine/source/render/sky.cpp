@@ -13,6 +13,9 @@ void Sky::render()
 {
     Globals * globals = Globals::getInstance();
 
+    globals->device_context4->
+        IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    
     m_shader->bind();
     m_texture->bind();
     globals->device_context4->Draw(3, 0);

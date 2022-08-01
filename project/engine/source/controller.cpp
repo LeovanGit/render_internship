@@ -61,27 +61,83 @@ void Controller::initScene(Camera & camera)
                                nullptr);
     
     // CREATE TEXTURES
-    tex_mgr->registerTexture("cube", L"../engine/assets/rubik_cube.dds");
-
-    tex_mgr->registerTexture("cape", L"../engine/assets/Knight/dds/Cape_BaseColor.dds");
-    tex_mgr->registerTexture("eye", L"../engine/assets/Knight/dds/Eye_BaseColor.dds");
     tex_mgr->registerTexture("fur", L"../engine/assets/Knight/dds/Fur_BaseColor.dds");
-    tex_mgr->registerTexture("glove", L"../engine/assets/Knight/dds/Glove_BaseColor.dds");
-    tex_mgr->registerTexture("head", L"../engine/assets/Knight/dds/Head_BaseColor.dds");
-    tex_mgr->registerTexture("helmet", L"../engine/assets/Knight/dds/Helmet_BaseColor.dds");
     tex_mgr->registerTexture("legs", L"../engine/assets/Knight/dds/Legs_BaseColor.dds");
-    tex_mgr->registerTexture("skirt", L"../engine/assets/Knight/dds/Skirt_BaseColor.dds");
     tex_mgr->registerTexture("torso", L"../engine/assets/Knight/dds/Torso_BaseColor.dds");
-    
-    tex_mgr->registerTexture("skybox", L"../engine/assets/skybox.dds");
-    tex_mgr->registerTexture("floor", L"../engine/assets/prototype_grid.dds");
+    tex_mgr->registerTexture("head", L"../engine/assets/Knight/dds/Head_BaseColor.dds");
+    tex_mgr->registerTexture("eye", L"../engine/assets/Knight/dds/Eye_BaseColor.dds");
+    tex_mgr->registerTexture("helmet", L"../engine/assets/Knight/dds/Helmet_BaseColor.dds");
+    tex_mgr->registerTexture("skirt", L"../engine/assets/Knight/dds/Skirt_BaseColor.dds");
+    tex_mgr->registerTexture("cape", L"../engine/assets/Knight/dds/Cape_BaseColor.dds");
+    tex_mgr->registerTexture("glove", L"../engine/assets/Knight/dds/Glove_BaseColor.dds");
 
-    // CREATE SKY
-    scene->m_sky.init(shader_mgr->getShader("skybox"),
-                      tex_mgr->getTexture("skybox"));
+    tex_mgr->registerTexture("cube", L"../engine/assets/rubik_cube.dds");
+    tex_mgr->registerTexture("floor", L"../engine/assets/prototype_grid.dds");
+    tex_mgr->registerTexture("skybox", L"../engine/assets/skybox.dds");
 
     // CREATE MODELS
     model_mgr->registerModel("knight", "../engine/assets/Knight/Knight.fbx");
+
+    // INIT SKY
+    scene->sky.init(shader_mgr->getShader("skybox"),
+                    tex_mgr->getTexture("skybox"));
+
+    // INIT KNIGHT
+    typedef engine::OpaqueInstances oi;
+    
+    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
+                                oi::Material(&tex_mgr->getTexture("fur")),
+                                math::Transform(glm::vec3(0.0f, 0.0f, 0.0f),
+                                                math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                                glm::vec3(0.0f, 0.0f, 0.0f)));
+
+    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
+                                oi::Material(&tex_mgr->getTexture("legs")),
+                                math::Transform(glm::vec3(0.0f, 0.0f, 0.0f),
+                                                math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                                glm::vec3(0.0f, 0.0f, 0.0f)));
+
+    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
+                                oi::Material(&tex_mgr->getTexture("torso")),
+                                math::Transform(glm::vec3(0.0f, 0.0f, 0.0f),
+                                                math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                                glm::vec3(0.0f, 0.0f, 0.0f)));
+
+    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
+                                oi::Material(&tex_mgr->getTexture("head")),
+                                math::Transform(glm::vec3(0.0f, 0.0f, 0.0f),
+                                                math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                                glm::vec3(0.0f, 0.0f, 0.0f)));
+
+    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
+                                oi::Material(&tex_mgr->getTexture("eye")),
+                                math::Transform(glm::vec3(0.0f, 0.0f, 0.0f),
+                                                math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                                glm::vec3(0.0f, 0.0f, 0.0f)));
+
+    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
+                                oi::Material(&tex_mgr->getTexture("helmet")),
+                                math::Transform(glm::vec3(0.0f, 0.0f, 0.0f),
+                                                math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                                glm::vec3(0.0f, 0.0f, 0.0f)));
+
+    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
+                                oi::Material(&tex_mgr->getTexture("skirt")),
+                                math::Transform(glm::vec3(0.0f, 0.0f, 0.0f),
+                                                math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                                glm::vec3(0.0f, 0.0f, 0.0f)));
+
+    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
+                                oi::Material(&tex_mgr->getTexture("cape")),
+                                math::Transform(glm::vec3(0.0f, 0.0f, 0.0f),
+                                                math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                                glm::vec3(0.0f, 0.0f, 0.0f)));
+
+    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
+                                oi::Material(&tex_mgr->getTexture("glove")),
+                                math::Transform(glm::vec3(0.0f, 0.0f, 0.0f),
+                                                math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                                glm::vec3(0.0f, 0.0f, 0.0f)));
 }
 
 void Controller::processInput(Camera & camera,

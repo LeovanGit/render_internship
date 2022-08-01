@@ -28,14 +28,15 @@ Model::Model(const std::string & model_filename)
     uint32_t index_sum = 0;
     
     for (uint32_t m = 0; m != ai_scene->mNumMeshes; ++m)
-    {        
+    {
+        // to convert from Blender (Z is up) coordinates to direct3D (Y is up):
+        aiNode * node = ai_scene->mRootNode->mChildren[m];
+        glm::mat4 mesh_to_model =
+            reinterpret_cast<glm::mat4 &>(node->mTransformation);
+        
         aiMesh *& src_mesh = ai_scene->mMeshes[m];
-        Mesh & dst_mesh = meshes[m];
-
-        // aiNode * node = ai_scene->mRootNode; // ->mTransform
-        // aiMatrix4x4 mesh_to_model = node->mTransformation.Transpose();
-        //const Mat4 transform = reinterpret_cast<const Mat4&>(node->mTransformation.Transpose());
-
+        MeshRange & dst_mesh = meshes[m];
+        
         dst_mesh.vertex_count = src_mesh->mNumVertices;
         dst_mesh.index_count = src_mesh->mNumFaces * 3; // triangles
 
@@ -51,8 +52,8 @@ Model::Model(const std::string & model_filename)
             Vertex vertex;
             
             vertex.position.x = src_mesh->mVertices[v].x;
-            vertex.position.y = -src_mesh->mVertices[v].z;
-            vertex.position.z = src_mesh->mVertices[v].y;
+            vertex.position.y = src_mesh->mVertices[v].y;
+            vertex.position.z = src_mesh->mVertices[v].z;
 
             // mTextureCoords[0] is main texture
             vertex.uv.x = src_mesh->mTextureCoords[0][v].x;
@@ -73,81 +74,18 @@ Model::Model(const std::string & model_filename)
         }
     }
     
-    vertex_buffer.init(vertices.data(), vertices.size());
+    vertex_buffer.init(vertices.data(), vertices.size(), BufferType::VERTEX);
     index_buffer.init(indices.data(), indices.size());
-    
-    // // CREATE VERTEX BUFFER
-    // float obj_size = 0.4f;
-    // Vertex vertices[] =
-    // {
-    //     // UV with a little offset to disable wrapping
-    //     //     POSITION                           UV
-    //     Vertex{{-obj_size, -obj_size, -obj_size}, {0.01f, 0.99f}},
-    //     Vertex{{-obj_size,  obj_size, -obj_size}, {0.01f, 0.01f}},
-    //     Vertex{{ obj_size,  obj_size, -obj_size}, {0.99f, 0.01f}},
-    //     Vertex{{ obj_size, -obj_size, -obj_size}, {0.99f, 0.99f}},
-    //     Vertex{{ obj_size, -obj_size,  obj_size}, {0.01f, 0.99f}},
-    //     Vertex{{ obj_size,  obj_size,  obj_size}, {0.01f, 0.01f}},
-    //     Vertex{{-obj_size,  obj_size,  obj_size}, {0.99f, 0.01f}},
-    //     Vertex{{-obj_size, -obj_size,  obj_size}, {0.99f, 0.99f}},
-
-    //     // additional vertices for texturing top and bot
-    //     Vertex{{ obj_size,  obj_size,  obj_size}, {0.99f, 0.99f}},
-    //     Vertex{{-obj_size,  obj_size,  obj_size}, {0.01f, 0.99f}},
-    //     Vertex{{ obj_size, -obj_size,  obj_size}, {0.99f, 0.01f}},
-    //     Vertex{{-obj_size, -obj_size,  obj_size}, {0.01f, 0.01f}},
-    // };
-
-    // vertex_buffer.init(vertices, 12);
-    
-    // // CREATE INDEX BUFFER
-    // int indices[] =
-    // {
-    //     // front
-    //     0, 1, 3,
-    //     1, 2, 3,
-
-    //     // right
-    //     3, 2, 5,
-    //     4, 3, 5,
-        
-    //     // top
-    //     8, 2, 1,
-    //     1, 9, 8,
-        
-    //     // back
-    //     5, 6, 4,
-    //     6, 7, 4,
-
-    //     // left
-    //     6, 1, 0,
-    //     0, 7, 6,
-
-    //     // bot
-    //     0, 3, 10,
-    //     0, 10, 7 
-    // };
-    
-    // index_buffer.init(indices, 36);
 }
 
 void Model::bind()
 {
-    Globals * globals = Globals::getInstance();
-    
-    globals->device_context4->IASetVertexBuffers(0,
-                                                 1,
-                                                 vertex_buffer.get_data().get(),
-                                                 &vertex_buffer.get_stride(),
-                                                 &vertex_buffer.get_offset());
-
-    globals->device_context4->IASetIndexBuffer(index_buffer.get_data().ptr(),
-                                               DXGI_FORMAT_R32_UINT,
-                                               0);
+    vertex_buffer.bind(0, 1);
+    index_buffer.bind();
 }
 
-std::vector<Model::Mesh> & Model::get_meshes()
+Model::MeshRange & Model::get_mesh(uint32_t index)
 {
-    return meshes;
+    return meshes[index];
 }
 } // namespace engine

@@ -32,6 +32,8 @@ public:
 
     Model & getModel(const std::string & key);
 
+    void registerDefaultCube(const std::string & key);
+
 private:
     ModelManager() = default;
     ~ModelManager() = default;

@@ -38,6 +38,7 @@ PS_INPUT vertexShader(VS_INPUT input)
     output.uv = input.uv;
 
     float4 pos = mul(float4(input.pos, 1.0f), mesh_to_model);
+    pos = mul(pos, transform);
     pos = mul(pos, g_proj_view);
     output.pos = pos;
 

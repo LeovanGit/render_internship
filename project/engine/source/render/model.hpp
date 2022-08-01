@@ -35,6 +35,10 @@ public:
     };
     
     Model(const std::string & model_filename);
+    Model(Vertex * vertices,
+          uint32_t vertices_size,
+          int * indices,
+          uint32_t indices_size);
 
     void bind();
 

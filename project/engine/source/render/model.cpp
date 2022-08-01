@@ -78,6 +78,24 @@ Model::Model(const std::string & model_filename)
     index_buffer.init(indices.data(), indices.size());
 }
 
+Model::Model(Vertex * vertices,
+             uint32_t vertices_size,
+             int * indices,
+             uint32_t indices_size)
+{
+    vertex_buffer.init(vertices, vertices_size);
+    index_buffer.init(indices, indices_size);
+
+    glm::mat4 mesh_to_model(1.0f, 0.0f, 0.0f, 0.0f,
+                            0.0f, 1.0f, 0.0f, 0.0f,
+                            0.0f, 0.0f, 1.0f, 0.0f,
+                            0.0f, 0.0f, 0.0f, 1.0f);
+
+    MeshRange mesh { vertices_size, indices_size, 0, 0, mesh_to_model };
+    meshes.push_back(mesh);
+}
+
+
 void Model::bind()
 {
     vertex_buffer.bind(0);

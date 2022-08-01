@@ -10,13 +10,15 @@ void MeshSystem::addModel(Model * model,
 {
     OpaqueInstances::Instance instance;
     instance.transform = transform.toMat4();
-    
+
+    // try to find the same model
     for (auto & per_model : opaque_instances.per_model)
     {
         if (per_model.model == model)
         {
             for (auto & per_mesh : per_model.per_mesh)
             {
+                // try to find the same texture
                 for (auto & per_material : per_mesh.per_material)
                 {
                     if (per_material.material.texture == material.texture)
@@ -28,6 +30,7 @@ void MeshSystem::addModel(Model * model,
                 }
             }
 
+            // if not found same texture -> add new
             OpaqueInstances::PerMaterial per_material;
             per_material.material = material;
             per_material.instances.push_back(instance);
@@ -41,6 +44,7 @@ void MeshSystem::addModel(Model * model,
         }
     }
 
+    // if not found same model -> add new
     {
         OpaqueInstances::PerMaterial per_material;
         per_material.material = material;

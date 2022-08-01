@@ -104,27 +104,45 @@ void Controller::initScene(Camera & camera)
     tex_mgr->registerTexture("cape", L"../engine/assets/Knight/dds/Cape_BaseColor.dds");
     tex_mgr->registerTexture("glove", L"../engine/assets/Knight/dds/Glove_BaseColor.dds");
 
-    tex_mgr->registerTexture("cube", L"../engine/assets/rubik_cube.dds");
+    tex_mgr->registerTexture("rubik_cube", L"../engine/assets/rubik_cube.dds");
+    tex_mgr->registerTexture("prototype", L"../engine/assets/prototype.dds");
     tex_mgr->registerTexture("floor", L"../engine/assets/prototype_grid.dds");
     tex_mgr->registerTexture("skybox", L"../engine/assets/skybox.dds");
 
     // CREATE MODELS
     model_mgr->registerModel("knight", "../engine/assets/Knight/Knight.fbx");
+    model_mgr->registerDefaultCube("cube_0");
+    model_mgr->registerDefaultCube("cube_1");
 
     // INIT SKY
     scene->sky.init(shader_mgr->getShader("skybox"),
                     tex_mgr->getTexture("skybox"));
 
     // INIT KNIGHT
-    initKnight(math::Transform(glm::vec3(0.0f, 0.0f, 0.0f),
-                               math::EulerAngles(0.0f, 0.0f, 0.0f),
-                               glm::vec3(0.0f, 0.0f, 0.0f)));
+    initKnight(math::Transform(glm::vec3(10.0f, -10.0f, 0.0f),
+                               math::EulerAngles(90.0f, 0.0f, 0.0f),
+                               glm::vec3(10.0f, 10.0f, 10.0f)));
+
+    initKnight(math::Transform(glm::vec3(-10.0f, -10.0f, 0.0f),
+                               math::EulerAngles(-90.0f, 0.0f, 0.0f),
+                               glm::vec3(10.0f, 10.0f, 10.0f)));
+
+    // INIT CUBE
+    scene->mesh_system.addModel(&model_mgr->getModel("cube_0"),
+                                oi::Material(&tex_mgr->getTexture("rubik_cube")),
+                                math::Transform(glm::vec3(0.0f, 0.0f, 10.0f),
+                                                math::EulerAngles(0.0f, 45.0f, 45.0f),
+                                                glm::vec3(4.0f, 4.0f, 4.0f)));
+
+    scene->mesh_system.addModel(&model_mgr->getModel("cube_1"),
+                                oi::Material(&tex_mgr->getTexture("prototype")),
+                                math::Transform(glm::vec3(0.0f, -11.0f, 10.0f),
+                                                math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                                glm::vec3(4.0f, 4.0f, 4.0f)));
 }
 
 void Controller::initKnight(const math::Transform & transform)
 {
-    typedef engine::OpaqueInstances oi;
-
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
     

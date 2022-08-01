@@ -59,15 +59,15 @@ void OpaqueInstances::render()
         {
             Model::MeshRange & mesh_range = per_model.model->get_mesh(i);
 
+            globals->setPerMeshBuffer(mesh_range.mesh_to_model);
+            globals->updatePerMeshBuffer();
+
             for (auto & per_material : per_model.per_mesh[i].per_material)
             {
                 if (per_material.instances.empty()) continue;
 
                 Material & material = per_material.material;
-
-                globals->setPerMeshBuffer(mesh_range.mesh_to_model);
-                globals->updatePerMeshBuffer();
-
+                
                 material.texture->bind();
 
                 uint32_t instances_count = uint32_t(per_material.instances.size());

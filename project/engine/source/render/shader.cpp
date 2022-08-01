@@ -4,7 +4,8 @@ namespace engine
 {
 Shader::Shader(WCHAR * path,
                WCHAR * filename,
-               D3D11_INPUT_ELEMENT_DESC input_desc[])
+               D3D11_INPUT_ELEMENT_DESC input_desc[],
+               uint32_t input_desc_size)
 {
     HRESULT result;
 
@@ -80,12 +81,14 @@ Shader::Shader(WCHAR * path,
 
     // CREATE INPUT LAYOUT (VAO)
     if (input_desc)
+    {
         globals->device5->
             CreateInputLayout(input_desc,
-                              2,
+                              input_desc_size,
                               vert_shader_buffer->GetBufferPointer(),
                               vert_shader_buffer->GetBufferSize(),
-                              input_layout.reset());
+                              input_layout.reset());        
+    }
 }
 
 void Shader::bind()

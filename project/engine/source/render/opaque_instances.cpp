@@ -29,8 +29,7 @@ void OpaqueInstances::updateInstanceBuffers()
     }
 
     instance_buffer.init(instances.data(),
-                         total_instances,
-                         BufferType::INSTANCE);
+                         total_instances);
 }
 
 void OpaqueInstances::render()
@@ -44,7 +43,7 @@ void OpaqueInstances::render()
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     
     shader_mgr->useShader("opaque");    
-    instance_buffer.bind(1, 1);
+    instance_buffer.bind(1);
 
     uint32_t rendered_instances = 0;
     
@@ -66,7 +65,8 @@ void OpaqueInstances::render()
 
                 Material & material = per_material.material;
 
-                // ... update shader local uniform buffer
+                globals->setPerMeshBuffer(mesh_range.mesh_to_model);
+                globals->updatePerMeshBuffer();
 
                 material.texture->bind();
 

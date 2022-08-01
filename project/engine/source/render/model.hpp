@@ -30,6 +30,8 @@ public:
         uint32_t index_count;
         uint32_t vertex_offset;
         uint32_t index_offset;
+
+        glm::mat4 mesh_to_model;
     };
     
     Model(const std::string & model_filename);

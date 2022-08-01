@@ -1,9 +1,19 @@
 #include "globals.hlsl"
 
+cbuffer PerMesh : register(b1)
+{
+    row_major float4x4 mesh_to_model;
+}
+
 struct VS_INPUT
 {
     float3 pos : POSITION;
     float2 uv : TEXCOORD;
+    
+    float4 transform_0 : TRANSFORM0;
+    float4 transform_1 : TRANSFORM1;
+    float4 transform_2 : TRANSFORM2;
+    float4 transform_3 : TRANSFORM3;
 };
 
 struct PS_INPUT
@@ -19,17 +29,17 @@ Texture2D g_texture;
 //------------------------------------------------------------------------------
 PS_INPUT vertexShader(VS_INPUT input)
 {
-    float4x4 scale = float4x4(10.0f, 0.0f, 0.0f, 0.0f,
-                              0.0f, 10.0f, 0.0f, 0.0f,
-                              0.0f, 0.0f, 10.0f, 0.0f,
-                              0.0f, 0.0f, 0.0f, 1.0f);
-
+    float4x4 transform = float4x4(input.transform_0,
+                                  input.transform_1,
+                                  input.transform_2,
+                                  input.transform_3);
     
     PS_INPUT output;
     output.uv = input.uv;
-    // output.pos = mul(mul(mul(float4(input.pos, 1.0f), scale), mesh_to_model), g_proj_view);
-    output.pos = mul(mul(float4(input.pos, 1.0f), scale), g_proj_view);
-    //output.pos = mul(g_proj_view, float4(input.pos, 1.0f));
+
+    float4 pos = mul(float4(input.pos, 1.0f), mesh_to_model);
+    pos = mul(pos, g_proj_view);
+    output.pos = pos;
 
     return output;
 }

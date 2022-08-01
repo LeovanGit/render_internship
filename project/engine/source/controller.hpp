@@ -61,6 +61,9 @@ public:
     glm::vec3 rotation_speed = glm::vec3(360.0f, 360.0f, 60.0f);
 
     bool is_accelerated;
+
+private:
+    void initKnight(const math::Transform & transform);
 };
 
 #endif

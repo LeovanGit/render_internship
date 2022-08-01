@@ -34,13 +34,14 @@ void ShaderManager::registerShader(const std::string & key,
 void ShaderManager::registerShader(const std::string & key,
                                    WCHAR * path,
                                    WCHAR * filename,
-                                   D3D11_INPUT_ELEMENT_DESC input_desc[])
+                                   D3D11_INPUT_ELEMENT_DESC input_desc[],
+                                   uint32_t input_desc_size)
 {
     // will call copy constructor (construct temp and then copy):
     // shaders.emplace(key, Shader(path, filename, input_desc));
 
     // just construct inside:
-    shaders.try_emplace(key, path, filename, input_desc);
+    shaders.try_emplace(key, path, filename, input_desc, input_desc_size);
 }
 
 void ShaderManager::useShader(const std::string & key)

@@ -28,12 +28,7 @@ Model::Model(const std::string & model_filename)
     uint32_t index_sum = 0;
     
     for (uint32_t m = 0; m != ai_scene->mNumMeshes; ++m)
-    {
-        // to convert from Blender (Z is up) coordinates to direct3D (Y is up):
-        aiNode * node = ai_scene->mRootNode->mChildren[m];
-        glm::mat4 mesh_to_model =
-            reinterpret_cast<glm::mat4 &>(node->mTransformation);
-        
+    {                
         aiMesh *& src_mesh = ai_scene->mMeshes[m];
         MeshRange & dst_mesh = meshes[m];
         
@@ -45,6 +40,11 @@ Model::Model(const std::string & model_filename)
 
         vertex_sum += dst_mesh.vertex_count;
         index_sum += dst_mesh.index_count;
+
+        // to convert from Blender (Z is up) to direct3D (Y is up) coordinates:
+        aiNode * node = ai_scene->mRootNode->mChildren[m];
+        dst_mesh.mesh_to_model =
+            reinterpret_cast<glm::mat4 &>(node->mTransformation.Transpose());
         
         // read vertex data
         for (uint32_t v = 0; v != src_mesh->mNumVertices; ++v)
@@ -74,13 +74,13 @@ Model::Model(const std::string & model_filename)
         }
     }
     
-    vertex_buffer.init(vertices.data(), vertices.size(), BufferType::VERTEX);
+    vertex_buffer.init(vertices.data(), vertices.size());
     index_buffer.init(indices.data(), indices.size());
 }
 
 void Model::bind()
 {
-    vertex_buffer.bind(0, 1);
+    vertex_buffer.bind(0);
     index_buffer.bind();
 }
 

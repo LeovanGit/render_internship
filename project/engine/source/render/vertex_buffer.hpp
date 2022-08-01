@@ -9,39 +9,22 @@
 
 namespace engine
 {
-enum class BufferType
-{
-    VERTEX,
-    INSTANCE
-};
-
 template <class T>
 class VertexBuffer
 {    
 public:    
     VertexBuffer() = default;
     
-    void init(T * vertices, uint32_t size, BufferType type)
+    void init(T * vertices, uint32_t size)
     {
         Globals * globals = Globals::getInstance();
 
         D3D11_BUFFER_DESC vbo_desc;
         ZeroMemory(&vbo_desc, sizeof(vbo_desc));
-
-        if (type == BufferType::VERTEX)
-        {
-            vbo_desc.Usage = D3D11_USAGE_IMMUTABLE;
-            vbo_desc.ByteWidth = sizeof(T) * size;
-            vbo_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-            vbo_desc.CPUAccessFlags = 0;
-        }
-        else
-        {
-            vbo_desc.Usage = D3D11_USAGE_DYNAMIC;
-            vbo_desc.ByteWidth = sizeof(T) * size;
-            vbo_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-            vbo_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        }
+        vbo_desc.Usage = D3D11_USAGE_IMMUTABLE;
+        vbo_desc.ByteWidth = sizeof(T) * size;
+        vbo_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        vbo_desc.CPUAccessFlags = 0;
 
         D3D11_SUBRESOURCE_DATA vertices_data;
         ZeroMemory(&vertices_data, sizeof(vertices_data));
@@ -59,16 +42,15 @@ public:
         offset = 0;
     }
 
-    void bind(uint32_t start_slot, uint32_t buffers_count)
+    void bind(uint32_t slot)
     {
         Globals * globals = Globals::getInstance();
 
-        globals->device_context4->IASetVertexBuffers(start_slot,
-                                                     buffers_count,
+        globals->device_context4->IASetVertexBuffers(slot,
+                                                     1,
                                                      data.get(),
                                                      &stride,
                                                      &offset);
-
     }
 
     DxResPtr<ID3D11Buffer> & get_data() { return data; }

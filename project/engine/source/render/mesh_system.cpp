@@ -40,6 +40,14 @@ void MeshSystem::addModel(Model * model,
         
             per_model.per_mesh.push_back(per_mesh);
 
+            // also add meshes_range
+            auto & src_meshes = model->get_meshes();
+            auto & dst_meshes = per_model.model->get_meshes();
+
+            dst_meshes.insert(dst_meshes.end(),
+                              src_meshes.begin(),
+                              src_meshes.end());
+
             goto end;
         }
     }

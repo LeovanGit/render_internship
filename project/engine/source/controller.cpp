@@ -111,8 +111,7 @@ void Controller::initScene(Camera & camera)
 
     // CREATE MODELS
     model_mgr->registerModel("knight", "../engine/assets/Knight/Knight.fbx");
-    model_mgr->registerDefaultCube("cube_0");
-    model_mgr->registerDefaultCube("cube_1");
+    model_mgr->registerDefaultCube("cube");
 
     // INIT SKY
     scene->sky.init(shader_mgr->getShader("skybox"),
@@ -128,13 +127,13 @@ void Controller::initScene(Camera & camera)
                                glm::vec3(10.0f, 10.0f, 10.0f)));
 
     // INIT CUBE
-    scene->mesh_system.addModel(&model_mgr->getModel("cube_0"),
+    scene->mesh_system.addModel(&model_mgr->getModel("cube"),
                                 oi::Material(&tex_mgr->getTexture("rubik_cube")),
                                 math::Transform(glm::vec3(0.0f, 0.0f, 10.0f),
                                                 math::EulerAngles(0.0f, 45.0f, 45.0f),
                                                 glm::vec3(4.0f, 4.0f, 4.0f)));
 
-    scene->mesh_system.addModel(&model_mgr->getModel("cube_1"),
+    scene->mesh_system.addModel(&model_mgr->getModel("cube"),
                                 oi::Material(&tex_mgr->getTexture("prototype")),
                                 math::Transform(glm::vec3(0.0f, -11.0f, 10.0f),
                                                 math::EulerAngles(0.0f, 0.0f, 0.0f),

@@ -102,6 +102,11 @@ void Model::bind()
     index_buffer.bind();
 }
 
+std::vector<Model::MeshRange> & Model::get_meshes()
+{
+    return meshes;
+}
+
 Model::MeshRange & Model::get_mesh(uint32_t index)
 {
     return meshes[index];

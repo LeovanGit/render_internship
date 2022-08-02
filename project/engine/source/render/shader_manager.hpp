@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include "spdlog.h"
+#include <memory>
 
 #include "dx_res_ptr.hpp"
 #include "shader.hpp"
@@ -25,9 +26,6 @@ public:
     static void del();
 
     void registerShader(const std::string & key,
-                        const Shader & shader);
-
-    void registerShader(const std::string & key,
                         WCHAR * path,
                         WCHAR * filename,
                         D3D11_INPUT_ELEMENT_DESC input_desc[] = nullptr,
@@ -35,7 +33,7 @@ public:
 
     void useShader(const std::string & key);
 
-    Shader & getShader(const std::string & key);
+    std::shared_ptr<Shader> getShader(const std::string & key);
        
 private:
     ShaderManager() = default;
@@ -43,7 +41,7 @@ private:
 
     static ShaderManager * instance;
 
-    std::unordered_map<std::string, Shader> shaders;
+    std::unordered_map<std::string, std::shared_ptr<Shader>> shaders;
 };
 } // namespace engine
 

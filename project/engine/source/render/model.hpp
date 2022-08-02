@@ -42,8 +42,8 @@ public:
 
     void bind();
 
-    std::vector<MeshRange> & get_meshes();
-    MeshRange & get_mesh(uint32_t index);
+    std::vector<MeshRange> & getMeshRanges();
+    MeshRange & getMeshRange(uint32_t index);
     
 protected:
     std::vector<MeshRange> meshes;

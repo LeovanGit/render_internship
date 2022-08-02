@@ -53,7 +53,7 @@ void OpaqueInstances::render()
     
     for (auto & per_model: per_model)
     {
-        if (!per_model.model) continue;
+        if (!static_cast<bool>(per_model.model)) continue;
 
         // bind vertex and index buffers
         per_model.model->bind();
@@ -61,7 +61,7 @@ void OpaqueInstances::render()
         uint32_t per_mesh_size = per_model.per_mesh.size();
         for (uint32_t i = 0; i < per_mesh_size; ++i)
         {
-            Model::MeshRange & mesh_range = per_model.model->get_mesh(i);
+            Model::MeshRange & mesh_range = per_model.model->getMeshRange(i);
 
             globals->setPerMeshBuffer(mesh_range.mesh_to_model);
             globals->updatePerMeshBuffer();

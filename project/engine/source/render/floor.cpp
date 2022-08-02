@@ -2,11 +2,11 @@
 
 namespace engine
 {
-void Floor::init(Shader & shader,
-                 Texture & texture)
+void Floor::init(std::shared_ptr<Shader> shader,
+                 std::shared_ptr<Texture> texture)
 {
-    m_shader = &shader;
-    m_texture = &texture;
+    m_shader = shader;
+    m_texture = texture;
 }
 
 void Floor::render()

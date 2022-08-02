@@ -18,15 +18,15 @@ public:
     struct Instance
     {
         Instance() = default;
-        Instance(glm::mat4 transform) : transform(transform) {}        
+        Instance(const glm::mat4 & transform) : transform(transform) {}
         glm::mat4 transform;
     };
     
     struct Material
     {
         Material() = default;
-        Material(Texture * texture) : texture(texture) {}        
-        Texture * texture;
+        Material(std::shared_ptr<Texture> texture) : texture(texture) {}        
+        std::shared_ptr<Texture> texture;
     };
 
     struct PerMaterial
@@ -42,7 +42,7 @@ public:
 
     struct PerModel
     {
-        Model * model;
+        std::shared_ptr<Model> model;
         std::vector<PerMesh> per_mesh;
     };
 

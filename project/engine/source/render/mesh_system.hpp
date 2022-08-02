@@ -2,6 +2,7 @@
 #define MESH_SYSTEM_HPP
 
 #include "spdlog.h"
+#include <memory>
 
 #include "opaque_instances.hpp"
 #include "model.hpp"
@@ -24,7 +25,7 @@ public:
     
     void render();
     
-    void addInstance(Model * model,
+    void addInstance(std::shared_ptr<Model> model,
                      std::vector<OpaqueInstances::Material> & materials,
                      const math::Transform & transform);
 

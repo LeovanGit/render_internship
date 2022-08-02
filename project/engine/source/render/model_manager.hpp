@@ -4,6 +4,7 @@
 #include "spdlog.h"
 #include <unordered_map>
 #include <string>
+#include <memory>
 
 #include "model.hpp"
 
@@ -22,11 +23,11 @@ public:
 
     static void del();
 
-    Model & getModel(const std::string & model_path);
+    std::shared_ptr<Model> getModel(const std::string & model_path);
 
     void bindModel(const std::string & key);
 
-    Model & getDefaultCube(const std::string & key);
+    std::shared_ptr<Model> getDefaultCube(const std::string & key);
 
 private:
     ModelManager() = default;
@@ -34,7 +35,7 @@ private:
 
     static ModelManager * instance;
 
-    std::unordered_map<std::string, Model> models;
+    std::unordered_map<std::string, std::shared_ptr<Model>> models;
 };
 } // namespace engine
 

@@ -25,17 +25,18 @@ void TextureManager::del()
     else spdlog::error("TextureManager::del() was called twice!");
 }
 
-Texture & TextureManager::getTexture(const std::string & texture_path)
+std::shared_ptr<Texture> TextureManager::getTexture(const std::string & texture_path)
 {
     auto item = textures.find(texture_path);
     if (item != textures.end()) return item->second;
 
-    auto result = textures.try_emplace(texture_path, texture_path);
+    auto result = textures.try_emplace(texture_path,
+                                       std::make_shared<Texture>(texture_path));
     return result.first->second;
 }
 
 void TextureManager::bindTexture(const std::string & key)
 {
-    textures.find(key)->second.bind();
+    textures.find(key)->second->bind();
 }
 } // namespace engine

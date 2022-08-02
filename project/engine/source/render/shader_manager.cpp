@@ -26,30 +26,24 @@ void ShaderManager::del()
 }
 
 void ShaderManager::registerShader(const std::string & key,
-                                   const Shader & shader)
-{
-    shaders.emplace(key, shader);
-}
-
-void ShaderManager::registerShader(const std::string & key,
                                    WCHAR * path,
                                    WCHAR * filename,
                                    D3D11_INPUT_ELEMENT_DESC input_desc[],
                                    uint32_t input_desc_size)
 {
-    // will call copy constructor (construct temp and then copy):
-    // shaders.emplace(key, Shader(path, filename, input_desc));
-
-    // just construct inside:
-    shaders.try_emplace(key, path, filename, input_desc, input_desc_size);
+    shaders.try_emplace(key,
+                        std::make_shared<Shader>(path,
+                                                 filename,
+                                                 input_desc,
+                                                 input_desc_size));
 }
 
 void ShaderManager::useShader(const std::string & key)
 {
-    shaders.find(key)->second.bind();
+    shaders.find(key)->second->bind();
 }
 
-Shader & ShaderManager::getShader(const std::string & key)
+std::shared_ptr<Shader> ShaderManager::getShader(const std::string & key)
 {
     return shaders.find(key)->second;
 }

@@ -128,27 +128,27 @@ void Controller::initKnight(const math::Transform & transform)
 
     std::vector<engine::OpaqueInstances::Material> materials =
     {
-        oi::Material(&tex_mgr->
+        oi::Material(tex_mgr->
                      getTexture("../engine/assets/Knight/dds/Fur_BaseColor.dds")),
-        oi::Material(&tex_mgr->
+        oi::Material(tex_mgr->
                      getTexture("../engine/assets/Knight/dds/Legs_BaseColor.dds")),
-        oi::Material(&tex_mgr->
+        oi::Material(tex_mgr->
                      getTexture("../engine/assets/Knight/dds/Torso_BaseColor.dds")),
-        oi::Material(&tex_mgr->
+        oi::Material(tex_mgr->
                      getTexture("../engine/assets/Knight/dds/Head_BaseColor.dds")),
-        oi::Material(&tex_mgr->
+        oi::Material(tex_mgr->
                      getTexture("../engine/assets/Knight/dds/Eye_BaseColor.dds")),
-        oi::Material(&tex_mgr->
+        oi::Material(tex_mgr->
                      getTexture("../engine/assets/Knight/dds/Helmet_BaseColor.dds")),
-        oi::Material(&tex_mgr->
+        oi::Material(tex_mgr->
                      getTexture("../engine/assets/Knight/dds/Skirt_BaseColor.dds")),
-        oi::Material(&tex_mgr->
+        oi::Material(tex_mgr->
                      getTexture("../engine/assets/Knight/dds/Cape_BaseColor.dds")),
-        oi::Material(&tex_mgr->
+        oi::Material(tex_mgr->
                      getTexture("../engine/assets/Knight/dds/Glove_BaseColor.dds")),
     };
 
-    mesh_system->addInstance(&model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
+    mesh_system->addInstance(model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
                              materials,
                              transform);
 }
@@ -162,10 +162,10 @@ void Controller::initCube(const std::string & texture_path,
 
     std::vector<engine::OpaqueInstances::Material> materials =
     {
-        oi::Material(&tex_mgr->getTexture(texture_path)),
+        oi::Material(tex_mgr->getTexture(texture_path)),
     };
 
-    mesh_system->addInstance(&model_mgr->getDefaultCube("cube"),
+    mesh_system->addInstance(model_mgr->getDefaultCube("cube"),
                              materials,
                              transform);
 }

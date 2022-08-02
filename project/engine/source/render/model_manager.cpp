@@ -25,21 +25,22 @@ void ModelManager::del()
     else spdlog::error("ModelManager::del() was called twice!");
 }
 
-Model & ModelManager::getModel(const std::string & model_path)
+std::shared_ptr<Model> ModelManager::getModel(const std::string & model_path)
 {
     auto item = models.find(model_path);
     if (item != models.end()) return item->second;
-
-    auto result = models.try_emplace(model_path, model_path);
+    
+    auto result = models.try_emplace(model_path,
+                                     std::make_shared<Model>(model_path));
     return result.first->second;
 }
 
 void ModelManager::bindModel(const std::string & key)
 {
-    models.find(key)->second.bind();
+    models.find(key)->second->bind();
 }
 
-Model & ModelManager::getDefaultCube(const std::string & key)
+std::shared_ptr<Model> ModelManager::getDefaultCube(const std::string & key)
 {
     auto item = models.find(key);
     if (item != models.end()) return item->second;
@@ -96,7 +97,7 @@ Model & ModelManager::getDefaultCube(const std::string & key)
     };
     
     Model model(vertices, 12, indices, 36);
-    auto result = models.try_emplace(key, model);
+    auto result = models.try_emplace(key, std::make_shared<Model>(model));
 
     return result.first->second;
 }

@@ -25,30 +25,25 @@ void ModelManager::del()
     else spdlog::error("ModelManager::del() was called twice!");
 }
 
-void ModelManager::registerModel(const std::string & key,
-                                 const Model & model)
+Model & ModelManager::getModel(const std::string & model_path)
 {
-    models.emplace(key, model);
+    auto item = models.find(model_path);
+    if (item != models.end()) return item->second;
+
+    auto result = models.try_emplace(model_path, model_path);
+    return result.first->second;
 }
 
-void ModelManager::registerModel(const std::string & key,
-                                 const std::string & model_filename)
-{
-    models.try_emplace(key, model_filename);
-}
-
-void ModelManager::useModel(const std::string & key)
+void ModelManager::bindModel(const std::string & key)
 {
     models.find(key)->second.bind();
 }
 
-Model & ModelManager::getModel(const std::string & key)
+Model & ModelManager::getDefaultCube(const std::string & key)
 {
-    return models.find(key)->second;
-}
-
-void ModelManager::registerDefaultCube(const std::string & key)
-{
+    auto item = models.find(key);
+    if (item != models.end()) return item->second;
+    
     typedef Model::Vertex Vertex;
 
     // CREATE VERTEX BUFFER
@@ -101,6 +96,8 @@ void ModelManager::registerDefaultCube(const std::string & key)
     };
     
     Model model(vertices, 12, indices, 36);
-    models.try_emplace(key, model);
+    auto result = models.try_emplace(key, model);
+
+    return result.first->second;
 }
 } // namespace engine

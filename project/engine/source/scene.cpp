@@ -11,25 +11,15 @@ void Scene::renderFrame(windows::Window & window,
     TextureManager * tex_mgr = TextureManager::getInstance();
     ShaderManager * shader_mgr = ShaderManager::getInstance();
     ModelManager * model_mgr = ModelManager::getInstance();
+    MeshSystem * mesh_system = MeshSystem::getInstance();
 
     globals->bind(camera);
 
     window.bindRT();
     window.clearFrame();
 
-    // DRAW MODELS
-    mesh_system.render();
-    
-    // DRAW FLOOR
-    globals->device_context4->
-        IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    shader_mgr->useShader("floor");
-    tex_mgr->useTexture("floor");
-    
-    globals->device_context4->Draw(6, 0);
-
-    // DRAW SKY
+    mesh_system->render();
+    floor.render();
     sky.render();
 
     window.switchBuffer();

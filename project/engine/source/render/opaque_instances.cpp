@@ -13,23 +13,27 @@ void OpaqueInstances::updateInstanceBuffers()
 
     if (total_instances == 0) return;
 
-    std::vector<Instance> instances;
-    
+    instance_buffer.init(total_instances);
+    D3D11_MAPPED_SUBRESOURCE mapped = instance_buffer.map();
+    Instance * dst = static_cast<Instance *>(mapped.pData);
+
+    uint32_t copied_count = 0;
     for (auto & per_model : per_model)
     {
         for (auto & per_mesh : per_model.per_mesh)
         {
             for (auto & per_material : per_mesh.per_material)
             {
-                instances.insert(instances.end(),
-                                 per_material.instances.begin(),
-                                 per_material.instances.end());
+                uint32_t instances_size = per_material.instances.size();
+                for (uint32_t i = 0; i != instances_size; ++i)
+                {
+                    dst[copied_count++] = per_material.instances[i];
+                }
             }
         }
     }
 
-    instance_buffer.init(instances.data(),
-                         total_instances);
+    instance_buffer.unmap();
 }
 
 void OpaqueInstances::render()

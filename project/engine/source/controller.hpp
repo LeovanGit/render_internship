@@ -66,6 +66,9 @@ public:
 
 private:
     void initKnight(const math::Transform & transform);
+
+    void initCube(const std::string & texture_path,
+                  const math::Transform & transform);
 };
 
 #endif

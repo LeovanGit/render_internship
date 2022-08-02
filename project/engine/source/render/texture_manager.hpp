@@ -23,15 +23,9 @@ public:
 
     static void del();
 
-    void registerTexture(const std::string & key,
-                         const Texture & texture);
+    Texture & getTexture(const std::string & texture_path);
 
-    void registerTexture(const std::string & key,
-                         WCHAR * texture_filename);
-
-    void useTexture(const std::string & key);
-
-    Texture & getTexture(const std::string & key);
+    void bindTexture(const std::string & key);
 
 private:
     TextureManager() = default;

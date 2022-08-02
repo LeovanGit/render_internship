@@ -71,6 +71,7 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/shader_includer.hpp
                    engine/source/render/engine.hpp
                    engine/source/render/sky.hpp
+                   engine/source/render/floor.hpp
                    engine/source/render/model.hpp
                    engine/source/render/model_manager.hpp
                    engine/source/render/vertex_buffer.hpp
@@ -87,6 +88,7 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/shader_includer.cpp
                    engine/source/render/engine.cpp
                    engine/source/render/sky.cpp
+                   engine/source/render/floor.cpp
                    engine/source/render/model.cpp
                    engine/source/render/model_manager.cpp
                    engine/source/render/index_buffer.cpp
@@ -120,13 +122,24 @@ add_executable(rt WIN32
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT rt)
 
 # ------------------[ASSIMP COMPILATION]---------------
-add_subdirectory(assimp)
-target_link_libraries(rt assimp)
+# check if assimp directory is empty
+file(GLOB DIR assimp/*)
+list(LENGTH DIR LEN)
+if (LEN EQUAL 0)
+  message("\n====================[WARNING]====================\n"
+          "Assimp directory is empty.\n"
+          "Clone it from github: git submodule update --init --recursive\n"
+          "or set up assimp paths by yourself in the IDE.\n"
+          "===================================================\n")
+else()
+  add_subdirectory(assimp)
+  target_link_libraries(rt assimp)
 
-# copy .dll to .exe directory (post-build event)
-# $<CONFIGURATION> means Debug/Release directory
-# depends on cmake --build . --config Debug/Release
-add_custom_command(TARGET rt POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${PROJECT_SOURCE_DIR}/build/assimp/bin/$<CONFIGURATION>"
-  "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
+  # copy .dll to .exe directory (post-build event)
+  # $<CONFIGURATION> means Debug/Release directory
+  # depends on cmake --build . --config Debug/Release
+  add_custom_command(TARGET rt POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/build/assimp/bin/$<CONFIGURATION>"
+    "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
+endif()

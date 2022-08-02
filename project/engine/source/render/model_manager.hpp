@@ -22,17 +22,11 @@ public:
 
     static void del();
 
-    void registerModel(const std::string & key,
-                       const Model & model);
+    Model & getModel(const std::string & model_path);
 
-    void registerModel(const std::string & key,
-                       const std::string & model_filename);
+    void bindModel(const std::string & key);
 
-    void useModel(const std::string & key);
-
-    Model & getModel(const std::string & key);
-
-    void registerDefaultCube(const std::string & key);
+    Model & getDefaultCube(const std::string & key);
 
 private:
     ModelManager() = default;

@@ -189,7 +189,7 @@ void Globals::updatePerFrameBuffer()
 void Globals::setPerMeshBuffer(const glm::mat4 & mesh_to_model)
 {
     // fill const buffer data
-    per_mesh_buffer_data.mesh_to_model = mesh_to_model;
+    per_mesh_buffer_data.g_mesh_to_model = mesh_to_model;
 
     if (per_mesh_buffer.valid()) return;
     // constant buffer description

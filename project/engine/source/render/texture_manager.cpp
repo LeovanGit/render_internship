@@ -25,29 +25,17 @@ void TextureManager::del()
     else spdlog::error("TextureManager::del() was called twice!");
 }
 
-void TextureManager::registerTexture(const std::string & key,
-                                     const Texture & texture)
+Texture & TextureManager::getTexture(const std::string & texture_path)
 {
-    textures.emplace(key, texture);
+    auto item = textures.find(texture_path);
+    if (item != textures.end()) return item->second;
+
+    auto result = textures.try_emplace(texture_path, texture_path);
+    return result.first->second;
 }
 
-void TextureManager::registerTexture(const std::string & key,
-                                     WCHAR * texture_filename)
-{
-    // will call copy constructor (construct temp and then copy):
-    // textures.emplace(key, Shader(texture_filename));
-
-    // just construct inside:
-    textures.try_emplace(key, texture_filename);
-}
-
-void TextureManager::useTexture(const std::string & key)
+void TextureManager::bindTexture(const std::string & key)
 {
     textures.find(key)->second.bind();
-}
-
-Texture & TextureManager::getTexture(const std::string & key)
-{
-    return textures.find(key)->second;
 }
 } // namespace engine

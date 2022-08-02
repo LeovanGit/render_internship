@@ -2,7 +2,7 @@
 
 cbuffer PerMesh : register(b1)
 {
-    row_major float4x4 mesh_to_model;
+    row_major float4x4 g_mesh_to_model;
 }
 
 struct VS_INPUT
@@ -37,7 +37,7 @@ PS_INPUT vertexShader(VS_INPUT input)
     PS_INPUT output;
     output.uv = input.uv;
 
-    float4 pos = mul(float4(input.pos, 1.0f), mesh_to_model);
+    float4 pos = mul(float4(input.pos, 1.0f), g_mesh_to_model);
     pos = mul(pos, transform);
     pos = mul(pos, g_proj_view);
     output.pos = pos;
@@ -51,7 +51,6 @@ PS_INPUT vertexShader(VS_INPUT input)
 float4 fragmentShader(PS_INPUT input) : SV_Target
 {
     float3 color = g_texture.Sample(g_sampler, input.uv);
-    // float3 color = g_texture.SampleLevel(g_sampler_state, input.uv, 0);
 
     return float4(color, 1.0f);
 }

@@ -33,7 +33,7 @@ struct PerFrameBufferData
 
 struct PerMeshBufferData
 {
-    glm::mat4 mesh_to_model;
+    glm::mat4 g_mesh_to_model;
 };
 
 // Singleton for global rendering resources

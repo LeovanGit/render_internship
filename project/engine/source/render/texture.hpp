@@ -11,7 +11,7 @@ namespace engine
 class Texture
 {
 public:
-    Texture(WCHAR * texture_filename);
+    Texture(const std::string & texture_path);
 
     void bind();
 

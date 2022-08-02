@@ -8,6 +8,7 @@
 #include "shader_manager.hpp"
 #include "model_manager.hpp"
 #include "sky.hpp"
+#include "floor.hpp"
 #include "mesh_system.hpp"
 
 namespace engine
@@ -21,7 +22,7 @@ public:
                      const Camera & camera);
 
     Sky sky;
-    MeshSystem mesh_system;
+    Floor floor;
 };
 } // namespace engine
 

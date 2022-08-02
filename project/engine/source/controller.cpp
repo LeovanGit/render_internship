@@ -24,6 +24,7 @@ void Controller::initScene(Camera & camera)
     engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
 
     // CREATE SHADERS
     D3D11_INPUT_ELEMENT_DESC ied[] =
@@ -93,31 +94,13 @@ void Controller::initScene(Camera & camera)
                                L"floor.hlsl",
                                nullptr);
     
-    // CREATE TEXTURES
-    tex_mgr->registerTexture("fur", L"../engine/assets/Knight/dds/Fur_BaseColor.dds");
-    tex_mgr->registerTexture("legs", L"../engine/assets/Knight/dds/Legs_BaseColor.dds");
-    tex_mgr->registerTexture("torso", L"../engine/assets/Knight/dds/Torso_BaseColor.dds");
-    tex_mgr->registerTexture("head", L"../engine/assets/Knight/dds/Head_BaseColor.dds");
-    tex_mgr->registerTexture("eye", L"../engine/assets/Knight/dds/Eye_BaseColor.dds");
-    tex_mgr->registerTexture("helmet", L"../engine/assets/Knight/dds/Helmet_BaseColor.dds");
-    tex_mgr->registerTexture("skirt", L"../engine/assets/Knight/dds/Skirt_BaseColor.dds");
-    tex_mgr->registerTexture("cape", L"../engine/assets/Knight/dds/Cape_BaseColor.dds");
-    tex_mgr->registerTexture("glove", L"../engine/assets/Knight/dds/Glove_BaseColor.dds");
-
-    tex_mgr->registerTexture("rubik_cube", L"../engine/assets/rubik_cube.dds");
-    tex_mgr->registerTexture("prototype", L"../engine/assets/prototype.dds");
-    tex_mgr->registerTexture("floor", L"../engine/assets/prototype_grid.dds");
-    tex_mgr->registerTexture("skybox", L"../engine/assets/skybox.dds");
-
-    // CREATE MODELS
-    model_mgr->registerModel("knight", "../engine/assets/Knight/Knight.fbx");
-    model_mgr->registerDefaultCube("cube");
-
-    // INIT SKY
+    // CREATE OBJECTS
     scene->sky.init(shader_mgr->getShader("skybox"),
-                    tex_mgr->getTexture("skybox"));
+                    tex_mgr->getTexture("../engine/assets/skybox.dds"));
 
-    // INIT KNIGHT
+    scene->floor.init(shader_mgr->getShader("floor"),
+                      tex_mgr->getTexture("../engine/assets/prototype_grid.dds"));
+    
     initKnight(math::Transform(glm::vec3(10.0f, -10.0f, 0.0f),
                                math::EulerAngles(90.0f, 0.0f, 0.0f),
                                glm::vec3(10.0f, 10.0f, 10.0f)));
@@ -126,60 +109,65 @@ void Controller::initScene(Camera & camera)
                                math::EulerAngles(-90.0f, 0.0f, 0.0f),
                                glm::vec3(10.0f, 10.0f, 10.0f)));
 
-    // INIT CUBE
-    scene->mesh_system.addModel(&model_mgr->getModel("cube"),
-                                oi::Material(&tex_mgr->getTexture("rubik_cube")),
-                                math::Transform(glm::vec3(0.0f, 0.0f, 10.0f),
-                                                math::EulerAngles(0.0f, 45.0f, 45.0f),
-                                                glm::vec3(4.0f, 4.0f, 4.0f)));
+    initCube("../engine/assets/rubik_cube.dds",
+             math::Transform(glm::vec3(0.0f, 0.0f, 10.0f),
+                             math::EulerAngles(0.0f, 45.0f, 45.0f),
+                             glm::vec3(4.0f, 4.0f, 4.0f)));
 
-    scene->mesh_system.addModel(&model_mgr->getModel("cube"),
-                                oi::Material(&tex_mgr->getTexture("prototype")),
-                                math::Transform(glm::vec3(0.0f, -11.0f, 10.0f),
-                                                math::EulerAngles(0.0f, 0.0f, 0.0f),
-                                                glm::vec3(4.0f, 4.0f, 4.0f)));
+    initCube("../engine/assets/prototype.dds",
+             math::Transform(glm::vec3(0.0f, -11.0f, 10.0f),
+                             math::EulerAngles(0.0f, 0.0f, 0.0f),
+                             glm::vec3(4.0f, 4.0f, 4.0f)));
 }
 
 void Controller::initKnight(const math::Transform & transform)
+{    
+    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+
+    std::vector<engine::OpaqueInstances::Material> materials =
+    {
+        oi::Material(&tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Fur_BaseColor.dds")),
+        oi::Material(&tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Legs_BaseColor.dds")),
+        oi::Material(&tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Torso_BaseColor.dds")),
+        oi::Material(&tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Head_BaseColor.dds")),
+        oi::Material(&tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Eye_BaseColor.dds")),
+        oi::Material(&tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Helmet_BaseColor.dds")),
+        oi::Material(&tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Skirt_BaseColor.dds")),
+        oi::Material(&tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Cape_BaseColor.dds")),
+        oi::Material(&tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Glove_BaseColor.dds")),
+    };
+
+    mesh_system->addInstance(&model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
+                             materials,
+                             transform);
+}
+
+void Controller::initCube(const std::string & texture_path,
+                          const math::Transform & transform)
 {
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
-    
-    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
-                                oi::Material(&tex_mgr->getTexture("fur")),
-                                transform);
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
 
-    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
-                                oi::Material(&tex_mgr->getTexture("legs")),
-                                transform);
+    std::vector<engine::OpaqueInstances::Material> materials =
+    {
+        oi::Material(&tex_mgr->getTexture(texture_path)),
+    };
 
-    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
-                                oi::Material(&tex_mgr->getTexture("torso")),
-                                transform);
-
-    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
-                                oi::Material(&tex_mgr->getTexture("head")),
-                                transform);
-
-    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
-                                oi::Material(&tex_mgr->getTexture("eye")),
-                                transform);
-
-    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
-                                oi::Material(&tex_mgr->getTexture("helmet")),
-                                transform);
-
-    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
-                                oi::Material(&tex_mgr->getTexture("skirt")),
-                                transform);
-
-    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
-                                oi::Material(&tex_mgr->getTexture("cape")),
-                                transform);
-
-    scene->mesh_system.addModel(&model_mgr->getModel("knight"),
-                                oi::Material(&tex_mgr->getTexture("glove")),
-                                transform);
+    mesh_system->addInstance(&model_mgr->getDefaultCube("cube"),
+                             materials,
+                             transform);
 }
 
 void Controller::processInput(Camera & camera,

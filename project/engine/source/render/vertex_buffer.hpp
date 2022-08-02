@@ -42,6 +42,49 @@ public:
         offset = 0;
     }
 
+    void init(uint32_t size)
+    {
+        Globals * globals = Globals::getInstance();
+
+        D3D11_BUFFER_DESC vbo_desc;
+        ZeroMemory(&vbo_desc, sizeof(vbo_desc));
+        vbo_desc.Usage = D3D11_USAGE_DYNAMIC;
+        vbo_desc.ByteWidth = sizeof(T) * size;
+        vbo_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        vbo_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+        HRESULT result = globals->device5->CreateBuffer(&vbo_desc,
+                                                        NULL,
+                                                        data.reset());
+        assert(result >= 0 && "CreateBuffer(vertex)");
+
+        this->size = size;
+        stride = sizeof(T);
+        offset = 0;
+    }
+
+    D3D11_MAPPED_SUBRESOURCE map() const
+    {
+        Globals * globals = Globals::getInstance();
+        
+        D3D11_MAPPED_SUBRESOURCE ms;
+        HRESULT result = globals->device_context4->Map(data.ptr(),
+                                                       NULL,
+                                                       D3D11_MAP_WRITE_DISCARD,
+                                                       NULL,
+                                                       &ms);
+        assert(result >= 0 && "Map");
+
+        return ms;
+    }
+
+    void unmap() const
+    {
+        Globals * globals = Globals::getInstance();
+        
+        globals->device_context4->Unmap(data.ptr(), NULL);
+    }
+    
     void bind(uint32_t slot)
     {
         Globals * globals = Globals::getInstance();

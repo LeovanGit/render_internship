@@ -1,10 +1,8 @@
 #include "shader_includer.hpp"
 
-ShaderIncluder::ShaderIncluder(WCHAR* path)
-{
-    fs::path currentDir(path);
-    m_currentDir = currentDir;
-}
+ShaderIncluder::ShaderIncluder(const std::string & currentDir) :
+                               m_currentDir(currentDir)
+{}
 
 HRESULT ShaderIncluder::Open(D3D_INCLUDE_TYPE includeType,
                              const char* includePathStr,

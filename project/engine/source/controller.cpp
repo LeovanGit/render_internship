@@ -78,27 +78,15 @@ void Controller::initScene(Camera & camera)
          1},
     };
 
-    shader_mgr->registerShader("opaque",
-                               L"../engine/shaders/",
-                               L"opaque.hlsl",
-                               ied,
-                               6);
-
-    shader_mgr->registerShader("skybox",
-                               L"../engine/shaders/",
-                               L"skybox.hlsl",
-                               nullptr);
-
-    shader_mgr->registerShader("floor",
-                               L"../engine/shaders/",
-                               L"floor.hlsl",
-                               nullptr);
+    shader_mgr->getShader("../engine/shaders/opaque.hlsl",
+                          ied,
+                          6);
     
     // CREATE OBJECTS
-    scene->sky.init(shader_mgr->getShader("skybox"),
+    scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
                     tex_mgr->getTexture("../engine/assets/skybox.dds"));
 
-    scene->floor.init(shader_mgr->getShader("floor"),
+    scene->floor.init(shader_mgr->getShader("../engine/shaders/floor.hlsl"),
                       tex_mgr->getTexture("../engine/assets/prototype_grid.dds"));
     
     initKnight(math::Transform(glm::vec3(10.0f, -10.0f, 0.0f),

@@ -45,8 +45,8 @@ void OpaqueInstances::render()
 
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    
-    shader_mgr->useShader("opaque");    
+
+    shader_mgr->bindShader("../engine/shaders/opaque.hlsl");
     instance_buffer.bind(1);
 
     uint32_t rendered_instances = 0;

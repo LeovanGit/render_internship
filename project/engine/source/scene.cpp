@@ -5,8 +5,6 @@ namespace engine
 void Scene::renderFrame(windows::Window & window,
                         const Camera & camera)
 {
-    HRESULT result;
-    
     Globals * globals = Globals::getInstance();
     TextureManager * tex_mgr = TextureManager::getInstance();
     ShaderManager * shader_mgr = ShaderManager::getInstance();

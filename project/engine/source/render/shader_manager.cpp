@@ -25,26 +25,22 @@ void ShaderManager::del()
     else spdlog::error("ShaderManager::del() was called twice!");
 }
 
-void ShaderManager::registerShader(const std::string & key,
-                                   WCHAR * path,
-                                   WCHAR * filename,
-                                   D3D11_INPUT_ELEMENT_DESC input_desc[],
-                                   uint32_t input_desc_size)
+std::shared_ptr<Shader> ShaderManager::getShader(const std::string shader_path,
+                                                 D3D11_INPUT_ELEMENT_DESC input_desc[],
+                                                 uint32_t input_desc_size)
 {
-    shaders.try_emplace(key,
-                        std::make_shared<Shader>(path,
-                                                 filename,
-                                                 input_desc,
-                                                 input_desc_size));
+    auto item = shaders.find(shader_path);
+    if (item != shaders.end()) return item->second;
+
+    auto result = shaders.try_emplace(shader_path,
+                                      std::make_shared<Shader>(shader_path,
+                                                               input_desc,
+                                                               input_desc_size));
+    return result.first->second;
 }
 
-void ShaderManager::useShader(const std::string & key)
+void ShaderManager::bindShader(const std::string & key)
 {
     shaders.find(key)->second->bind();
-}
-
-std::shared_ptr<Shader> ShaderManager::getShader(const std::string & key)
-{
-    return shaders.find(key)->second;
 }
 } // namespace engine

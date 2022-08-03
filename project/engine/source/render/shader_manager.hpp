@@ -25,15 +25,11 @@ public:
 
     static void del();
 
-    void registerShader(const std::string & key,
-                        WCHAR * path,
-                        WCHAR * filename,
-                        D3D11_INPUT_ELEMENT_DESC input_desc[] = nullptr,
-                        uint32_t input_desc_size = 0);
+    std::shared_ptr<Shader> getShader(const std::string shader_path,
+                                      D3D11_INPUT_ELEMENT_DESC input_desc[] = nullptr,
+                                      uint32_t input_desc_size = 0);
 
-    void useShader(const std::string & key);
-
-    std::shared_ptr<Shader> getShader(const std::string & key);
+    void bindShader(const std::string & key);
        
 private:
     ShaderManager() = default;

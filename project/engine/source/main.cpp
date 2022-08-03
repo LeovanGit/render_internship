@@ -81,6 +81,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     win.init(hInstance, 100.0f, 100.0f, 1280.0f, 720.0f);
 
     // CREATE SCENE
+    scene.init(win);
     controller.init(scene);
     controller.initScene(camera);
 

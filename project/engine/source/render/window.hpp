@@ -35,8 +35,6 @@ public:
 
     void initBackBuffer();
 
-    void initDepthBuffer();
-
     void initViewport();
 
     void resize(int width, int height);
@@ -47,7 +45,7 @@ public:
 
     void clearFrame();
 
-    void bindRT();
+    void bindRT(const DxResPtr<ID3D11DepthStencilView> & depth_stencil_view);
 
     void switchBuffer();
 
@@ -67,10 +65,6 @@ private:
 
     DxResPtr<ID3D11RenderTargetView> m_render_target;
     D3D11_VIEWPORT viewport;
-
-    DxResPtr<ID3D11Texture2D> depth_stencil_buffer;
-    DxResPtr<ID3D11DepthStencilView> depth_stencil_view;
-    DxResPtr<ID3D11DepthStencilState> depth_stencil_state;
 };
 } // namespace engine::windows
 

@@ -101,7 +101,7 @@ void Controller::initScene(Camera & camera)
              math::Transform(glm::vec3(0.0f, 0.0f, 10.0f),
                              math::EulerAngles(0.0f, 45.0f, 45.0f),
                              glm::vec3(4.0f, 4.0f, 4.0f)));
-
+    
     initCube("../engine/assets/prototype.dds",
              math::Transform(glm::vec3(0.0f, -11.0f, 10.0f),
                              math::EulerAngles(0.0f, 0.0f, 0.0f),
@@ -114,7 +114,7 @@ void Controller::initKnight(const math::Transform & transform)
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
 
-    std::vector<engine::OpaqueInstances::Material> materials =
+    std::vector<oi::Material> materials =
     {
         oi::Material(tex_mgr->
                      getTexture("../engine/assets/Knight/dds/Fur_BaseColor.dds")),
@@ -138,7 +138,7 @@ void Controller::initKnight(const math::Transform & transform)
 
     mesh_system->addInstance(model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
                              materials,
-                             transform);
+                             oi::Instance(transform.toMat4()));
 }
 
 void Controller::initCube(const std::string & texture_path,
@@ -148,14 +148,14 @@ void Controller::initCube(const std::string & texture_path,
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
 
-    std::vector<engine::OpaqueInstances::Material> materials =
+    std::vector<oi::Material> materials =
     {
         oi::Material(tex_mgr->getTexture(texture_path)),
     };
 
     mesh_system->addInstance(model_mgr->getDefaultCube("cube"),
                              materials,
-                             transform);
+                             oi::Instance(transform.toMat4()));
 }
 
 void Controller::processInput(Camera & camera,

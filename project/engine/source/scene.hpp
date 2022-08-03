@@ -18,9 +18,19 @@ class Scene
 public:
     Scene() = default;
 
+    void init(const windows::Window & window);
+
     void renderFrame(windows::Window & window,
                      const Camera & camera);
 
+    void initDepthBuffer(int width, int heigth);
+    void clearDepthBuffer();
+    void bindDepthBuffer();
+    
+    DxResPtr<ID3D11Texture2D> depth_stencil_buffer;
+    DxResPtr<ID3D11DepthStencilView> depth_stencil_view;
+    DxResPtr<ID3D11DepthStencilState> depth_stencil_state;
+    
     Sky sky;
     Floor floor;
 };

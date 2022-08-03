@@ -142,6 +142,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             if (wParam != SIZE_MINIMIZED)
             {
                 win.resize(LOWORD(lParam), HIWORD(lParam));
+                scene.initDepthBuffer(LOWORD(lParam), HIWORD(lParam));
             
                 camera.setPerspective(glm::radians(45.0f),
                                       float(LOWORD(lParam)) / HIWORD(lParam),

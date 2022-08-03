@@ -27,7 +27,7 @@ public:
     
     void addInstance(std::shared_ptr<Model> model,
                      std::vector<OpaqueInstances::Material> & materials,
-                     const math::Transform & transform);
+                     const OpaqueInstances::Instance & instance);
 
     OpaqueInstances opaque_instances;
 

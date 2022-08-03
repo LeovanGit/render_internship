@@ -29,11 +29,8 @@ void MeshSystem::render() { opaque_instances.render(); }
 
 void MeshSystem::addInstance(std::shared_ptr<Model> model,
                              std::vector<OpaqueInstances::Material> & materials,
-                             const math::Transform & transform)
+                             const OpaqueInstances::Instance & instance)
 {
-    OpaqueInstances::Instance instance;
-    instance.transform = transform.toMat4();
-
     // try to find the same model
     for (auto & per_model : opaque_instances.per_model)
     {

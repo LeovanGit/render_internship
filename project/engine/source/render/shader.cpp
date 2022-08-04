@@ -2,25 +2,25 @@
 
 namespace engine
 {
-Shader::Shader(WCHAR * path,
-               WCHAR * filename,
-               D3D11_INPUT_ELEMENT_DESC input_desc[])
+Shader::Shader(const std::string & shader_path,
+               D3D11_INPUT_ELEMENT_DESC input_desc[],
+               uint32_t input_desc_size)
 {
     HRESULT result;
 
     ID3D10Blob * error_message(0);
     ID3D10Blob * vert_shader_buffer(0);
     ID3D10Blob * frag_shader_buffer(0);
-    
-    ShaderIncluder includer(path);
+
+    // pass only path to shader
+    ShaderIncluder includer(shader_path.substr(0, shader_path.rfind("/")));
     
     // create full path to shader
-    std::wstring shader_path = std::wstring(path);
-    if (shader_path.back() == '/') shader_path += std::wstring(filename);
-    else shader_path += L'/' + std::wstring(filename);
+    std::wstring path = std::wstring(shader_path.begin(),
+                                     shader_path.end());
 
     // Compile the vertex shader code
-    result = D3DCompileFromFile(shader_path.c_str(),
+    result = D3DCompileFromFile(path.c_str(),
                                 NULL,
                                 &includer,
                                 "vertexShader", // entry point
@@ -40,7 +40,7 @@ Shader::Shader(WCHAR * path,
     }
 
     // Compile the fragment shader code
-    result = D3DCompileFromFile(shader_path.c_str(),
+    result = D3DCompileFromFile(path.c_str(),
                                 NULL,
                                 &includer,
                                 "fragmentShader", // entry point
@@ -80,12 +80,14 @@ Shader::Shader(WCHAR * path,
 
     // CREATE INPUT LAYOUT (VAO)
     if (input_desc)
+    {
         globals->device5->
             CreateInputLayout(input_desc,
-                              2,
+                              input_desc_size,
                               vert_shader_buffer->GetBufferPointer(),
                               vert_shader_buffer->GetBufferSize(),
-                              input_layout.reset());
+                              input_layout.reset());        
+    }
 }
 
 void Shader::bind()

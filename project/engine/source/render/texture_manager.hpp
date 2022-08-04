@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include "spdlog.h"
+#include <memory>
 
 #include "texture.hpp"
 
@@ -23,15 +24,9 @@ public:
 
     static void del();
 
-    void registerTexture(const std::string & key,
-                         const Texture & texture);
+    std::shared_ptr<Texture> getTexture(const std::string & texture_path);
 
-    void registerTexture(const std::string & key,
-                         WCHAR * texture_filename);
-
-    void useTexture(const std::string & key);
-
-    Texture & getTexture(const std::string & key);
+    void bindTexture(const std::string & key);
 
 private:
     TextureManager() = default;
@@ -39,7 +34,7 @@ private:
 
     static TextureManager * instance;
 
-    std::unordered_map<std::string, Texture> textures;
+    std::unordered_map<std::string, std::shared_ptr<Texture>> textures;
 };
 } // namespace engine
 

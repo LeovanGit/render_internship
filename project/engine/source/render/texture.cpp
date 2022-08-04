@@ -2,13 +2,16 @@
 
 namespace engine
 {
-Texture::Texture(WCHAR * texture_filename)
+Texture::Texture(const std::string & texture_path)
 {
     HRESULT result;
     Globals * globals = Globals::getInstance();
 
+    std::wstring path = std::wstring(texture_path.begin(),
+                                     texture_path.end());
+    
     result = DirectX::CreateDDSTextureFromFile(globals->device5.ptr(),
-                                               texture_filename,
+                                               path.c_str(),
                                                nullptr,
                                                texture_view.get());
     assert(result >= 0 && "CreateDDSTextureFromFile");

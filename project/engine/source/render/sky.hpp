@@ -2,6 +2,7 @@
 #define SKY_HPP
 
 #include <string>
+#include <memory>
 
 #include "globals.hpp"
 #include "texture.hpp"
@@ -14,13 +15,13 @@ class Sky
 public:
     Sky() = default;
 
-    void init(Shader & shader,
-              Texture & texture);
+    void init(std::shared_ptr<Shader> shader,
+              std::shared_ptr<Texture> texture);
 
     void render();
 
-    Shader * m_shader;
-    Texture * m_texture;
+    std::shared_ptr<Shader> m_shader;
+    std::shared_ptr<Texture> m_texture;
 };
 } // namespace engine
 

@@ -8,13 +8,17 @@ void Engine::init()
     Globals::init();
     ShaderManager::init(); // depends on Globals
     TextureManager::init(); // depends on Globals
+    ModelManager::init();
+    MeshSystem::init();
 }
 
 void Engine::del()
 {
     // destruct singletons in reverse order!
-    engine::TextureManager::del();
-    engine::ShaderManager::del();
-    engine::Globals::del();
+    MeshSystem::del();
+    ModelManager::del();
+    TextureManager::del();
+    ShaderManager::del();
+    Globals::del();
 }
 } // namespace engine

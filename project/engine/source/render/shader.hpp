@@ -33,9 +33,9 @@ namespace engine
 class Shader
 {
 public:
-    Shader(WCHAR * path,
-           WCHAR * filename,
-           D3D11_INPUT_ELEMENT_DESC input_desc[] = nullptr);
+    Shader(const std::string & shader_path,
+           D3D11_INPUT_ELEMENT_DESC input_desc[] = nullptr,
+           uint32_t input_desc_size = 0);
 
     void bind();
 

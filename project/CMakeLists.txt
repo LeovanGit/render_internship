@@ -21,7 +21,10 @@ set(INC engine/source
         glm/glm
         directx_texture_loader
         spdlog/include
-        spdlog/include/spdlog)
+        spdlog/include/spdlog
+        assimp/include
+        build/assimp/include # config.h appears only after compilation
+      )
 
 include_directories(${INC})
 
@@ -32,7 +35,7 @@ set(TEX_LOADER directx_texture_loader/DDSTextureLoader11.h
 source_group("directx_texture_loader" FILES ${TEX_LOADER})
 
 # --------------------[SHADERS]--------------------
-set(SHADERS engine/shaders/cube.hlsl
+set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/globals.hlsl
             engine/shaders/skybox.hlsl
             engine/shaders/floor.hlsl)
@@ -57,17 +60,24 @@ source_group("Source Files/source" FILES ${SOURCES})
 
 # --------------------[SOURCE/RENDER]--------------------
 set(RENDER_HEADERS engine/source/render/window.hpp
+                   engine/source/render/win_def.hpp
+                   engine/source/render/win_undef.hpp
                    engine/source/render/dx_res_ptr.hpp
                    engine/source/render/globals.hpp
                    engine/source/render/shader.hpp
                    engine/source/render/shader_manager.hpp
-                   engine/source/render/win_def.hpp
-                   engine/source/render/win_undef.hpp
                    engine/source/render/texture.hpp
                    engine/source/render/texture_manager.hpp
                    engine/source/render/shader_includer.hpp
                    engine/source/render/engine.hpp
-                   engine/source/render/sky.hpp)
+                   engine/source/render/sky.hpp
+                   engine/source/render/floor.hpp
+                   engine/source/render/model.hpp
+                   engine/source/render/model_manager.hpp
+                   engine/source/render/vertex_buffer.hpp
+                   engine/source/render/index_buffer.hpp
+                   engine/source/render/opaque_instances.hpp
+                   engine/source/render/mesh_system.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/globals.cpp
@@ -77,17 +87,25 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/texture_manager.cpp
                    engine/source/render/shader_includer.cpp
                    engine/source/render/engine.cpp
-                   engine/source/render/sky.cpp)
+                   engine/source/render/sky.cpp
+                   engine/source/render/floor.cpp
+                   engine/source/render/model.cpp
+                   engine/source/render/model_manager.cpp
+                   engine/source/render/index_buffer.cpp
+                   engine/source/render/opaque_instances.cpp
+                   engine/source/render/mesh_system.cpp)
 
 source_group("Header Files/source/render" FILES ${RENDER_HEADERS})
 source_group("Source Files/source/render" FILES ${RENDER_SOURCES})
 
 # --------------------[SOURCE/MATH]--------------------
 set(MATH_HEADERS engine/source/math/matrices.hpp
-                 engine/source/math/euler_angles.hpp)
+                 engine/source/math/euler_angles.hpp
+                 engine/source/math/matrices.hpp)
 
 set(MATH_SOURCES engine/source/math/matrices.cpp
-                 engine/source/math/euler_angles.cpp)
+                 engine/source/math/euler_angles.cpp
+                 engine/source/math/matrices.cpp)
 
 source_group("Header Files/source/math" FILES ${MATH_HEADERS})
 source_group("Source Files/source/math" FILES ${MATH_SOURCES})
@@ -102,3 +120,26 @@ add_executable(rt WIN32
 
 # set rt in VS as startup project
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT rt)
+
+# ------------------[ASSIMP COMPILATION]---------------
+# check if assimp directory is empty
+file(GLOB DIR assimp/*)
+list(LENGTH DIR LEN)
+if (LEN EQUAL 0)
+  message("\n====================[WARNING]====================\n"
+          "Assimp directory is empty.\n"
+          "Clone it from github: git submodule update --init --recursive\n"
+          "or set up assimp paths by yourself in the IDE.\n"
+          "===================================================\n")
+else()
+  add_subdirectory(assimp)
+  target_link_libraries(rt assimp)
+
+  # copy .dll to .exe directory (post-build event)
+  # $<CONFIGURATION> means Debug/Release directory
+  # depends on cmake --build . --config Debug/Release
+  add_custom_command(TARGET rt POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_SOURCE_DIR}/build/assimp/bin/$<CONFIGURATION>"
+    "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
+endif()

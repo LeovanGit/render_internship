@@ -81,6 +81,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     win.init(hInstance, 100.0f, 100.0f, 1280.0f, 720.0f);
 
     // CREATE SCENE
+    scene.init(win);
     controller.init(scene);
     controller.initScene(camera);
 
@@ -142,6 +143,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             if (wParam != SIZE_MINIMIZED)
             {
                 win.resize(LOWORD(lParam), HIWORD(lParam));
+                scene.initDepthBuffer(LOWORD(lParam), HIWORD(lParam));
             
                 camera.setPerspective(glm::radians(45.0f),
                                       float(LOWORD(lParam)) / HIWORD(lParam),

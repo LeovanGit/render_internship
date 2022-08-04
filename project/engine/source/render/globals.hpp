@@ -22,19 +22,18 @@
 
 namespace engine
 {
-struct Vertex
-{
-    float position[3];
-    float uv[2];
-};
-
-// size must be multiple of 16
+// size of cbuffers must be multiple of 16
 struct PerFrameBufferData
 {
     glm::mat4 g_proj_view;
     glm::vec3 g_camera_pos;
     float padding_0;
     glm::vec4 g_frustum_corners[3];
+};
+
+struct PerMeshBufferData
+{
+    glm::mat4 g_mesh_to_model;
 };
 
 // Singleton for global rendering resources
@@ -55,23 +54,24 @@ public:
 
     void initD3D();
 
-    void initVBO();
-
     void initSamplers();
 
     void setPerFrameBuffer(const Camera & camera);
-
     void updatePerFrameBuffer();
+
+    void setPerMeshBuffer(const glm::mat4 & mesh_to_model);
+    void updatePerMeshBuffer();
 
     DxResPtr<IDXGIFactory5> factory5;
     DxResPtr<ID3D11Device5> device5;
     DxResPtr<ID3D11DeviceContext4> device_context4;
     DxResPtr<ID3D11Debug> device_debug;
 
-    DxResPtr<ID3D11Buffer> vbo;
-
     DxResPtr<ID3D11Buffer> per_frame_buffer;
     PerFrameBufferData per_frame_buffer_data;
+
+    DxResPtr<ID3D11Buffer> per_mesh_buffer;
+    PerMeshBufferData per_mesh_buffer_data;
 
     DxResPtr<ID3D11SamplerState> sampler;
 

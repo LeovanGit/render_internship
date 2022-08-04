@@ -4,6 +4,8 @@
 #include "globals.hpp"
 #include "shader_manager.hpp"
 #include "texture_manager.hpp"
+#include "model_manager.hpp"
+#include "mesh_system.hpp"
 
 namespace engine
 {

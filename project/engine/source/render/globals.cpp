@@ -18,7 +18,6 @@ void Globals::init()
         instance = new Globals();
 
         instance->initD3D();
-        instance->initVBO();
         instance->initSamplers();
     }
     else spdlog::error("Globals::init() was called twice!");
@@ -114,90 +113,6 @@ void Globals::initD3D()
     assert(result >= 0 && "Query ID3D11Debug");
 }
 
-void Globals::initVBO()
-{
-    float obj_size = 4.0f;
-
-    std::array<Vertex, 36> vertices =
-    {
-        //     POSITION                           UV
-        // front
-        Vertex{{-obj_size, obj_size,  -obj_size}, {0.0f, 1.0f}},
-        Vertex{{obj_size,  obj_size,  -obj_size}, {1.0f, 1.0f}},
-        Vertex{{obj_size, -obj_size,  -obj_size}, {1.0f, 0.0f}},
-
-        Vertex{{obj_size,  -obj_size,  -obj_size}, {1.0f, 0.0f}},
-        Vertex{{-obj_size, -obj_size,  -obj_size}, {0.0f, 0.0f}},
-        Vertex{{-obj_size,  obj_size,  -obj_size}, {0.0f, 1.0f}},
-
-        // right
-        Vertex{{obj_size, obj_size,  -obj_size}, {0.0f, 1.0f}},
-        Vertex{{obj_size, obj_size,   obj_size}, {1.0f, 1.0f}},
-        Vertex{{obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
-
-        Vertex{{obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
-        Vertex{{obj_size,  obj_size,  obj_size}, {1.0f, 1.0f}},
-        Vertex{{obj_size, -obj_size,  obj_size}, {1.0f, 0.0f}},
-
-        // left
-        Vertex{{-obj_size,  obj_size, -obj_size}, {1.0f, 1.0f}},
-        Vertex{{-obj_size, -obj_size, -obj_size}, {1.0f, 0.0f}},
-        Vertex{{-obj_size,  obj_size,  obj_size}, {0.0f, 1.0f}},
-
-        Vertex{{-obj_size,  obj_size,  obj_size}, {0.0f, 1.0f}},
-        Vertex{{-obj_size, -obj_size, -obj_size}, {1.0f, 0.0f}},
-        Vertex{{-obj_size, -obj_size,  obj_size}, {0.0f, 0.0f}},
-
-        // back
-        Vertex{{ obj_size,  obj_size, obj_size}, {1.0f, 1.0f}},
-        Vertex{{-obj_size,  obj_size, obj_size}, {0.0f, 1.0f}},
-        Vertex{{ obj_size, -obj_size, obj_size}, {1.0f, 0.0f}},
-
-        Vertex{{ obj_size, -obj_size, obj_size}, {1.0f, 0.0f}},
-        Vertex{{-obj_size,  obj_size, obj_size}, {0.0f, 1.0f}},
-        Vertex{{-obj_size, -obj_size, obj_size}, {0.0f, 0.0f}},
-
-        // top
-        Vertex{{ obj_size, obj_size,  obj_size}, {1.0f, 1.0f}},
-        Vertex{{ obj_size, obj_size, -obj_size}, {1.0f, 0.0f}},
-        Vertex{{-obj_size, obj_size, -obj_size}, {0.0f, 0.0f}},
-
-        Vertex{{-obj_size, obj_size, -obj_size}, {0.0f, 0.0f}},
-        Vertex{{-obj_size, obj_size,  obj_size}, {0.0f, 1.0f}},
-        Vertex{{ obj_size, obj_size,  obj_size}, {1.0f, 1.0f}},
-
-        // down
-        Vertex{{ obj_size, -obj_size,  obj_size}, {1.0f, 1.0f}},
-        Vertex{{-obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
-        Vertex{{ obj_size, -obj_size, -obj_size}, {1.0f, 0.0f}},
-
-        Vertex{{-obj_size, -obj_size, -obj_size}, {0.0f, 0.0f}},
-        Vertex{{ obj_size, -obj_size,  obj_size}, {1.0f, 1.0f}},
-        Vertex{{-obj_size, -obj_size,  obj_size}, {0.0f, 1.0f}},
-    };
-
-    // contain properties of the VBO
-    D3D11_BUFFER_DESC vbo_desc;
-    ZeroMemory(&vbo_desc, sizeof(vbo_desc));
-
-    vbo_desc.Usage = D3D11_USAGE_IMMUTABLE;
-    vbo_desc.ByteWidth = sizeof(Vertex) * vertices.size();
-    vbo_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vbo_desc.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA vertices_data;
-    ZeroMemory(&vertices_data, sizeof(vertices_data));
-
-    vertices_data.pSysMem = vertices.data();
-    vertices_data.SysMemPitch = 0;
-    vertices_data.SysMemSlicePitch = 0;
-
-    HRESULT result = device5->CreateBuffer(&vbo_desc,
-                                           &vertices_data,
-                                           vbo.reset());
-    assert(result >= 0 && "CreateBuffer");
-}
-
 void Globals::initSamplers()
 {
     D3D11_SAMPLER_DESC sampler_desc;
@@ -269,5 +184,51 @@ void Globals::updatePerFrameBuffer()
     device_context4->VSSetConstantBuffers(0,
                                           1,
                                           per_frame_buffer.get());
+}
+
+void Globals::setPerMeshBuffer(const glm::mat4 & mesh_to_model)
+{
+    // fill const buffer data
+    per_mesh_buffer_data.g_mesh_to_model = mesh_to_model;
+
+    if (per_mesh_buffer.valid()) return;
+    // constant buffer description
+    D3D11_BUFFER_DESC cb_desc;
+    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+    cb_desc.ByteWidth = sizeof(per_mesh_buffer_data);
+    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb_desc.MiscFlags = 0;
+    cb_desc.StructureByteStride = 0;
+    
+    HRESULT result = device5->CreateBuffer(&cb_desc,
+                                           NULL,
+                                           per_mesh_buffer.reset());
+    assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::updatePerMeshBuffer()
+{
+    HRESULT result;
+
+    // write new data to const buffer
+    D3D11_MAPPED_SUBRESOURCE ms;
+    result = device_context4->Map(per_mesh_buffer.ptr(),
+                                  NULL,
+                                  D3D11_MAP_WRITE_DISCARD,
+                                  NULL,
+                                  &ms);
+    assert(result >= 0 && "Map");
+
+    memcpy(ms.pData,
+           &per_mesh_buffer_data,
+           sizeof(per_mesh_buffer_data));
+
+    device_context4->Unmap(per_mesh_buffer.ptr(), NULL);
+
+    // bind const buffer with updated values to vertex shader
+    device_context4->VSSetConstantBuffers(1,
+                                          1,
+                                          per_mesh_buffer.get());
 }
 } // namespace engine

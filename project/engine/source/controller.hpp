@@ -6,11 +6,15 @@
 #include "window.hpp"
 #include "camera.hpp"
 #include "euler_angles.hpp"
+#include "matrices.hpp"
 #include "scene.hpp"
 #include "sky.hpp"
 #include "globals.hpp"
 #include "shader_manager.hpp"
 #include "texture_manager.hpp"
+#include "model_manager.hpp"
+#include "mesh_system.hpp"
+#include "opaque_instances.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -28,6 +32,8 @@ constexpr int KEY_G = 71;
 constexpr int KEY_SHIFT = 16;
 constexpr int KEY_LMOUSE = 1;
 constexpr int KEY_RMOUSE = 2;
+
+typedef engine::OpaqueInstances oi;
 
 class Controller
 {
@@ -57,6 +63,12 @@ public:
     glm::vec3 rotation_speed = glm::vec3(360.0f, 360.0f, 60.0f);
 
     bool is_accelerated;
+
+private:
+    void initKnight(const math::Transform & transform);
+
+    void initCube(const std::string & texture_path,
+                  const math::Transform & transform);
 };
 
 #endif

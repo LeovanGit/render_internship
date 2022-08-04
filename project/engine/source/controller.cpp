@@ -23,6 +23,8 @@ void Controller::initScene(Camera & camera)
 
     engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
 
     // CREATE SHADERS
     D3D11_INPUT_ELEMENT_DESC ied[] =
@@ -31,7 +33,7 @@ void Controller::initScene(Camera & camera)
          0,
          DXGI_FORMAT_R32G32B32_FLOAT,
          0,
-         D3D11_APPEND_ALIGNED_ELEMENT, // auto offset
+         0,
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
 
@@ -39,34 +41,121 @@ void Controller::initScene(Camera & camera)
          0,
          DXGI_FORMAT_R32G32_FLOAT,
          0,
-         D3D11_APPEND_ALIGNED_ELEMENT,
+         12, // 3 floats of 4 bytes
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
+
+        {"TRANSFORM",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         0, // reset align for instance data!
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         1,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         16,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         2,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         32,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         3,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         48,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
     };
 
-    shader_mgr->registerShader("cube",
-                               L"../engine/shaders/",
-                               L"cube.hlsl",
-                               ied);
-
-    shader_mgr->registerShader("skybox",
-                               L"../engine/shaders/",
-                               L"skybox.hlsl",
-                               nullptr);
-
-    shader_mgr->registerShader("floor",
-                               L"../engine/shaders/",
-                               L"floor.hlsl",
-                               nullptr);
+    shader_mgr->getShader("../engine/shaders/opaque.hlsl",
+                          ied,
+                          6);
     
-    // CREATE TEXTURES
-    tex_mgr->registerTexture("cube", L"../engine/assets/rubik_cube.dds");
-    tex_mgr->registerTexture("skybox", L"../engine/assets/skybox.dds");
-    tex_mgr->registerTexture("floor", L"../engine/assets/prototype_grid.dds");
+    // CREATE OBJECTS
+    scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
+                    tex_mgr->getTexture("../engine/assets/skybox.dds"));
 
-    // CREATE SKY
-    scene->m_sky.init(shader_mgr->getShader("skybox"),
-                      tex_mgr->getTexture("skybox"));
+    scene->floor.init(shader_mgr->getShader("../engine/shaders/floor.hlsl"),
+                      tex_mgr->getTexture("../engine/assets/prototype_grid.dds"));
+    
+    initKnight(math::Transform(glm::vec3(10.0f, -10.0f, 0.0f),
+                               math::EulerAngles(90.0f, 0.0f, 0.0f),
+                               glm::vec3(10.0f, 10.0f, 10.0f)));
+
+    initKnight(math::Transform(glm::vec3(-10.0f, -10.0f, 0.0f),
+                               math::EulerAngles(-90.0f, 0.0f, 0.0f),
+                               glm::vec3(10.0f, 10.0f, 10.0f)));
+
+    initCube("../engine/assets/rubik_cube.dds",
+             math::Transform(glm::vec3(0.0f, 0.0f, 10.0f),
+                             math::EulerAngles(0.0f, 45.0f, 45.0f),
+                             glm::vec3(4.0f, 4.0f, 4.0f)));
+    
+    initCube("../engine/assets/prototype.dds",
+             math::Transform(glm::vec3(0.0f, -11.0f, 10.0f),
+                             math::EulerAngles(0.0f, 0.0f, 0.0f),
+                             glm::vec3(4.0f, 4.0f, 4.0f)));
+}
+
+void Controller::initKnight(const math::Transform & transform)
+{    
+    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+
+    std::vector<oi::Material> materials =
+    {
+        oi::Material(tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Fur_BaseColor.dds")),
+        oi::Material(tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Legs_BaseColor.dds")),
+        oi::Material(tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Torso_BaseColor.dds")),
+        oi::Material(tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Head_BaseColor.dds")),
+        oi::Material(tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Eye_BaseColor.dds")),
+        oi::Material(tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Helmet_BaseColor.dds")),
+        oi::Material(tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Skirt_BaseColor.dds")),
+        oi::Material(tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Cape_BaseColor.dds")),
+        oi::Material(tex_mgr->
+                     getTexture("../engine/assets/Knight/dds/Glove_BaseColor.dds")),
+    };
+
+    mesh_system->addInstance(model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
+                             materials,
+                             oi::Instance(transform.toMat4()));
+}
+
+void Controller::initCube(const std::string & texture_path,
+                          const math::Transform & transform)
+{
+    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+
+    std::vector<oi::Material> materials =
+    {
+        oi::Material(tex_mgr->getTexture(texture_path)),
+    };
+
+    mesh_system->addInstance(model_mgr->getDefaultCube("cube"),
+                             materials,
+                             oi::Instance(transform.toMat4()));
 }
 
 void Controller::processInput(Camera & camera,

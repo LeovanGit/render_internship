@@ -12,10 +12,7 @@ namespace fs = std::filesystem;
 class ShaderIncluder : public ID3DInclude
 {
 public:
-    ShaderIncluder(const fs::path& currentDir) : m_currentDir(currentDir)
-    {}
-
-    ShaderIncluder(WCHAR* path);
+    ShaderIncluder(const std::string & currentDir);
 
     HRESULT Open(D3D_INCLUDE_TYPE includeType,
                  const char* relativePath,

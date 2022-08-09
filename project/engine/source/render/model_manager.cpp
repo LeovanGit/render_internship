@@ -101,4 +101,35 @@ std::shared_ptr<Model> ModelManager::getDefaultCube(const std::string & key)
 
     return result.first->second;
 }
+
+std::shared_ptr<Model> ModelManager::getDefaultPlane(const std::string & key)
+{
+    auto item = models.find(key);
+    if (item != models.end()) return item->second;
+    
+    typedef Model::Vertex Vertex;
+
+    // CREATE VERTEX BUFFER
+    Vertex vertices[] =
+    {
+        // UV with a little offset to disable wrapping
+        //     POSITION                           UV
+        Vertex{{-1.0f, -1.0f, 0.0f}, {0.0f, 1.0f}},
+        Vertex{{-1.0f,  1.0f, 0.0f}, {0.0f, 0.0f}},
+        Vertex{{ 1.0f,  1.0f, 0.0f}, {1.0f, 0.0f}},
+        Vertex{{ 1.0f, -1.0f, 0.0f}, {1.0f, 1.0f}},
+    };
+    
+    // CREATE INDEX BUFFER
+    int indices[] =
+    {
+        0, 1, 2,
+        2, 3, 0,
+    };
+    
+    Model model(vertices, 4, indices, 6);
+    auto result = models.try_emplace(key, std::make_shared<Model>(model));
+
+    return result.first->second;
+}
 } // namespace engine

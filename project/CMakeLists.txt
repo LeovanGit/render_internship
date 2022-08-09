@@ -37,8 +37,7 @@ source_group("directx_texture_loader" FILES ${TEX_LOADER})
 # --------------------[SHADERS]--------------------
 set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/globals.hlsl
-            engine/shaders/skybox.hlsl
-            engine/shaders/floor.hlsl)
+            engine/shaders/skybox.hlsl)
 
 # does not participate in the compilation:
 set_source_files_properties(${SHADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -71,7 +70,6 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/shader_includer.hpp
                    engine/source/render/engine.hpp
                    engine/source/render/sky.hpp
-                   engine/source/render/floor.hpp
                    engine/source/render/model.hpp
                    engine/source/render/model_manager.hpp
                    engine/source/render/vertex_buffer.hpp
@@ -88,7 +86,6 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/shader_includer.cpp
                    engine/source/render/engine.cpp
                    engine/source/render/sky.cpp
-                   engine/source/render/floor.cpp
                    engine/source/render/model.cpp
                    engine/source/render/model_manager.cpp
                    engine/source/render/index_buffer.cpp

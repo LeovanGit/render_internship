@@ -8,7 +8,6 @@
 #include "shader_manager.hpp"
 #include "model_manager.hpp"
 #include "sky.hpp"
-#include "floor.hpp"
 #include "mesh_system.hpp"
 
 namespace engine
@@ -32,7 +31,6 @@ public:
     DxResPtr<ID3D11DepthStencilState> depth_stencil_state;
     
     Sky sky;
-    Floor floor;
 };
 } // namespace engine
 

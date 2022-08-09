@@ -29,7 +29,6 @@ void Scene::renderFrame(windows::Window & window,
     clearDepthBuffer();
 
     mesh_system->render();
-    floor.render();
     sky.render();
 
     window.switchBuffer();

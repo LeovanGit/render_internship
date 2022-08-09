@@ -69,6 +69,9 @@ private:
 
     void initCube(const std::string & texture_path,
                   const math::Transform & transform);
+
+    void initPlane(const std::string & texture_path,
+                   const math::Transform & transform);
 };
 
 #endif

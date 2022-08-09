@@ -85,9 +85,6 @@ void Controller::initScene(Camera & camera)
     // CREATE OBJECTS
     scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
                     tex_mgr->getTexture("../engine/assets/skybox.dds"));
-
-    scene->floor.init(shader_mgr->getShader("../engine/shaders/floor.hlsl"),
-                      tex_mgr->getTexture("../engine/assets/prototype_grid.dds"));
     
     initKnight(math::Transform(glm::vec3(10.0f, -10.0f, 0.0f),
                                math::EulerAngles(90.0f, 0.0f, 0.0f),
@@ -106,6 +103,11 @@ void Controller::initScene(Camera & camera)
              math::Transform(glm::vec3(0.0f, -11.0f, 10.0f),
                              math::EulerAngles(0.0f, 0.0f, 0.0f),
                              glm::vec3(4.0f, 4.0f, 4.0f)));
+
+    initPlane("../engine/assets/prototype_grid.dds",
+              math::Transform(glm::vec3(0.0f, -10.0f, 0.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(100.0f, 100.0f, 100.0f)));
 }
 
 void Controller::initKnight(const math::Transform & transform)
@@ -154,6 +156,23 @@ void Controller::initCube(const std::string & texture_path,
     };
 
     mesh_system->addInstance(model_mgr->getDefaultCube("cube"),
+                             materials,
+                             oi::Instance(transform.toMat4()));
+}
+
+void Controller::initPlane(const std::string & texture_path,
+                           const math::Transform & transform)
+{
+    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+
+    std::vector<oi::Material> materials =
+    {
+        oi::Material(tex_mgr->getTexture(texture_path)),
+    };
+
+    mesh_system->addInstance(model_mgr->getDefaultPlane("floor"),
                              materials,
                              oi::Instance(transform.toMat4()));
 }

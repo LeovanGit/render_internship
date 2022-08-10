@@ -141,6 +141,7 @@ void Globals::setPerFrameBuffer(const Camera & camera)
     // fill const buffer data
     per_frame_buffer_data.g_proj_view = camera.getViewProj();
     per_frame_buffer_data.g_camera_pos = camera.getPosition();
+    per_frame_buffer_data.g_EV_100 = camera.EV_100;
     per_frame_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);
     per_frame_buffer_data.g_frustum_corners[1] = glm::vec4(top_left_WS, 1.0f);
     per_frame_buffer_data.g_frustum_corners[2] = glm::vec4(bottom_right_WS, 1.0f);

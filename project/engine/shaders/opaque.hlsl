@@ -50,7 +50,6 @@ PS_INPUT vertexShader(VS_INPUT input)
 //------------------------------------------------------------------------------
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
-    float3 color = g_texture.Sample(g_sampler, input.uv);
-
-    return float4(color, 1.0f);
+    float4 color = g_texture.Sample(g_sampler, input.uv);
+    return color;
 }

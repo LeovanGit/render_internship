@@ -48,8 +48,6 @@ public:
 
     glm::vec3 reproject(float x, float y) const;
 
-    glm::vec3 adjustExposure(const glm::vec3 & color) const;
-
     bool is_roll_enabled;
 
     float EV_100;

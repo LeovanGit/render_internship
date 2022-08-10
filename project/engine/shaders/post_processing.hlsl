@@ -29,8 +29,25 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID)
 //==============================================================================
 // FRAGMENT SHADER
 //==============================================================================
+float4 adjustExposure(float4 color);
+
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
     float4 color = g_HDR_scene.Sample(g_sampler, input.uv);
+
+    // color = adjustExposure(color);
+    if (g_EV_100 > 0) color = float4(1.0f, 0.0f, 0.0f, 1.0f);
+    else if (g_EV_100 < 0) color = float4(0.0f, 1.0f, 0.0f, 1.0f);
+    else color = float4(0.0f, 0.0f, 1.0f, 1.0f);
+    
     return color;
+}
+
+float4 adjustExposure(float4 color)
+{
+    float S = 100.0f;
+    float q = 0.65f;
+
+    float luminance_max = (78.0f / (q * S)) * pow(2.0f, g_EV_100);
+    return color * (1.0f / luminance_max);
 }

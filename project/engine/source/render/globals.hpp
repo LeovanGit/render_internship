@@ -27,7 +27,7 @@ struct PerFrameBufferData
 {
     glm::mat4 g_proj_view;
     glm::vec3 g_camera_pos;
-    float padding_0;
+    float g_EV_100;
     glm::vec4 g_frustum_corners[3];
 };
 

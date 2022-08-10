@@ -81,6 +81,8 @@ void Controller::initScene(Camera & camera)
     shader_mgr->getShader("../engine/shaders/opaque.hlsl",
                           ied,
                           6);
+
+    shader_mgr->getShader("../engine/shaders/post_processing.hlsl");
     
     // CREATE OBJECTS
     scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
@@ -172,7 +174,7 @@ void Controller::initPlane(const std::string & texture_path,
         oi::Material(tex_mgr->getTexture(texture_path)),
     };
 
-    mesh_system->addInstance(model_mgr->getDefaultPlane("floor"),
+    mesh_system->addInstance(model_mgr->getDefaultPlane("plane"),
                              materials,
                              oi::Instance(transform.toMat4()));
 }

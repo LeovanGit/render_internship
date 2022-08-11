@@ -45,6 +45,30 @@ void Controller::initScene(Camera & camera)
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
 
+        {"NORMAL",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         20,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         32,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"BITANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         44,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+        
         {"TRANSFORM",
          0,
          DXGI_FORMAT_R32G32B32A32_FLOAT,
@@ -77,10 +101,10 @@ void Controller::initScene(Camera & camera)
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
     };
-
+    
     shader_mgr->getShader("../engine/shaders/opaque.hlsl",
                           ied,
-                          6);
+                          9);
 
     shader_mgr->getShader("../engine/shaders/post_processing.hlsl");
     
@@ -120,24 +144,65 @@ void Controller::initKnight(const math::Transform & transform)
 
     std::vector<oi::Material> materials =
     {
-        oi::Material(tex_mgr->
-                     getTexture("../engine/assets/Knight/dds/Fur_BaseColor.dds")),
-        oi::Material(tex_mgr->
-                     getTexture("../engine/assets/Knight/dds/Legs_BaseColor.dds")),
-        oi::Material(tex_mgr->
-                     getTexture("../engine/assets/Knight/dds/Torso_BaseColor.dds")),
-        oi::Material(tex_mgr->
-                     getTexture("../engine/assets/Knight/dds/Head_BaseColor.dds")),
-        oi::Material(tex_mgr->
-                     getTexture("../engine/assets/Knight/dds/Eye_BaseColor.dds")),
-        oi::Material(tex_mgr->
-                     getTexture("../engine/assets/Knight/dds/Helmet_BaseColor.dds")),
-        oi::Material(tex_mgr->
-                     getTexture("../engine/assets/Knight/dds/Skirt_BaseColor.dds")),
-        oi::Material(tex_mgr->
-                     getTexture("../engine/assets/Knight/dds/Cape_BaseColor.dds")),
-        oi::Material(tex_mgr->
-                     getTexture("../engine/assets/Knight/dds/Glove_BaseColor.dds")),
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Normal.dds"),
+                     0.5f,
+                     0.0f,
+                     glm::vec3(0.0f, 0.0f, 1.0f)),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Normal.dds")),
+
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Normal.dds")),
+
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Head_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Normal.dds"),
+                     0.5f,
+                     0.0f,
+                     glm::vec3(0.0f, 0.0f, 1.0f)),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Eye_BaseColor.dds"),
+                     nullptr,
+                     nullptr,
+                     nullptr,
+                     0.1f,
+                     0.0f,
+                     glm::vec3(0.0f, 0.0f, 1.0f)),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Normal.dds")),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Normal.dds"),
+                     0.5f,
+                     0.0f,
+                     glm::vec3(0.0f, 0.0f, 1.0f)),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Normal.dds"),
+                     0.5f,
+                     0.0f,
+                     glm::vec3(0.0f, 0.0f, 1.0f)),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Normal.dds")),
     };
 
     mesh_system->addInstance(model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),

@@ -17,12 +17,12 @@ Texture::Texture(const std::string & texture_path)
     assert(result >= 0 && "CreateDDSTextureFromFile");
 }
 
-void Texture::bind()
+void Texture::bind(uint32_t slot)
 {
     Globals * globals = Globals::getInstance();
 
     // bind texture to fragment shader
-    globals->device_context4->PSSetShaderResources(0,
+    globals->device_context4->PSSetShaderResources(slot,
                                                    1,
                                                    texture_view.get());
 }

@@ -7,11 +7,10 @@ struct PS_INPUT
 };
 
 Texture2D g_hdr_scene;
-static const float g_gamma = 2.2;
 
-//==============================================================================
+//------------------------------------------------------------------------------
 // VERTEX SHADER
-//==============================================================================
+//------------------------------------------------------------------------------
 PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID)
 {
     // generate fullscreen triangle in clip space
@@ -27,9 +26,9 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID)
     return output;
 }
 
-//==============================================================================
+//------------------------------------------------------------------------------
 // FRAGMENT SHADER
-//==============================================================================
+//------------------------------------------------------------------------------
 float3 adjustExposure(float3 color);
 float3 toneMappingACES(float3 hdr);
 float3 gammaCorrection(float3 color);
@@ -44,6 +43,8 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     
     return float4(color, 1.0f);
 }
+
+//------------------------------------------------------------------------------
 
 float3 adjustExposure(float3 color)
 {

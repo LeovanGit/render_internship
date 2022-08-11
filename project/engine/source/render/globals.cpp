@@ -191,11 +191,23 @@ void Globals::updatePerFrameBuffer()
                                           per_frame_buffer.get());
 }
 
-void Globals::setPerMeshBuffer(const glm::mat4 & mesh_to_model)
+void Globals::setPerMeshBuffer(const glm::mat4 & mesh_to_model,
+                               bool g_has_roughness_texture,
+                               bool g_has_metalness_texture,
+                               bool g_has_normal_map,
+                               float g_roughness_default,
+                               float g_metalness_default,
+                               glm::vec3 g_normal_default)
 {
     // fill const buffer data
     per_mesh_buffer_data.g_mesh_to_model = mesh_to_model;
-
+    per_mesh_buffer_data.g_has_roughness_texture = g_has_roughness_texture;
+    per_mesh_buffer_data.g_has_metalness_texture = g_has_metalness_texture;
+    per_mesh_buffer_data.g_has_normal_map = g_has_normal_map;
+    per_mesh_buffer_data.g_roughness_default = g_roughness_default;
+    per_mesh_buffer_data.g_metalness_default = g_metalness_default;
+    per_mesh_buffer_data.g_normal_default = g_normal_default;
+    
     if (per_mesh_buffer.valid()) return;
     // constant buffer description
     D3D11_BUFFER_DESC cb_desc;

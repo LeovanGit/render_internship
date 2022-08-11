@@ -25,8 +25,43 @@ public:
     struct Material
     {
         Material() = default;
-        Material(std::shared_ptr<Texture> texture) : texture(texture) {}        
-        std::shared_ptr<Texture> texture;
+        Material(std::shared_ptr<Texture> albedo,
+                 std::shared_ptr<Texture> roughness = nullptr,
+                 std::shared_ptr<Texture> metalness = nullptr,
+                 std::shared_ptr<Texture> normal = nullptr,
+                 float roughness_default = -1.0f,
+                 float metalness_default = -1.0f,
+                 glm::vec3 normal_default = glm::vec3(-1.0f)) :
+                 albedo(albedo),
+                 roughness(roughness),
+                 metalness(metalness),
+                 normal(normal),
+                 roughness_default(roughness_default),
+                 metalness_default(metalness_default),
+                 normal_default(normal_default)
+        {}
+
+        bool operator==(const Material & other)
+        {
+            return (albedo == other.albedo &&
+                    roughness == other.roughness &&
+                    metalness == other.metalness &&
+                    normal == other.normal);
+        }
+
+        bool operator!=(const Material & other)
+        {
+            return !(*this == other);
+        }
+        
+        std::shared_ptr<Texture> albedo;
+        std::shared_ptr<Texture> roughness;
+        std::shared_ptr<Texture> metalness;
+        std::shared_ptr<Texture> normal;
+
+        float roughness_default;
+        float metalness_default;
+        glm::vec3 normal_default;
     };
 
     struct PerMaterial

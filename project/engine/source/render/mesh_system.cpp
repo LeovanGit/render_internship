@@ -43,7 +43,7 @@ void MeshSystem::addInstance(std::shared_ptr<Model> model,
                     // try to find the same texture
                     for (auto & per_material : per_mesh.per_material)
                     {
-                        if (per_material.material.texture == material.texture)
+                        if (per_material.material == material)
                         {
                             per_material.instances.push_back(instance);
 

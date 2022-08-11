@@ -34,6 +34,15 @@ struct PerFrameBufferData
 struct PerMeshBufferData
 {
     glm::mat4 g_mesh_to_model;
+
+    // size of bool in HLSL is 4 bytes
+    BOOL g_has_roughness_texture;
+    BOOL g_has_metalness_texture;
+    BOOL g_has_normal_map;
+
+    float g_roughness_default;
+    float g_metalness_default;
+    glm::vec3 g_normal_default;
 };
 
 // Singleton for global rendering resources
@@ -59,7 +68,13 @@ public:
     void setPerFrameBuffer(const Camera & camera);
     void updatePerFrameBuffer();
 
-    void setPerMeshBuffer(const glm::mat4 & mesh_to_model);
+    void setPerMeshBuffer(const glm::mat4 & mesh_to_model,
+                          bool g_has_roughness_texture,
+                          bool g_has_metalness_texture,
+                          bool g_has_normal_map,
+                          float g_roughness_default,
+                          float g_metalness_default,
+                          glm::vec3 g_normal_default);
     void updatePerMeshBuffer();
 
     DxResPtr<IDXGIFactory5> factory5;

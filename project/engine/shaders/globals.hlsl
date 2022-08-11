@@ -8,3 +8,6 @@ cbuffer PerFrame : register(b0)
 };
 
 SamplerState g_sampler;
+
+static const float g_gamma = 2.2f;
+static const float g_PI = 3.14159265f;

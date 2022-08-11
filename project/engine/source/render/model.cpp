@@ -12,7 +12,8 @@ Model::Model(const std::string & model_filename)
     Assimp::Importer importer;
     
     uint32_t flags(aiProcess_Triangulate |
-                   aiProcess_ConvertToLeftHanded);
+                   aiProcess_ConvertToLeftHanded |
+                   aiProcess_CalcTangentSpace);
     
     const aiScene * ai_scene = importer.ReadFile(model_filename,
                                                  flags);
@@ -58,7 +59,13 @@ Model::Model(const std::string & model_filename)
             // mTextureCoords[0] is main texture
             vertex.uv.x = src_mesh->mTextureCoords[0][v].x;
             vertex.uv.y = src_mesh->mTextureCoords[0][v].y;
-            
+
+            vertex.normal = reinterpret_cast<glm::vec3 &>(src_mesh->mNormals[v]);
+            vertex.tangent = reinterpret_cast<glm::vec3 &>(src_mesh->mTangents[v]);
+            vertex.bitangent = reinterpret_cast<glm::vec3 &>(src_mesh->mBitangents[v]);
+            // flip V 
+            // vertex.bitangent = reinterpret_cast<glm::vec3 &>(src_mesh->mBitangents[v]) * -1.0f;
+               
             vertices.push_back(vertex);
         }
 

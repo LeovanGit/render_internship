@@ -37,7 +37,8 @@ source_group("directx_texture_loader" FILES ${TEX_LOADER})
 # --------------------[SHADERS]--------------------
 set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/globals.hlsl
-            engine/shaders/skybox.hlsl)
+            engine/shaders/skybox.hlsl
+            engine/shaders/post_processing.hlsl)
 
 # does not participate in the compilation:
 set_source_files_properties(${SHADERS} PROPERTIES HEADER_FILE_ONLY TRUE)

@@ -145,7 +145,7 @@ void Globals::setPerFrameBuffer(const Camera & camera)
     per_frame_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);
     per_frame_buffer_data.g_frustum_corners[1] = glm::vec4(top_left_WS, 1.0f);
     per_frame_buffer_data.g_frustum_corners[2] = glm::vec4(bottom_right_WS, 1.0f);
-
+    
     if (per_frame_buffer.valid()) return;
     // constant buffer description
     D3D11_BUFFER_DESC cb_desc;
@@ -183,6 +183,10 @@ void Globals::updatePerFrameBuffer()
 
     // bind const buffer with updated values to vertex shader
     device_context4->VSSetConstantBuffers(0,
+                                          1,
+                                          per_frame_buffer.get());
+
+    device_context4->PSSetConstantBuffers(0,
                                           1,
                                           per_frame_buffer.get());
 }
@@ -229,6 +233,10 @@ void Globals::updatePerMeshBuffer()
 
     // bind const buffer with updated values to vertex shader
     device_context4->VSSetConstantBuffers(1,
+                                          1,
+                                          per_mesh_buffer.get());
+
+    device_context4->PSSetConstantBuffers(1,
                                           1,
                                           per_mesh_buffer.get());
 }

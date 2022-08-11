@@ -306,11 +306,11 @@ void Controller::processInput(Camera & camera,
     // }
     if (keys_log[KEY_PLUS])
     {
-        camera.EV_100 += 6.0f * delta_time;
+        camera.EV_100 += 2.0f * delta_time;
     }
     if (keys_log[KEY_MINUS])
     {
-        camera.EV_100 -= 6.0f * delta_time;
+        camera.EV_100 -= 2.0f * delta_time;
     }
     // if (keys_log[KEY_G] && 
     //     !scene->is_global_illumination && 

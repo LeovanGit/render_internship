@@ -199,8 +199,6 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     // float3 L = normalize(light_pos - input.pos.xyz); // tmp light
     float3 L = normalize(-float3(-1.0f, -1.0f, 1.0f)); // tmp light
     float3 V = normalize(g_camera_position - input.pos.xyz);
-
-    return float4(material.albedo, 1.0f);
     
     float3 color = PBR(material, N, L, V);
     

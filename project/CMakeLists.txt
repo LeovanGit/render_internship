@@ -36,6 +36,7 @@ source_group("directx_texture_loader" FILES ${TEX_LOADER})
 
 # --------------------[SHADERS]--------------------
 set(SHADERS engine/shaders/opaque.hlsl
+            engine/shaders/emissive.hlsl
             engine/shaders/globals.hlsl
             engine/shaders/skybox.hlsl
             engine/shaders/post_processing.hlsl)
@@ -76,6 +77,7 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/vertex_buffer.hpp
                    engine/source/render/index_buffer.hpp
                    engine/source/render/opaque_instances.hpp
+                   engine/source/render/emissive_instances.hpp
                    engine/source/render/mesh_system.hpp)
                    # engine/source/render/light_system.hpp)
 
@@ -92,6 +94,7 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/model_manager.cpp
                    engine/source/render/index_buffer.cpp
                    engine/source/render/opaque_instances.cpp
+                   engine/source/render/emissive_instances.cpp
                    engine/source/render/mesh_system.cpp)
                    # engine/source/render/light_system.cpp)
 

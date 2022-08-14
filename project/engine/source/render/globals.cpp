@@ -191,7 +191,7 @@ void Globals::updatePerFrameBuffer()
                                           per_frame_buffer.get());
 }
 
-void Globals::setPerMeshBuffer(const glm::mat4 & mesh_to_model,
+void Globals::setPerMeshBuffer(const glm::mat4 & g_mesh_to_model,
                                bool g_has_roughness_texture,
                                bool g_has_metalness_texture,
                                bool g_has_normal_map,
@@ -199,7 +199,7 @@ void Globals::setPerMeshBuffer(const glm::mat4 & mesh_to_model,
                                float g_metalness_default)
 {
     // fill const buffer data
-    per_mesh_buffer_data.g_mesh_to_model = mesh_to_model;
+    per_mesh_buffer_data.g_mesh_to_model = g_mesh_to_model;
     per_mesh_buffer_data.g_has_roughness_texture = g_has_roughness_texture;
     per_mesh_buffer_data.g_has_metalness_texture = g_has_metalness_texture;
     per_mesh_buffer_data.g_has_normal_map = g_has_normal_map;
@@ -249,5 +249,57 @@ void Globals::updatePerMeshBuffer()
     device_context4->PSSetConstantBuffers(1,
                                           1,
                                           per_mesh_buffer.get());
+}
+
+void Globals::setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model,
+                                       const glm::vec3 & g_radiance)
+{
+    // fill const buffer data
+    per_emissive_mesh_buffer_data.g_mesh_to_model = g_mesh_to_model;
+    per_emissive_mesh_buffer_data.g_radiance = g_radiance;
+    
+    if (per_emissive_mesh_buffer.valid()) return;
+    // constant buffer description
+    D3D11_BUFFER_DESC cb_desc;
+    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+    cb_desc.ByteWidth = sizeof(per_emissive_mesh_buffer_data);
+    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb_desc.MiscFlags = 0;
+    cb_desc.StructureByteStride = 0;
+    
+    HRESULT result = device5->CreateBuffer(&cb_desc,
+                                           NULL,
+                                           per_emissive_mesh_buffer.reset());
+    assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::updatePerEmissiveMeshBuffer()
+{
+    HRESULT result;
+
+    // write new data to const buffer
+    D3D11_MAPPED_SUBRESOURCE ms;
+    result = device_context4->Map(per_emissive_mesh_buffer.ptr(),
+                                  NULL,
+                                  D3D11_MAP_WRITE_DISCARD,
+                                  NULL,
+                                  &ms);
+    assert(result >= 0 && "Map");
+
+    memcpy(ms.pData,
+           &per_emissive_mesh_buffer_data,
+           sizeof(per_emissive_mesh_buffer_data));
+
+    device_context4->Unmap(per_emissive_mesh_buffer.ptr(), NULL);
+
+    // bind const buffer with updated values to vertex shader
+    device_context4->VSSetConstantBuffers(2,
+                                          1,
+                                          per_emissive_mesh_buffer.get());
+
+    device_context4->PSSetConstantBuffers(2,
+                                          1,
+                                          per_emissive_mesh_buffer.get());
 }
 } // namespace engine

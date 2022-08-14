@@ -41,8 +41,16 @@ struct PerMeshBufferData
     BOOL g_has_normal_map;
 
     float g_roughness_default;
-    float g_metalness_default;
+    float g_metalness_default;    
     glm::vec3 padding_0;
+};
+
+struct PerEmissiveMeshBufferData
+{
+    glm::mat4 g_mesh_to_model;
+
+    glm::vec3 g_radiance;
+    float padding_0;
 };
 
 // Singleton for global rendering resources
@@ -68,13 +76,17 @@ public:
     void setPerFrameBuffer(const Camera & camera);
     void updatePerFrameBuffer();
 
-    void setPerMeshBuffer(const glm::mat4 & mesh_to_model,
+    void setPerMeshBuffer(const glm::mat4 & g_mesh_to_model,
                           bool g_has_roughness_texture,
                           bool g_has_metalness_texture,
                           bool g_has_normal_map,
                           float g_roughness_default,
                           float g_metalness_default);
     void updatePerMeshBuffer();
+
+    void setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model,
+                                  const glm::vec3 & g_radiance);
+    void updatePerEmissiveMeshBuffer();
 
     DxResPtr<IDXGIFactory5> factory5;
     DxResPtr<ID3D11Device5> device5;
@@ -87,6 +99,9 @@ public:
     DxResPtr<ID3D11Buffer> per_mesh_buffer;
     PerMeshBufferData per_mesh_buffer_data;
 
+    DxResPtr<ID3D11Buffer> per_emissive_mesh_buffer;
+    PerEmissiveMeshBufferData per_emissive_mesh_buffer_data;
+    
     DxResPtr<ID3D11SamplerState> sampler;
 
 private:

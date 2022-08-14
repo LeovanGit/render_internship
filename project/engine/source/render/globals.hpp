@@ -42,7 +42,7 @@ struct PerMeshBufferData
 
     float g_roughness_default;
     float g_metalness_default;
-    glm::vec3 g_normal_default;
+    glm::vec3 padding_0;
 };
 
 // Singleton for global rendering resources
@@ -73,8 +73,7 @@ public:
                           bool g_has_metalness_texture,
                           bool g_has_normal_map,
                           float g_roughness_default,
-                          float g_metalness_default,
-                          glm::vec3 g_normal_default);
+                          float g_metalness_default);
     void updatePerMeshBuffer();
 
     DxResPtr<IDXGIFactory5> factory5;

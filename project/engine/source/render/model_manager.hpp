@@ -31,6 +31,8 @@ public:
 
     std::shared_ptr<Model> getDefaultPlane(const std::string & key);
 
+    std::shared_ptr<Model> getDefaultSphere(const std::string & key);
+
 private:
     ModelManager() = default;
     ~ModelManager() = default;

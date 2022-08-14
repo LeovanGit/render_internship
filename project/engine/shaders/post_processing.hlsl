@@ -29,23 +29,6 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID)
 //------------------------------------------------------------------------------
 // FRAGMENT SHADER
 //------------------------------------------------------------------------------
-float3 adjustExposure(float3 color);
-float3 toneMappingACES(float3 hdr);
-float3 gammaCorrection(float3 color);
-
-float4 fragmentShader(PS_INPUT input) : SV_TARGET
-{
-    float3 color = g_hdr_scene.Sample(g_sampler, input.uv);
-
-    color = adjustExposure(color);
-    color = toneMappingACES(color);
-    color = gammaCorrection(color);
-    
-    return float4(color, 1.0f);
-}
-
-//------------------------------------------------------------------------------
-
 float3 adjustExposure(float3 color)
 {
     float S = 100.0f;
@@ -77,3 +60,16 @@ float3 gammaCorrection(float3 color)
 {
     return pow(color, 1.0f / g_gamma);
 }
+
+
+float4 fragmentShader(PS_INPUT input) : SV_TARGET
+{
+    float3 color = g_hdr_scene.Sample(g_sampler, input.uv);
+
+    color = adjustExposure(color);
+    color = toneMappingACES(color);
+    color = gammaCorrection(color);
+    
+    return float4(color, 1.0f);
+}
+

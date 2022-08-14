@@ -30,15 +30,13 @@ public:
                  std::shared_ptr<Texture> metalness = nullptr,
                  std::shared_ptr<Texture> normal = nullptr,
                  float roughness_default = -1.0f,
-                 float metalness_default = -1.0f,
-                 glm::vec3 normal_default = glm::vec3(-1.0f)) :
+                 float metalness_default = -1.0f) :
                  albedo(albedo),
                  roughness(roughness),
                  metalness(metalness),
                  normal(normal),
                  roughness_default(roughness_default),
-                 metalness_default(metalness_default),
-                 normal_default(normal_default)
+                 metalness_default(metalness_default)
         {}
 
         bool operator==(const Material & other)
@@ -61,7 +59,6 @@ public:
 
         float roughness_default;
         float metalness_default;
-        glm::vec3 normal_default;
     };
 
     struct PerMaterial

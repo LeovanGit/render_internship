@@ -10,11 +10,13 @@ void Engine::init()
     TextureManager::init(); // depends on Globals
     ModelManager::init();
     MeshSystem::init();
+    // LightSystem::init();
 }
 
 void Engine::del()
 {
     // destruct singletons in reverse order!
+    // LightSystem::del();
     MeshSystem::del();
     ModelManager::del();
     TextureManager::del();

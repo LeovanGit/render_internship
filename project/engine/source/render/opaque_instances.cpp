@@ -74,8 +74,7 @@ void OpaqueInstances::render()
                                           static_cast<bool>(material.metalness),
                                           static_cast<bool>(material.normal),
                                           material.roughness_default,
-                                          material.metalness_default,
-                                          material.normal_default);
+                                          material.metalness_default);
                 globals->updatePerMeshBuffer();
                 
                 if (static_cast<bool>(material.albedo)) material.albedo->bind(0);

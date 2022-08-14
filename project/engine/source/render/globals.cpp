@@ -117,9 +117,9 @@ void Globals::initSamplers()
 {
     D3D11_SAMPLER_DESC sampler_desc;
     ZeroMemory(&sampler_desc, sizeof(sampler_desc));
-    sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    // sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
-    // sampler_desc.MaxAnisotropy = 16;
+    // sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
+    sampler_desc.MaxAnisotropy = 2;
     sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
     sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
     sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -196,8 +196,7 @@ void Globals::setPerMeshBuffer(const glm::mat4 & mesh_to_model,
                                bool g_has_metalness_texture,
                                bool g_has_normal_map,
                                float g_roughness_default,
-                               float g_metalness_default,
-                               glm::vec3 g_normal_default)
+                               float g_metalness_default)
 {
     // fill const buffer data
     per_mesh_buffer_data.g_mesh_to_model = mesh_to_model;
@@ -206,7 +205,6 @@ void Globals::setPerMeshBuffer(const glm::mat4 & mesh_to_model,
     per_mesh_buffer_data.g_has_normal_map = g_has_normal_map;
     per_mesh_buffer_data.g_roughness_default = g_roughness_default;
     per_mesh_buffer_data.g_metalness_default = g_metalness_default;
-    per_mesh_buffer_data.g_normal_default = g_normal_default;
     
     if (per_mesh_buffer.valid()) return;
     // constant buffer description

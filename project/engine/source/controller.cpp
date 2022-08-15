@@ -159,165 +159,195 @@ void Controller::initScene(Camera & camera)
     scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
                     tex_mgr->getTexture("../engine/assets/skybox.dds"));
 
+    initDirectionalLight(glm::vec3(100.0f),
+                         glm::normalize(glm::vec3(1.0f, -1.0f, 1.0f)),
+                         0.00006794f);
+
+    initPointLight(glm::vec3(0.0f, 0.0f, 0.0f),
+                   glm::vec3(100.0f),
+                   1.0f);
+
+    initPointLight(glm::vec3(15.0f, 0.0f, 0.0f),
+                   glm::vec3(10.0f, 0.0f, 0.0f),
+                   1.0f);
+
+    initPointLight(glm::vec3(-15.0f, 0.0f, 0.0f),
+                   glm::vec3(0.0f, 10.0f, 0.0f),
+                   1.0f);
+    
+    initPlane(math::Transform(glm::vec3(0.0f, -10.0f, 0.0f),
+                               math::EulerAngles(0.0f, 90.0f, 0.0f),
+                               glm::vec3(100.0f, 100.0f, 100.0f)),
+               std::vector<oi::Material>{oi::Material(
+                   tex_mgr->getTexture("../engine/assets/moldy_bricks/bricks_albedo.dds"),
+                   tex_mgr->getTexture("../engine/assets/moldy_bricks/bricks_roughness.dds"),
+                   tex_mgr->getTexture("../engine/assets/moldy_bricks/bricks_metallic.dds"),
+                   tex_mgr->getTexture("../engine/assets/moldy_bricks/bricks_normal.dds"))});
+    
+    initSphere(math::Transform(glm::vec3(20.0f, 0.0f, 20.0f),
+                               math::EulerAngles(0.0f, 0.0f, 0.0f),
+                               glm::vec3(4.0f, 4.0f, 4.0f)),
+               std::vector<oi::Material>{oi::Material(
+                   tex_mgr->getTexture("../engine/assets/copper/copper_albedo.dds"),
+                   tex_mgr->getTexture("../engine/assets/copper/copper_roughness.dds"),
+                   tex_mgr->getTexture("../engine/assets/copper/copper_metallic.dds"),
+                   tex_mgr->getTexture("../engine/assets/copper/copper_normal.dds"))});
+
+    initCube(math::Transform(glm::vec3(0.0f, 0.0f, 20.0f),
+                             math::EulerAngles(45.0f, 0.0f, 0.0f),
+                             glm::vec3(4.0f, 4.0f, 4.0f)),
+             std::vector<oi::Material>{oi::Material(
+                 tex_mgr->getTexture("../engine/assets/space/space_albedo.dds"),
+                 tex_mgr->getTexture("../engine/assets/space/space_roughness.dds"),
+                 tex_mgr->getTexture("../engine/assets/space/space_metallic.dds"),
+                 tex_mgr->getTexture("../engine/assets/space/space_normal.dds"))});
+    
+    initKnight(math::Transform(glm::vec3(10.0f, -10.0f, 0.0f),
+                               math::EulerAngles(90.0f, 0.0f, 0.0f),
+                               glm::vec3(10.0f, 10.0f, 10.0f)));
+
+    initKnight(math::Transform(glm::vec3(-10.0f, -10.0f, 0.0f),
+                               math::EulerAngles(-90.0f, 0.0f, 0.0f),
+                               glm::vec3(10.0f, 10.0f, 10.0f)));
+}
+
+void Controller::initKnight(const math::Transform & transform)
+{    
+    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+
     std::vector<oi::Material> materials =
     {
-        oi::Material(tex_mgr->getTexture("../engine/assets/copper/copper_albedo.dds"),
-                     tex_mgr->getTexture("../engine/assets/copper/copper_roughness.dds"),
-                     tex_mgr->getTexture("../engine/assets/copper/copper_metallic.dds"),
-                     tex_mgr->getTexture("../engine/assets/copper/copper_normal.dds")),
-    };    
-    
-    math::Transform transform(glm::vec3(0.0f, 0.0f, 0.0f),
-                              math::EulerAngles(0.0f, 0.0f, 0.0f),
-                              glm::vec3(2.0f, 2.0f, 2.0f));
-    
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Normal.dds"),
+                     0.95f,
+                     0.0f),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Normal.dds")),
+
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Normal.dds")),
+
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Head_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Normal.dds"),
+                     0.95f,
+                     0.0f),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Eye_BaseColor.dds"),
+                     nullptr,
+                     nullptr,
+                     nullptr,
+                     0.1f,
+                     0.0f),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Normal.dds")),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Normal.dds"),
+                     0.95f,
+                     0.0f),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Normal.dds"),
+                     0.95f,
+                     0.0f),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Normal.dds")),
+    };
+
+    mesh_system->addInstance<engine::OpaqueInstances>(
+        model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
+        materials,
+        transform.toMat4());
+}
+
+void Controller::initCube(const math::Transform & transform,
+                          const std::vector<oi::Material> & materials)
+{
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+
+    mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultCube("cube"),
+                                                      materials,
+                                                      transform.toMat4());
+}
+
+void Controller::initPlane(const math::Transform & transform,
+                           const std::vector<oi::Material> & materials)
+{
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+
+    mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultPlane("plane"),
+                                                      materials,
+                                                      transform.toMat4());
+}
+
+void Controller::initSphere(const math::Transform & transform,
+                            const std::vector<oi::Material> & materials)
+{
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+
     mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultSphere("sphere"),
                                                       materials,
                                                       transform.toMat4());
-
-    std::vector<ei::Material> materials_2 =
-    {
-        ei::Material(glm::vec3(100.0f, 100.0f, 100.0f)),
-    };    
-    
-    math::Transform transform_2(glm::vec3(5.0f, 0.0f, 0.0f),
-                                math::EulerAngles(0.0f, 0.0f, 0.0f),
-                                glm::vec3(2.0f, 2.0f, 2.0f));
-    
-    mesh_system->addInstance<engine::EmissiveInstances>(model_mgr->getDefaultSphere("sphere"),
-                                                        materials_2,
-                                                        transform_2.toMat4());
-    
-    // initKnight(math::Transform(glm::vec3(10.0f, -10.0f, 0.0f),
-    //                            math::EulerAngles(90.0f, 0.0f, 0.0f),
-    //                            glm::vec3(10.0f, 10.0f, 10.0f)));
-
-    // initKnight(math::Transform(glm::vec3(-10.0f, -10.0f, 0.0f),
-    //                            math::EulerAngles(-90.0f, 0.0f, 0.0f),
-    //                            glm::vec3(10.0f, 10.0f, 10.0f)));
-
-    // initKnight(math::Transform(glm::vec3(0.0f, -10.0f, 10.0f),
-    //                            math::EulerAngles(0.0f, 0.0f, 0.0f),
-    //                            glm::vec3(10.0f, 10.0f, 10.0f)));
-    
-    // initCube("../engine/assets/rubik_cube.dds",
-    //          math::Transform(glm::vec3(0.0f, 0.0f, 10.0f),
-    //                          math::EulerAngles(0.0f, 45.0f, 45.0f),
-    //                          glm::vec3(4.0f, 4.0f, 4.0f)));
-    
-    // initCube("../engine/assets/prototype.dds",
-    //          math::Transform(glm::vec3(0.0f, -11.0f, 10.0f),
-    //                          math::EulerAngles(0.0f, 0.0f, 0.0f),
-    //                          glm::vec3(4.0f, 4.0f, 4.0f)));
-
-    // initPlane("../engine/assets/prototype_grid.dds",
-    //           math::Transform(glm::vec3(0.0f, -10.0f, 0.0f),
-    //                           math::EulerAngles(0.0f, 90.0f, 0.0f),
-    //                           glm::vec3(100.0f, 100.0f, 100.0f)));
 }
 
-// void Controller::initKnight(const math::Transform & transform)
-// {    
-//     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
-//     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
-//     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+void Controller::initDirectionalLight(const glm::vec3 & radiance,
+                                      const glm::vec3 & direction,
+                                      float solid_angle)
+{
+    engine::LightSystem * light_system = engine::LightSystem::getInstance();
 
-//     std::vector<oi::Material> materials =
-//     {
-//         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_BaseColor.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Roughness.dds"),
-//                      nullptr,
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Normal.dds"),
-//                      0.5f,
-//                      0.0f),
-        
-//         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_BaseColor.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Roughness.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Metallic.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Normal.dds")),
+    light_system->addDirectionalLight(radiance, direction, solid_angle);
+}
 
-//         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_BaseColor.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Roughness.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Metallic.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Normal.dds")),
+void Controller::initPointLight(const glm::vec3 & position,
+                                const glm::vec3 & radiance,
+                                float radius)
+{
+    engine::LightSystem * light_system = engine::LightSystem::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
 
-//         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Head_BaseColor.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Roughness.dds"),
-//                      nullptr,
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Normal.dds"),
-//                      0.5f,
-//                      0.0f),
-        
-//         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Eye_BaseColor.dds"),
-//                      nullptr,
-//                      nullptr,
-//                      nullptr,
-//                      0.1f,
-//                      0.0f),
-        
-//         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_BaseColor.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Roughness.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Metallic.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Normal.dds")),
-        
-//         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_BaseColor.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Roughness.dds"),
-//                      nullptr,
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Normal.dds"),
-//                      0.5f,
-//                      0.0f),
-        
-//         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_BaseColor.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Roughness.dds"),
-//                      nullptr,
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Normal.dds"),
-//                      0.5f,
-//                      0.0f),
-        
-//         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_BaseColor.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Roughness.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Metallic.dds"),
-//                      tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Normal.dds")),
-//     };
+    // data
+    light_system->addPointLight(position, radiance, radius);
 
-//     mesh_system->addInstance(model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
-//                              materials,
-//                              oi::Instance(transform.toMat4()));
-// }
-
-// void Controller::initCube(const std::string & texture_path,
-//                           const math::Transform & transform)
-// {
-//     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
-//     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
-//     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
-
-//     std::vector<oi::Material> materials =
-//     {
-//         oi::Material(tex_mgr->getTexture(texture_path)),
-//     };
-
-//     mesh_system->addInstance(model_mgr->getDefaultCube("cube"),
-//                              materials,
-//                              oi::Instance(transform.toMat4()));
-// }
-
-// void Controller::initPlane(const std::string & texture_path,
-//                            const math::Transform & transform)
-// {
-//     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
-//     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
-//     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
-
-//     std::vector<oi::Material> materials =
-//     {
-//         oi::Material(tex_mgr->getTexture(texture_path)),
-//     };
-
-//     mesh_system->addInstance(model_mgr->getDefaultPlane("plane"),
-//                              materials,
-//                              oi::Instance(transform.toMat4()));
-// }
+    // visualization
+    std::vector<ei::Material> materials =
+    {
+        ei::Material(radiance),
+    };
+    
+    math::Transform transform(position,
+                              math::EulerAngles(0.0f, 0.0f, 0.0f),
+                              glm::vec3(radius));
+    
+    mesh_system->addInstance<engine::EmissiveInstances>(model_mgr->getDefaultSphere("sphere"),
+                                                        materials,
+                                                        transform.toMat4());
+}
 
 void Controller::processInput(Camera & camera,
                               const float delta_time,

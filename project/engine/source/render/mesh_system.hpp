@@ -28,17 +28,17 @@ public:
 
     template <class T>
     void addInstance(std::shared_ptr<Model> model,
-                     std::vector<struct T::Material> & materials,
+                     const std::vector<struct T::Material> & materials,
                      const struct T::Instance & instance);
 
     template <>
     void addInstance<OpaqueInstances>(std::shared_ptr<Model> model,
-                                      std::vector<OpaqueInstances::Material> & materials,
+                                      const std::vector<OpaqueInstances::Material> & materials,
                                       const OpaqueInstances::Instance & instance);
 
     template <>
     void addInstance<EmissiveInstances>(std::shared_ptr<Model> model,
-                                        std::vector<EmissiveInstances::Material> & materials,
+                                        const std::vector<EmissiveInstances::Material> & materials,
                                         const EmissiveInstances::Instance & instance);
 
     OpaqueInstances opaque_instances;
@@ -53,7 +53,7 @@ private:
 
 template <>
 void MeshSystem::addInstance<OpaqueInstances>(std::shared_ptr<Model> model,
-                                              std::vector<OpaqueInstances::Material> & materials,
+                                              const std::vector<OpaqueInstances::Material> & materials,
                                               const OpaqueInstances::Instance & instance)
 {    
     // try to find the same model
@@ -129,7 +129,7 @@ void MeshSystem::addInstance<OpaqueInstances>(std::shared_ptr<Model> model,
 
 template <>
 void MeshSystem::addInstance<EmissiveInstances>(std::shared_ptr<Model> model,
-                                                std::vector<EmissiveInstances::Material> & materials,
+                                                const std::vector<EmissiveInstances::Material> & materials,
                                                 const EmissiveInstances::Instance & instance)
 {    
     // try to find the same model

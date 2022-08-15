@@ -161,6 +161,18 @@ float3 PBR(Material material,
     return (diffuse + specular) * light_radiance;
 }
 
+/* float calculateSolidAngle(float L_length) */
+/* { */
+/*     // to avoid black points in mirrors mode */
+/*     // when light source partially in some object */
+/*     L_length = fmax(L_length, radius); */
+
+/*     float R_sqr = L_length * L_length - radius * radius; */
+/*     float cosa = sqrtf(R_sqr) / L_length; */
+
+/*     return 2.0f * math::PI * (1.0f - cosa); */
+/* } */
+
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
     Material material;
@@ -199,6 +211,8 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     // float3 L = normalize(light_pos - input.pos.xyz); // tmp light
     float3 L = normalize(-float3(-1.0f, -1.0f, 1.0f)); // tmp light
     float3 V = normalize(g_camera_position - input.pos.xyz);
+
+    return float4(material.albedo, 1.0f);
     
     float3 color = PBR(material, N, L, V);
     

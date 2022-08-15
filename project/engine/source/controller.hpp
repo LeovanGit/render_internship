@@ -14,7 +14,9 @@
 #include "texture_manager.hpp"
 #include "model_manager.hpp"
 #include "mesh_system.hpp"
+#include "light_system.hpp"
 #include "opaque_instances.hpp"
+#include "emissive_instances.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -68,11 +70,22 @@ public:
 private:
     void initKnight(const math::Transform & transform);
 
-    void initCube(const std::string & texture_path,
-                  const math::Transform & transform);
+    void initCube(const math::Transform & transform,
+                  const std::vector<oi::Material> & materials);
 
-    void initPlane(const std::string & texture_path,
-                   const math::Transform & transform);
+    void initPlane(const math::Transform & transform,
+                   const std::vector<oi::Material> & materials);
+
+    void initSphere(const math::Transform & transform,
+                    const std::vector<oi::Material> & materials);
+    
+    void initDirectionalLight(const glm::vec3 & radiance,
+                              const glm::vec3 & direction,
+                              float solid_angle);
+
+    void initPointLight(const glm::vec3 & position,
+                        const glm::vec3 & radiance,
+                        float radius);
 };
 
 #endif

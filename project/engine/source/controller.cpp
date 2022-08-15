@@ -159,41 +159,41 @@ void Controller::initScene(Camera & camera)
     scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
                     tex_mgr->getTexture("../engine/assets/skybox.dds"));
 
-    initDirectionalLight(glm::vec3(100.0f),
+    initDirectionalLight(glm::vec3(50.0f),
                          glm::normalize(glm::vec3(1.0f, -1.0f, 1.0f)),
                          0.00006794f);
 
     initPointLight(glm::vec3(0.0f, 0.0f, 0.0f),
-                   glm::vec3(100.0f),
+                   glm::vec3(15.0f),
+                   2.0f);
+
+    initPointLight(glm::vec3(30.0f, 0.0f, 0.0f),
+                   glm::vec3(5.0f, 0.0f, 0.0f),
+                   5.0f);
+
+    initPointLight(glm::vec3(-20.0f, 0.0f, 0.0f),
+                   glm::vec3(0.0f, 5.0f, 0.0f),
                    1.0f);
 
-    initPointLight(glm::vec3(15.0f, 0.0f, 0.0f),
-                   glm::vec3(10.0f, 0.0f, 0.0f),
-                   1.0f);
-
-    initPointLight(glm::vec3(-15.0f, 0.0f, 0.0f),
-                   glm::vec3(0.0f, 10.0f, 0.0f),
-                   1.0f);
+    initFloor(std::vector<oi::Material>{oi::Material(
+                  tex_mgr->getTexture("../engine/assets/floor/tile_albedo.dds"),
+                  tex_mgr->getTexture("../engine/assets/floor/tile_roughness.dds"),
+                  nullptr,
+                  tex_mgr->getTexture("../engine/assets/floor/tile_normal.dds"),
+                  glm::vec3(1.0f, 0.0f, 0.0f),
+                  0.9f,
+                  0.0f)});
     
-    initPlane(math::Transform(glm::vec3(0.0f, -10.0f, 0.0f),
-                               math::EulerAngles(0.0f, 90.0f, 0.0f),
-                               glm::vec3(100.0f, 100.0f, 100.0f)),
-               std::vector<oi::Material>{oi::Material(
-                   tex_mgr->getTexture("../engine/assets/moldy_bricks/bricks_albedo.dds"),
-                   tex_mgr->getTexture("../engine/assets/moldy_bricks/bricks_roughness.dds"),
-                   tex_mgr->getTexture("../engine/assets/moldy_bricks/bricks_metallic.dds"),
-                   tex_mgr->getTexture("../engine/assets/moldy_bricks/bricks_normal.dds"))});
-    
-    initSphere(math::Transform(glm::vec3(20.0f, 0.0f, 20.0f),
-                               math::EulerAngles(0.0f, 0.0f, 0.0f),
-                               glm::vec3(4.0f, 4.0f, 4.0f)),
-               std::vector<oi::Material>{oi::Material(
-                   tex_mgr->getTexture("../engine/assets/copper/copper_albedo.dds"),
-                   tex_mgr->getTexture("../engine/assets/copper/copper_roughness.dds"),
-                   tex_mgr->getTexture("../engine/assets/copper/copper_metallic.dds"),
-                   tex_mgr->getTexture("../engine/assets/copper/copper_normal.dds"))});
+    // initSphere(math::Transform(glm::vec3(20.0f, 0.0f, 20.0f),
+    //                            math::EulerAngles(0.0f, 0.0f, 0.0f),
+    //                            glm::vec3(4.0f, 4.0f, 4.0f)),
+    //            std::vector<oi::Material>{oi::Material(
+    //                tex_mgr->getTexture("../engine/assets/copper/copper_albedo.dds"),
+    //                tex_mgr->getTexture("../engine/assets/copper/copper_roughness.dds"),
+    //                tex_mgr->getTexture("../engine/assets/copper/copper_metallic.dds"),
+    //                tex_mgr->getTexture("../engine/assets/copper/copper_normal.dds"))});
 
-    initCube(math::Transform(glm::vec3(0.0f, 0.0f, 20.0f),
+    initCube(math::Transform(glm::vec3(-30.0f, 0.0f, 0.0f),
                              math::EulerAngles(45.0f, 0.0f, 0.0f),
                              glm::vec3(4.0f, 4.0f, 4.0f)),
              std::vector<oi::Material>{oi::Material(
@@ -201,14 +201,40 @@ void Controller::initScene(Camera & camera)
                  tex_mgr->getTexture("../engine/assets/space/space_roughness.dds"),
                  tex_mgr->getTexture("../engine/assets/space/space_metallic.dds"),
                  tex_mgr->getTexture("../engine/assets/space/space_normal.dds"))});
+
+    initCube(math::Transform(glm::vec3(-30.0f, 0.0f, 20.0f),
+                             math::EulerAngles(45.0f, 0.0f, 0.0f),
+                             glm::vec3(4.0f, 4.0f, 4.0f)),
+             std::vector<oi::Material>{oi::Material(nullptr,
+                                                    nullptr,
+                                                    nullptr,
+                                                    nullptr,
+                                                    glm::vec3(1.0f, 0.0f, 0.0f),
+                                                    0.95f,
+                                                    0.0f)});
+
+    initCube(math::Transform(glm::vec3(-30.0f, 0.0f, -20.0f),
+                             math::EulerAngles(45.0f, 0.0f, 0.0f),
+                             glm::vec3(4.0f, 4.0f, 4.0f)),
+             std::vector<oi::Material>{oi::Material(nullptr,
+                                                    nullptr,
+                                                    nullptr,
+                                                    nullptr,
+                                                    glm::vec3(0.944f, 0.776f, 0.373f),
+                                                    0.01f,
+                                                    1.0f)});
     
-    initKnight(math::Transform(glm::vec3(10.0f, -10.0f, 0.0f),
+    initKnight(math::Transform(glm::vec3(15.0f, -10.0f, 0.0f),
                                math::EulerAngles(90.0f, 0.0f, 0.0f),
                                glm::vec3(10.0f, 10.0f, 10.0f)));
 
-    initKnight(math::Transform(glm::vec3(-10.0f, -10.0f, 0.0f),
+    initKnight(math::Transform(glm::vec3(-15.0f, -10.0f, 0.0f),
                                math::EulerAngles(-90.0f, 0.0f, 0.0f),
                                glm::vec3(10.0f, 10.0f, 10.0f)));
+
+    initWall(math::Transform(glm::vec3(0.0f, -10.0f, 50.0f),
+                             math::EulerAngles(0.0f, 0.0f, 0.0f),
+                             glm::vec3(10.0f, 10.0f, 10.0f)));
 }
 
 void Controller::initKnight(const math::Transform & transform)
@@ -223,6 +249,7 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Roughness.dds"),
                      nullptr,
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Normal.dds"),
+                     glm::vec3(1.0f, 0.0f, 0.0f),
                      0.95f,
                      0.0f),
         
@@ -240,6 +267,7 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Roughness.dds"),
                      nullptr,
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Normal.dds"),
+                     glm::vec3(1.0f, 0.0f, 0.0f),
                      0.95f,
                      0.0f),
         
@@ -247,6 +275,7 @@ void Controller::initKnight(const math::Transform & transform)
                      nullptr,
                      nullptr,
                      nullptr,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
                      0.1f,
                      0.0f),
         
@@ -259,6 +288,7 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Roughness.dds"),
                      nullptr,
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Normal.dds"),
+                     glm::vec3(1.0f, 0.0f, 0.0f),
                      0.95f,
                      0.0f),
         
@@ -266,6 +296,7 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Roughness.dds"),
                      nullptr,
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Normal.dds"),
+                     glm::vec3(1.0f, 0.0f, 0.0f),
                      0.95f,
                      0.0f),
         
@@ -277,6 +308,55 @@ void Controller::initKnight(const math::Transform & transform)
 
     mesh_system->addInstance<engine::OpaqueInstances>(
         model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
+        materials,
+        transform.toMat4());
+}
+
+void Controller::initWall(const math::Transform & transform)
+{
+    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+
+    std::vector<oi::Material> materials =
+    {
+        oi::Material(tex_mgr->getTexture("../engine/assets/Wall/dds/Star_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Wall/dds/Star_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Wall/dds/Star_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Wall/dds/Star_Normal.dds")),
+
+        oi::Material(tex_mgr->getTexture("../engine/assets/Wall/dds/Marble_BaseColor.dds"),
+                     nullptr,
+                     nullptr,
+                     nullptr,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.95f,
+                     0.0f),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Wall/dds/StoneWork_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Wall/dds/StoneWork_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Wall/dds/StoneWork_Normal.dds"),
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.99f,
+                     0.0f),
+
+        oi::Material(tex_mgr->getTexture("../engine/assets/Wall/dds/Statue_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Wall/dds/Statue_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Wall/dds/Statue_Normal.dds"),
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.01f,
+                     1.0f),
+        
+        oi::Material(tex_mgr->getTexture("../engine/assets/Wall/dds/Trims_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Wall/dds/Trims_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Wall/dds/Trims_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Wall/dds/Trims_Normal.dds")),
+    };
+
+    mesh_system->addInstance<engine::OpaqueInstances>(
+        model_mgr->getModel("../engine/assets/Wall/SunCityWall.fbx"),
         materials,
         transform.toMat4());
 }
@@ -312,6 +392,32 @@ void Controller::initSphere(const math::Transform & transform,
     mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultSphere("sphere"),
                                                       materials,
                                                       transform.toMat4());
+}
+
+void Controller::initFloor(const std::vector<oi::Material> & materials)
+{
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    
+    initPlane(math::Transform(glm::vec3(25.0f, -10.0f, -25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);
+              
+    initPlane(math::Transform(glm::vec3(-25.0f, -10.0f, -25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);
+    
+    initPlane(math::Transform(glm::vec3(25.0f, -10.0f, 25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);
+    
+    initPlane(math::Transform(glm::vec3(-25.0f, -10.0f, 25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);
 }
 
 void Controller::initDirectionalLight(const glm::vec3 & radiance,

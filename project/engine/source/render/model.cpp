@@ -97,7 +97,7 @@ Model::Model(Vertex * vertices,
                             0.0f, 0.0f, 1.0f, 0.0f,
                             0.0f, 0.0f, 0.0f, 1.0f);
 
-    MeshRange mesh { vertices_size, indices_size, 0, 0, mesh_to_model };
+    MeshRange mesh {vertices_size, indices_size, 0, 0, mesh_to_model};
     meshes.push_back(mesh);
 }
 

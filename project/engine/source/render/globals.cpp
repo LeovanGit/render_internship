@@ -133,6 +133,8 @@ void Globals::initSamplers()
 
 void Globals::setPerFrameBuffer(const Camera & camera)
 {
+    LightSystem * light_system = LightSystem::getInstance();
+    
     // find CS corner points in WS
     glm::vec3 bottom_left_WS = camera.reproject(-1.0f, -1.0f);
     glm::vec3 top_left_WS = camera.reproject(-1.0f, 1.0f);
@@ -145,6 +147,30 @@ void Globals::setPerFrameBuffer(const Camera & camera)
     per_frame_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);
     per_frame_buffer_data.g_frustum_corners[1] = glm::vec4(top_left_WS, 1.0f);
     per_frame_buffer_data.g_frustum_corners[2] = glm::vec4(bottom_right_WS, 1.0f);
+
+    for (uint32_t i = 0; i != 3; ++i)
+    {
+        per_frame_buffer_data.g_point_lights[i].position =
+            light_system->point_lights[i].position;
+
+        per_frame_buffer_data.g_point_lights[i].radiance =
+            light_system->point_lights[i].radiance;
+
+        per_frame_buffer_data.g_point_lights[i].radius =
+            light_system->point_lights[i].radius;
+    }
+
+    for (uint32_t i = 0; i != 1; ++i)
+    {
+        per_frame_buffer_data.g_dir_lights[i].direction =
+            light_system->directional_lights[i].direction;
+
+        per_frame_buffer_data.g_dir_lights[i].radiance =
+            light_system->directional_lights[i].radiance;
+
+        per_frame_buffer_data.g_dir_lights[i].solid_angle =
+            light_system->directional_lights[i].solid_angle;
+    }
     
     if (per_frame_buffer.valid()) return;
     // constant buffer description
@@ -192,17 +218,23 @@ void Globals::updatePerFrameBuffer()
 }
 
 void Globals::setPerMeshBuffer(const glm::mat4 & g_mesh_to_model,
+                               bool g_has_albedo_texture,
                                bool g_has_roughness_texture,
                                bool g_has_metalness_texture,
                                bool g_has_normal_map,
+                               const glm::vec3 & g_albedo_default,
                                float g_roughness_default,
                                float g_metalness_default)
-{
+{    
     // fill const buffer data
     per_mesh_buffer_data.g_mesh_to_model = g_mesh_to_model;
+
+    per_mesh_buffer_data.g_has_albedo_texture = g_has_albedo_texture;
     per_mesh_buffer_data.g_has_roughness_texture = g_has_roughness_texture;
     per_mesh_buffer_data.g_has_metalness_texture = g_has_metalness_texture;
     per_mesh_buffer_data.g_has_normal_map = g_has_normal_map;
+    
+    per_mesh_buffer_data.g_albedo_default = g_albedo_default;
     per_mesh_buffer_data.g_roughness_default = g_roughness_default;
     per_mesh_buffer_data.g_metalness_default = g_metalness_default;
     

@@ -15,6 +15,7 @@
 
 #include "dx_res_ptr.hpp"
 #include "camera.hpp"
+#include "light_system.hpp"
 
 #include "win_undef.hpp"
 
@@ -29,6 +30,22 @@ struct PerFrameBufferData
     glm::vec3 g_camera_pos;
     float g_EV_100;
     glm::vec4 g_frustum_corners[3];
+
+    struct
+    {
+        glm::vec3 position;
+        float padding_0;
+        glm::vec3 radiance;
+        float radius;
+    } g_point_lights[3];
+
+    struct
+    {
+        glm::vec3 radiance;
+        float padding_0;
+        glm::vec3 direction;
+        float solid_angle;
+    } g_dir_lights[1];
 };
 
 struct PerMeshBufferData
@@ -36,10 +53,12 @@ struct PerMeshBufferData
     glm::mat4 g_mesh_to_model;
 
     // size of bool in HLSL is 4 bytes
+    BOOL g_has_albedo_texture;
     BOOL g_has_roughness_texture;
     BOOL g_has_metalness_texture;
     BOOL g_has_normal_map;
 
+    glm::vec3 g_albedo_default;
     float g_roughness_default;
     float g_metalness_default;    
     glm::vec3 padding_0;
@@ -77,9 +96,11 @@ public:
     void updatePerFrameBuffer();
 
     void setPerMeshBuffer(const glm::mat4 & g_mesh_to_model,
+                          bool g_has_albedo_texture,
                           bool g_has_roughness_texture,
                           bool g_has_metalness_texture,
                           bool g_has_normal_map,
+                          const glm::vec3 & g_albedo_default,
                           float g_roughness_default,
                           float g_metalness_default);
     void updatePerMeshBuffer();

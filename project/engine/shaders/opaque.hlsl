@@ -3,11 +3,13 @@
 cbuffer PerMesh : register(b1)
 {
     row_major float4x4 g_mesh_to_model;
-    
+
+    bool g_has_albedo_texture;
     bool g_has_roughness_texture;
     bool g_has_metalness_texture;
     bool g_has_normal_map;
 
+    float3 g_albedo_default;
     float g_roughness_default;
     float g_metalness_default;
     float3 padding_0;
@@ -29,7 +31,8 @@ struct VS_INPUT
 
 struct PS_INPUT
 {
-    float4 pos : SV_POSITION;
+    float4 pos_CS : SV_POSITION;
+    float3 pos_WS : POSITION;
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
     float3x3 TBN : TBN;
@@ -51,17 +54,20 @@ PS_INPUT vertexShader(VS_INPUT input)
                                   input.transform_2,
                                   input.transform_3);
 
+    PS_INPUT output;
+    
     float4 pos = mul(float4(input.pos, 1.0f), g_mesh_to_model);
     pos = mul(pos, transform);
+    output.pos_WS = pos.xyz;
+    
     pos = mul(pos, g_proj_view);
+    output.pos_CS = pos;
 
     float3x3 TBN = float3x3(input.tangent,
                             input.bitangent,
                             input.normal);
-    
-    PS_INPUT output;
+
     output.uv = input.uv;
-    output.pos = pos;
     output.normal = input.normal;
     output.TBN = TBN;
     output.transform = transform;
@@ -79,6 +85,19 @@ struct Material
     float metalness;
     float3 fresnel;
 };
+
+float calculateSolidAngle(float L,
+                          float radius)
+{
+    // to avoid black points for roughness -> 0 objects
+    // when light source partially in some object
+    float L_length = max(length(L), radius);
+
+    float R_sqr = L_length * L_length - radius * radius;
+    float cosa = sqrt(R_sqr) / L_length;
+
+    return 2.0f * g_PI * (1.0f - cosa);
+}
 
 // G
 float ggxSmith(float roughness_sqr,
@@ -124,7 +143,8 @@ float3 CookTorranceBRDF(Material material,
                         float NL,
                         float NV,
                         float NH,
-                        float HL)
+                        float HL,
+                        float solid_angle)
 {
     float roughness_sqr = material.roughness * material.roughness;
     
@@ -133,7 +153,6 @@ float3 CookTorranceBRDF(Material material,
     float3 F = ggxSchlick(HL, material.fresnel);
 
     // clamp NDF to avoid light reflection being brighter than a light source
-    float solid_angle = 1.0f; // tmp
     float D_norm = min(1.0f, solid_angle * D / (4 * NV));
     
     return D_norm * F * G;
@@ -142,12 +161,10 @@ float3 CookTorranceBRDF(Material material,
 float3 PBR(Material material,
            float3 N,
            float3 L,
-           float3 V)
+           float3 V,
+           float3 radiance,
+           float solid_angle)
 {
-    // tmp light value
-    float power = 15.0f;
-    float3 light_radiance = float3(power, power, power);
-    
     float3 H = normalize(L + V);
 
     float NL = clamp(dot(N, L), 0.0f, 1.0f);
@@ -156,40 +173,78 @@ float3 PBR(Material material,
     float HL = clamp(dot(H, L), 0.0f, 1.0f);
 
     float3 diffuse = LambertBRDF(material, NL);
-    float3 specular = CookTorranceBRDF(material, NL, NV, NH, HL);
+    float3 specular = CookTorranceBRDF(material, NL, NV, NH, HL, solid_angle);
 
-    return (diffuse + specular) * light_radiance;
+    return (diffuse + specular) * radiance;
 }
 
-/* float calculateSolidAngle(float L_length) */
-/* { */
-/*     // to avoid black points in mirrors mode */
-/*     // when light source partially in some object */
-/*     L_length = fmax(L_length, radius); */
+float3 calculateDirectionalLights(Material material,
+                                  float3 N,
+                                  float3 V)
+{
+    float3 color = float3(0.0f, 0.0f, 0.0f);
+    
+    for (uint i = 0; i != g_dir_lights_count; ++i)
+    {
+        float3 L = normalize(-g_dir_lights[i].direction);
+        
+        color += PBR(material,
+                     N,
+                     L,
+                     V,
+                     g_dir_lights[i].radiance,
+                     g_dir_lights[i].solid_angle);
+    }
 
-/*     float R_sqr = L_length * L_length - radius * radius; */
-/*     float cosa = sqrtf(R_sqr) / L_length; */
+    return color;
+}
 
-/*     return 2.0f * math::PI * (1.0f - cosa); */
-/* } */
+float3 calculatePointLights(Material material,
+                            float3 N,
+                            float3 V,
+                            float3 pos_WS)
+{
+    float3 color = float3(0.0f, 0.0f, 0.0f);
+    
+    for (uint i = 0; i != g_point_lights_count; ++i)
+    {
+        float3 L = normalize(g_point_lights[i].position - pos_WS);
+        float solid_angle = calculateSolidAngle(L,
+                                                g_point_lights[i].radius);
+    
+        color += PBR(material,
+                     N,
+                     L,
+                     V,
+                     g_point_lights[i].radiance,
+                     solid_angle);
+    }
+
+    return color;
+}
 
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
     Material material;
-    material.albedo = g_albedo.Sample(g_sampler, input.uv);
-    material.fresnel = float3(0.04f, 0.04f, 0.04f);
+    material.fresnel = float3(g_F0_dielectric, g_F0_dielectric, g_F0_dielectric);
 
-    // texture sRGB -> linear
-    // material.albedo = pow(material.albedo, g_gamma);
-    
+    if (g_has_albedo_texture)
+    {
+        material.albedo = g_albedo.Sample(g_sampler, input.uv);
+        
+        // texture sRGB -> linear
+        material.albedo = pow(material.albedo, g_gamma);
+    }
+    else material.albedo = g_albedo_default;
+        
     if (g_has_roughness_texture)
     {
         material.roughness = g_roughness.Sample(g_sampler, input.uv);
-
-        // perception roughness -> roughness
-        material.roughness *= material.roughness;
     }
     else material.roughness = g_roughness_default;
+
+    // perception roughness -> roughness
+    material.roughness *= material.roughness;
     
     if (g_has_metalness_texture)
         material.metalness = g_metalness.Sample(g_sampler, input.uv);
@@ -200,21 +255,24 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
 
     float3 N; // fragment normal
     
-    if (g_has_normal_map) N = g_normal.Sample(g_sampler, input.uv);
+    if (g_has_normal_map)
+    {
+        N = g_normal.Sample(g_sampler, input.uv);
+        N = normalize(N * 2.0f - 1.0f); // [0; 1] -> [-1; 1]
+        N = mul(N, input.TBN);
+    }
     else N = input.normal;
+    
+    N = mul(float4(N, 0.0f), g_mesh_to_model).xyz;
+    N = mul(float4(N, 0.0f), input.transform).xyz;
 
-    N = normalize(N * 2.0f - 1.0f); // [0; 1] -> [-1; 1]
-    N = mul(N, input.TBN);
-    N = mul(float4(N, 0.0f), input.transform);
-
-    // float3 light_pos = float3(3.0f, -3.0f, -6.0f);
-    // float3 L = normalize(light_pos - input.pos.xyz); // tmp light
-    float3 L = normalize(-float3(-1.0f, -1.0f, 1.0f)); // tmp light
-    float3 V = normalize(g_camera_position - input.pos.xyz);
+    float3 V = normalize(g_camera_position - input.pos_WS);
+    
+    float3 color = float3(0.0f, 0.0f, 0.0f);
+    // color += calculateDirectionalLights(material, N, V);
+    color += calculatePointLights(material, N, V, input.pos_WS);
 
     return float4(material.albedo, 1.0f);
-    
-    float3 color = PBR(material, N, L, V);
     
     return float4(color, 1.0f);
 }

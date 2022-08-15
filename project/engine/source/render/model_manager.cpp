@@ -141,11 +141,11 @@ std::shared_ptr<Model> ModelManager::getDefaultPlane(const std::string & key)
     Vertex vertices[] =
     {
         // UV with a little offset to disable wrapping
-        //     POSITION                           UV
-        Vertex{{-1.0f, -1.0f, 0.0f}, {0.0f, 1.0f}},
-        Vertex{{-1.0f,  1.0f, 0.0f}, {0.0f, 0.0f}},
-        Vertex{{ 1.0f,  1.0f, 0.0f}, {1.0f, 0.0f}},
-        Vertex{{ 1.0f, -1.0f, 0.0f}, {1.0f, 1.0f}},
+        //     POSITION              UV            NORMAL               TANGENT             BITANGENT
+        Vertex{{-1.0f, -1.0f, 0.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+        Vertex{{-1.0f,  1.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+        Vertex{{ 1.0f,  1.0f, 0.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+        Vertex{{ 1.0f, -1.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
     };
     
     // CREATE INDEX BUFFER
@@ -256,11 +256,10 @@ std::shared_ptr<Model> ModelManager::getDefaultSphere(const std::string & key)
                     glm::vec3 AB = vertex[1].position - vertex[0].position;
                     glm::vec3 AC = vertex[2].position - vertex[0].position;
                     vertex[0].normal = vertex[1].normal = vertex[2].normal =
-                        glm::normalize(glm::cross(AC, AB));
+                        glm::normalize(glm::cross(AB, AC));
 
-                    vertex[0].tangent = vertex[1].tangent = vertex[2].tangent = AC;
-                    vertex[0].bitangent = vertex[1].bitangent = vertex[2].bitangent = AB;
-
+                    vertex[0].tangent = vertex[1].tangent = vertex[2].tangent = AB;
+                    vertex[0].bitangent = vertex[1].bitangent = vertex[2].bitangent = AC;
                 }
 
                 vertex += 3;
@@ -273,10 +272,10 @@ std::shared_ptr<Model> ModelManager::getDefaultSphere(const std::string & key)
                     glm::vec3 AB = vertex[1].position - vertex[0].position;
                     glm::vec3 AC = vertex[2].position - vertex[0].position;
                     vertex[0].normal = vertex[1].normal = vertex[2].normal =
-                        glm::normalize(glm::cross(AC, AB));
+                        glm::normalize(glm::cross(AB, AC));
 
-                    vertex[0].tangent = vertex[1].tangent = vertex[2].tangent = AC;
-                    vertex[0].bitangent = vertex[1].bitangent = vertex[2].bitangent = AB;
+                    vertex[0].tangent = vertex[1].tangent = vertex[2].tangent = AB;
+                    vertex[0].bitangent = vertex[1].bitangent = vertex[2].bitangent = AC;
                 }
 
                 vertex += 3;

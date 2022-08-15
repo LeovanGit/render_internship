@@ -70,9 +70,11 @@ void OpaqueInstances::render()
                 Material & material = per_material.material;
 
                 globals->setPerMeshBuffer(mesh_range.mesh_to_model,
+                                          static_cast<bool>(material.albedo),
                                           static_cast<bool>(material.roughness),
                                           static_cast<bool>(material.metalness),
                                           static_cast<bool>(material.normal),
+                                          material.albedo_default,
                                           material.roughness_default,
                                           material.metalness_default);
                 globals->updatePerMeshBuffer();

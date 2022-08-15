@@ -70,6 +70,8 @@ public:
 private:
     void initKnight(const math::Transform & transform);
 
+    void initWall(const math::Transform & transform);
+
     void initCube(const math::Transform & transform,
                   const std::vector<oi::Material> & materials);
 
@@ -78,6 +80,8 @@ private:
 
     void initSphere(const math::Transform & transform,
                     const std::vector<oi::Material> & materials);
+
+    void initFloor(const std::vector<oi::Material> & materials);
     
     void initDirectionalLight(const glm::vec3 & radiance,
                               const glm::vec3 & direction,

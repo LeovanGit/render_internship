@@ -29,22 +29,53 @@ public:
                  std::shared_ptr<Texture> roughness = nullptr,
                  std::shared_ptr<Texture> metalness = nullptr,
                  std::shared_ptr<Texture> normal = nullptr,
+                 glm::vec3 albedo_default = glm::vec3(-1.0f),
                  float roughness_default = -1.0f,
                  float metalness_default = -1.0f) :
                  albedo(albedo),
                  roughness(roughness),
                  metalness(metalness),
                  normal(normal),
+                 albedo_default(albedo_default),
                  roughness_default(roughness_default),
                  metalness_default(metalness_default)
         {}
 
         bool operator==(const Material & other)
         {
-            return (albedo == other.albedo &&
-                    roughness == other.roughness &&
-                    metalness == other.metalness &&
-                    normal == other.normal);
+            if (static_cast<bool>(albedo))
+            {
+                if (albedo != other.albedo) return false;
+            }                
+            else
+            {
+                if (albedo_default != other.albedo_default) return false;
+            }
+            
+            if (static_cast<bool>(roughness))
+            {
+                if (roughness != other.roughness) return false;
+            }                
+            else
+            {
+                if (roughness_default != other.roughness_default) return false;
+            }
+            
+            if (static_cast<bool>(metalness))
+            {
+                if (metalness != other.metalness) return false;
+            }                
+            else
+            {
+                if (metalness_default != other.metalness_default) return false;
+            }
+            
+            if (static_cast<bool>(normal))
+            {
+                if (normal != other.normal) return false;
+            }                
+
+            return true;
         }
 
         bool operator!=(const Material & other)
@@ -57,6 +88,7 @@ public:
         std::shared_ptr<Texture> metalness;
         std::shared_ptr<Texture> normal;
 
+        glm::vec3 albedo_default;
         float roughness_default;
         float metalness_default;
     };

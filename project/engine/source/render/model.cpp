@@ -63,7 +63,7 @@ Model::Model(const std::string & model_filename)
             vertex.normal = reinterpret_cast<glm::vec3 &>(src_mesh->mNormals[v]);
             vertex.tangent = reinterpret_cast<glm::vec3 &>(src_mesh->mTangents[v]);
             // flip
-            vertex.bitangent = reinterpret_cast<glm::vec3 &>(src_mesh->mBitangents[v]) * -1.0f;
+            vertex.bitangent = reinterpret_cast<glm::vec3 &>(src_mesh->mBitangents[v]);
                
             vertices.push_back(vertex);
         }

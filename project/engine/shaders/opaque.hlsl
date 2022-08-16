@@ -86,15 +86,15 @@ struct Material
     float3 fresnel;
 };
 
-float calculateSolidAngle(float L,
+float calculateSolidAngle(float L_length,
                           float radius)
 {
     // to avoid black points for roughness -> 0 objects
     // when light source partially in some object
-    float L_length = max(length(L), radius);
+    L_length = max(L_length, radius);
 
     float R_sqr = L_length * L_length - radius * radius;
-    float cosa = sqrt(R_sqr) / L_length;
+    float cosa = sqrt(R_sqr) / L_length;    
 
     return 2.0f * g_PI * (1.0f - cosa);
 }
@@ -153,7 +153,6 @@ float3 CookTorranceBRDF(Material material,
     float3 F = ggxSchlick(HL, material.fresnel);
 
     // clamp NDF to avoid light reflection being brighter than a light source
-    solid_angle = 2.0f;
     float D_norm = min(1.0f, solid_angle * D / (4.0f * NV));
     
     return D_norm * F * G;
@@ -176,7 +175,7 @@ float3 PBR(Material material,
     float3 diffuse = LambertBRDF(material, NL);
     float3 specular = CookTorranceBRDF(material, NL, NV, NH, HL, solid_angle);
 
-    return (diffuse + specular) * radiance;
+    return (diffuse * solid_angle + specular) * radiance;
 }
 
 float3 calculateDirectionalLights(Material material,
@@ -210,7 +209,9 @@ float3 calculatePointLights(Material material,
     for (uint i = 0; i != 3; ++i)
     {
         float3 L = normalize(g_point_lights[i].position - pos_WS);
-        float solid_angle = calculateSolidAngle(L,
+        float L_length = length(g_point_lights[i].position - pos_WS);
+        
+        float solid_angle = calculateSolidAngle(L_length,
                                                 g_point_lights[i].radius);
     
         color += PBR(material,

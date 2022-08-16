@@ -61,7 +61,6 @@ float3 gammaCorrection(float3 color)
     return pow(color, 1.0f / g_gamma);
 }
 
-
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
     float3 color = g_hdr_scene.Sample(g_sampler, input.uv);

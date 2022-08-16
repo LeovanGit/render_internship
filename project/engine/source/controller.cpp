@@ -159,17 +159,17 @@ void Controller::initScene(Camera & camera)
     scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
                     tex_mgr->getTexture("../engine/assets/skybox.dds"));
 
-    initDirectionalLight(glm::vec3(50.0f),
+    initDirectionalLight(glm::vec3(10.0f),
                          glm::normalize(glm::vec3(1.0f, -1.0f, 1.0f)),
                          0.00006794f);
 
-    initPointLight(glm::vec3(0.0f, 0.0f, 0.0f),
-                   glm::vec3(15.0f),
+    initPointLight(glm::vec3(0.0f, 5.0f, 0.0f),
+                   glm::vec3(5.0f),
                    2.0f);
 
     initPointLight(glm::vec3(30.0f, 0.0f, 0.0f),
                    glm::vec3(5.0f, 0.0f, 0.0f),
-                   5.0f);
+                   1.0f);
 
     initPointLight(glm::vec3(-20.0f, 0.0f, 0.0f),
                    glm::vec3(0.0f, 5.0f, 0.0f),
@@ -205,13 +205,11 @@ void Controller::initScene(Camera & camera)
     initCube(math::Transform(glm::vec3(-30.0f, 0.0f, 20.0f),
                              math::EulerAngles(45.0f, 0.0f, 0.0f),
                              glm::vec3(4.0f, 4.0f, 4.0f)),
-             std::vector<oi::Material>{oi::Material(nullptr,
-                                                    nullptr,
-                                                    nullptr,
-                                                    nullptr,
-                                                    glm::vec3(1.0f, 0.0f, 0.0f),
-                                                    0.95f,
-                                                    0.0f)});
+             std::vector<oi::Material>{oi::Material(
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_albedo.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_roughness.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_metallic.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_normal.dds"))});
 
     initCube(math::Transform(glm::vec3(-30.0f, 0.0f, -20.0f),
                              math::EulerAngles(45.0f, 0.0f, 0.0f),
@@ -221,8 +219,8 @@ void Controller::initScene(Camera & camera)
                                                     nullptr,
                                                     nullptr,
                                                     glm::vec3(0.944f, 0.776f, 0.373f),
-                                                    0.01f,
-                                                    1.0f)});
+                                                    0.2f,
+                                                    0.5f)});
     
     initKnight(math::Transform(glm::vec3(15.0f, -10.0f, 0.0f),
                                math::EulerAngles(90.0f, 0.0f, 0.0f),

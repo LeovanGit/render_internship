@@ -153,7 +153,8 @@ float3 CookTorranceBRDF(Material material,
     float3 F = ggxSchlick(HL, material.fresnel);
 
     // clamp NDF to avoid light reflection being brighter than a light source
-    float D_norm = min(1.0f, solid_angle * D / (4 * NV));
+    solid_angle = 2.0f;
+    float D_norm = min(1.0f, solid_angle * D / (4.0f * NV));
     
     return D_norm * F * G;
 }
@@ -186,7 +187,7 @@ float3 calculateDirectionalLights(Material material,
     
     for (uint i = 0; i != g_dir_lights_count; ++i)
     {
-        float3 L = normalize(-g_dir_lights[i].direction);
+        float3 L = -normalize(g_dir_lights[i].direction);
         
         color += PBR(material,
                      N,
@@ -206,7 +207,7 @@ float3 calculatePointLights(Material material,
 {
     float3 color = float3(0.0f, 0.0f, 0.0f);
     
-    for (uint i = 0; i != g_point_lights_count; ++i)
+    for (uint i = 0; i != 3; ++i)
     {
         float3 L = normalize(g_point_lights[i].position - pos_WS);
         float solid_angle = calculateSolidAngle(L,
@@ -230,7 +231,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
 
     if (g_has_albedo_texture)
     {
-        material.albedo = g_albedo.Sample(g_sampler, input.uv);
+        material.albedo = g_albedo.Sample(g_sampler, input.uv).rgb;
         
         // texture sRGB -> linear
         material.albedo = pow(material.albedo, g_gamma);
@@ -239,7 +240,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
         
     if (g_has_roughness_texture)
     {
-        material.roughness = g_roughness.Sample(g_sampler, input.uv);
+        material.roughness = g_roughness.Sample(g_sampler, input.uv).r;
     }
     else material.roughness = g_roughness_default;
 
@@ -247,7 +248,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     material.roughness *= material.roughness;
     
     if (g_has_metalness_texture)
-        material.metalness = g_metalness.Sample(g_sampler, input.uv);
+        material.metalness = g_metalness.Sample(g_sampler, input.uv).r;
     else material.metalness = g_metalness_default;
 
     // use albedo as F0 for metals
@@ -257,22 +258,20 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     
     if (g_has_normal_map)
     {
-        N = g_normal.Sample(g_sampler, input.uv);
+        N = g_normal.Sample(g_sampler, input.uv).rgb;
         N = normalize(N * 2.0f - 1.0f); // [0; 1] -> [-1; 1]
-        N = mul(N, input.TBN);
+        N = normalize(mul(N, input.TBN));
     }
     else N = input.normal;
     
-    N = mul(float4(N, 0.0f), g_mesh_to_model).xyz;
-    N = mul(float4(N, 0.0f), input.transform).xyz;
+    N = normalize(mul(float4(N, 0.0f), g_mesh_to_model).xyz);
+    N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
 
     float3 V = normalize(g_camera_position - input.pos_WS);
     
     float3 color = float3(0.0f, 0.0f, 0.0f);
-    // color += calculateDirectionalLights(material, N, V);
+    color += calculateDirectionalLights(material, N, V);
     color += calculatePointLights(material, N, V, input.pos_WS);
-
-    return float4(material.albedo, 1.0f);
     
     return float4(color, 1.0f);
 }

@@ -16,16 +16,16 @@ public:
     class DirectionalLight
     {
     public:
-        DirectionalLight(const glm::vec3 & radiance,
-                         const glm::vec3 & direction,
+        DirectionalLight(const glm::vec3 & direction,
+                         const glm::vec3 & radiance,                         
                          float solid_angle) :
-                         radiance(radiance),
                          direction(direction),
+                         radiance(radiance),
                          solid_angle(solid_angle)
         {}
         
-        glm::vec3 radiance;
         glm::vec3 direction;
+        glm::vec3 radiance;
         float solid_angle;
     };
     
@@ -55,13 +55,20 @@ public:
 
     static void del();
 
-    void addDirectionalLight(const glm::vec3 & radiance,
-                             const glm::vec3 & direction,
+    void addDirectionalLight(const glm::vec3 & direction,
+                             const glm::vec3 & radiance,
                              float solid_angle);
 
     void addPointLight(const glm::vec3 & position,
                        const glm::vec3 & radiance,
                        float radius);
+
+    // easy way to set the radiance of the light source:
+    // set it irradiance at some distance.
+    // This func will calculate light source radiance from this values
+    glm::vec3 radianceFromIrradianceAtDistance(const glm::vec3 & irradiance,
+                                               float distance,
+                                               float radius);
     
     std::vector<DirectionalLight> directional_lights;
     std::vector<PointLight> point_lights;

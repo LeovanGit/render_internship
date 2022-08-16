@@ -41,9 +41,9 @@ struct PerFrameBufferData
 
     struct
     {
-        glm::vec3 radiance;
-        float padding_0;
         glm::vec3 direction;
+        float padding_0;
+        glm::vec3 radiance;
         float solid_angle;
     } g_dir_lights[1];
 };

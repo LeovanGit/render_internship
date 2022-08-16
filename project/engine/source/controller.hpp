@@ -88,7 +88,8 @@ private:
                               float solid_angle);
 
     void initPointLight(const glm::vec3 & position,
-                        const glm::vec3 & radiance,
+                        const glm::vec3 & irradiance,
+                        float distance,
                         float radius);
 };
 

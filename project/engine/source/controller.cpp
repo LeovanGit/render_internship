@@ -159,24 +159,28 @@ void Controller::initScene(Camera & camera)
     scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
                     tex_mgr->getTexture("../engine/assets/skybox.dds"));
 
-    initDirectionalLight(glm::vec3(30000.0f),
-                         glm::normalize(glm::vec3(0.25f, -1.0f, 0.25f)),
+    initDirectionalLight(glm::normalize(glm::vec3(0.25f, -1.0f, 0.25f)),
+                         glm::vec3(30000.0f),
                          0.00006794f);
 
     initPointLight(glm::vec3(0.0f, 5.0f, 0.0f),
                    glm::vec3(100.0f),
+                   1.0f,
                    2.0f);
 
     initPointLight(glm::vec3(20.0f, 0.0f, 0.0f),
                    glm::vec3(100.0f, 0.0f, 0.0f),
+                   1.0f,
                    1.0f);
 
     initPointLight(glm::vec3(-20.0f, 0.0f, 0.0f),
                    glm::vec3(0.0f, 100.0f, 0.0f),
+                   1.0f,
                    1.0f);
 
     initPointLight(glm::vec3(0.0f, 0.0f, 20.0f),
                    glm::vec3(0.0f, 0.0f, 100.0f),
+                   1.0f,
                    1.0f);
 
     initFloor(std::vector<oi::Material>{oi::Material(
@@ -444,13 +448,18 @@ void Controller::initDirectionalLight(const glm::vec3 & radiance,
 }
 
 void Controller::initPointLight(const glm::vec3 & position,
-                                const glm::vec3 & radiance,
+                                const glm::vec3 & irradiance,
+                                float distance,
                                 float radius)
 {
     engine::LightSystem * light_system = engine::LightSystem::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
 
+    glm::vec3 radiance = light_system->radianceFromIrradianceAtDistance(irradiance,
+                                                                        distance,
+                                                                        radius);
+    
     // data
     light_system->addPointLight(position, radiance, radius);
 

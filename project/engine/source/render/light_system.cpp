@@ -25,11 +25,11 @@ void LightSystem::del()
     else spdlog::error("LightSystem::del() was called twice!");
 }
 
-void LightSystem::addDirectionalLight(const glm::vec3 & radiance,
-                                      const glm::vec3 & direction,
+void LightSystem::addDirectionalLight(const glm::vec3 & direction,
+                                      const glm::vec3 & radiance,
                                       float solid_angle)
 {
-    DirectionalLight directional_light(radiance, direction, solid_angle);
+    DirectionalLight directional_light(direction, radiance, solid_angle);
     
     directional_lights.push_back(directional_light);
 }
@@ -41,5 +41,16 @@ void LightSystem::addPointLight(const glm::vec3 & position,
     PointLight point_light(position, radiance, radius);
 
     point_lights.push_back(point_light);
+}
+
+glm::vec3 LightSystem::radianceFromIrradianceAtDistance(const glm::vec3 & irradiance,
+                                                        float distance,
+                                                        float radius)
+{
+    float sina = std::min(1.0f, radius / distance);
+    float cosa = sqrtf(1.0f - sina * sina);
+    float occupation = 1.0f - cosa;
+
+    return irradiance / occupation;
 }
 } // namespace engine

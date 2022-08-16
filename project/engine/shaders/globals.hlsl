@@ -25,9 +25,9 @@ cbuffer PerFrame : register(b0)
 
     struct
     {
-        float3 radiance;
-        float padding_0;
         float3 direction;
+        float padding_0;
+        float3 radiance;
         float solid_angle;
     } g_dir_lights[g_dir_lights_count];
 };

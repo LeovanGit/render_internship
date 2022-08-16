@@ -37,7 +37,7 @@ struct PerFrameBufferData
         float padding_0;
         glm::vec3 radiance;
         float radius;
-    } g_point_lights[3];
+    } g_point_lights[4];
 
     struct
     {
@@ -88,9 +88,13 @@ public:
 
     void bind(const Camera & camera);
 
+    void bindRasterizer(bool is_double_sided = false);
+
     void initD3D();
 
     void initSamplers();
+
+    void initRasterizers();
 
     void setPerFrameBuffer(const Camera & camera);
     void updatePerFrameBuffer();
@@ -124,6 +128,9 @@ public:
     PerEmissiveMeshBufferData per_emissive_mesh_buffer_data;
     
     DxResPtr<ID3D11SamplerState> sampler;
+
+    DxResPtr<ID3D11RasterizerState> one_sided_rasterizer;
+    DxResPtr<ID3D11RasterizerState> double_sided_rasterizer;
 
 private:
     Globals() = default;

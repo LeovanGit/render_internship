@@ -206,7 +206,7 @@ float3 calculatePointLights(Material material,
 {
     float3 color = float3(0.0f, 0.0f, 0.0f);
     
-    for (uint i = 0; i != 3; ++i)
+    for (uint i = 0; i != g_point_lights_count; ++i)
     {
         float3 L = normalize(g_point_lights[i].position - pos_WS);
         float L_length = length(g_point_lights[i].position - pos_WS);

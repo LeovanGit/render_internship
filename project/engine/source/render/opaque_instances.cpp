@@ -69,6 +69,8 @@ void OpaqueInstances::render()
 
                 Material & material = per_material.material;
 
+                globals->bindRasterizer(material.is_double_sided);
+
                 globals->setPerMeshBuffer(mesh_range.mesh_to_model,
                                           static_cast<bool>(material.albedo),
                                           static_cast<bool>(material.roughness),

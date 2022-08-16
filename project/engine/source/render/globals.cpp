@@ -19,6 +19,7 @@ void Globals::init()
 
         instance->initD3D();
         instance->initSamplers();
+        instance->initRasterizers();
     }
     else spdlog::error("Globals::init() was called twice!");
 }
@@ -47,6 +48,12 @@ void Globals::bind(const Camera & camera)
     device_context4->PSSetSamplers(0,
                                    1,
                                    sampler.get());
+}
+
+void Globals::bindRasterizer(bool is_double_sided)
+{
+    if (is_double_sided) device_context4->RSSetState(double_sided_rasterizer.ptr());
+    else device_context4->RSSetState(one_sided_rasterizer.ptr());
 }
 
 void Globals::initD3D()
@@ -131,6 +138,43 @@ void Globals::initSamplers()
     assert(result >= 0 && "CreateSamplerState");
 }
 
+void Globals::initRasterizers()
+{
+    HRESULT result;
+    
+    D3D11_RASTERIZER_DESC one_sided_raster_desc;
+    one_sided_raster_desc.FillMode = D3D11_FILL_SOLID;
+    one_sided_raster_desc.CullMode = D3D11_CULL_BACK;
+    one_sided_raster_desc.FrontCounterClockwise = false;
+    one_sided_raster_desc.DepthBias = 0;
+    one_sided_raster_desc.SlopeScaledDepthBias = 0.0f;
+    one_sided_raster_desc.DepthBiasClamp = 0.0f;
+    one_sided_raster_desc.DepthClipEnable = true;
+    one_sided_raster_desc.ScissorEnable = false;
+    one_sided_raster_desc.MultisampleEnable = false;
+    one_sided_raster_desc.AntialiasedLineEnable = false;
+
+    result = device->CreateRasterizerState(&one_sided_raster_desc,
+                                           one_sided_rasterizer.reset());
+    assert(result >= 0 && "CreateRasterizerState");
+        
+    D3D11_RASTERIZER_DESC double_sided_raster_desc;
+    double_sided_raster_desc.FillMode = D3D11_FILL_SOLID;
+    double_sided_raster_desc.CullMode = D3D11_CULL_NONE;
+    double_sided_raster_desc.FrontCounterClockwise = false;
+    double_sided_raster_desc.DepthBias = 0;
+    double_sided_raster_desc.SlopeScaledDepthBias = 0.0f;
+    double_sided_raster_desc.DepthBiasClamp = 0.0f;
+    double_sided_raster_desc.DepthClipEnable = true;
+    double_sided_raster_desc.ScissorEnable = false;
+    double_sided_raster_desc.MultisampleEnable = false;
+    double_sided_raster_desc.AntialiasedLineEnable = false;
+
+    result = device->CreateRasterizerState(&double_sided_raster_desc,
+                                           double_sided_rasterizer.reset());
+    assert(result >= 0 && "CreateRasterizerState");    
+}
+
 void Globals::setPerFrameBuffer(const Camera & camera)
 {
     LightSystem * light_system = LightSystem::getInstance();
@@ -148,7 +192,8 @@ void Globals::setPerFrameBuffer(const Camera & camera)
     per_frame_buffer_data.g_frustum_corners[1] = glm::vec4(top_left_WS, 1.0f);
     per_frame_buffer_data.g_frustum_corners[2] = glm::vec4(bottom_right_WS, 1.0f);
 
-    for (uint32_t i = 0; i != 3; ++i)
+    for (uint32_t size = light_system->point_lights.size(),
+         i = 0; i != size; ++i)
     {
         per_frame_buffer_data.g_point_lights[i].position =
             light_system->point_lights[i].position;
@@ -160,7 +205,8 @@ void Globals::setPerFrameBuffer(const Camera & camera)
             light_system->point_lights[i].radius;
     }
 
-    for (uint32_t i = 0; i != 1; ++i)
+    for (uint32_t size = light_system->directional_lights.size(),
+         i = 0; i != size; ++i)
     {
         per_frame_buffer_data.g_dir_lights[i].direction =
             light_system->directional_lights[i].direction;

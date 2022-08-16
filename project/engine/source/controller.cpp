@@ -167,7 +167,7 @@ void Controller::initScene(Camera & camera)
                    glm::vec3(100.0f),
                    2.0f);
 
-    initPointLight(glm::vec3(30.0f, 0.0f, 0.0f),
+    initPointLight(glm::vec3(20.0f, 0.0f, 0.0f),
                    glm::vec3(100.0f, 0.0f, 0.0f),
                    1.0f);
 
@@ -175,11 +175,16 @@ void Controller::initScene(Camera & camera)
                    glm::vec3(0.0f, 100.0f, 0.0f),
                    1.0f);
 
+    initPointLight(glm::vec3(0.0f, 0.0f, 20.0f),
+                   glm::vec3(0.0f, 0.0f, 100.0f),
+                   1.0f);
+
     initFloor(std::vector<oi::Material>{oi::Material(
                   tex_mgr->getTexture("../engine/assets/floor/tile_albedo.dds"),
                   tex_mgr->getTexture("../engine/assets/floor/tile_roughness.dds"),
                   nullptr,
                   tex_mgr->getTexture("../engine/assets/floor/tile_normal.dds"),
+                  false,
                   glm::vec3(1.0f, 0.0f, 0.0f),
                   0.9f,
                   0.0f)});
@@ -249,6 +254,7 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Roughness.dds"),
                      nullptr,
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Normal.dds"),
+                     true,
                      glm::vec3(1.0f, 0.0f, 0.0f),
                      0.95f,
                      0.0f),
@@ -267,6 +273,7 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Roughness.dds"),
                      nullptr,
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Normal.dds"),
+                     false,
                      glm::vec3(1.0f, 0.0f, 0.0f),
                      0.95f,
                      0.0f),
@@ -275,6 +282,7 @@ void Controller::initKnight(const math::Transform & transform)
                      nullptr,
                      nullptr,
                      nullptr,
+                     false,
                      glm::vec3(1.0f, 0.0f, 0.0f),
                      0.1f,
                      0.0f),
@@ -282,12 +290,14 @@ void Controller::initKnight(const math::Transform & transform)
         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_BaseColor.dds"),
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Roughness.dds"),
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Metallic.dds"),
-                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Normal.dds")),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Normal.dds"),
+                     true),
         
         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_BaseColor.dds"),
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Roughness.dds"),
                      nullptr,
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Normal.dds"),
+                     true,
                      glm::vec3(1.0f, 0.0f, 0.0f),
                      0.95f,
                      0.0f),
@@ -296,6 +306,7 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Roughness.dds"),
                      nullptr,
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Normal.dds"),
+                     true,
                      glm::vec3(1.0f, 0.0f, 0.0f),
                      0.95f,
                      0.0f),
@@ -329,6 +340,7 @@ void Controller::initWall(const math::Transform & transform)
                      nullptr,
                      nullptr,
                      nullptr,
+                     false,
                      glm::vec3(1.0f, 0.0f, 0.0f),
                      0.95f,
                      0.0f),
@@ -337,6 +349,7 @@ void Controller::initWall(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Wall/dds/StoneWork_Roughness.dds"),
                      nullptr,
                      tex_mgr->getTexture("../engine/assets/Wall/dds/StoneWork_Normal.dds"),
+                     false,
                      glm::vec3(1.0f, 0.0f, 0.0f),
                      0.99f,
                      0.0f),
@@ -345,6 +358,7 @@ void Controller::initWall(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Wall/dds/Statue_Roughness.dds"),
                      nullptr,
                      tex_mgr->getTexture("../engine/assets/Wall/dds/Statue_Normal.dds"),
+                     false,
                      glm::vec3(1.0f, 0.0f, 0.0f),
                      0.01f,
                      1.0f),

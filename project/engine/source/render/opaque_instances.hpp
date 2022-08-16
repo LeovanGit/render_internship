@@ -29,6 +29,7 @@ public:
                  std::shared_ptr<Texture> roughness = nullptr,
                  std::shared_ptr<Texture> metalness = nullptr,
                  std::shared_ptr<Texture> normal = nullptr,
+                 bool is_double_sided = false,
                  glm::vec3 albedo_default = glm::vec3(-1.0f),
                  float roughness_default = -1.0f,
                  float metalness_default = -1.0f) :
@@ -38,7 +39,8 @@ public:
                  normal(normal),
                  albedo_default(albedo_default),
                  roughness_default(roughness_default),
-                 metalness_default(metalness_default)
+                 metalness_default(metalness_default),
+                 is_double_sided(is_double_sided)
         {}
 
         bool operator==(const Material & other)
@@ -73,7 +75,9 @@ public:
             if (static_cast<bool>(normal))
             {
                 if (normal != other.normal) return false;
-            }                
+            }
+
+            if (is_double_sided != other.is_double_sided) return false;
 
             return true;
         }
@@ -91,6 +95,8 @@ public:
         glm::vec3 albedo_default;
         float roughness_default;
         float metalness_default;
+
+        bool is_double_sided;
     };
 
     struct PerMaterial

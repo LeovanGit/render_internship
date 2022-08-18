@@ -15,6 +15,7 @@
 #include "model_manager.hpp"
 #include "mesh_system.hpp"
 #include "light_system.hpp"
+#include "transform_system.hpp"
 #include "opaque_instances.hpp"
 #include "emissive_instances.hpp"
 

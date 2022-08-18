@@ -251,6 +251,7 @@ void Controller::initKnight(const math::Transform & transform)
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
     std::vector<oi::Material> materials =
     {
@@ -321,10 +322,12 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Normal.dds")),
     };
 
+    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
+    
     mesh_system->addInstance<engine::OpaqueInstances>(
         model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
         materials,
-        transform.toMat4());
+        transform_id);
 }
 
 void Controller::initWall(const math::Transform & transform)
@@ -332,6 +335,7 @@ void Controller::initWall(const math::Transform & transform)
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
     std::vector<oi::Material> materials =
     {
@@ -373,10 +377,12 @@ void Controller::initWall(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Wall/dds/Trims_Normal.dds")),
     };
 
+    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
+    
     mesh_system->addInstance<engine::OpaqueInstances>(
         model_mgr->getModel("../engine/assets/Wall/SunCityWall.fbx"),
         materials,
-        transform.toMat4());
+        transform_id);
 }
 
 void Controller::initCube(const math::Transform & transform,
@@ -384,10 +390,13 @@ void Controller::initCube(const math::Transform & transform,
 {
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
+
+    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
 
     mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultCube("cube"),
                                                       materials,
-                                                      transform.toMat4());
+                                                      transform_id);
 }
 
 void Controller::initPlane(const math::Transform & transform,
@@ -395,10 +404,13 @@ void Controller::initPlane(const math::Transform & transform,
 {
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
+
+    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
 
     mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultPlane("plane"),
                                                       materials,
-                                                      transform.toMat4());
+                                                      transform_id);
 }
 
 void Controller::initSphere(const math::Transform & transform,
@@ -406,10 +418,13 @@ void Controller::initSphere(const math::Transform & transform,
 {
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
+
+    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
 
     mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultSphere("sphere"),
                                                       materials,
-                                                      transform.toMat4());
+                                                      transform_id);
 }
 
 void Controller::initFloor(const std::vector<oi::Material> & materials)

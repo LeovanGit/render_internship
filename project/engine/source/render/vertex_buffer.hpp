@@ -59,7 +59,7 @@ public:
         assert(result >= 0 && "CreateBuffer(vertex)");
 
         this->size = size;
-        stride = sizeof(T);
+        this->stride = sizeof(T);
         offset = 0;
     }
 

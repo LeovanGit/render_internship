@@ -9,6 +9,7 @@
 #include "texture_manager.hpp"
 #include "vertex_buffer.hpp"
 #include "model.hpp"
+#include "transform_system.hpp"
 
 namespace engine
 {
@@ -18,8 +19,9 @@ public:
     struct Instance
     {
         Instance() = default;
-        Instance(const glm::mat4 & transform) : transform(transform) {}
-        glm::mat4 transform;
+        Instance(uint32_t transform_id) : transform_id(transform_id) {}
+        
+        uint32_t transform_id;
     };
     
     struct Material
@@ -121,7 +123,7 @@ public:
     void render();
 
     std::vector<PerModel> per_model;
-    VertexBuffer<Instance> instance_buffer;
+    VertexBuffer<glm::mat4> instance_buffer;
 };
 } // namespace engine
 

@@ -79,7 +79,8 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/opaque_instances.hpp
                    engine/source/render/emissive_instances.hpp
                    engine/source/render/mesh_system.hpp
-                   engine/source/render/light_system.hpp)
+                   engine/source/render/light_system.hpp
+                   engine/source/transform_system.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/globals.cpp
@@ -96,7 +97,8 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/opaque_instances.cpp
                    engine/source/render/emissive_instances.cpp
                    engine/source/render/mesh_system.cpp
-                   engine/source/render/light_system.cpp)
+                   engine/source/render/light_system.cpp
+                   engine/source/transform_system.cpp)
 
 source_group("Header Files/source/render" FILES ${RENDER_HEADERS})
 source_group("Source Files/source/render" FILES ${RENDER_SOURCES})
@@ -105,11 +107,15 @@ source_group("Source Files/source/render" FILES ${RENDER_SOURCES})
 set(MATH_HEADERS engine/source/math/matrices.hpp
                  engine/source/math/euler_angles.hpp
                  engine/source/math/matrices.hpp
-                 engine/source/math/constants.hpp)
+                 engine/source/math/constants.hpp
+                 engine/source/math/box.hpp
+                 engine/source/math/solid_vector.hpp
+                 engine/source/math/triangle_octree.hpp)
 
 set(MATH_SOURCES engine/source/math/matrices.cpp
                  engine/source/math/euler_angles.cpp
-                 engine/source/math/matrices.cpp)
+                 engine/source/math/matrices.cpp
+                 engine/source/math/triangle_octree.cpp)
 
 source_group("Header Files/source/math" FILES ${MATH_HEADERS})
 source_group("Source Files/source/math" FILES ${MATH_SOURCES})

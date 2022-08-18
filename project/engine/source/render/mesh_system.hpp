@@ -8,6 +8,7 @@
 #include "emissive_instances.hpp"
 #include "model.hpp"
 #include "matrices.hpp"
+#include "transform_system.hpp"
 
 namespace engine
 {
@@ -55,7 +56,7 @@ template <>
 void MeshSystem::addInstance<OpaqueInstances>(std::shared_ptr<Model> model,
                                               const std::vector<OpaqueInstances::Material> & materials,
                                               const OpaqueInstances::Instance & instance)
-{    
+{
     // try to find the same model
     for (auto & per_model : opaque_instances.per_model)
     {

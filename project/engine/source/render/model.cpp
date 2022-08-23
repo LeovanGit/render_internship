@@ -13,14 +13,16 @@ Model::Model(const std::string & model_filename)
     
     uint32_t flags(aiProcess_Triangulate |
                    aiProcess_ConvertToLeftHanded |
-                   aiProcess_CalcTangentSpace);
+                   aiProcess_CalcTangentSpace |
+                   aiProcess_GenBoundingBoxes);
     
     const aiScene * ai_scene = importer.ReadFile(model_filename,
                                                  flags);
     // importer.GetErrorString() for more information
     assert(ai_scene && "Assimp::Importer::ReadFile()");
    
-    meshes.resize(ai_scene->mNumMeshes);    
+    meshes.resize(ai_scene->mNumMeshes);
+    octrees.resize(ai_scene->mNumMeshes);
     
     std::vector<Vertex> vertices;
     std::vector<int> indices;
@@ -46,6 +48,11 @@ Model::Model(const std::string & model_filename)
         aiNode * node = ai_scene->mRootNode->mChildren[m];
         dst_mesh.mesh_to_model =
             reinterpret_cast<glm::mat4 &>(node->mTransformation.Transpose());
+
+        // for collision in TransfromSystem
+        math::Mesh mesh;
+        mesh.box.min = reinterpret_cast<glm::vec3 &>(src_mesh->mAABB.mMin);
+        mesh.box.max = reinterpret_cast<glm::vec3 &>(src_mesh->mAABB.mMax);        
         
         // read vertex data
         for (uint32_t v = 0; v != src_mesh->mNumVertices; ++v)
@@ -66,7 +73,10 @@ Model::Model(const std::string & model_filename)
             vertex.bitangent = reinterpret_cast<glm::vec3 &>(src_mesh->mBitangents[v]);
                
             vertices.push_back(vertex);
+            mesh.vertices.push_back(vertex);
         }
+
+        mesh.triangles.resize(src_mesh->mNumFaces);
 
         // read index data
         for (uint32_t f = 0; f != src_mesh->mNumFaces; ++f)
@@ -76,29 +86,54 @@ Model::Model(const std::string & model_filename)
             for (uint32_t i = 0; i != face.mNumIndices; ++i)
             {
                 indices.push_back(face.mIndices[i]);
+                mesh.triangles[f].indices[i] = face.mIndices[i];
             }
         }
+        octrees[m].initialize(std::make_shared<math::Mesh>(mesh));
     }
     
     vertex_buffer.init(vertices.data(), vertices.size());
     index_buffer.init(indices.data(), indices.size());
 }
 
-Model::Model(Vertex * vertices,
-             uint32_t vertices_size,
-             int * indices,
-             uint32_t indices_size)
+// for generate default objects with one mesh (sphere, cube, plane)
+Model::Model(std::vector<Vertex> & vertices,
+             std::vector<int> & indices)
 {
-    vertex_buffer.init(vertices, vertices_size);
-    index_buffer.init(indices, indices_size);
+    uint32_t vertices_size = vertices.size();
+    uint32_t indices_size = indices.size();
+    
+    vertex_buffer.init(vertices.data(), vertices_size);
+    index_buffer.init(indices.data(), indices_size);
 
     glm::mat4 mesh_to_model(1.0f, 0.0f, 0.0f, 0.0f,
                             0.0f, 1.0f, 0.0f, 0.0f,
                             0.0f, 0.0f, 1.0f, 0.0f,
                             0.0f, 0.0f, 0.0f, 1.0f);
+    
+    MeshRange mesh_range {vertices_size,
+                          indices_size,
+                          0,
+                          0,
+                          mesh_to_model};
 
-    MeshRange mesh {vertices_size, indices_size, 0, 0, mesh_to_model};
-    meshes.push_back(mesh);
+    meshes.push_back(mesh_range);
+
+    math::Mesh mesh;
+    mesh.vertices = vertices;
+    mesh.box = math::BoundingBox::unit();
+    for (uint32_t i = 0, size = indices_size; i != size; i += 3)
+    {
+        math::Mesh::Triangle triangle;
+        triangle.indices[0] = indices[i];
+        triangle.indices[1] = indices[i + 1];
+        triangle.indices[2] = indices[i + 2];
+        
+        mesh.triangles.push_back(triangle);
+    }
+    
+    octrees.resize(1);
+    octrees[0].initialize(std::make_shared<math::Mesh>(mesh));
 }
 
 
@@ -116,5 +151,10 @@ std::vector<Model::MeshRange> & Model::getMeshRanges()
 Model::MeshRange & Model::getMeshRange(uint32_t index)
 {
     return meshes[index];
+}
+
+std::vector<math::TriangleOctree> & Model::getOctree()
+{
+    return octrees;
 }
 } // namespace engine

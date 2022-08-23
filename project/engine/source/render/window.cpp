@@ -158,12 +158,15 @@ void Window::bindRenderTarget()
 {
     Globals * globals = Globals::getInstance();
 
-    // set render target
     globals->device_context4->OMSetRenderTargets(1,
                                                  LDR_RTV.get(),
                                                  NULL);
+}
 
-    // set viewport
+void Window::bindViewport()
+{
+    Globals * globals = Globals::getInstance();
+
     globals->device_context4->RSSetViewports(1, &viewport);
 }
 

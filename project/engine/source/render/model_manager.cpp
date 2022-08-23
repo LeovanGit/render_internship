@@ -29,9 +29,10 @@ std::shared_ptr<Model> ModelManager::getModel(const std::string & model_path)
 {
     auto item = models.find(model_path);
     if (item != models.end()) return item->second;
+
+    std::shared_ptr<Model> model(new Model(model_path));
+    auto result = models.try_emplace(model_path, model);
     
-    auto result = models.try_emplace(model_path,
-                                     std::make_shared<Model>(model_path));
     return result.first->second;
 }
 
@@ -45,10 +46,8 @@ std::shared_ptr<Model> ModelManager::getDefaultCube(const std::string & key)
     auto item = models.find(key);
     if (item != models.end()) return item->second;
     
-    typedef Model::Vertex Vertex;
-
     // CREATE VERTEX BUFFER
-    Vertex vertices[] =
+    std::vector<Vertex> vertices =
     {
         // UV with a little offset to disable wrapping
         //     POSITION               UV              NORMAL               TANGENT             BITANGENT
@@ -108,7 +107,7 @@ std::shared_ptr<Model> ModelManager::getDefaultCube(const std::string & key)
     };
     
     // CREATE INDEX BUFFER
-    int indices[] =
+    std::vector<int> indices =
     {
         0, 1, 2,
         3, 4, 5,
@@ -124,8 +123,8 @@ std::shared_ptr<Model> ModelManager::getDefaultCube(const std::string & key)
         33, 34, 35,
     };
     
-    Model model(vertices, 36, indices, 36);
-    auto result = models.try_emplace(key, std::make_shared<Model>(model));
+    std::shared_ptr<Model> model(new Model(vertices, indices));
+    auto result = models.emplace(key, model);
 
     return result.first->second;
 }
@@ -135,10 +134,8 @@ std::shared_ptr<Model> ModelManager::getDefaultPlane(const std::string & key)
     auto item = models.find(key);
     if (item != models.end()) return item->second;
     
-    typedef Model::Vertex Vertex;
-
     // CREATE VERTEX BUFFER
-    Vertex vertices[] =
+    std::vector<Vertex> vertices =
     {
         // UV with a little offset to disable wrapping
         //     POSITION              UV            NORMAL               TANGENT             BITANGENT
@@ -149,14 +146,14 @@ std::shared_ptr<Model> ModelManager::getDefaultPlane(const std::string & key)
     };
     
     // CREATE INDEX BUFFER
-    int indices[] =
+    std::vector<int> indices =
     {
         0, 1, 2,
         2, 3, 0,
     };
     
-    Model model(vertices, 4, indices, 6);
-    auto result = models.try_emplace(key, std::make_shared<Model>(model));
+    std::shared_ptr<Model> model(new Model(vertices, indices));
+    auto result = models.emplace(key, model);
 
     return result.first->second;
 }
@@ -164,9 +161,7 @@ std::shared_ptr<Model> ModelManager::getDefaultPlane(const std::string & key)
 std::shared_ptr<Model> ModelManager::getDefaultSphere(const std::string & key)
 {
     auto item = models.find(key);
-    if (item != models.end()) return item->second;
-    
-    typedef Model::Vertex Vertex;
+    if (item != models.end()) return item->second;   
 
     // GENERATE SPHERE FROM CUBE
     const uint32_t SIDES = 6;
@@ -287,9 +282,8 @@ std::shared_ptr<Model> ModelManager::getDefaultSphere(const std::string & key)
     indices.resize(vertices.size());
     for (int i = 0, size = indices.size(); i != size; ++i) indices[i] = i;
     
-    Model model(vertices.data(), vertices.size(),
-                indices.data(), indices.size());
-    auto result = models.try_emplace(key, std::make_shared<Model>(model));
+    std::shared_ptr<Model> model(new Model(vertices, indices));
+    auto result = models.emplace(key, model);
 
     return result.first->second;
 }

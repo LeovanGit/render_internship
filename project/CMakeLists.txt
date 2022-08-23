@@ -80,7 +80,8 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/emissive_instances.hpp
                    engine/source/render/mesh_system.hpp
                    engine/source/render/light_system.hpp
-                   engine/source/transform_system.hpp)
+                   engine/source/transform_system.hpp
+                   engine/source/render/vertex.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/globals.cpp
@@ -110,12 +111,14 @@ set(MATH_HEADERS engine/source/math/matrices.hpp
                  engine/source/math/constants.hpp
                  engine/source/math/box.hpp
                  engine/source/math/solid_vector.hpp
-                 engine/source/math/triangle_octree.hpp)
+                 engine/source/math/triangle_octree.hpp
+                 engine/source/math/ray.hpp)
 
 set(MATH_SOURCES engine/source/math/matrices.cpp
                  engine/source/math/euler_angles.cpp
                  engine/source/math/matrices.cpp
-                 engine/source/math/triangle_octree.cpp)
+                 engine/source/math/triangle_octree.cpp
+                 engine/source/math/ray.cpp)
 
 source_group("Header Files/source/math" FILES ${MATH_HEADERS})
 source_group("Source Files/source/math" FILES ${MATH_SOURCES})

@@ -168,12 +168,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         }
         case WM_RBUTTONDOWN:
         {
-            // controller.keys_log[KEY_RMOUSE] = true;
+            controller.keys_log[KEY_RMOUSE] = true;
             break;
         }
         case WM_RBUTTONUP:
         {
-            // controller.keys_log[KEY_RMOUSE] = false;
+            controller.keys_log[KEY_RMOUSE] = false;
             break;
         }
         case WM_LBUTTONDOWN:

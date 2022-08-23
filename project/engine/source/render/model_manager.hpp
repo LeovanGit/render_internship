@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "model.hpp"
+#include "vertex.hpp"
 
 namespace engine
 {

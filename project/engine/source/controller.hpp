@@ -68,6 +68,13 @@ public:
 
     bool is_accelerated;
 
+    struct GrabbedObject
+    {
+        bool is_grabbed = false;
+        uint32_t transform_id;
+        float t;
+    } object;
+
 private:
     void initKnight(const math::Transform & transform);
 

@@ -47,6 +47,8 @@ public:
 
     void bindRenderTarget();
 
+    void bindViewport();
+
     void switchBuffer();
 
     HWND handle;

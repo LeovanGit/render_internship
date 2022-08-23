@@ -1,75 +1,79 @@
-// #ifndef TRIANGLE_OCTREE_H
-// #define TRIANGLE_OCTREE_H
+#ifndef TRIANGLE_OCTREE_H
+#define TRIANGLE_OCTREE_H
 
-// #include "glm.hpp"
-// #include <limits>
-// #include <vector>
-// #include <array>
-// #include <memory>
-// #include <cassert>
-// #include <algorithm>
+#include "glm.hpp"
+#include <limits>
+#include <vector>
+#include <array>
+#include <memory>
+#include <cassert>
+#include <algorithm>
 
-// #include "box.hpp"
+#include "box.hpp"
+#include "ray.hpp"
+#include "vertex.hpp"
+#include "mesh_intersection.hpp"
 
-// namespace math
-// {
-// struct Ray;
-// struct Mesh;
-
-// struct MeshIntersection
-// {
-//     glm::vec3 pos;
-//     glm::vec3 normal;
-//     float near;
-//     float t;
-//     uint32_t triangle;
-
-//     constexpr void reset(float near,
-//                          float far = std::numeric_limits<float>::infinity())
-//     {
-//         this->near = near;
-//         t = far;
-//     }
+namespace math
+{
+struct Mesh
+{
+    struct Triangle
+    {
+        std::array<uint32_t, 3> indices;
+    };
     
-//     bool valid() const { return std::isfinite(t); }
-// };
+    Mesh() = default;
+    Mesh(const std::vector<engine::Vertex> & vertices,
+         const std::vector<Triangle> & triangles,
+         const BoundingBox & box) :
+         vertices(vertices),
+         triangles(triangles),
+         box(box)
+    {}
 
-// class TriangleOctree //: public NonCopyable
-// {
-// public:
-//     const static int PREFFERED_TRIANGLE_COUNT;
-//     const static float MAX_STRETCHING_RATIO;
+    std::vector<engine::Vertex> vertices;
+    std::vector<Triangle> triangles;
+    BoundingBox box;
+};
 
-//     void clear() { mesh = nullptr; }
-//     bool inited() const { return mesh != nullptr; }
+class TriangleOctree //: public NonCopyable
+{
+public:    
+    const static int PREFFERED_TRIANGLE_COUNT;
+    const static float MAX_STRETCHING_RATIO;
 
-//     void initialize(const Mesh & mesh);
+    void clear() { mesh = nullptr; }
+    bool inited() const { return mesh != nullptr; }
 
-//     bool intersect(const Ray & ray,
-//                    MeshIntersection & nearest) const;
+    void initialize(std::shared_ptr<Mesh> mesh);
 
-// protected:
-//     const Mesh * mesh = nullptr;
-//     std::vector<uint32_t> triangles;
+    bool intersect(const Ray & ray,
+                   MeshIntersection & nearest) const;
 
-//     BoundingBox box;
-//     BoundingBox initial_box;
+protected:
+    // const Mesh * mesh = nullptr;
+    std::shared_ptr<Mesh> mesh = nullptr;
+    std::vector<uint32_t> triangles;
 
-//     std::unique_ptr<std::array<TriangleOctree, 8>> children;
+    BoundingBox box;
+    BoundingBox initial_box;
 
-//     void initialize(const Mesh & mesh,
-//                     const BoundingBox & parent_box,
-//                     const glm::vec3 & parent_center,
-//                     int octet_index);
+    std::unique_ptr<std::array<TriangleOctree, 8>> children;
 
-//     bool addTriangle(uint32_t triangle_index,
-//                      const glm::vec3 & V1,
-//                      const glm::vec3 & V2,
-//                      const glm::vec3 & V3,
-//                      const glm::vec3 & center);
+    void initialize(std::shared_ptr<Mesh> mesh,
+                    const BoundingBox & parent_box,
+                    const glm::vec3 & parent_center,
+                    int octet_index);
 
-//     bool intersectInternal(const Ray & ray,
-//                            MeshIntersection & nearest) const;
-// };
-// } // namespace math
-// #endif
+    bool addTriangle(uint32_t triangle_index,
+                     const glm::vec3 & V1,
+                     const glm::vec3 & V2,
+                     const glm::vec3 & V3,
+                     const glm::vec3 & center);
+
+    bool intersectInternal(const Ray & ray,
+                           MeshIntersection & nearest) const;
+};
+} // namespace math
+#endif

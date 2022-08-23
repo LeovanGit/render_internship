@@ -470,6 +470,7 @@ void Controller::initPointLight(const glm::vec3 & position,
     engine::LightSystem * light_system = engine::LightSystem::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
     glm::vec3 radiance = light_system->radianceFromIrradianceAtDistance(irradiance,
                                                                         distance,
@@ -483,14 +484,16 @@ void Controller::initPointLight(const glm::vec3 & position,
     {
         ei::Material(radiance),
     };
-    
+
     math::Transform transform(position,
                               math::EulerAngles(0.0f, 0.0f, 0.0f),
                               glm::vec3(radius));
     
+    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
+    
     mesh_system->addInstance<engine::EmissiveInstances>(model_mgr->getDefaultSphere("sphere"),
                                                         materials,
-                                                        transform.toMat4());
+                                                        transform_id);
 }
 
 void Controller::processInput(Camera & camera,
@@ -575,49 +578,56 @@ void Controller::processInput(Camera & camera,
 
         camera.addRelativeAngles(euler);
     }
-    // if (keys_log[KEY_RMOUSE])
-    // {
-    //     camera.updateMatrices();
+    if (keys_log[KEY_RMOUSE])
+    {        
+        engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
+        engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+        
+        camera.updateMatrices();
 
-    //     glm::vec2 xy;
-    //     xy.x = 2.0f * (mouse.x + 0.5f) / width - 1.0f;           
-    //     xy.y = 1.0f - 2.0f * (mouse.y + 0.5f) / height; // reversed
+        glm::vec2 xy;
+        xy.x = 2.0f * (mouse.x + 0.5f) / width - 1.0f;
+        xy.y = 1.0f - 2.0f * (mouse.y + 0.5f) / height; // reversed
 
-    //     math::Ray ray;
-    //     ray.origin = camera.getPosition();
-    //     ray.direction = camera.reproject(xy.x, xy.y) - ray.origin;
+        math::Ray ray;
+        ray.origin = camera.getPosition();
+        ray.direction = camera.reproject(xy.x, xy.y) - ray.origin;
 
-    //     if (!object.is_grabbed)
-    //     {
-    //         Scene::IntersectionQuery iq;
-    //         iq.nearest.reset();
-    //         iq.mover = &object.mover;
+        math::MeshIntersection nearest;
+        nearest.reset(0.0f);
 
-    //         if (scene->findIntersection(ray, iq))
-    //         {
-    //             if (iq.mover->get())
-    //             {
-    //                 object.t = iq.nearest.t;
-    //                 object.point = iq.nearest.point;
-    //                 object.is_grabbed = true;
-    //             }
-    //         }
-    //     }
-    //     else
-    //     {
-    //         glm::vec3 dest = camera.getPosition() + object.t * ray.direction;
-    //         object.mover->move(dest - object.point);
-    //         object.point = dest;
-    //     }
-    // }
-    // else
-    // {
-    //     if (object.is_grabbed)
-    //     {
-    //         object.is_grabbed = false;
-    //         object.mover.reset();
-    //     }
-    // }
+        if (!object.is_grabbed)
+        {           
+            if (mesh_system->findIntersection(ray, nearest))
+            {
+                object.is_grabbed = true;
+                object.transform_id = nearest.transform_id;
+                object.t = nearest.t;
+            }
+        }
+        else
+        {
+            // glm::vec3 dest = camera.getPosition() + object.t * ray.direction;
+            // object.mover->move(dest - object.point);
+            // object.point = dest;
+
+            // DON'T FORGOT DELTA TIME
+            auto & transform = trans_system->transforms[object.transform_id];
+            transform *= math::Transform(glm::vec3(0.5f, 0.0f, 0.0f),
+                                         math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                         glm::vec3(1.0f, 1.0f, 1.0f)).toMat4();
+
+            mesh_system->opaque_instances.updateInstanceBuffers();
+            mesh_system->emissive_instances.updateInstanceBuffers();
+        }
+    }
+    else
+    {
+        if (object.is_grabbed)
+        {
+            object.is_grabbed = false;
+        }
+    }
     if (keys_log[KEY_PLUS])
     {
         camera.EV_100 += 2.0f * delta_time;

@@ -28,6 +28,8 @@ void Scene::renderFrame(windows::Window & window,
 
     globals->bind(camera);
 
+    window.bindViewport();
+    
     bindRenderTarget();
     bindDepthBuffer();
 
@@ -177,7 +179,7 @@ void Scene::bindRenderTarget()
 }
 
 void Scene::postProcessing(windows::Window & window)
-{
+{    
     Globals * globals = Globals::getInstance();
     ShaderManager * shader_mgr = ShaderManager::getInstance();
 
@@ -190,6 +192,13 @@ void Scene::postProcessing(windows::Window & window)
     shader_mgr->bindShader("../engine/shaders/post_processing.hlsl");
 
     globals->device_context4->Draw(3, 0);
+
+    // unset HDR SRV (because of warnings)
+    ID3D11ShaderResourceView * null_resource = nullptr;
+    globals->device_context4->PSSetShaderResources(0,
+                                                   1,
+                                                   &null_resource);
+
 }
 } // namespace engine
 

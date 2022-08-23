@@ -12,21 +12,14 @@
 #include "globals.hpp"
 #include "vertex_buffer.hpp"
 #include "index_buffer.hpp"
+#include "triangle_octree.hpp"
+#include "vertex.hpp"
 
 namespace engine
 {
 class Model
 {
 public:
-    struct Vertex
-    {
-        glm::vec3 position;
-        glm::vec2 uv;
-        glm::vec3 normal;
-        glm::vec3 tangent;
-        glm::vec3 bitangent;
-    };
-
     struct MeshRange
     {
         uint32_t vertex_count;
@@ -38,20 +31,20 @@ public:
     };
     
     Model(const std::string & model_filename);
-    Model(Vertex * vertices,
-          uint32_t vertices_size,
-          int * indices,
-          uint32_t indices_size);
+    Model(std::vector<Vertex> & vertices,
+          std::vector<int> & indices);
 
     void bind();
 
     std::vector<MeshRange> & getMeshRanges();
     MeshRange & getMeshRange(uint32_t index);
+    std::vector<math::TriangleOctree> & getOctree();
     
 protected:
     std::vector<MeshRange> meshes;
     VertexBuffer<Vertex> vertex_buffer;
     IndexBuffer index_buffer;
+    std::vector<math::TriangleOctree> octrees;
 };
 } // namespace engine
 

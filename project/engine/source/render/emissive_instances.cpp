@@ -4,6 +4,8 @@ namespace engine
 {
 void EmissiveInstances::updateInstanceBuffers()
 {
+    TransformSystem * trans_system = TransformSystem::getInstance();
+    
     uint32_t total_instances = 0;
     
     for (auto & per_model : per_model)
@@ -15,7 +17,7 @@ void EmissiveInstances::updateInstanceBuffers()
 
     instance_buffer.init(total_instances);
     D3D11_MAPPED_SUBRESOURCE mapped = instance_buffer.map();
-    Instance * dst = static_cast<Instance *>(mapped.pData);
+    glm::mat4 * dst = static_cast<glm::mat4 *>(mapped.pData);
 
     uint32_t copied_count = 0;
     for (auto & per_model : per_model)
@@ -27,7 +29,9 @@ void EmissiveInstances::updateInstanceBuffers()
                 uint32_t instances_size = per_material.instances.size();
                 for (uint32_t i = 0; i != instances_size; ++i)
                 {
-                    dst[copied_count++] = per_material.instances[i];
+                    dst[copied_count++] =
+                        trans_system->
+                        transforms[per_material.instances[i].transform_id];
                 }
             }
         }

@@ -27,6 +27,9 @@ public:
 
     void render();
 
+    bool findIntersection(const math::Ray & ray_ws,
+                          math::MeshIntersection & nearest);
+    
     template <class T>
     void addInstance(std::shared_ptr<Model> model,
                      const std::vector<struct T::Material> & materials,
@@ -62,45 +65,28 @@ void MeshSystem::addInstance<OpaqueInstances>(std::shared_ptr<Model> model,
     {
         if (per_model.model == model)
         {
-            for (auto & material : materials)
+            // meshes and is materials are in the same order!
+            for (uint32_t i = 0, size = materials.size(); i != size; ++i)
             {
-                for (auto & per_mesh : per_model.per_mesh)
+                // try to find the same material
+                for (auto & per_material: per_model.per_mesh[i].per_material)
                 {
-                    // try to find the same texture
-                    for (auto & per_material : per_mesh.per_material)
+                    if (per_material.material == materials[i])
                     {
-                        if (per_material.material == material)
-                        {
-                            per_material.instances.push_back(instance);
-
-                            goto next;
-                        }
+                        per_material.instances.push_back(instance);
+                        goto next_material;
                     }
                 }
+                // if not found same materials in the mesh -> add new
                 {
-                // if not found same texture -> add new
                 OpaqueInstances::PerMaterial per_material;
-                per_material.material = material;
+                per_material.material = materials[i];
                 per_material.instances.push_back(instance);
-
-                OpaqueInstances::PerMesh per_mesh;
-                per_mesh.per_material.push_back(per_material);
-        
-                per_model.per_mesh.push_back(per_mesh);
-
-                // also add meshes_range
-                auto & src_meshes = model->getMeshRanges();
-                auto & dst_meshes = per_model.model->getMeshRanges();
-
-                dst_meshes.insert(dst_meshes.end(),
-                                  src_meshes.begin(),
-                                  src_meshes.end());
+                per_model.per_mesh[i].per_material.push_back(per_material);
                 } // block
-                
-            next:
-                continue;
+                next_material:
+                    continue;
             }
-
             goto end;
         }
     }
@@ -138,66 +124,49 @@ void MeshSystem::addInstance<EmissiveInstances>(std::shared_ptr<Model> model,
     {
         if (per_model.model == model)
         {
-            for (auto & material : materials)
+            // meshes and is materials are in the same order!
+            for (uint32_t i = 0, size = materials.size(); i != size; ++i)
             {
-                for (auto & per_mesh : per_model.per_mesh)
+                // try to find the same material
+                for (auto & per_material: per_model.per_mesh[i].per_material)
                 {
-                    // try to find the same texture
-                    for (auto & per_material : per_mesh.per_material)
+                    if (per_material.material == materials[i])
                     {
-                        if (per_material.material == material)
-                        {
-                            per_material.instances.push_back(instance);
-
-                            goto next;
-                        }
+                        per_material.instances.push_back(instance);
+                        goto next_material;
                     }
                 }
+                // if not found same materials in the mesh -> add new
                 {
-                    // if not found same texture -> add new
-                    EmissiveInstances::PerMaterial per_material;
-                    per_material.material = material;
-                    per_material.instances.push_back(instance);
-
-                    EmissiveInstances::PerMesh per_mesh;
-                    per_mesh.per_material.push_back(per_material);
-        
-                    per_model.per_mesh.push_back(per_mesh);
-
-                    // also add meshes_range
-                    auto & src_meshes = model->getMeshRanges();
-                    auto & dst_meshes = per_model.model->getMeshRanges();
-
-                    dst_meshes.insert(dst_meshes.end(),
-                                      src_meshes.begin(),
-                                      src_meshes.end());
+                EmissiveInstances::PerMaterial per_material;
+                per_material.material = materials[i];
+                per_material.instances.push_back(instance);
+                per_model.per_mesh[i].per_material.push_back(per_material);
                 } // block
-                
-            next:
-                continue;
+                next_material:
+                    continue;
             }
-
             goto end;
         }
     }
     // if not found same model -> add new
     {
-        EmissiveInstances::PerModel per_model;
-        per_model.model = model;
+    EmissiveInstances::PerModel per_model;
+    per_model.model = model;
         
-        for (auto & material : materials)
-        {
-            EmissiveInstances::PerMaterial per_material;
-            per_material.material = material;
-            per_material.instances.push_back(instance);    
+    for (auto & material : materials)
+    {
+        EmissiveInstances::PerMaterial per_material;
+        per_material.material = material;
+        per_material.instances.push_back(instance);    
 
-            EmissiveInstances::PerMesh per_mesh;
-            per_mesh.per_material.push_back(per_material);
+        EmissiveInstances::PerMesh per_mesh;
+        per_mesh.per_material.push_back(per_material);
 
-            per_model.per_mesh.push_back(per_mesh);
-        }
+        per_model.per_mesh.push_back(per_mesh);
+    }
     
-        emissive_instances.per_model.push_back(per_model);
+    emissive_instances.per_model.push_back(per_model);
     } // block
     
  end:

@@ -235,7 +235,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
         material.albedo = g_albedo.Sample(g_sampler, input.uv).rgb;
         
         // texture sRGB -> linear
-        material.albedo = pow(material.albedo, g_gamma);
+        // material.albedo = pow(material.albedo, g_gamma);
     }
     else material.albedo = g_albedo_default;
         

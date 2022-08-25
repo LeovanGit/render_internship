@@ -118,7 +118,6 @@ set(MATH_HEADERS engine/source/math/matrices.hpp
 set(MATH_SOURCES engine/source/math/matrices.cpp
                  engine/source/math/euler_angles.cpp
                  engine/source/math/matrices.cpp
-                 engine/source/math/solid_vector.cpp
                  engine/source/math/triangle_octree.cpp
                  engine/source/math/ray.cpp)
 

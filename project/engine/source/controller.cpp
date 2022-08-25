@@ -300,6 +300,7 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Roughness.dds"),
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Metallic.dds"),
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Normal.dds"),
+                     true,
                      true),
         
         oi::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_BaseColor.dds"),

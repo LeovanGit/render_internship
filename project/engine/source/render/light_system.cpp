@@ -34,11 +34,11 @@ void LightSystem::addDirectionalLight(const glm::vec3 & direction,
     directional_lights.push_back(directional_light);
 }
 
-void LightSystem::addPointLight(const glm::vec3 & position,
+void LightSystem::addPointLight(uint32_t transform_id,
                                 const glm::vec3 & radiance,
                                 float radius)
 {
-    PointLight point_light(position, radiance, radius);
+    PointLight point_light(transform_id, radiance, radius);
 
     point_lights.push_back(point_light);
 }

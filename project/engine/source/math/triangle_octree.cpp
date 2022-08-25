@@ -191,7 +191,6 @@ bool TriangleOctree::intersectInternal(const Ray & ray,
         if (ray.intersect(nearest, V1, V2, V3))
         {
             nearest.triangle = i;
-            nearest.pos = (V1 + V2 + V3) / 3.0f;
             found = true;
         }
     }

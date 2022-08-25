@@ -5,6 +5,7 @@
 #include "glm.hpp"
 
 #include "solid_vector.hpp"
+#include "matrices.hpp"
 
 namespace engine
 {
@@ -21,7 +22,7 @@ public:
 
     static void del();
     
-    math::SolidVector<glm::mat4> transforms;
+    math::SolidVector<math::Transform> transforms;
     
 private:    
     TransformSystem() = default;

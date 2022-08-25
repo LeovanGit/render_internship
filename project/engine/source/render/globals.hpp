@@ -16,6 +16,7 @@
 #include "dx_res_ptr.hpp"
 #include "camera.hpp"
 #include "light_system.hpp"
+#include "transform_system.hpp"
 
 #include "win_undef.hpp"
 

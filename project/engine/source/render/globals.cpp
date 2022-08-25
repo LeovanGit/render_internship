@@ -178,6 +178,7 @@ void Globals::initRasterizers()
 void Globals::setPerFrameBuffer(const Camera & camera)
 {
     LightSystem * light_system = LightSystem::getInstance();
+    TransformSystem * trans_system = TransformSystem::getInstance();
     
     // find CS corner points in WS
     glm::vec3 bottom_left_WS = camera.reproject(-1.0f, -1.0f);
@@ -195,8 +196,10 @@ void Globals::setPerFrameBuffer(const Camera & camera)
     for (uint32_t size = light_system->point_lights.size(),
          i = 0; i != size; ++i)
     {
+        uint32_t transform_id = light_system->point_lights[i].transform_id;
+        
         per_frame_buffer_data.g_point_lights[i].position =
-            light_system->point_lights[i].position;
+            trans_system->transforms[transform_id].position;
 
         per_frame_buffer_data.g_point_lights[i].radiance =
             light_system->point_lights[i].radiance;

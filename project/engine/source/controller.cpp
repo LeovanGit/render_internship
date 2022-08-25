@@ -322,7 +322,7 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Normal.dds")),
     };
 
-    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
+    uint32_t transform_id = trans_system->transforms.insert(transform);
     
     mesh_system->addInstance<engine::OpaqueInstances>(
         model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
@@ -377,7 +377,7 @@ void Controller::initWall(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Wall/dds/Trims_Normal.dds")),
     };
 
-    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
+    uint32_t transform_id = trans_system->transforms.insert(transform);
     
     mesh_system->addInstance<engine::OpaqueInstances>(
         model_mgr->getModel("../engine/assets/Wall/SunCityWall.fbx"),
@@ -392,7 +392,7 @@ void Controller::initCube(const math::Transform & transform,
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
-    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
+    uint32_t transform_id = trans_system->transforms.insert(transform);
 
     mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultCube("cube"),
                                                       materials,
@@ -406,7 +406,7 @@ void Controller::initPlane(const math::Transform & transform,
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
-    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
+    uint32_t transform_id = trans_system->transforms.insert(transform);
 
     mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultPlane("plane"),
                                                       materials,
@@ -420,7 +420,7 @@ void Controller::initSphere(const math::Transform & transform,
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
-    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
+    uint32_t transform_id = trans_system->transforms.insert(transform);
 
     mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultSphere("sphere"),
                                                       materials,
@@ -475,21 +475,21 @@ void Controller::initPointLight(const glm::vec3 & position,
     glm::vec3 radiance = light_system->radianceFromIrradianceAtDistance(irradiance,
                                                                         distance,
                                                                         radius);
+
+    math::Transform transform(position,
+                              math::EulerAngles(0.0f, 0.0f, 0.0f),
+                              glm::vec3(radius));
+    
+    uint32_t transform_id = trans_system->transforms.insert(transform);
     
     // data
-    light_system->addPointLight(position, radiance, radius);
+    light_system->addPointLight(transform_id, radiance, radius);
 
     // visualization
     std::vector<ei::Material> materials =
     {
         ei::Material(radiance),
     };
-
-    math::Transform transform(position,
-                              math::EulerAngles(0.0f, 0.0f, 0.0f),
-                              glm::vec3(radius));
-    
-    uint32_t transform_id = trans_system->transforms.insert(transform.toMat4());
     
     mesh_system->addInstance<engine::EmissiveInstances>(model_mgr->getDefaultSphere("sphere"),
                                                         materials,
@@ -603,19 +603,16 @@ void Controller::processInput(Camera & camera,
                 object.is_grabbed = true;
                 object.transform_id = nearest.transform_id;
                 object.t = nearest.t;
+                object.pos = nearest.pos;
             }
         }
         else
         {
-            // glm::vec3 dest = camera.getPosition() + object.t * ray.direction;
-            // object.mover->move(dest - object.point);
-            // object.point = dest;
-
-            // DON'T FORGOT DELTA TIME
             auto & transform = trans_system->transforms[object.transform_id];
-            transform *= math::Transform(glm::vec3(0.5f, 0.0f, 0.0f),
-                                         math::EulerAngles(0.0f, 0.0f, 0.0f),
-                                         glm::vec3(1.0f, 1.0f, 1.0f)).toMat4();
+            
+            glm::vec3 new_pos = camera.getPosition() + object.t * ray.direction;
+            transform.position += (new_pos - object.pos);
+            object.pos = new_pos;
 
             mesh_system->opaque_instances.updateInstanceBuffers();
             mesh_system->emissive_instances.updateInstanceBuffers();

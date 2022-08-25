@@ -35,7 +35,9 @@ bool MeshSystem::findIntersection(const math::Ray & ray_ws,
                                   math::MeshIntersection & nearest)
 {
     TransformSystem * trans_system = TransformSystem::getInstance();
-        
+
+    glm::vec3 pos_ws;
+    
     for (auto & model: opaque_instances.per_model)
     {
         auto & octree = model.model->getOctree();
@@ -49,22 +51,29 @@ bool MeshSystem::findIntersection(const math::Ray & ray_ws,
             {
                 for (auto & instance: material.instances)
                 {
-                    glm::mat4 transform_inv = glm::inverse(trans_system->
-                                                           transforms[instance.transform_id]);
-                    glm::mat4 mesh_to_model_inv = glm::inverse(mesh_ranges[i].mesh_to_model);
+                    glm::mat4 mesh_to_model = mesh_ranges[i].mesh_to_model;
+                    glm::mat4 transform =
+                        trans_system->transforms[instance.transform_id].toMat4();
 
+                    glm::mat4 mesh_to_model_inv = glm::inverse(mesh_to_model);
+                    glm::mat4 transform_inv = glm::inverse(transform);
+                                        
                     // TriangleOctree stores vertices in mesh space
                     math::Ray ray_ms;
                     ray_ms.origin = mesh_to_model_inv *
                                     transform_inv *
                                     glm::vec4(ray_ws.origin, 1.0f);
-                    ray_ms.direction = glm::normalize(mesh_to_model_inv *
-                                                      transform_inv *
-                                                      glm::vec4(ray_ws.direction, 0.0f));
+                    ray_ms.direction = mesh_to_model_inv *
+                                       transform_inv *
+                                       glm::vec4(ray_ws.direction, 0.0f);
 
                     if (octree[i].intersect(ray_ms, nearest))
                     {
                         nearest.transform_id = instance.transform_id;
+
+                        pos_ws = transform *
+                                 mesh_to_model *
+                                 glm::vec4(nearest.pos, 1.0f);
                     }
                 }
             }
@@ -84,28 +93,40 @@ bool MeshSystem::findIntersection(const math::Ray & ray_ws,
             {
                 for (auto & instance: material.instances)
                 {
-                    glm::mat4 transform_inv = glm::inverse(trans_system->
-                                                           transforms[instance.transform_id]);
-                    glm::mat4 mesh_to_model_inv = glm::inverse(mesh_ranges[i].mesh_to_model);
+                    glm::mat4 mesh_to_model = mesh_ranges[i].mesh_to_model;
+                    glm::mat4 transform =
+                        trans_system->transforms[instance.transform_id].toMat4();
+
+                    glm::mat4 mesh_to_model_inv = glm::inverse(mesh_to_model);
+                    glm::mat4 transform_inv = glm::inverse(transform);
 
                     // TriangleOctree stores vertices in mesh space
                     math::Ray ray_ms;
                     ray_ms.origin = mesh_to_model_inv *
                                     transform_inv *
                                     glm::vec4(ray_ws.origin, 1.0f);
-                    ray_ms.direction = glm::normalize(mesh_to_model_inv *
-                                                      transform_inv *
-                                                      glm::vec4(ray_ws.direction, 0.0f));
+                    ray_ms.direction = mesh_to_model_inv *
+                                       transform_inv *
+                                       glm::vec4(ray_ws.direction, 0.0f);
 
                     if (octree[i].intersect(ray_ms, nearest))
                     {
                         nearest.transform_id = instance.transform_id;
+
+                        pos_ws = transform *
+                                 mesh_to_model *
+                                 glm::vec4(nearest.pos, 1.0f);
                     }
                 }
             }
         } 
     }
-    
-    return nearest.valid();
+
+    if (!nearest.valid()) return false;
+
+    nearest.t = glm::length(pos_ws - ray_ws.origin) / glm::length(ray_ws.direction);
+    nearest.pos = pos_ws;
+
+    return true;
 }
 } // namespace engine

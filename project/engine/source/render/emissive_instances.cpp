@@ -31,7 +31,7 @@ void EmissiveInstances::updateInstanceBuffers()
                 {
                     dst[copied_count++] =
                         trans_system->
-                        transforms[per_material.instances[i].transform_id];
+                        transforms[per_material.instances[i].transform_id].toMat4();
                 }
             }
         }

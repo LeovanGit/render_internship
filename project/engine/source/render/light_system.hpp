@@ -32,15 +32,15 @@ public:
     class PointLight
     {
     public:
-        PointLight(const glm::vec3 & position,
+        PointLight(uint32_t transform_id,
                    const glm::vec3 & radiance,
                    float radius) :
-                   position(position),
+                   transform_id(transform_id),
                    radiance(radiance),
                    radius(radius)
         {}
 
-        glm::vec3 position;
+        uint32_t transform_id;
         glm::vec3 radiance;
         float radius;
     };
@@ -59,7 +59,7 @@ public:
                              const glm::vec3 & radiance,
                              float solid_angle);
 
-    void addPointLight(const glm::vec3 & position,
+    void addPointLight(uint32_t transform_id,
                        const glm::vec3 & radiance,
                        float radius);
 

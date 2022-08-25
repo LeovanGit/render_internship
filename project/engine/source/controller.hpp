@@ -73,6 +73,7 @@ public:
         bool is_grabbed = false;
         uint32_t transform_id;
         float t;
+        glm::vec3 pos;
     } object;
 
 private:

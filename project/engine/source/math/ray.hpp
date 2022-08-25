@@ -1,6 +1,7 @@
 #ifndef RAY_HPP
 #define RAY_HPP
 
+#include <algorithm>
 #include "glm.hpp"
 
 #include "box.hpp"

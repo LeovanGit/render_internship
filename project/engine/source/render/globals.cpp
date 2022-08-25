@@ -271,6 +271,7 @@ void Globals::setPerMeshBuffer(const glm::mat4 & g_mesh_to_model,
                                bool g_has_roughness_texture,
                                bool g_has_metalness_texture,
                                bool g_has_normal_map,
+                               bool g_is_directx_style_normal_map,
                                const glm::vec3 & g_albedo_default,
                                float g_roughness_default,
                                float g_metalness_default)
@@ -282,6 +283,8 @@ void Globals::setPerMeshBuffer(const glm::mat4 & g_mesh_to_model,
     per_mesh_buffer_data.g_has_roughness_texture = g_has_roughness_texture;
     per_mesh_buffer_data.g_has_metalness_texture = g_has_metalness_texture;
     per_mesh_buffer_data.g_has_normal_map = g_has_normal_map;
+    per_mesh_buffer_data.g_is_directx_style_normal_map =
+        g_is_directx_style_normal_map;
     
     per_mesh_buffer_data.g_albedo_default = g_albedo_default;
     per_mesh_buffer_data.g_roughness_default = g_roughness_default;

@@ -49,12 +49,14 @@ source_group("shaders" FILES ${SHADERS})
 # --------------------[SOURCE]--------------------
 set(HEADERS engine/source/controller.hpp
             engine/source/scene.hpp
-            engine/source/camera.hpp)
+            engine/source/camera.hpp
+            engine/source/transform_system.hpp)
 
 set(SOURCES engine/source/controller.cpp
             engine/source/scene.cpp
             engine/source/camera.cpp
-            engine/source/main.cpp)
+            engine/source/main.cpp
+            engine/source/transform_system.cpp)
 
 source_group("Header Files/source" FILES ${HEADERS})
 source_group("Source Files/source" FILES ${SOURCES})
@@ -80,7 +82,6 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/emissive_instances.hpp
                    engine/source/render/mesh_system.hpp
                    engine/source/render/light_system.hpp
-                   engine/source/transform_system.hpp
                    engine/source/render/vertex.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
@@ -98,8 +99,7 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/opaque_instances.cpp
                    engine/source/render/emissive_instances.cpp
                    engine/source/render/mesh_system.cpp
-                   engine/source/render/light_system.cpp
-                   engine/source/transform_system.cpp)
+                   engine/source/render/light_system.cpp)
 
 source_group("Header Files/source/render" FILES ${RENDER_HEADERS})
 source_group("Source Files/source/render" FILES ${RENDER_SOURCES})
@@ -112,11 +112,13 @@ set(MATH_HEADERS engine/source/math/matrices.hpp
                  engine/source/math/box.hpp
                  engine/source/math/solid_vector.hpp
                  engine/source/math/triangle_octree.hpp
-                 engine/source/math/ray.hpp)
+                 engine/source/math/ray.hpp
+                 engine/source/math/mesh_intersection.hpp)
 
 set(MATH_SOURCES engine/source/math/matrices.cpp
                  engine/source/math/euler_angles.cpp
                  engine/source/math/matrices.cpp
+                 engine/source/math/solid_vector.cpp
                  engine/source/math/triangle_octree.cpp
                  engine/source/math/ray.cpp)
 

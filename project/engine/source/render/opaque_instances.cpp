@@ -80,6 +80,7 @@ void OpaqueInstances::render()
                                           static_cast<bool>(material.roughness),
                                           static_cast<bool>(material.metalness),
                                           static_cast<bool>(material.normal),
+                                          material.is_directx_style_normal_map,
                                           material.albedo_default,
                                           material.roughness_default,
                                           material.metalness_default);

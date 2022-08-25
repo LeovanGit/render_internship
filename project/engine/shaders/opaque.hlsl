@@ -8,11 +8,13 @@ cbuffer PerMesh : register(b1)
     bool g_has_roughness_texture;
     bool g_has_metalness_texture;
     bool g_has_normal_map;
-
+    bool g_is_directx_style_normal_map;
+    float3 padding_0;
+    
     float3 g_albedo_default;
     float g_roughness_default;
     float g_metalness_default;
-    float3 padding_0;
+    float3 padding_1;
 }
 
 struct VS_INPUT
@@ -63,8 +65,10 @@ PS_INPUT vertexShader(VS_INPUT input)
     pos = mul(pos, g_proj_view);
     output.pos_CS = pos;
 
+    float3 bitangent = input.bitangent;
+    if (!g_is_directx_style_normal_map) bitangent *= -1.0f;
     float3x3 TBN = float3x3(input.tangent,
-                            input.bitangent,
+                            bitangent,
                             input.normal);
 
     output.uv = input.uv;
@@ -234,7 +238,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     {
         material.albedo = g_albedo.Sample(g_sampler, input.uv).rgb;
         
-        // texture sRGB -> linear
+        // texture sRGB -> linear (delegated to DDSTextureLoader)
         // material.albedo = pow(material.albedo, g_gamma);
     }
     else material.albedo = g_albedo_default;

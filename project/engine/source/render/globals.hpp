@@ -58,11 +58,13 @@ struct PerMeshBufferData
     BOOL g_has_roughness_texture;
     BOOL g_has_metalness_texture;
     BOOL g_has_normal_map;
-
+    BOOL g_is_directx_style_normal_map;
+    glm::vec3 padding_0;
+    
     glm::vec3 g_albedo_default;
     float g_roughness_default;
     float g_metalness_default;    
-    glm::vec3 padding_0;
+    glm::vec3 padding_1;
 };
 
 struct PerEmissiveMeshBufferData
@@ -105,6 +107,7 @@ public:
                           bool g_has_roughness_texture,
                           bool g_has_metalness_texture,
                           bool g_has_normal_map,
+                          bool g_is_directx_style_normal_map,
                           const glm::vec3 & g_albedo_default,
                           float g_roughness_default,
                           float g_metalness_default);

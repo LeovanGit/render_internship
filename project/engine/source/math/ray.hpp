@@ -8,7 +8,7 @@
 #include "euler_angles.hpp"
 #include "constants.hpp"
 #include "mesh_intersection.hpp"
-#include <iostream>
+
 namespace math
 {
 class Ray

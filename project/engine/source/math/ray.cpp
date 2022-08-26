@@ -34,35 +34,30 @@ bool Ray::intersect(MeshIntersection & nearest,
                     const glm::vec3 & V3) const
 {
     glm::vec3 edge_1 = V2 - V1;
-    glm::vec3 edge_2 = V3 - V2;
-    glm::vec3 edge_3 = V1 - V3;
+    glm::vec3 edge_2 = V3 - V1;
 
-    glm::vec3 normal = glm::cross(edge_2, edge_1);
+    glm::vec3 vec_1 = glm::cross(direction, edge_2);
+    float det = glm::dot(edge_1, vec_1);
 
-    // FIND INTERSECTION POINT
-    float cosa = glm::dot(normal, direction);
-    if (math::areAlmostEqual(cosa, 0.0f, math::SOME_SMALL_NUMBER)) return false;    
-    float d = -glm::dot(normal, V1);
-
-    float t = -(d + glm::dot(normal, origin)) / cosa;
-    if (t < 0.0f) return false; // no intersection
-    if (t >= nearest.t) return false; // intersection, but not nearest
-    glm::vec3 P = origin + t * direction;
+    // ray || triangle
+    if (areAlmostEqual(fabs(det), 0.0f, SOME_SMALL_NUMBER)) return false;
     
-    // INSIDE-OUTSIDE TEST (using barycentric coords)
-    float denom = glm::dot(normal, normal);
-    glm::vec3 e;
+    float det_inv = 1.0f / det;
 
-    e = glm::cross((P - V1), edge_1);
-    float u = glm::dot(e, normal) / denom;
-    if (u < 0 || u > 1) return false;
+    glm::vec3 vec_2 = origin - V1;
+    float u = glm::dot(vec_2, vec_1) * det_inv;
+    if (u < 0.0f || u > 1.0f) return false;
 
-    e = glm::cross((P - V2), edge_2);
-    float v = glm::dot(e, normal) / denom;
-    if (v < 0 || (u + v) > 1) return false;
+    glm::vec3 vec_3 = glm::cross(vec_2, edge_1);
+    float v = glm::dot(direction, vec_3) * det_inv;
+    if (v < 0.0f || (u + v) > 1.0f) return false;
+
+    float t = glm::dot(edge_2, vec_3) * det_inv;
+    if (t < 0) return false; // no intersection
+    if (t >= nearest.t) return false; // intersection, but not nearest
     
     nearest.t = t;
-    nearest.pos = P;
+    nearest.pos = origin + t * direction;
 
     return true;
 }

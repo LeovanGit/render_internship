@@ -27,44 +27,42 @@ bool Ray::intersect(float t, const BoundingBox & box) const
     return true;
 }
 
-// ray-triangle intersection
+// Moller-Trumbore ray-triangle intersection
 bool Ray::intersect(MeshIntersection & nearest,
                     const glm::vec3 & V1,
                     const glm::vec3 & V2,
                     const glm::vec3 & V3) const
 {
-    glm::vec3 normal = glm::normalize(glm::cross(V2 - V1, V3 - V1));
-    
-    float cosa = glm::dot(normal, direction);
-    // ray || triangle
-    if (math::areAlmostEqual(cosa, 0, math::SOME_SMALL_NUMBER)) return false; 
-    
-    float d = -glm::dot(normal, V1);
-    float t = -(d + glm::dot(normal, origin)) / cosa;
-
-    if (t < 0) return false; // no intersection
-    if (t >= nearest.t) return false; // intersection, but not nearest
-
-    // inside-outside the triangle test
-    glm::vec3 point = origin + direction * t;
-    
     glm::vec3 edge_1 = V2 - V1;
     glm::vec3 edge_2 = V3 - V2;
     glm::vec3 edge_3 = V1 - V3;
 
-    glm::vec3 vp_1 = point - V1;
-    glm::vec3 vp_2 = point - V2;
-    glm::vec3 vp_3 = point - V3;
+    glm::vec3 normal = glm::cross(edge_2, edge_1);
 
-    glm::vec3 n = normal;
-    if (glm::dot(glm::cross(edge_1, edge_2), normal) <= 0) n = -normal;
+    // FIND INTERSECTION POINT
+    float cosa = glm::dot(normal, direction);
+    if (math::areAlmostEqual(cosa, 0.0f, math::SOME_SMALL_NUMBER)) return false;    
+    float d = -glm::dot(normal, V1);
 
-    if (glm::dot(n, glm::cross(edge_1, vp_1)) <= 0 ||
-        glm::dot(n, glm::cross(edge_2, vp_2)) <= 0 ||
-        glm::dot(n, glm::cross(edge_3, vp_3)) <= 0) return false;
+    float t = -(d + glm::dot(normal, origin)) / cosa;
+    if (t < 0.0f) return false; // no intersection
+    if (t >= nearest.t) return false; // intersection, but not nearest
+    glm::vec3 P = origin + t * direction;
+    
+    // INSIDE-OUTSIDE TEST (using barycentric coords)
+    float denom = glm::dot(normal, normal);
+    glm::vec3 e;
+
+    e = glm::cross((P - V1), edge_1);
+    float u = glm::dot(e, normal) / denom;
+    if (u < 0 || u > 1) return false;
+
+    e = glm::cross((P - V2), edge_2);
+    float v = glm::dot(e, normal) / denom;
+    if (v < 0 || (u + v) > 1) return false;
     
     nearest.t = t;
-    nearest.pos = origin + t * direction;
+    nearest.pos = P;
 
     return true;
 }

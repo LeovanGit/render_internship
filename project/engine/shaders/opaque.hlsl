@@ -37,7 +37,8 @@ struct PS_INPUT
     float3 pos_WS : POSITION;
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
-    float3x3 TBN : TBN;
+    float3 tangent : TANGENT;
+    float3 bitangent : BITANGENT;
     float4x4 transform : TRANSFORM;
 };
 
@@ -57,7 +58,7 @@ PS_INPUT vertexShader(VS_INPUT input)
                                   input.transform_3);
 
     PS_INPUT output;
-    
+
     float4 pos = mul(float4(input.pos, 1.0f), g_mesh_to_model);
     pos = mul(pos, transform);
     output.pos_WS = pos.xyz;
@@ -65,15 +66,10 @@ PS_INPUT vertexShader(VS_INPUT input)
     pos = mul(pos, g_proj_view);
     output.pos_CS = pos;
 
-    float3 bitangent = input.bitangent;
-    if (!g_is_directx_style_normal_map) bitangent *= -1.0f;
-    float3x3 TBN = float3x3(input.tangent,
-                            bitangent,
-                            input.normal);
-
     output.uv = input.uv;
     output.normal = input.normal;
-    output.TBN = TBN;
+    output.tangent = input.tangent;
+    output.bitangent = input.bitangent;
     output.transform = transform;
 
     return output;
@@ -231,6 +227,12 @@ float3 calculatePointLights(Material material,
 
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
+    float3 bitangent = input.bitangent;
+    if (!g_is_directx_style_normal_map) bitangent *= -1.0f;
+    float3x3 TBN = float3x3(input.tangent,
+                            bitangent,
+                            input.normal);
+    
     Material material;
     material.fresnel = float3(g_F0_dielectric, g_F0_dielectric, g_F0_dielectric);
 
@@ -265,7 +267,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     {
         N = g_normal.Sample(g_sampler, input.uv).rgb;
         N = normalize(N * 2.0f - 1.0f); // [0; 1] -> [-1; 1]
-        N = normalize(mul(N, input.TBN));
+        N = normalize(mul(N, TBN));
     }
     else N = input.normal;
     

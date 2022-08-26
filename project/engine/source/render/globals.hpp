@@ -99,9 +99,11 @@ public:
 
     void initRasterizers();
 
+    void initPerFrameBuffer();
     void setPerFrameBuffer(const Camera & camera);
     void updatePerFrameBuffer();
 
+    void initPerMeshBuffer();
     void setPerMeshBuffer(const glm::mat4 & g_mesh_to_model,
                           bool g_has_albedo_texture,
                           bool g_has_roughness_texture,
@@ -113,6 +115,7 @@ public:
                           float g_metalness_default);
     void updatePerMeshBuffer();
 
+    void initPerEmissiveMeshBuffer();
     void setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model,
                                   const glm::vec3 & g_radiance);
     void updatePerEmissiveMeshBuffer();

@@ -20,6 +20,9 @@ void Globals::init()
         instance->initD3D();
         instance->initSamplers();
         instance->initRasterizers();
+        instance->initPerFrameBuffer();
+        instance->initPerMeshBuffer();
+        instance->initPerEmissiveMeshBuffer();
     }
     else spdlog::error("Globals::init() was called twice!");
 }
@@ -175,6 +178,22 @@ void Globals::initRasterizers()
     assert(result >= 0 && "CreateRasterizerState");    
 }
 
+void Globals::initPerFrameBuffer()
+{
+    D3D11_BUFFER_DESC cb_desc;
+    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+    cb_desc.ByteWidth = sizeof(per_frame_buffer_data);
+    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb_desc.MiscFlags = 0;
+    cb_desc.StructureByteStride = 0;
+    
+    HRESULT result = device5->CreateBuffer(&cb_desc,
+                                           NULL,
+                                           per_frame_buffer.reset());
+    assert(result >= 0 && "CreateBuffer");
+}
+
 void Globals::setPerFrameBuffer(const Camera & camera)
 {
     LightSystem * light_system = LightSystem::getInstance();
@@ -220,21 +239,6 @@ void Globals::setPerFrameBuffer(const Camera & camera)
         per_frame_buffer_data.g_dir_lights[i].solid_angle =
             light_system->directional_lights[i].solid_angle;
     }
-    
-    if (per_frame_buffer.valid()) return;
-    // constant buffer description
-    D3D11_BUFFER_DESC cb_desc;
-    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
-    cb_desc.ByteWidth = sizeof(per_frame_buffer_data);
-    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    cb_desc.MiscFlags = 0;
-    cb_desc.StructureByteStride = 0;
-    
-    HRESULT result = device5->CreateBuffer(&cb_desc,
-                                           NULL,
-                                           per_frame_buffer.reset());
-    assert(result >= 0 && "CreateBuffer");
 }
 
 void Globals::updatePerFrameBuffer()
@@ -266,6 +270,22 @@ void Globals::updatePerFrameBuffer()
                                           per_frame_buffer.get());
 }
 
+void Globals::initPerMeshBuffer()
+{
+    D3D11_BUFFER_DESC cb_desc;
+    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+    cb_desc.ByteWidth = sizeof(per_mesh_buffer_data);
+    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb_desc.MiscFlags = 0;
+    cb_desc.StructureByteStride = 0;
+    
+    HRESULT result = device5->CreateBuffer(&cb_desc,
+                                           NULL,
+                                           per_mesh_buffer.reset());
+    assert(result >= 0 && "CreateBuffer");
+}
+
 void Globals::setPerMeshBuffer(const glm::mat4 & g_mesh_to_model,
                                bool g_has_albedo_texture,
                                bool g_has_roughness_texture,
@@ -289,21 +309,6 @@ void Globals::setPerMeshBuffer(const glm::mat4 & g_mesh_to_model,
     per_mesh_buffer_data.g_albedo_default = g_albedo_default;
     per_mesh_buffer_data.g_roughness_default = g_roughness_default;
     per_mesh_buffer_data.g_metalness_default = g_metalness_default;
-    
-    if (per_mesh_buffer.valid()) return;
-    // constant buffer description
-    D3D11_BUFFER_DESC cb_desc;
-    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
-    cb_desc.ByteWidth = sizeof(per_mesh_buffer_data);
-    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    cb_desc.MiscFlags = 0;
-    cb_desc.StructureByteStride = 0;
-    
-    HRESULT result = device5->CreateBuffer(&cb_desc,
-                                           NULL,
-                                           per_mesh_buffer.reset());
-    assert(result >= 0 && "CreateBuffer");
 }
 
 void Globals::updatePerMeshBuffer()
@@ -335,15 +340,8 @@ void Globals::updatePerMeshBuffer()
                                           per_mesh_buffer.get());
 }
 
-void Globals::setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model,
-                                       const glm::vec3 & g_radiance)
+void Globals::initPerEmissiveMeshBuffer()
 {
-    // fill const buffer data
-    per_emissive_mesh_buffer_data.g_mesh_to_model = g_mesh_to_model;
-    per_emissive_mesh_buffer_data.g_radiance = g_radiance;
-    
-    if (per_emissive_mesh_buffer.valid()) return;
-    // constant buffer description
     D3D11_BUFFER_DESC cb_desc;
     cb_desc.Usage = D3D11_USAGE_DYNAMIC;
     cb_desc.ByteWidth = sizeof(per_emissive_mesh_buffer_data);
@@ -356,6 +354,14 @@ void Globals::setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model,
                                            NULL,
                                            per_emissive_mesh_buffer.reset());
     assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model,
+                                       const glm::vec3 & g_radiance)
+{
+    // fill const buffer data
+    per_emissive_mesh_buffer_data.g_mesh_to_model = g_mesh_to_model;
+    per_emissive_mesh_buffer_data.g_radiance = g_radiance;
 }
 
 void Globals::updatePerEmissiveMeshBuffer()

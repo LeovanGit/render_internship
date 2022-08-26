@@ -6,7 +6,6 @@ void Controller::init(engine::Scene & scene)
 
     mouse = glm::vec2(0);
     fixed_mouse = glm::vec2(0);
-    delta_fixed_mouse = glm::vec2(0);
 
     is_accelerated = false;
 
@@ -576,11 +575,13 @@ void Controller::processInput(Camera & camera,
         }
     }
     if (keys_log[KEY_LMOUSE])
-    {	
+    {
+        glm::vec2 delta_mouse = mouse - fixed_mouse;
+        
         // delta_fixed_mouse normalized
         glm::vec2 speed(0);
-        speed.x = (delta_fixed_mouse.y / float(height)) * rotation_speed.x;
-        speed.y = (delta_fixed_mouse.x / float(width)) * rotation_speed.y;
+        speed.x = (delta_mouse.y / float(height)) * rotation_speed.x;
+        speed.y = (delta_mouse.x / float(width)) * rotation_speed.y;
 
         math::EulerAngles euler(speed.y * delta_time,
                                 speed.x * delta_time,
@@ -660,13 +661,3 @@ void Controller::processInput(Camera & camera,
     // }
 }
 
-void Controller::calcMouseMovement(LPARAM lParam)
-{
-    mouse = glm::vec2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-
-    if (keys_log[KEY_LMOUSE])
-    {
-        delta_fixed_mouse.x = mouse.x - fixed_mouse.x;
-        delta_fixed_mouse.y = mouse.y - fixed_mouse.y;
-    }
-}

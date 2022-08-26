@@ -52,13 +52,10 @@ public:
                       const float delta_time,
                       const engine::windows::Window & win);
 
-    void calcMouseMovement(LPARAM lParam);
-
     engine::Scene * scene;
 
     glm::vec2 mouse;
     glm::vec2 fixed_mouse;
-    glm::vec2 delta_fixed_mouse;   
 
     bool keys_log[KEYS_COUNT];
     bool was_released[KEYS_COUNT];

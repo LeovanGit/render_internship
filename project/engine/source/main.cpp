@@ -192,7 +192,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         }
         case WM_MOUSEMOVE:
         {
-            controller.calcMouseMovement(lParam);
+            controller.mouse.x = GET_X_LPARAM(lParam);
+            controller.mouse.y = GET_Y_LPARAM(lParam);
             break;
         }
 	case WM_MOUSEWHEEL:

@@ -66,9 +66,9 @@ public:
     // easy way to set the radiance of the light source:
     // set it irradiance at some distance.
     // This func will calculate light source radiance from this values
-    glm::vec3 radianceFromIrradianceAtDistance(const glm::vec3 & irradiance,
-                                               float distance,
-                                               float radius);
+    static glm::vec3 radianceFromIrradianceAtDistance(const glm::vec3 & irradiance,
+                                                      float distance,
+                                                      float radius);
     
     std::vector<DirectionalLight> directional_lights;
     std::vector<PointLight> point_lights;

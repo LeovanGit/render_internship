@@ -227,7 +227,7 @@ void Globals::setPerFrameBuffer(const Camera & camera)
             light_system->point_lights[i].radius;
     }
 
-    for (uint32_t size = light_system->directional_lights.size(),
+    for (int32_t size = light_system->directional_lights.size(),
          i = 0; i != size; ++i)
     {
         per_frame_buffer_data.g_dir_lights[i].direction =

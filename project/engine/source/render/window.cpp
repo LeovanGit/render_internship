@@ -116,8 +116,8 @@ void Window::initViewport()
 
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
-    viewport.Width = client_width;
-    viewport.Height = client_height;
+    viewport.Width = static_cast<float>(client_width);
+    viewport.Height = static_cast<float>(client_height);
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
 }

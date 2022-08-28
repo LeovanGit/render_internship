@@ -201,7 +201,7 @@ void Controller::initScene(Camera & camera)
     //                tex_mgr->getTexture("../engine/assets/copper/copper_roughness.dds"),
     //                tex_mgr->getTexture("../engine/assets/copper/copper_metallic.dds"),
     //                tex_mgr->getTexture("../engine/assets/copper/copper_normal.dds"))});
-
+    
     initCube(math::Transform(glm::vec3(-30.0f, 0.0f, 0.0f),
                              math::EulerAngles(45.0f, 0.0f, 0.0f),
                              glm::vec3(4.0f, 4.0f, 4.0f)),
@@ -244,6 +244,20 @@ void Controller::initScene(Camera & camera)
     initWall(math::Transform(glm::vec3(0.0f, -10.0f, 50.0f),
                              math::EulerAngles(0.0f, 0.0f, 0.0f),
                              glm::vec3(10.0f, 10.0f, 10.0f)));
+    
+    initPlane(math::Transform(glm::vec3(10.0f, 0.0f, 48.0f),
+                              math::EulerAngles(0.0f, 0.0f, 0.0f),
+                              glm::vec3(5.0f, 10.0f, 1.0f)),
+              std::vector<oi::Material>{oi::Material(
+                      nullptr,
+                      nullptr,
+                      nullptr,
+                      nullptr,
+                      true,
+                      false,
+                      glm::vec3(0.5f),
+                      0.1f,
+                      1.0f)});
 }
 
 void Controller::initKnight(const math::Transform & transform)

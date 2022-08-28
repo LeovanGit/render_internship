@@ -57,19 +57,21 @@ PS_INPUT vertexShader(VS_INPUT input)
                                   input.transform_2,
                                   input.transform_3);
 
+    float4 pos_MS = mul(float4(input.pos, 1.0f), g_mesh_to_model);
+    float4 pos_WS = mul(pos_MS, transform);
+    float4 pos_CS = mul(pos_WS, g_proj_view);
+
     PS_INPUT output;
-
-    float4 pos = mul(float4(input.pos, 1.0f), g_mesh_to_model);
-    pos = mul(pos, transform);
-    output.pos_WS = pos.xyz;
+    output.pos_CS = pos_CS;
+    output.pos_WS = pos_WS.xyz;
     
-    pos = mul(pos, g_proj_view);
-    output.pos_CS = pos;
-
     output.uv = input.uv;
+    
     output.normal = input.normal;
     output.tangent = input.tangent;
-    output.bitangent = input.bitangent;
+    output.bitangent = g_is_directx_style_normal_map ? input.bitangent :
+                                                       input.bitangent * -1.0f;
+
     output.transform = transform;
 
     return output;
@@ -227,10 +229,8 @@ float3 calculatePointLights(Material material,
 
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
-    float3 bitangent = input.bitangent;
-    if (!g_is_directx_style_normal_map) bitangent *= -1.0f;
     float3x3 TBN = float3x3(input.tangent,
-                            bitangent,
+                            input.bitangent,
                             input.normal);
     
     Material material;
@@ -266,7 +266,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     if (g_has_normal_map)
     {
         N = g_normal.Sample(g_sampler, input.uv).rgb;
-        N = normalize(N * 2.0f - 1.0f); // [0; 1] -> [-1; 1]
+        N = N * 2.0f - 1.0f; // [0; 1] -> [-1; 1]
         N = normalize(mul(N, TBN));
     }
     else N = input.normal;

@@ -78,7 +78,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     RegisterClassEx(&wclass);
 
     // CREATE WINDOW
-    win.init(hInstance, 100.0f, 100.0f, 1280.0f, 720.0f);
+    win.init(hInstance, 100, 100, 1280, 720);
 
     // CREATE SCENE
     scene.init(win);
@@ -103,7 +103,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
         if (frameTimeElapsed())
         {
-            int fps = 1 / delta_time;
+            int fps = static_cast<int>(1.0f / delta_time);
             std::string fps_str = "FPS: " + std::to_string(fps);
             SetWindowTextA(win.handle, TEXT(fps_str.c_str()));
 
@@ -120,7 +120,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     engine::Engine::del();
 
     // return this part of the WM_QUIT message to Windows
-    return msg.wParam;
+    return static_cast<int>(msg.wParam);
 }
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

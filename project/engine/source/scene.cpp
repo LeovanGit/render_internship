@@ -101,7 +101,7 @@ void Scene::clearDepthBuffer()
                                                     D3D11_CLEAR_DEPTH |
                                                     D3D11_CLEAR_STENCIL,
                                                     0.0f, // reversed depth
-                                                    0.0f);
+                                                    0);
 }
 
 void Scene::bindDepthBuffer()

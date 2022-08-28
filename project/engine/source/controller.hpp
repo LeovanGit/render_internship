@@ -54,8 +54,8 @@ public:
 
     engine::Scene * scene;
 
-    glm::vec2 mouse;
-    glm::vec2 fixed_mouse;
+    glm::ivec2 mouse;
+    glm::ivec2 fixed_mouse;
 
     bool keys_log[KEYS_COUNT];
     bool was_released[KEYS_COUNT];

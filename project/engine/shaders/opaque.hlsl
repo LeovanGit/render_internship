@@ -88,6 +88,42 @@ struct Material
     float3 fresnel;
 };
 
+// May return direction pointing beneath surface horizon (dot(N, dir) < 0),
+// use clampDirToHorizon to fix it.
+// R = reflect(V, N)
+// cosa - half of solid angle's angular diameter
+// L - position of a sphere relative to surface (not normalized)
+// radius - radius of light source
+float3 approximateClosestSphereDir(float3 R,
+                                   float cosa,
+                                   float3 L,
+                                   float3 L_norm,
+                                   float L_length,
+                                   float radius)
+{
+    float RS = dot(R, L_norm);
+
+    bool intersects = (RS >= cosa);
+    if (intersects) return R;
+    if (RS < 0.0f) return L_norm;
+
+    float3 closest_point_dir = normalize(R * L_length * RS - L);
+    return normalize(L + radius * closest_point_dir);
+}
+
+// Input dir and NoD is N and NoL in a case of lighting computation
+void clampDirToHorizon(inout float3 dir,
+                       inout float ND,
+                       float3 normal,
+                       float minND)
+{
+    if (ND < minND)
+    {
+        dir = normalize(dir + (minND - ND) * normal);
+        ND = minND;
+    }
+}
+
 float calculateSolidAngle(float L_length,
                           float radius)
 {
@@ -160,6 +196,33 @@ float3 CookTorranceBRDF(Material material,
     return D_norm * F * G;
 }
 
+// PBR which take into light source size
+float3 PBR(Material material,
+           float3 N,
+           float3 L,
+           float3 L2,
+           float3 V,
+           float3 radiance,
+           float solid_angle)
+{
+    float3 H = normalize(L + V);
+    float NL = clamp(dot(N, L), 0.0f, 1.0f);
+    float NV = clamp(dot(N, V), 0.0f, 1.0f);
+
+    clampDirToHorizon(L2, NL, N, 0.0f);    
+    
+    float3 H2 = normalize(L2 + V);
+    float NL2 = clamp(dot(N, L2), 0.0f, 1.0f);
+    float NH2 = clamp(dot(N, H2), 0.0f, 1.0f);
+    float HL2 = clamp(dot(H, L2), 0.0f, 1.0f);
+
+    float3 diffuse = LambertBRDF(material, NL);
+    float3 specular = CookTorranceBRDF(material, NL2, NV, NH2, HL2, solid_angle);
+
+    return (diffuse * solid_angle + specular) * radiance;
+}
+
+// default PBR
 float3 PBR(Material material,
            float3 N,
            float3 L,
@@ -210,15 +273,27 @@ float3 calculatePointLights(Material material,
     
     for (uint i = 0; i != g_point_lights_count; ++i)
     {
-        float3 L = normalize(g_point_lights[i].position - pos_WS);
-        float L_length = length(g_point_lights[i].position - pos_WS);
+        float3 L = g_point_lights[i].position - pos_WS;
+        float3 L_norm = normalize(L);
         
-        float solid_angle = calculateSolidAngle(L_length,
+        float solid_angle = calculateSolidAngle(length(L),
                                                 g_point_lights[i].radius);
-    
+
+        // angular diameter of solid angle
+        float sina = g_point_lights[i].radius / length(L);
+        float cosa = sqrt(1.0f - sina * sina);
+
+        float3 L2 = approximateClosestSphereDir(reflect(-V, N),
+                                                cosa,
+                                                L,
+                                                L_norm,
+                                                length(L),
+                                                g_point_lights[i].radius);
+        
         color += PBR(material,
                      N,
-                     L,
+                     L_norm,
+                     L2,
                      V,
                      g_point_lights[i].radiance,
                      solid_angle);

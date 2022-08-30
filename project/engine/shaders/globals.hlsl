@@ -1,3 +1,6 @@
+#ifndef GLOBALS_HLSL
+#define GLOBALS_HLSL
+
 SamplerState g_sampler;
 
 static const float g_gamma = 2.2f;
@@ -32,3 +35,4 @@ cbuffer PerFrame : register(b0)
     } g_dir_lights[g_dir_lights_count];
 };
 
+#endif

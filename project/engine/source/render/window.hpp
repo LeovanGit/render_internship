@@ -51,6 +51,8 @@ public:
 
     void switchBuffer();
 
+    DxResPtr<ID3D11RenderTargetView> & getRenderTarget();
+
     HWND handle;
     HDC hdc;
 
@@ -71,3 +73,4 @@ private:
 } // namespace engine::windows
 
 #endif
+

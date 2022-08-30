@@ -1,4 +1,5 @@
 #include "globals.hlsl"
+#include "lighting.hlsl"
 
 cbuffer PerMesh : register(b1)
 {
@@ -70,7 +71,7 @@ PS_INPUT vertexShader(VS_INPUT input)
     output.normal = input.normal;
     output.tangent = input.tangent;
     output.bitangent = g_is_directx_style_normal_map ? input.bitangent :
-                                                       input.bitangent * -1.0f;
+                                                      -input.bitangent;
 
     output.transform = transform;
 
@@ -88,200 +89,6 @@ struct Material
     float3 fresnel;
 };
 
-// May return direction pointing beneath surface horizon (dot(N, dir) < 0),
-// use clampDirToHorizon to fix it.
-// R = reflect(V, N)
-// cosa - half of solid angle's angular diameter
-// L - position of a sphere relative to surface (not normalized)
-// radius - radius of light source
-float3 approximateClosestSphereDir(float3 R,
-                                   float cosa,
-                                   float3 L,
-                                   float3 L_norm,
-                                   float L_length,
-                                   float radius)
-{
-    float RS = dot(R, L_norm);
-
-    bool intersects = (RS >= cosa);
-    if (intersects) return R;
-    if (RS < 0.0f) return L_norm;
-
-    float3 closest_point_dir = normalize(R * L_length * RS - L);
-    return normalize(L + radius * closest_point_dir);
-}
-
-// Input dir and NoD is N and NoL in a case of lighting computation
-void clampDirToHorizon(inout float3 dir,
-                       inout float ND,
-                       float3 normal,
-                       float minND)
-{
-    if (ND < minND)
-    {
-        dir = normalize(dir + (minND - ND) * normal);
-        ND = minND;
-    }
-}
-
-float calculateSolidAngle(float L_length,
-                          float radius)
-{
-    // to avoid black points for roughness -> 0 objects
-    // when light source partially in some object
-    L_length = max(L_length, radius);
-
-    float R_sqr = L_length * L_length - radius * radius;
-    float cosa = sqrt(R_sqr) / L_length;    
-
-    return 2.0f * g_PI * (1.0f - cosa);
-}
-
-// G
-float ggxSmith(float roughness_sqr,
-               float NL,
-               float NV)
-{
-    float NL_sqr = NL * NL;
-    float NV_sqr = NV * NV;
-
-    // fast Smith from Filament
-    return 2.0f / (sqrt(1 + roughness_sqr * (1 - NV_sqr) / NV_sqr) +
-                   sqrt(1 + roughness_sqr * (1 - NL_sqr) / NL_sqr));
-
-}
-
-// D
-float ggxTrowbridgeReitz(float roughness_sqr,
-                         float NH)
-{
-    float NH_sqr = NH * NH;
-    float denom = NH_sqr * (roughness_sqr - 1.0f) + 1.0f;
-    float D = roughness_sqr / (g_PI  * denom * denom);
-
-    return D;
-}
-
-// F
-float3 ggxSchlick(float cosTheta,
-                  float3 F0)
-{
-    return F0 + (1.0f - F0) * pow(1.0f - cosTheta, 5.0f);
-}
-
-float3 LambertBRDF(Material material,
-                   float NL)
-{
-    float3 F = ggxSchlick(NL, material.fresnel);
-
-    return material.albedo * (1.0f - material.metalness) * (1.0f - F) * NL / g_PI;
-}
-
-float3 CookTorranceBRDF(Material material,
-                        float NL,
-                        float NV,
-                        float NH,
-                        float HL,
-                        float solid_angle)
-{
-    float roughness_sqr = material.roughness * material.roughness;
-    
-    float G = ggxSmith(roughness_sqr, NL, NV);
-    float D = ggxTrowbridgeReitz(roughness_sqr, NH);
-    float3 F = ggxSchlick(HL, material.fresnel);
-
-    // clamp NDF to avoid light reflection being brighter than a light source
-    float D_norm = min(1.0f, solid_angle * D / (4.0f * NV));
-    
-    return D_norm * F * G;
-}
-
-float3 calculateDirectionalLights(Material material,
-                                  float3 N,
-                                  float3 V)
-{
-    float3 color = float3(0.0f, 0.0f, 0.0f);
-    
-    for (uint i = 0; i != g_dir_lights_count; ++i)
-    {
-        float3 L = -normalize(g_dir_lights[i].direction);
-
-        float3 H = normalize(L + V);        
-        float NL = clamp(dot(N, L), 0.0f, 1.0f);
-        float NV = clamp(dot(N, V), 0.0f, 1.0f);
-        float NH = clamp(dot(N, H), 0.0f, 1.0f);
-        float HL = clamp(dot(H, L), 0.0f, 1.0f);
-
-        float3 diffuse = LambertBRDF(material, NL);
-        float3 specular = CookTorranceBRDF(material, NL, NV, NH, HL, g_dir_lights[i].solid_angle);
-        float3 color_i = (diffuse * g_dir_lights[i].solid_angle + specular) * g_dir_lights[i].radiance;
-        
-        color += color_i;
-    }
-
-    return color;
-}
-
-float3 calculatePointLights(Material material,
-                            float3 N,
-                            float3 GN,
-                            float3 V,
-                            float3 pos_WS)
-{
-    float3 color = float3(0.0f, 0.0f, 0.0f);
-    
-    for (uint i = 0; i != g_point_lights_count; ++i)
-    {
-        float3 L = g_point_lights[i].position - pos_WS;
-        float3 L_norm = normalize(L);
-
-        float3 H = normalize(L_norm + V);
-        float NL = clamp(dot(N, L_norm), 0.0f, 1.0f);
-        float NV = clamp(dot(N, V), 0.0f, 1.0f);
-
-        // angular diameter of solid angle
-        float sina = g_point_lights[i].radius / length(L);
-        float cosa = sqrt(1.0f - sina * sina);
-
-        // to avoid illumination of regions of the surface that
-        // should be self-shadowed (when light source on the back side of surface)
-        float GNL = dot(GN, L_norm);
-        float height_micro = NL * length(L); // distance: surface - light source
-        float height_macro = GNL * length(L);
-
-        float fading_micro = saturate((height_micro + g_point_lights[i].radius) /
-                                      (2.0f * g_point_lights[i].radius));
-        float fading_macro = saturate((height_macro + g_point_lights[i].radius) /
-                                      (2.0f * g_point_lights[i].radius));
-        NL = max(NL, fading_micro * sina);
-        
-        // take into light source size in specular part
-        float3 L2 = approximateClosestSphereDir(reflect(-V, N),
-                                                cosa,
-                                                L,
-                                                L_norm,
-                                                length(L),
-                                                g_point_lights[i].radius);
-        clampDirToHorizon(L2, NL, N, 0.001f);        
-
-        float3 H2 = normalize(L2 + V);
-        float NL2 = clamp(dot(N, L2), 0.0f, 1.0f);
-        float NH2 = clamp(dot(N, H2), 0.0f, 1.0f);
-        float HL2 = clamp(dot(H, L2), 0.0f, 1.0f);
-
-        float solid_angle = calculateSolidAngle(length(L),
-                                                g_point_lights[i].radius);
-   
-        float3 diffuse = LambertBRDF(material, NL);
-        float3 specular = CookTorranceBRDF(material, NL2, NV, NH2, HL2, solid_angle);
-        float3 color_i = (diffuse * solid_angle + specular) * g_point_lights[i].radiance;
-
-        color += color_i * fading_micro * fading_macro;
-    }
-
-    return color;
-}
-
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
     float3x3 TBN = float3x3(input.tangent,
@@ -289,42 +96,34 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
                             input.normal);
     
     Material material;
-    material.fresnel = float3(g_F0_dielectric, g_F0_dielectric, g_F0_dielectric);
 
-    if (g_has_albedo_texture)
-    {
-        material.albedo = g_albedo.Sample(g_sampler, input.uv).rgb;
-        
-        // texture sRGB -> linear (delegated to DDSTextureLoader)
-        // material.albedo = pow(material.albedo, g_gamma);
-    }
-    else material.albedo = g_albedo_default;
-        
-    if (g_has_roughness_texture)
-    {
-        material.roughness = g_roughness.Sample(g_sampler, input.uv).r;
-    }
-    else material.roughness = g_roughness_default;
+    // conversion from sRGB to linear by raising to the power of 2.2
+    // is delegated to DDSTextureLoader
+    material.albedo = g_has_albedo_texture ? g_albedo.Sample(g_sampler, input.uv).rgb :
+                                             g_albedo_default;
 
+    material.roughness = g_has_roughness_texture ? g_roughness.Sample(g_sampler, input.uv).r :
+                                                   g_roughness_default;
     // perception roughness -> roughness
     material.roughness *= material.roughness;
-    
-    if (g_has_metalness_texture)
-        material.metalness = g_metalness.Sample(g_sampler, input.uv).r;
-    else material.metalness = g_metalness_default;
 
+    material.metalness = g_has_metalness_texture ? g_metalness.Sample(g_sampler, input.uv).r :
+                                                   g_metalness_default;
+        
     // use albedo as F0 for metals
-    material.fresnel = lerp(material.fresnel, material.albedo, material.metalness);
+    material.fresnel = lerp(g_F0_dielectric, material.albedo, material.metalness);
 
-    float3 GN = input.normal; // geometry normal
+    // geometry normal
+    float3 GN = input.normal;
     GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
     GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
-    
-    float3 N; // texture normal
+
+    // texture normal
+    float3 N;
     if (g_has_normal_map)
     {
         N = g_normal.Sample(g_sampler, input.uv).rgb;
-        N = N * 2.0f - 1.0f; // [0; 1] -> [-1; 1]
+        N = 2.0f * N - 1.0f; // [0; 1] -> [-1; 1]
         N = normalize(mul(N, TBN));
     }
     else N = input.normal;
@@ -333,9 +132,14 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     
     float3 V = normalize(g_camera_position - input.pos_WS);
     
-    float3 color = float3(0.0f, 0.0f, 0.0f);
-    color += calculateDirectionalLights(material, N, V);
-    color += calculatePointLights(material, N, GN, V, input.pos_WS);
+    float3 color = calculateLighting(material.albedo,
+                                     material.roughness,
+                                     material.metalness,
+                                     material.fresnel,
+                                     N,
+                                     GN,
+                                     V,
+                                     input.pos_WS);
     
     return float4(color, 1.0f);
 }

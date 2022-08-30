@@ -18,7 +18,8 @@ void Scene::init(const windows::Window & window)
 }
 
 void Scene::renderFrame(windows::Window & window,
-                        const Camera & camera)
+                        const Camera & camera,
+                        engine::Postprocess & post_process) 
 {
     Globals * globals = Globals::getInstance();
     TextureManager * tex_mgr = TextureManager::getInstance();
@@ -26,7 +27,7 @@ void Scene::renderFrame(windows::Window & window,
     ModelManager * model_mgr = ModelManager::getInstance();
     MeshSystem * mesh_system = MeshSystem::getInstance();
 
-    globals->bind(camera);
+    globals->bind(camera, post_process.EV_100);
 
     window.bindViewport();
     
@@ -39,7 +40,7 @@ void Scene::renderFrame(windows::Window & window,
     mesh_system->render();
     sky.render();
 
-    postProcessing(window);
+    post_process.resolve(HDR_SRV, window.getRenderTarget());
 
     window.switchBuffer();    
 }
@@ -176,29 +177,6 @@ void Scene::bindRenderTarget()
     globals->device_context4->OMSetRenderTargets(1,
                                                  HDR_RTV.get(),
                                                  depth_stencil_view.ptr());
-}
-
-void Scene::postProcessing(windows::Window & window)
-{    
-    Globals * globals = Globals::getInstance();
-    ShaderManager * shader_mgr = ShaderManager::getInstance();
-
-    window.bindRenderTarget();
-    window.clearFrame();
-    
-    globals->device_context4->PSSetShaderResources(0,
-                                                   1,
-                                                   HDR_SRV.get());
-    shader_mgr->bindShader("../engine/shaders/post_processing.hlsl");
-
-    globals->device_context4->Draw(3, 0);
-
-    // unset HDR SRV (because of warnings)
-    ID3D11ShaderResourceView * null_resource = nullptr;
-    globals->device_context4->PSSetShaderResources(0,
-                                                   1,
-                                                   &null_resource);
-
 }
 } // namespace engine
 

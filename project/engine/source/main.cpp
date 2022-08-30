@@ -12,6 +12,7 @@
 
 #include "window.hpp"
 #include "camera.hpp"
+#include "post_process.hpp"
 #include "controller.hpp"
 #include "scene.hpp"
 #include "engine.hpp"
@@ -30,6 +31,8 @@ Controller controller;
 Camera camera(glm::vec3(0.0f, 0.0f, -30.0f),
               glm::vec3(0, 1.0f, 0), // up
               glm::vec3(0, 0, 1.0f)); // forward
+
+engine::Postprocess post_process;
 } // namespace
 
 LRESULT CALLBACK WindowProc(HWND hWnd,
@@ -107,9 +110,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
             std::string fps_str = "FPS: " + std::to_string(fps);
             SetWindowTextA(win.handle, TEXT(fps_str.c_str()));
 
-            controller.processInput(camera, delta_time, win);
+            controller.processInput(camera, post_process, delta_time, win);
             camera.updateMatrices();
-            controller.scene->renderFrame(win, camera);
+            controller.scene->renderFrame(win, camera, post_process);
         }
     }
     exit:

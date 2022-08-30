@@ -18,6 +18,7 @@
 #include "transform_system.hpp"
 #include "opaque_instances.hpp"
 #include "emissive_instances.hpp"
+#include "post_process.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -49,6 +50,7 @@ public:
     void initScene(Camera & camera);
 
     void processInput(Camera & camera,
+                      engine::Postprocess & post_process, 
                       const float delta_time,
                       const engine::windows::Window & win);
 

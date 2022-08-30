@@ -118,7 +118,7 @@ template <>
 void MeshSystem::addInstance<EmissiveInstances>(std::shared_ptr<Model> model,
                                                 const std::vector<EmissiveInstances::Material> & materials,
                                                 const EmissiveInstances::Instance & instance)
-{    
+{
     // try to find the same model
     for (auto & per_model : emissive_instances.per_model)
     {

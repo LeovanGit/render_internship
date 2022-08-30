@@ -3,6 +3,7 @@
 
 #include "window.hpp"
 #include "camera.hpp"
+#include "post_process.hpp"
 #include "globals.hpp"
 #include "texture_manager.hpp"
 #include "shader_manager.hpp"
@@ -20,7 +21,8 @@ public:
     void init(const windows::Window & window);
 
     void renderFrame(windows::Window & window,
-                     const Camera & camera);
+                     const Camera & camera,
+                     engine::Postprocess & post_process);
 
     void initDepthBuffer(int width, int heigth);
     void clearDepthBuffer();
@@ -29,8 +31,6 @@ public:
     void initRenderTarget(int width, int height);
     void clearRenderTarget();
     void bindRenderTarget();
-
-    void postProcessing(windows::Window & window);
 
     DxResPtr<ID3D11Texture2D> depth_stencil_buffer;
     DxResPtr<ID3D11DepthStencilView> depth_stencil_view;

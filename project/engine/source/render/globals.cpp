@@ -42,9 +42,10 @@ void Globals::del()
     else spdlog::error("Globals::del() was called twice!");
 }
 
-void Globals::bind(const Camera & camera)
+void Globals::bind(const Camera & camera,
+                   float EV_100)
 {
-    setPerFrameBuffer(camera);
+    setPerFrameBuffer(camera, EV_100);
     updatePerFrameBuffer();
 
     // bind sampler to fragment shader
@@ -194,7 +195,8 @@ void Globals::initPerFrameBuffer()
     assert(result >= 0 && "CreateBuffer");
 }
 
-void Globals::setPerFrameBuffer(const Camera & camera)
+void Globals::setPerFrameBuffer(const Camera & camera,
+                                float EV_100)
 {
     LightSystem * light_system = LightSystem::getInstance();
     TransformSystem * trans_system = TransformSystem::getInstance();
@@ -207,37 +209,37 @@ void Globals::setPerFrameBuffer(const Camera & camera)
     // fill const buffer data
     per_frame_buffer_data.g_proj_view = camera.getViewProj();
     per_frame_buffer_data.g_camera_pos = camera.getPosition();
-    per_frame_buffer_data.g_EV_100 = camera.EV_100;
+    per_frame_buffer_data.g_EV_100 = EV_100;
     per_frame_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);
     per_frame_buffer_data.g_frustum_corners[1] = glm::vec4(top_left_WS, 1.0f);
     per_frame_buffer_data.g_frustum_corners[2] = glm::vec4(bottom_right_WS, 1.0f);
 
-    for (uint32_t size = light_system->point_lights.size(),
-         i = 0; i != size; ++i)
+    auto & point_lights = light_system->getPointLights();    
+    for (uint32_t size = point_lights.size(), i = 0; i != size; ++i)
     {
-        uint32_t transform_id = light_system->point_lights[i].transform_id;
+        uint32_t transform_id = point_lights[i].transform_id;
         
         per_frame_buffer_data.g_point_lights[i].position =
             trans_system->transforms[transform_id].position;
 
         per_frame_buffer_data.g_point_lights[i].radiance =
-            light_system->point_lights[i].radiance;
+            point_lights[i].radiance;
 
         per_frame_buffer_data.g_point_lights[i].radius =
-            light_system->point_lights[i].radius;
+            point_lights[i].radius;
     }
 
-    for (uint32_t size = light_system->directional_lights.size(),
-         i = 0; i != size; ++i)
+    auto & directional_lights = light_system->getDirectionalLights();
+    for (uint32_t size = directional_lights.size(), i = 0; i != size; ++i)
     {
         per_frame_buffer_data.g_dir_lights[i].direction =
-            light_system->directional_lights[i].direction;
+            directional_lights[i].direction;
 
         per_frame_buffer_data.g_dir_lights[i].radiance =
-            light_system->directional_lights[i].radiance;
+            directional_lights[i].radiance;
 
         per_frame_buffer_data.g_dir_lights[i].solid_angle =
-            light_system->directional_lights[i].solid_angle;
+            directional_lights[i].solid_angle;
     }
 }
 
@@ -356,12 +358,10 @@ void Globals::initPerEmissiveMeshBuffer()
     assert(result >= 0 && "CreateBuffer");
 }
 
-void Globals::setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model,
-                                       const glm::vec3 & g_radiance)
+void Globals::setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model)
 {
     // fill const buffer data
     per_emissive_mesh_buffer_data.g_mesh_to_model = g_mesh_to_model;
-    per_emissive_mesh_buffer_data.g_radiance = g_radiance;
 }
 
 void Globals::updatePerEmissiveMeshBuffer()

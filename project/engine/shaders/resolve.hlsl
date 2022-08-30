@@ -2,8 +2,7 @@
 
 struct PS_INPUT
 {
-    float4 pos : SV_POSITION;
-    float2 uv : TEXCOORD;
+    float4 pos : SV_POSITION; 
 };
 
 Texture2D g_hdr_scene;
@@ -20,9 +19,7 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID)
     
     PS_INPUT output;
     output.pos = float4(vertexCS[vertex_index], 1.0f, 1.0f);
-    // inversed y
-    output.uv = (vertexCS[vertex_index] + float2(1.0f, 1.0f)) / float2(2.0f, -2.0f);
-    
+
     return output;
 }
 
@@ -63,7 +60,7 @@ float3 gammaCorrection(float3 color)
 
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
-    float3 color = g_hdr_scene.Sample(g_sampler, input.uv);
+    float3 color = g_hdr_scene.Load(int3(input.pos.x, input.pos.y, 0));
 
     color = adjustExposure(color);
     color = toneMappingACES(color);

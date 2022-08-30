@@ -53,4 +53,15 @@ glm::vec3 LightSystem::radianceFromIrradianceAtDistance(const glm::vec3 & irradi
 
     return irradiance / occupation;
 }
+
+const std::vector<LightSystem::DirectionalLight> & LightSystem::getDirectionalLights() const
+{
+    return directional_lights;
+}
+
+const std::vector<LightSystem::PointLight> & LightSystem::getPointLights() const
+{
+    return point_lights;
+}
+
 } // namespace engine

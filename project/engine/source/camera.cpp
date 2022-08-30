@@ -15,10 +15,7 @@ Camera::Camera(const glm::vec3 & position,
     rotation = glm::quat_cast(glm::mat3(view_matrix_inv));
 
     is_updated_basis = false;
-
     is_roll_enabled = false;
-
-    EV_100 = -1.0f;
 }
 
 void Camera::setPerspective(float fovy,

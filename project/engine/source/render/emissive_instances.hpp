@@ -15,33 +15,45 @@ namespace engine
 {
 class EmissiveInstances
 {
+private:
+    struct GPUInstance
+    {
+        GPUInstance(const glm::mat4 & transform,
+                    const glm::vec3 & radiance) :
+                    transform(transform),
+                    radiance(radiance)
+        {}
+        
+        glm::mat4 transform;
+        glm::vec3 radiance;
+    };
 public:
     struct Instance
     {
         Instance() = default;
-        Instance(uint32_t transform_id) : transform_id(transform_id) {}
+        Instance(uint32_t transform_id,
+                 const glm::vec3 & radiance) :
+                 transform_id(transform_id),
+                 radiance(radiance)
+        {}
 
         uint32_t transform_id;
+        glm::vec3 radiance;
     };
     
     struct Material
     {
         Material() = default;
-        Material(const glm::vec3 & radiance) :
-                 radiance(radiance)
-        {}
 
         bool operator==(const Material & other)
         {
-            return (radiance == other.radiance);
+            return true;
         }
 
         bool operator!=(const Material & other)
         {
             return !(*this == other);
-        }
-        
-        glm::vec3 radiance;
+        }       
     };
 
     struct PerMaterial
@@ -66,7 +78,7 @@ public:
     void render();
 
     std::vector<PerModel> per_model;
-    VertexBuffer<glm::mat4> instance_buffer;
+    VertexBuffer<GPUInstance> instance_buffer;
 };
 } // namespace engine
 

@@ -6,7 +6,6 @@
 
 #include "matrices.hpp"
 #include "euler_angles.hpp"
-// #include "ray.hpp"
 
 class Camera
 {
@@ -49,8 +48,6 @@ public:
     glm::vec3 reproject(float x, float y) const;
 
     bool is_roll_enabled;
-
-    float EV_100;
 
 private:
     glm::mat4 view_matrix;

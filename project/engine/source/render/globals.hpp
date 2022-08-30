@@ -70,9 +70,6 @@ struct PerMeshBufferData
 struct PerEmissiveMeshBufferData
 {
     glm::mat4 g_mesh_to_model;
-
-    glm::vec3 g_radiance;
-    float padding_0;
 };
 
 // Singleton for global rendering resources
@@ -89,7 +86,8 @@ public:
 
     static void del();
 
-    void bind(const Camera & camera);
+    void bind(const Camera & camera,
+              float EV_100);
 
     void bindRasterizer(bool is_double_sided = false);
 
@@ -100,7 +98,8 @@ public:
     void initRasterizers();
 
     void initPerFrameBuffer();
-    void setPerFrameBuffer(const Camera & camera);
+    void setPerFrameBuffer(const Camera & camera,
+                           float EV_100);
     void updatePerFrameBuffer();
 
     void initPerMeshBuffer();
@@ -116,8 +115,7 @@ public:
     void updatePerMeshBuffer();
 
     void initPerEmissiveMeshBuffer();
-    void setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model,
-                                  const glm::vec3 & g_radiance);
+    void setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model);
     void updatePerEmissiveMeshBuffer();
 
     DxResPtr<IDXGIFactory5> factory5;

@@ -12,7 +12,7 @@ namespace engine
 {
 class LightSystem
 {
-public:
+private:
     class DirectionalLight
     {
     public:
@@ -45,6 +45,7 @@ public:
         float radius;
     };
     
+public:    
     // deleted methods should be public for better error messages
     LightSystem(const LightSystem & other) = delete;
     void operator=(const LightSystem & other) = delete;
@@ -69,15 +70,18 @@ public:
     static glm::vec3 radianceFromIrradianceAtDistance(const glm::vec3 & irradiance,
                                                       float distance,
                                                       float radius);
-    
-    std::vector<DirectionalLight> directional_lights;
-    std::vector<PointLight> point_lights;
+
+    const std::vector<DirectionalLight> & getDirectionalLights() const;
+    const std::vector<PointLight> & getPointLights() const;
     
 private:
     LightSystem() = default;
     ~LightSystem() = default;
 
     static LightSystem * instance;
+
+    std::vector<DirectionalLight> directional_lights;
+    std::vector<PointLight> point_lights;
 };
 } // namespace engine
 

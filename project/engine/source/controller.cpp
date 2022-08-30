@@ -26,7 +26,7 @@ void Controller::initScene(Camera & camera)
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
 
     // CREATE SHADERS
-    D3D11_INPUT_ELEMENT_DESC ied[] =
+    D3D11_INPUT_ELEMENT_DESC ied_opaque[] =
     {
         {"POSITION",
          0,
@@ -102,10 +102,10 @@ void Controller::initScene(Camera & camera)
     };
     
     shader_mgr->getShader("../engine/shaders/opaque.hlsl",
-                          ied,
+                          ied_opaque,
                           9);
 
-    D3D11_INPUT_ELEMENT_DESC ied_2[] =
+    D3D11_INPUT_ELEMENT_DESC ied_emissive[] =
     {
         {"POSITION",
          0,
@@ -146,13 +146,21 @@ void Controller::initScene(Camera & camera)
          48,
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
+
+        {"RADIANCE",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         64,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
     };
     
     shader_mgr->getShader("../engine/shaders/emissive.hlsl",
-                          ied_2,
-                          5);
+                          ied_emissive,
+                          6);
     
-    shader_mgr->getShader("../engine/shaders/post_processing.hlsl");
+    shader_mgr->getShader("../engine/shaders/resolve.hlsl");
     
     // CREATE OBJECTS
     scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
@@ -511,15 +519,16 @@ void Controller::initPointLight(const glm::vec3 & position,
     // visualization
     std::vector<ei::Material> materials =
     {
-        ei::Material(radiance),
+        ei::Material(),
     };
     
     mesh_system->addInstance<engine::EmissiveInstances>(model_mgr->getDefaultSphere("sphere"),
                                                         materials,
-                                                        transform_id);
+                                                        ei::Instance(transform_id, radiance));
 }
 
 void Controller::processInput(Camera & camera,
+                              engine::Postprocess & post_process, 
                               const float delta_time,
                               const engine::windows::Window & win)
 {
@@ -652,11 +661,11 @@ void Controller::processInput(Camera & camera,
     }
     if (keys_log[KEY_PLUS])
     {
-        camera.EV_100 += 2.0f * delta_time;
+        post_process.EV_100 += 2.0f * delta_time;
     }
     if (keys_log[KEY_MINUS])
     {
-        camera.EV_100 -= 2.0f * delta_time;
+        post_process.EV_100 -= 2.0f * delta_time;
     }
     // if (keys_log[KEY_G] && 
     //     !scene->is_global_illumination && 

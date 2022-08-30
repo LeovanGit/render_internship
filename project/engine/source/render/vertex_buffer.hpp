@@ -35,7 +35,7 @@ public:
         HRESULT result = globals->device5->CreateBuffer(&vbo_desc,
                                                         &vertices_data,
                                                         data.reset());
-        assert(result >= 0 && "CreateBuffer(vertex)");
+        assert(result >= 0 && "CreateBuffer()");
 
         this->size = size;
         stride = sizeof(T);
@@ -56,7 +56,7 @@ public:
         HRESULT result = globals->device5->CreateBuffer(&vbo_desc,
                                                         NULL,
                                                         data.reset());
-        assert(result >= 0 && "CreateBuffer(vertex)");
+        assert(result >= 0 && "CreateBuffer()");
 
         this->size = size;
         this->stride = sizeof(T);

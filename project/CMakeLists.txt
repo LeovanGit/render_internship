@@ -39,7 +39,8 @@ set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/emissive.hlsl
             engine/shaders/globals.hlsl
             engine/shaders/skybox.hlsl
-            engine/shaders/post_processing.hlsl)
+            engine/shaders/resolve.hlsl
+            engine/shaders/lighting.hlsl)
 
 # does not participate in the compilation:
 set_source_files_properties(${SHADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -82,7 +83,8 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/emissive_instances.hpp
                    engine/source/render/mesh_system.hpp
                    engine/source/render/light_system.hpp
-                   engine/source/render/vertex.hpp)
+                   engine/source/render/vertex.hpp
+                   engine/source/render/post_process.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/globals.cpp
@@ -99,7 +101,8 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/opaque_instances.cpp
                    engine/source/render/emissive_instances.cpp
                    engine/source/render/mesh_system.cpp
-                   engine/source/render/light_system.cpp)
+                   engine/source/render/light_system.cpp
+                   engine/source/render/post_process.cpp)
 
 source_group("Header Files/source/render" FILES ${RENDER_HEADERS})
 source_group("Source Files/source/render" FILES ${RENDER_SOURCES})

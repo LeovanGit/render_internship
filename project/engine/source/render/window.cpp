@@ -175,4 +175,9 @@ void Window::switchBuffer()
     // switch the back buffer and the front buffer
     swapchain->Present(0, 0);
 }
+
+DxResPtr<ID3D11RenderTargetView> & Window::getRenderTarget()
+{
+    return LDR_RTV;
+}
 } // namespace engine::windows

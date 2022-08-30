@@ -196,53 +196,6 @@ float3 CookTorranceBRDF(Material material,
     return D_norm * F * G;
 }
 
-// PBR which take into light source size
-float3 PBR(Material material,
-           float3 N,
-           float3 L,
-           float3 L2,
-           float3 V,
-           float3 radiance,
-           float solid_angle)
-{
-    float3 H = normalize(L + V);
-    float NL = clamp(dot(N, L), 0.0f, 1.0f);
-    float NV = clamp(dot(N, V), 0.0f, 1.0f);
-
-    clampDirToHorizon(L2, NL, N, 0.0f);    
-    
-    float3 H2 = normalize(L2 + V);
-    float NL2 = clamp(dot(N, L2), 0.0f, 1.0f);
-    float NH2 = clamp(dot(N, H2), 0.0f, 1.0f);
-    float HL2 = clamp(dot(H, L2), 0.0f, 1.0f);
-
-    float3 diffuse = LambertBRDF(material, NL);
-    float3 specular = CookTorranceBRDF(material, NL2, NV, NH2, HL2, solid_angle);
-
-    return (diffuse * solid_angle + specular) * radiance;
-}
-
-// default PBR
-float3 PBR(Material material,
-           float3 N,
-           float3 L,
-           float3 V,
-           float3 radiance,
-           float solid_angle)
-{
-    float3 H = normalize(L + V);
-
-    float NL = clamp(dot(N, L), 0.0f, 1.0f);
-    float NV = clamp(dot(N, V), 0.0f, 1.0f);
-    float NH = clamp(dot(N, H), 0.0f, 1.0f);
-    float HL = clamp(dot(H, L), 0.0f, 1.0f);
-
-    float3 diffuse = LambertBRDF(material, NL);
-    float3 specular = CookTorranceBRDF(material, NL, NV, NH, HL, solid_angle);
-
-    return (diffuse * solid_angle + specular) * radiance;
-}
-
 float3 calculateDirectionalLights(Material material,
                                   float3 N,
                                   float3 V)
@@ -252,13 +205,18 @@ float3 calculateDirectionalLights(Material material,
     for (uint i = 0; i != g_dir_lights_count; ++i)
     {
         float3 L = -normalize(g_dir_lights[i].direction);
+
+        float3 H = normalize(L + V);        
+        float NL = clamp(dot(N, L), 0.0f, 1.0f);
+        float NV = clamp(dot(N, V), 0.0f, 1.0f);
+        float NH = clamp(dot(N, H), 0.0f, 1.0f);
+        float HL = clamp(dot(H, L), 0.0f, 1.0f);
+
+        float3 diffuse = LambertBRDF(material, NL);
+        float3 specular = CookTorranceBRDF(material, NL, NV, NH, HL, g_dir_lights[i].solid_angle);
+        float3 color_i = (diffuse * g_dir_lights[i].solid_angle + specular) * g_dir_lights[i].radiance;
         
-        color += PBR(material,
-                     N,
-                     L,
-                     V,
-                     g_dir_lights[i].radiance,
-                     g_dir_lights[i].solid_angle);
+        color += color_i;
     }
 
     return color;
@@ -266,6 +224,7 @@ float3 calculateDirectionalLights(Material material,
 
 float3 calculatePointLights(Material material,
                             float3 N,
+                            float3 GN,
                             float3 V,
                             float3 pos_WS)
 {
@@ -275,28 +234,49 @@ float3 calculatePointLights(Material material,
     {
         float3 L = g_point_lights[i].position - pos_WS;
         float3 L_norm = normalize(L);
-        
-        float solid_angle = calculateSolidAngle(length(L),
-                                                g_point_lights[i].radius);
+
+        float3 H = normalize(L_norm + V);
+        float NL = clamp(dot(N, L_norm), 0.0f, 1.0f);
+        float NV = clamp(dot(N, V), 0.0f, 1.0f);
 
         // angular diameter of solid angle
         float sina = g_point_lights[i].radius / length(L);
         float cosa = sqrt(1.0f - sina * sina);
 
+        // to avoid illumination of regions of the surface that
+        // should be self-shadowed (when light source on the back side of surface)
+        float GNL = dot(GN, L_norm);
+        float height_micro = NL * length(L); // distance: surface - light source
+        float height_macro = GNL * length(L);
+
+        float fading_micro = saturate((height_micro + g_point_lights[i].radius) /
+                                      (2.0f * g_point_lights[i].radius));
+        float fading_macro = saturate((height_macro + g_point_lights[i].radius) /
+                                      (2.0f * g_point_lights[i].radius));
+        NL = max(NL, fading_micro * sina);
+        
+        // take into light source size in specular part
         float3 L2 = approximateClosestSphereDir(reflect(-V, N),
                                                 cosa,
                                                 L,
                                                 L_norm,
                                                 length(L),
                                                 g_point_lights[i].radius);
-        
-        color += PBR(material,
-                     N,
-                     L_norm,
-                     L2,
-                     V,
-                     g_point_lights[i].radiance,
-                     solid_angle);
+        clampDirToHorizon(L2, NL, N, 0.001f);        
+
+        float3 H2 = normalize(L2 + V);
+        float NL2 = clamp(dot(N, L2), 0.0f, 1.0f);
+        float NH2 = clamp(dot(N, H2), 0.0f, 1.0f);
+        float HL2 = clamp(dot(H, L2), 0.0f, 1.0f);
+
+        float solid_angle = calculateSolidAngle(length(L),
+                                                g_point_lights[i].radius);
+   
+        float3 diffuse = LambertBRDF(material, NL);
+        float3 specular = CookTorranceBRDF(material, NL2, NV, NH2, HL2, solid_angle);
+        float3 color_i = (diffuse * solid_angle + specular) * g_point_lights[i].radiance;
+
+        color += color_i * fading_micro * fading_macro;
     }
 
     return color;
@@ -336,8 +316,11 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     // use albedo as F0 for metals
     material.fresnel = lerp(material.fresnel, material.albedo, material.metalness);
 
-    float3 N; // fragment normal
+    float3 GN = input.normal; // geometry normal
+    GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
+    GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
     
+    float3 N; // texture normal
     if (g_has_normal_map)
     {
         N = g_normal.Sample(g_sampler, input.uv).rgb;
@@ -345,15 +328,14 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
         N = normalize(mul(N, TBN));
     }
     else N = input.normal;
-    
     N = normalize(mul(float4(N, 0.0f), g_mesh_to_model).xyz);
     N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
-
+    
     float3 V = normalize(g_camera_position - input.pos_WS);
     
     float3 color = float3(0.0f, 0.0f, 0.0f);
     color += calculateDirectionalLights(material, N, V);
-    color += calculatePointLights(material, N, V, input.pos_WS);
+    color += calculatePointLights(material, N, GN, V, input.pos_WS);
     
     return float4(color, 1.0f);
 }

@@ -25,6 +25,9 @@ public:
 
     static void del();
 
+    void setShaders(std::shared_ptr<Shader> opaque,
+                    std::shared_ptr<Shader> emissive);
+    
     void render();
 
     bool findIntersection(const math::Ray & ray_ws,

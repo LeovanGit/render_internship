@@ -1,8 +1,10 @@
 #include "controller.hpp"
 
-void Controller::init(engine::Scene & scene)
+void Controller::init(engine::Scene & scene,
+                      engine::Postprocess & post_process)
 {
     this->scene = &scene;
+    this->post_process = &post_process;
 
     mouse = glm::vec2(0);
     fixed_mouse = glm::vec2(0);
@@ -101,10 +103,6 @@ void Controller::initScene(Camera & camera)
          1},
     };
     
-    shader_mgr->getShader("../engine/shaders/opaque.hlsl",
-                          ied_opaque,
-                          9);
-
     D3D11_INPUT_ELEMENT_DESC ied_emissive[] =
     {
         {"POSITION",
@@ -149,16 +147,19 @@ void Controller::initScene(Camera & camera)
 
         {"RADIANCE",
          0,
-         DXGI_FORMAT_R32G32B32_FLOAT,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
          1,
          64,
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
     };
     
-    shader_mgr->getShader("../engine/shaders/emissive.hlsl",
-                          ied_emissive,
-                          6);
+    mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
+                                                  ied_opaque,
+                                                  9),
+                            shader_mgr->getShader("../engine/shaders/emissive.hlsl",
+                                                  ied_emissive,
+                                                  6));
     
     shader_mgr->getShader("../engine/shaders/resolve.hlsl");
     
@@ -266,6 +267,13 @@ void Controller::initScene(Camera & camera)
                       glm::vec3(0.5f),
                       0.1f,
                       1.0f)});
+}
+
+void Controller::initPostprocess()
+{
+    engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
+    
+    post_process->init(shader_mgr->getShader("../engine/shaders/resolve.hlsl"), -1.0f);
 }
 
 void Controller::initKnight(const math::Transform & transform)

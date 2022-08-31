@@ -46,12 +46,11 @@ void EmissiveInstances::render()
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
-    ShaderManager * shader_mgr = ShaderManager::getInstance();
 
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    shader_mgr->bindShader("../engine/shaders/emissive.hlsl");
+    shader->bind();
     instance_buffer.bind(1);
 
     uint32_t rendered_instances = 0;

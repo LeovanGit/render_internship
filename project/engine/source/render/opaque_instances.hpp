@@ -129,6 +129,8 @@ public:
 
     std::vector<PerModel> per_model;
     VertexBuffer<glm::mat4> instance_buffer;
+
+    std::shared_ptr<Shader> shader;
 };
 } // namespace engine
 

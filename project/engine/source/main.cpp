@@ -85,8 +85,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     // CREATE SCENE
     scene.init(win);
-    controller.init(scene);
+    controller.init(scene, post_process);
     controller.initScene(camera);
+    controller.initPostprocess();
 
     ShowWindow(win.handle, nCmdShow);
 

@@ -25,6 +25,14 @@ void MeshSystem::del()
     else spdlog::error("MeshSystem::del() was called twice!");
 }
 
+void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
+                            std::shared_ptr<Shader> emissive)
+{
+    instance->opaque_instances.shader = opaque;
+    instance->emissive_instances.shader = emissive;
+}
+
+
 void MeshSystem::render()
 {
     opaque_instances.render();

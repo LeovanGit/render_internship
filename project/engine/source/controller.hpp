@@ -45,9 +45,12 @@ class Controller
 public:
     Controller() = default;
 
-    void init(engine::Scene & scene);
+    void init(engine::Scene & scene,
+              engine::Postprocess & post_process);
 
     void initScene(Camera & camera);
+
+    void initPostprocess();
 
     void processInput(Camera & camera,
                       engine::Postprocess & post_process, 
@@ -55,6 +58,7 @@ public:
                       const engine::windows::Window & win);
 
     engine::Scene * scene;
+    engine::Postprocess * post_process;
 
     glm::ivec2 mouse;
     glm::ivec2 fixed_mouse;

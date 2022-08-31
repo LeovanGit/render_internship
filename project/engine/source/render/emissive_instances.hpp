@@ -26,6 +26,7 @@ private:
         
         glm::mat4 transform;
         glm::vec3 radiance;
+        float padding_0;
     };
 public:
     struct Instance
@@ -79,6 +80,8 @@ public:
 
     std::vector<PerModel> per_model;
     VertexBuffer<GPUInstance> instance_buffer;
+
+    std::shared_ptr<Shader> shader;
 };
 } // namespace engine
 

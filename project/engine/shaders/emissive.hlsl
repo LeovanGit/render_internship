@@ -14,7 +14,7 @@ struct VS_INPUT
     float4 transform_2 : TRANSFORM2;
     float4 transform_3 : TRANSFORM3;
 
-    float3 radiance : RADIANCE;
+    float4 radiance : RADIANCE;
 };
 
 struct PS_INPUT
@@ -39,7 +39,7 @@ PS_INPUT vertexShader(VS_INPUT input)
 
     PS_INPUT output;
     output.pos = pos;
-    output.radiance = input.radiance;
+    output.radiance = input.radiance.xyz;
 
     return output;
 }

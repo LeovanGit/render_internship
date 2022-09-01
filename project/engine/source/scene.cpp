@@ -1,5 +1,10 @@
 #include "scene.hpp"
 
+namespace
+{
+constexpr float BACKGROUND[4] = {0.4f, 0.44f, 0.4f, 1.0f};
+} // namespace
+
 namespace engine
 {
 void Scene::init(const windows::Window & window)
@@ -9,10 +14,12 @@ void Scene::init(const windows::Window & window)
     int height = client_size.bottom - client_size.top;
 
     initDepthBuffer(width, height);
+    initRenderTarget(width, height);
 }
 
 void Scene::renderFrame(windows::Window & window,
-                        const Camera & camera)
+                        const Camera & camera,
+                        engine::Postprocess & post_process) 
 {
     Globals * globals = Globals::getInstance();
     TextureManager * tex_mgr = TextureManager::getInstance();
@@ -20,19 +27,22 @@ void Scene::renderFrame(windows::Window & window,
     ModelManager * model_mgr = ModelManager::getInstance();
     MeshSystem * mesh_system = MeshSystem::getInstance();
 
-    globals->bind(camera);
+    globals->bind(camera, post_process.EV_100);
 
-    window.bindRT(depth_stencil_view);
-    bindDepthBuffer();
+    window.bindViewport();
     
-    window.clearFrame();
+    bindRenderTarget();
+    bindDepthBuffer();
+
+    clearRenderTarget();
     clearDepthBuffer();
 
     mesh_system->render();
-    floor.render();
     sky.render();
 
-    window.switchBuffer();
+    post_process.resolve(HDR_SRV, window.getRenderTarget());
+
+    window.switchBuffer();    
 }
 
 void Scene::initDepthBuffer(int width, int height)
@@ -92,7 +102,7 @@ void Scene::clearDepthBuffer()
                                                     D3D11_CLEAR_DEPTH |
                                                     D3D11_CLEAR_STENCIL,
                                                     0.0f, // reversed depth
-                                                    0.0f);
+                                                    0);
 }
 
 void Scene::bindDepthBuffer()
@@ -101,6 +111,72 @@ void Scene::bindDepthBuffer()
 
     globals->device_context4->OMSetDepthStencilState(depth_stencil_state.ptr(),
                                                      0);
+}
+
+void Scene::initRenderTarget(int width, int height)
+{
+    Globals * globals = Globals::getInstance();
+    HRESULT result;
+
+    // create texture
+    D3D11_TEXTURE2D_DESC texture_desc;
+    ZeroMemory(&texture_desc, sizeof(texture_desc));
+    texture_desc.Width = width;
+    texture_desc.Height = height;
+    texture_desc.MipLevels = 1;
+    texture_desc.ArraySize = 1;
+    texture_desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+    texture_desc.SampleDesc.Count = 1;
+    texture_desc.Usage = D3D11_USAGE_DEFAULT;
+    texture_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    texture_desc.CPUAccessFlags = 0;
+    texture_desc.MiscFlags = 0;
+
+    result = globals->device5->CreateTexture2D(&texture_desc,
+                                               NULL,
+                                               HDR_texture.reset());
+    assert(result >= 0 && "CreateTexture2D");
+    
+    // create HDR render target
+    D3D11_RENDER_TARGET_VIEW_DESC RTV_desc;
+    RTV_desc.Format = texture_desc.Format;
+    RTV_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+    RTV_desc.Texture2D.MipSlice = 0;
+
+    result = globals->device5->CreateRenderTargetView(HDR_texture.ptr(),
+                                                      &RTV_desc,
+                                                      HDR_RTV.reset());
+    assert(result >= 0 && "CreateRenderTargetView");
+
+    // create HDR shader resource view
+    D3D11_SHADER_RESOURCE_VIEW_DESC SRV_desc;
+    SRV_desc.Format = texture_desc.Format;
+    SRV_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    SRV_desc.Texture2D.MostDetailedMip = 0;
+    SRV_desc.Texture2D.MipLevels = 1;
+
+    result = globals->device5->CreateShaderResourceView(HDR_texture.ptr(),
+                                                        &SRV_desc,
+                                                        HDR_SRV.reset());
+    assert(result >= 0 && "CreateShaderResourceView");
+}
+
+void Scene::clearRenderTarget()
+{
+    Globals * globals = Globals::getInstance();
+
+    globals->device_context4->ClearRenderTargetView(HDR_RTV.ptr(),
+                                                    BACKGROUND);
+}
+
+void Scene::bindRenderTarget()
+{
+    Globals * globals = Globals::getInstance();
+
+    // set render target
+    globals->device_context4->OMSetRenderTargets(1,
+                                                 HDR_RTV.get(),
+                                                 depth_stencil_view.ptr());
 }
 } // namespace engine
 

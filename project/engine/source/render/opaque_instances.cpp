@@ -4,6 +4,8 @@ namespace engine
 {
 void OpaqueInstances::updateInstanceBuffers()
 {
+    TransformSystem * trans_system = TransformSystem::getInstance();
+    
     uint32_t total_instances = 0;
     
     for (auto & per_model : per_model)
@@ -15,8 +17,8 @@ void OpaqueInstances::updateInstanceBuffers()
 
     instance_buffer.init(total_instances);
     D3D11_MAPPED_SUBRESOURCE mapped = instance_buffer.map();
-    Instance * dst = static_cast<Instance *>(mapped.pData);
-
+    glm::mat4 * dst = static_cast<glm::mat4 *>(mapped.pData);
+    
     uint32_t copied_count = 0;
     for (auto & per_model : per_model)
     {
@@ -27,7 +29,9 @@ void OpaqueInstances::updateInstanceBuffers()
                 uint32_t instances_size = per_material.instances.size();
                 for (uint32_t i = 0; i != instances_size; ++i)
                 {
-                    dst[copied_count++] = per_material.instances[i];
+                    dst[copied_count++] =
+                        trans_system->
+                        transforms[per_material.instances[i].transform_id].toMat4();
                 }
             }
         }
@@ -41,12 +45,11 @@ void OpaqueInstances::render()
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
-    ShaderManager * shader_mgr = ShaderManager::getInstance();
 
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    shader_mgr->bindShader("../engine/shaders/opaque.hlsl");
+    shader->bind();
     instance_buffer.bind(1);
 
     uint32_t rendered_instances = 0;
@@ -63,16 +66,29 @@ void OpaqueInstances::render()
         {
             Model::MeshRange & mesh_range = per_model.model->getMeshRange(i);
 
-            globals->setPerMeshBuffer(mesh_range.mesh_to_model);
-            globals->updatePerMeshBuffer();
-
             for (auto & per_material : per_model.per_mesh[i].per_material)
             {
                 if (per_material.instances.empty()) continue;
 
                 Material & material = per_material.material;
+
+                globals->bindRasterizer(material.is_double_sided);
+
+                globals->setPerMeshBuffer(mesh_range.mesh_to_model,
+                                          static_cast<bool>(material.albedo),
+                                          static_cast<bool>(material.roughness),
+                                          static_cast<bool>(material.metalness),
+                                          static_cast<bool>(material.normal),
+                                          material.is_directx_style_normal_map,
+                                          material.albedo_default,
+                                          material.roughness_default,
+                                          material.metalness_default);
+                globals->updatePerMeshBuffer();
                 
-                material.texture->bind();
+                if (static_cast<bool>(material.albedo)) material.albedo->bind(0);
+                if (static_cast<bool>(material.roughness)) material.roughness->bind(1);
+                if (static_cast<bool>(material.metalness)) material.metalness->bind(2);
+                if (static_cast<bool>(material.normal)) material.normal->bind(3);
 
                 uint32_t instances_count = uint32_t(per_material.instances.size());
 
@@ -80,7 +96,7 @@ void OpaqueInstances::render()
                                                                instances_count,
                                                                mesh_range.index_offset,
                                                                mesh_range.vertex_offset,
-                                                               rendered_instances);               
+                                                               rendered_instances);
                 rendered_instances += instances_count;
             }
         }

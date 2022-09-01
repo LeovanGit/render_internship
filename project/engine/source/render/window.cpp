@@ -67,48 +67,46 @@ void Window::initSwapChain()
                                &scd,
                                NULL,
                                NULL,
-                               m_swapchain.reset());
+                               swapchain.reset());
 
     assert(result >= 0 && "CreateSwapChainForHwnd");
 }
 
 void Window::initBackBuffer()
 {
+    Globals * globals = Globals::getInstance();
+    HRESULT result;
+    
     // may be called after resizing
-    if (m_backbuffer.valid())
+    if (backbuffer.valid())
     {
-        m_backbuffer.release();
-        m_render_target.release();
+        backbuffer.release();
+        LDR_RTV.release();
 
-        // before ResizeBuffers(), backbuffers must be released!!!
-        HRESULT result = m_swapchain->ResizeBuffers(0,
-                                                    0, // auto size
-                                                    0,
-                                                    DXGI_FORMAT_UNKNOWN,
-                                                    0);
+        // before ResizeBuffers(), all backbuffers must be released!!!
+        result = swapchain->ResizeBuffers(0,
+                                          0, // auto size
+                                          0,
+                                          DXGI_FORMAT_UNKNOWN,
+                                          0);
         assert(result >= 0 && "ResizeBuffers");
     }
     
-    HRESULT result = m_swapchain->GetBuffer(0,
-                                            __uuidof(ID3D11Texture2D),
-                                            (void **)m_backbuffer.reset());
-    assert(result >= 0);
+    result = swapchain->GetBuffer(0,
+                                  __uuidof(ID3D11Texture2D),
+                                  (void **)backbuffer.reset());
+    assert(result >= 0 && "GetBuffer");
 
     // get backbuffer description
     ID3D11Texture2D * pTextureInterface = 0;
-    m_backbuffer->QueryInterface<ID3D11Texture2D>(&pTextureInterface);
-    pTextureInterface->GetDesc(&m_backbuffer_desc);
+    backbuffer->QueryInterface<ID3D11Texture2D>(&pTextureInterface);
+    pTextureInterface->GetDesc(&backbuffer_desc);
     pTextureInterface->Release();
 
-    // get access to global render variables
-    Globals * globals = Globals::getInstance();
-
-    // CREATE RENDER TARGET
-    result = globals->device5->
-        CreateRenderTargetView(m_backbuffer.ptr(),
-                               NULL,
-                               m_render_target.reset());
-
+    // create LDR render target
+    result = globals->device5->CreateRenderTargetView(backbuffer.ptr(),
+                                                      NULL,
+                                                      LDR_RTV.reset());
     assert(result >= 0 && "CreateRenderTargetView");
 }
 
@@ -118,8 +116,8 @@ void Window::initViewport()
 
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
-    viewport.Width = client_width;
-    viewport.Height = client_height;
+    viewport.Width = static_cast<float>(client_width);
+    viewport.Height = static_cast<float>(client_height);
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
 }
@@ -152,26 +150,34 @@ void Window::clearFrame()
     Globals * globals = Globals::getInstance();
 
     // fill the back buffer with background color
-    globals->device_context4->ClearRenderTargetView(m_render_target.ptr(),
+    globals->device_context4->ClearRenderTargetView(LDR_RTV.ptr(),
                                                     BACKGROUND);
 }
 
-void Window::bindRT(const DxResPtr<ID3D11DepthStencilView> & depth_stencil_view)
+void Window::bindRenderTarget()
 {
     Globals * globals = Globals::getInstance();
 
-    // set render target
     globals->device_context4->OMSetRenderTargets(1,
-                                                 m_render_target.get(),
-                                                 depth_stencil_view.ptr());
+                                                 LDR_RTV.get(),
+                                                 NULL);
+}
 
-    // set viewport
+void Window::bindViewport()
+{
+    Globals * globals = Globals::getInstance();
+
     globals->device_context4->RSSetViewports(1, &viewport);
 }
 
 void Window::switchBuffer()
 {
     // switch the back buffer and the front buffer
-    m_swapchain->Present(0, 0);
+    swapchain->Present(0, 0);
+}
+
+DxResPtr<ID3D11RenderTargetView> & Window::getRenderTarget()
+{
+    return LDR_RTV;
 }
 } // namespace engine::windows

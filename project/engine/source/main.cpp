@@ -12,6 +12,7 @@
 
 #include "window.hpp"
 #include "camera.hpp"
+#include "post_process.hpp"
 #include "controller.hpp"
 #include "scene.hpp"
 #include "engine.hpp"
@@ -27,9 +28,11 @@ engine::Scene scene;
 Controller controller;
 
 // CREATE CAMERA
-Camera camera(glm::vec3(0.0f, 0.0f, -15.0f),
+Camera camera(glm::vec3(0.0f, 0.0f, -30.0f),
               glm::vec3(0, 1.0f, 0), // up
               glm::vec3(0, 0, 1.0f)); // forward
+
+engine::Postprocess post_process;
 } // namespace
 
 LRESULT CALLBACK WindowProc(HWND hWnd,
@@ -78,12 +81,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
     RegisterClassEx(&wclass);
 
     // CREATE WINDOW
-    win.init(hInstance, 100.0f, 100.0f, 1280.0f, 720.0f);
+    win.init(hInstance, 100, 100, 1280, 720);
 
     // CREATE SCENE
     scene.init(win);
-    controller.init(scene);
+    controller.init(scene, post_process);
     controller.initScene(camera);
+    controller.initPostprocess();
 
     ShowWindow(win.handle, nCmdShow);
 
@@ -103,13 +107,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
         if (frameTimeElapsed())
         {
-            int fps = 1 / delta_time;
+            int fps = static_cast<int>(1.0f / delta_time);
             std::string fps_str = "FPS: " + std::to_string(fps);
             SetWindowTextA(win.handle, TEXT(fps_str.c_str()));
 
-            controller.processInput(camera, delta_time, win);
+            controller.processInput(camera, post_process, delta_time, win);
             camera.updateMatrices();
-            controller.scene->renderFrame(win, camera);
+            controller.scene->renderFrame(win, camera, post_process);
         }
     }
     exit:
@@ -120,7 +124,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     engine::Engine::del();
 
     // return this part of the WM_QUIT message to Windows
-    return msg.wParam;
+    return static_cast<int>(msg.wParam);
 }
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -144,6 +148,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             {
                 win.resize(LOWORD(lParam), HIWORD(lParam));
                 scene.initDepthBuffer(LOWORD(lParam), HIWORD(lParam));
+                scene.initRenderTarget(LOWORD(lParam), HIWORD(lParam));
             
                 camera.setPerspective(glm::radians(45.0f),
                                       float(LOWORD(lParam)) / HIWORD(lParam),
@@ -167,12 +172,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         }
         case WM_RBUTTONDOWN:
         {
-            // controller.keys_log[KEY_RMOUSE] = true;
+            controller.keys_log[KEY_RMOUSE] = true;
             break;
         }
         case WM_RBUTTONUP:
         {
-            // controller.keys_log[KEY_RMOUSE] = false;
+            controller.keys_log[KEY_RMOUSE] = false;
             break;
         }
         case WM_LBUTTONDOWN:
@@ -191,7 +196,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         }
         case WM_MOUSEMOVE:
         {
-            controller.calcMouseMovement(lParam);
+            controller.mouse.x = GET_X_LPARAM(lParam);
+            controller.mouse.y = GET_Y_LPARAM(lParam);
             break;
         }
 	case WM_MOUSEWHEEL:

@@ -15,6 +15,8 @@
 
 #include "dx_res_ptr.hpp"
 #include "camera.hpp"
+#include "light_system.hpp"
+#include "transform_system.hpp"
 
 #include "win_undef.hpp"
 
@@ -27,11 +29,45 @@ struct PerFrameBufferData
 {
     glm::mat4 g_proj_view;
     glm::vec3 g_camera_pos;
-    float padding_0;
+    float g_EV_100;
     glm::vec4 g_frustum_corners[3];
+
+    struct
+    {
+        glm::vec3 position;
+        float padding_0;
+        glm::vec3 radiance;
+        float radius;
+    } g_point_lights[4];
+
+    struct
+    {
+        glm::vec3 direction;
+        float padding_0;
+        glm::vec3 radiance;
+        float solid_angle;
+    } g_dir_lights[1];
 };
 
 struct PerMeshBufferData
+{
+    glm::mat4 g_mesh_to_model;
+
+    // size of bool in HLSL is 4 bytes
+    BOOL g_has_albedo_texture;
+    BOOL g_has_roughness_texture;
+    BOOL g_has_metalness_texture;
+    BOOL g_has_normal_map;
+    BOOL g_is_directx_style_normal_map;
+    glm::vec3 padding_0;
+    
+    glm::vec3 g_albedo_default;
+    float g_roughness_default;
+    float g_metalness_default;    
+    glm::vec3 padding_1;
+};
+
+struct PerEmissiveMeshBufferData
 {
     glm::mat4 g_mesh_to_model;
 };
@@ -50,17 +86,37 @@ public:
 
     static void del();
 
-    void bind(const Camera & camera);
+    void bind(const Camera & camera,
+              float EV_100);
+
+    void bindRasterizer(bool is_double_sided = false);
 
     void initD3D();
 
     void initSamplers();
 
-    void setPerFrameBuffer(const Camera & camera);
+    void initRasterizers();
+
+    void initPerFrameBuffer();
+    void setPerFrameBuffer(const Camera & camera,
+                           float EV_100);
     void updatePerFrameBuffer();
 
-    void setPerMeshBuffer(const glm::mat4 & mesh_to_model);
+    void initPerMeshBuffer();
+    void setPerMeshBuffer(const glm::mat4 & g_mesh_to_model,
+                          bool g_has_albedo_texture,
+                          bool g_has_roughness_texture,
+                          bool g_has_metalness_texture,
+                          bool g_has_normal_map,
+                          bool g_is_directx_style_normal_map,
+                          const glm::vec3 & g_albedo_default,
+                          float g_roughness_default,
+                          float g_metalness_default);
     void updatePerMeshBuffer();
+
+    void initPerEmissiveMeshBuffer();
+    void setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model);
+    void updatePerEmissiveMeshBuffer();
 
     DxResPtr<IDXGIFactory5> factory5;
     DxResPtr<ID3D11Device5> device5;
@@ -73,7 +129,13 @@ public:
     DxResPtr<ID3D11Buffer> per_mesh_buffer;
     PerMeshBufferData per_mesh_buffer_data;
 
+    DxResPtr<ID3D11Buffer> per_emissive_mesh_buffer;
+    PerEmissiveMeshBufferData per_emissive_mesh_buffer_data;
+    
     DxResPtr<ID3D11SamplerState> sampler;
+
+    DxResPtr<ID3D11RasterizerState> one_sided_rasterizer;
+    DxResPtr<ID3D11RasterizerState> double_sided_rasterizer;
 
 private:
     Globals() = default;

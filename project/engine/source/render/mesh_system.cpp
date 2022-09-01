@@ -25,80 +25,116 @@ void MeshSystem::del()
     else spdlog::error("MeshSystem::del() was called twice!");
 }
 
-void MeshSystem::render() { opaque_instances.render(); }
-
-void MeshSystem::addInstance(std::shared_ptr<Model> model,
-                             std::vector<OpaqueInstances::Material> & materials,
-                             const OpaqueInstances::Instance & instance)
+void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
+                            std::shared_ptr<Shader> emissive)
 {
-    // try to find the same model
-    for (auto & per_model : opaque_instances.per_model)
-    {
-        if (per_model.model == model)
-        {
-            for (auto & material : materials)
-            {
-                for (auto & per_mesh : per_model.per_mesh)
-                {
-                    // try to find the same texture
-                    for (auto & per_material : per_mesh.per_material)
-                    {
-                        if (per_material.material.texture == material.texture)
-                        {
-                            per_material.instances.push_back(instance);
+    instance->opaque_instances.shader = opaque;
+    instance->emissive_instances.shader = emissive;
+}
 
-                            goto next;
-                        }
+
+void MeshSystem::render()
+{
+    opaque_instances.render();
+    emissive_instances.render();
+}
+
+bool MeshSystem::findIntersection(const math::Ray & ray_ws,
+                                  math::MeshIntersection & nearest)
+{
+    TransformSystem * trans_system = TransformSystem::getInstance();
+
+    glm::vec3 pos_ws;
+    
+    for (auto & model: opaque_instances.per_model)
+    {
+        auto & octree = model.model->getOctree();
+        auto & mesh_ranges = model.model->getMeshRanges();
+
+        for (uint32_t i = 0, size = model.per_mesh.size(); i != size; ++i)
+        {
+            auto & mesh = model.per_mesh[i];
+            
+            for (auto & material: mesh.per_material)
+            {
+                for (auto & instance: material.instances)
+                {
+                    glm::mat4 mesh_to_model = mesh_ranges[i].mesh_to_model;
+                    glm::mat4 transform =
+                        trans_system->transforms[instance.transform_id].toMat4();
+
+                    glm::mat4 mesh_to_model_inv = glm::inverse(mesh_to_model);
+                    glm::mat4 transform_inv = glm::inverse(transform);
+                                        
+                    // TriangleOctree stores vertices in mesh space
+                    math::Ray ray_ms;
+                    ray_ms.origin = mesh_to_model_inv *
+                                    transform_inv *
+                                    glm::vec4(ray_ws.origin, 1.0f);
+                    ray_ms.direction = mesh_to_model_inv *
+                                       transform_inv *
+                                       glm::vec4(ray_ws.direction, 0.0f);
+
+                    if (octree[i].intersect(ray_ms, nearest))
+                    {
+                        nearest.transform_id = instance.transform_id;
+
+                        pos_ws = transform *
+                                 mesh_to_model *
+                                 glm::vec4(nearest.pos, 1.0f);
                     }
                 }
-                {
-                // if not found same texture -> add new
-                OpaqueInstances::PerMaterial per_material;
-                per_material.material = material;
-                per_material.instances.push_back(instance);
-
-                OpaqueInstances::PerMesh per_mesh;
-                per_mesh.per_material.push_back(per_material);
-        
-                per_model.per_mesh.push_back(per_mesh);
-
-                // also add meshes_range
-                auto & src_meshes = model->getMeshRanges();
-                auto & dst_meshes = per_model.model->getMeshRanges();
-
-                dst_meshes.insert(dst_meshes.end(),
-                                  src_meshes.begin(),
-                                  src_meshes.end());
-                } // block
-                
-            next:
-                continue;
             }
-
-            goto end;
-        }
+        } 
     }
-    // if not found same model -> add new
-    {
-    OpaqueInstances::PerModel per_model;
-    per_model.model = model;
-        
-    for (auto & material : materials)
-    {
-        OpaqueInstances::PerMaterial per_material;
-        per_material.material = material;
-        per_material.instances.push_back(instance);    
 
-        OpaqueInstances::PerMesh per_mesh;
-        per_mesh.per_material.push_back(per_material);
+    for (auto & model: emissive_instances.per_model)
+    {
+        auto & octree = model.model->getOctree();
+        auto & mesh_ranges = model.model->getMeshRanges();
 
-        per_model.per_mesh.push_back(per_mesh);
+        for (uint32_t i = 0, size = model.per_mesh.size(); i != size; ++i)
+        {
+            auto & mesh = model.per_mesh[i];
+            
+            for (auto & material: mesh.per_material)
+            {
+                for (auto & instance: material.instances)
+                {
+                    glm::mat4 mesh_to_model = mesh_ranges[i].mesh_to_model;
+                    glm::mat4 transform =
+                        trans_system->transforms[instance.transform_id].toMat4();
+
+                    glm::mat4 mesh_to_model_inv = glm::inverse(mesh_to_model);
+                    glm::mat4 transform_inv = glm::inverse(transform);
+
+                    // TriangleOctree stores vertices in mesh space
+                    math::Ray ray_ms;
+                    ray_ms.origin = mesh_to_model_inv *
+                                    transform_inv *
+                                    glm::vec4(ray_ws.origin, 1.0f);
+                    ray_ms.direction = mesh_to_model_inv *
+                                       transform_inv *
+                                       glm::vec4(ray_ws.direction, 0.0f);
+
+                    if (octree[i].intersect(ray_ms, nearest))
+                    {
+                        nearest.transform_id = instance.transform_id;
+
+                        pos_ws = transform *
+                                 mesh_to_model *
+                                 glm::vec4(nearest.pos, 1.0f);
+                    }
+                }
+            }
+        } 
     }
-    
-    opaque_instances.per_model.push_back(per_model);
-    } // block
-    
- end:
-    opaque_instances.updateInstanceBuffers();
+
+    if (!nearest.valid()) return false;
+
+    nearest.t = glm::length(pos_ws - ray_ws.origin) / glm::length(ray_ws.direction);
+    nearest.pos = pos_ws;
+
+    return true;
 }
 } // namespace engine

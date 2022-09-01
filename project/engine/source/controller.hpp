@@ -14,7 +14,11 @@
 #include "texture_manager.hpp"
 #include "model_manager.hpp"
 #include "mesh_system.hpp"
+#include "light_system.hpp"
+#include "transform_system.hpp"
 #include "opaque_instances.hpp"
+#include "emissive_instances.hpp"
+#include "post_process.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -34,27 +38,30 @@ constexpr int KEY_LMOUSE = 1;
 constexpr int KEY_RMOUSE = 2;
 
 typedef engine::OpaqueInstances oi;
+typedef engine::EmissiveInstances ei;
 
 class Controller
 {
 public:
     Controller() = default;
 
-    void init(engine::Scene & scene);
+    void init(engine::Scene & scene,
+              engine::Postprocess & post_process);
 
     void initScene(Camera & camera);
 
+    void initPostprocess();
+
     void processInput(Camera & camera,
+                      engine::Postprocess & post_process, 
                       const float delta_time,
                       const engine::windows::Window & win);
 
-    void calcMouseMovement(LPARAM lParam);
-
     engine::Scene * scene;
+    engine::Postprocess * post_process;
 
-    glm::vec2 mouse;
-    glm::vec2 fixed_mouse;
-    glm::vec2 delta_fixed_mouse;   
+    glm::ivec2 mouse;
+    glm::ivec2 fixed_mouse;
 
     bool keys_log[KEYS_COUNT];
     bool was_released[KEYS_COUNT];
@@ -64,11 +71,38 @@ public:
 
     bool is_accelerated;
 
+    struct GrabbedObject
+    {
+        bool is_grabbed = false;
+        uint32_t transform_id;
+        float t;
+        glm::vec3 pos;
+    } object;
+
 private:
     void initKnight(const math::Transform & transform);
 
-    void initCube(const std::string & texture_path,
-                  const math::Transform & transform);
+    void initWall(const math::Transform & transform);
+
+    void initCube(const math::Transform & transform,
+                  const std::vector<oi::Material> & materials);
+
+    void initPlane(const math::Transform & transform,
+                   const std::vector<oi::Material> & materials);
+
+    void initSphere(const math::Transform & transform,
+                    const std::vector<oi::Material> & materials);
+
+    void initFloor(const std::vector<oi::Material> & materials);
+    
+    void initDirectionalLight(const glm::vec3 & radiance,
+                              const glm::vec3 & direction,
+                              float solid_angle);
+
+    void initPointLight(const glm::vec3 & position,
+                        const glm::vec3 & irradiance,
+                        float distance,
+                        float radius);
 };
 
 #endif

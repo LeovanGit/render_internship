@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "model.hpp"
+#include "vertex.hpp"
 
 namespace engine
 {
@@ -28,6 +29,10 @@ public:
     void bindModel(const std::string & key);
 
     std::shared_ptr<Model> getDefaultCube(const std::string & key);
+
+    std::shared_ptr<Model> getDefaultPlane(const std::string & key);
+
+    std::shared_ptr<Model> getDefaultSphere(const std::string & key);
 
 private:
     ModelManager() = default;

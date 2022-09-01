@@ -13,7 +13,7 @@ class Texture
 public:
     Texture(const std::string & texture_path);
 
-    void bind();
+    void bind(uint32_t slot = 0);
 
     DxResPtr<ID3D11ShaderResourceView> texture_view;
 private:

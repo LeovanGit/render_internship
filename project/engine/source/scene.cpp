@@ -58,7 +58,7 @@ void Scene::initDepthBuffer(int width, int height)
     dsb_desc.MipLevels = 1;
     dsb_desc.ArraySize = 1;
     dsb_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    dsb_desc.SampleDesc.Count = 1;
+    dsb_desc.SampleDesc.Count = 4;
     dsb_desc.SampleDesc.Quality = 0;
     dsb_desc.Usage = D3D11_USAGE_DEFAULT;
     dsb_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -74,7 +74,7 @@ void Scene::initDepthBuffer(int width, int height)
     D3D11_DEPTH_STENCIL_VIEW_DESC dsv_desc;
     ZeroMemory(&dsv_desc, sizeof(dsv_desc));
     dsv_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
     dsv_desc.Texture2D.MipSlice = 0;
 
     result = globals->device5->CreateDepthStencilView(depth_stencil_buffer.ptr(),
@@ -126,7 +126,7 @@ void Scene::initRenderTarget(int width, int height)
     texture_desc.MipLevels = 1;
     texture_desc.ArraySize = 1;
     texture_desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
-    texture_desc.SampleDesc.Count = 1;
+    texture_desc.SampleDesc.Count = 4;
     texture_desc.Usage = D3D11_USAGE_DEFAULT;
     texture_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
     texture_desc.CPUAccessFlags = 0;
@@ -140,7 +140,7 @@ void Scene::initRenderTarget(int width, int height)
     // create HDR render target
     D3D11_RENDER_TARGET_VIEW_DESC RTV_desc;
     RTV_desc.Format = texture_desc.Format;
-    RTV_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+    RTV_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
     RTV_desc.Texture2D.MipSlice = 0;
 
     result = globals->device5->CreateRenderTargetView(HDR_texture.ptr(),
@@ -151,7 +151,7 @@ void Scene::initRenderTarget(int width, int height)
     // create HDR shader resource view
     D3D11_SHADER_RESOURCE_VIEW_DESC SRV_desc;
     SRV_desc.Format = texture_desc.Format;
-    SRV_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    SRV_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
     SRV_desc.Texture2D.MostDetailedMip = 0;
     SRV_desc.Texture2D.MipLevels = 1;
 

@@ -155,7 +155,7 @@ void Globals::initRasterizers()
     one_sided_raster_desc.DepthBiasClamp = 0.0f;
     one_sided_raster_desc.DepthClipEnable = true;
     one_sided_raster_desc.ScissorEnable = false;
-    one_sided_raster_desc.MultisampleEnable = false;
+    one_sided_raster_desc.MultisampleEnable = true;
     one_sided_raster_desc.AntialiasedLineEnable = false;
 
     result = device->CreateRasterizerState(&one_sided_raster_desc,
@@ -171,7 +171,7 @@ void Globals::initRasterizers()
     double_sided_raster_desc.DepthBiasClamp = 0.0f;
     double_sided_raster_desc.DepthClipEnable = true;
     double_sided_raster_desc.ScissorEnable = false;
-    double_sided_raster_desc.MultisampleEnable = false;
+    double_sided_raster_desc.MultisampleEnable = true;
     double_sided_raster_desc.AntialiasedLineEnable = false;
 
     result = device->CreateRasterizerState(&double_sided_raster_desc,

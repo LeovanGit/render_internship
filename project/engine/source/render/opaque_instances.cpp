@@ -45,6 +45,7 @@ void OpaqueInstances::render()
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
+    TextureManager * tex_mgr = TextureManager::getInstance();
 
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -52,6 +53,10 @@ void OpaqueInstances::render()
     shader->bind();
     instance_buffer.bind(1);
 
+    tex_mgr->getTexture("../engine/assets/environment/reflectance.dds")->bind(4);
+    tex_mgr->getTexture("../engine/assets/environment/irradiance.dds")->bind(5);
+    tex_mgr->getTexture("../engine/assets/environment/reflection.dds")->bind(6);
+    
     uint32_t rendered_instances = 0;
     
     for (auto & per_model: per_model)

@@ -1,6 +1,12 @@
 #ifndef LIGHTING_HLSL
 #define LIGHTING_HLSL
 
+Texture2D<float2> g_reflectance : register(t4);
+TextureCube g_irradiance : register(t5);
+TextureCube g_reflection : register(t6);
+
+static const int g_reflection_mips_count = 8;
+
 // May return direction pointing beneath surface horizon (dot(N, dir) < 0),
 // use clampDirToHorizon to fix it.
 // R = reflect(V, N)
@@ -48,6 +54,25 @@ float calculateSolidAngle(float L_length,
     float cosa = sqrt(1.0f - sina * sina);
 
     return 2.0f * g_PI * (1.0f - cosa);
+}
+
+float3 calculateEnvironment(float3 albedo,
+                            float roughness,
+                            float metalness,
+                            float3 fresnel,
+                            float3 N,
+                            float3 V)
+{
+    float NV = max(dot(N, V), 0.001f);
+    
+    float3 diffuse = albedo * (1.0f - metalness) * g_irradiance.SampleLevel(g_sampler, N, 0);
+
+    float2 reflectanceLUT = g_reflectance.Sample(g_sampler, float2(NV, roughness));
+    float3 reflectance = reflectanceLUT.x * fresnel + reflectanceLUT.y;
+    int mip = roughness * g_reflection_mips_count;
+    float3 specular = reflectance * g_reflection.SampleLevel(g_sampler, reflect(-V, N), mip);
+
+    return diffuse + specular;
 }
 
 // G
@@ -231,6 +256,7 @@ float3 calculateLighting(float3 albedo,
                                         fresnel,
                                         N,
                                         V);
+    
     color += calculatePointLights(albedo,
                                   roughness,
                                   metalness,
@@ -239,6 +265,13 @@ float3 calculateLighting(float3 albedo,
                                   GN,
                                   V,
                                   pos_WS);
+
+    color += calculateEnvironment(albedo,
+                                  roughness,
+                                  metalness,
+                                  fresnel,
+                                  N,
+                                  V);
 
     return color;
 }

@@ -165,7 +165,7 @@ void Controller::initScene(Camera & camera)
     
     // CREATE OBJECTS
     scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
-                    tex_mgr->getTexture("../engine/assets/skybox.dds"));
+                    tex_mgr->getTexture("../engine/assets/environment/skybox.dds"));
 
     initDirectionalLight(glm::normalize(glm::vec3(0.25f, -1.0f, 0.25f)),
                          glm::vec3(20000.0f),
@@ -253,7 +253,8 @@ void Controller::initScene(Camera & camera)
     initWall(math::Transform(glm::vec3(0.0f, -10.0f, 50.0f),
                              math::EulerAngles(0.0f, 0.0f, 0.0f),
                              glm::vec3(10.0f, 10.0f, 10.0f)));
-    
+
+    // gold
     initPlane(math::Transform(glm::vec3(10.0f, 0.0f, 48.0f),
                               math::EulerAngles(0.0f, 0.0f, 0.0f),
                               glm::vec3(5.0f, 10.0f, 1.0f)),
@@ -264,8 +265,53 @@ void Controller::initScene(Camera & camera)
                       nullptr,
                       true,
                       false,
-                      glm::vec3(0.5f),
-                      0.1f,
+                      glm::vec3(0.944f, 0.776f, 0.373f),
+                      0.01f,
+                      1.0f)});
+
+    // copper
+    initPlane(math::Transform(glm::vec3(20.0f, 0.0f, 48.0f),
+                              math::EulerAngles(0.0f, 0.0f, 0.0f),
+                              glm::vec3(5.0f, 10.0f, 1.0f)),
+              std::vector<oi::Material>{oi::Material(
+                      nullptr,
+                      nullptr,
+                      nullptr,
+                      nullptr,
+                      true,
+                      false,
+                      glm::vec3(0.926f, 0.721f, 0.504f),
+                      0.15f,
+                      1.0f)});
+
+    // iron
+    initPlane(math::Transform(glm::vec3(30.0f, 0.0f, 48.0f),
+                              math::EulerAngles(0.0f, 0.0f, 0.0f),
+                              glm::vec3(5.0f, 10.0f, 1.0f)),
+              std::vector<oi::Material>{oi::Material(
+                      nullptr,
+                      nullptr,
+                      nullptr,
+                      nullptr,
+                      true,
+                      false,
+                      glm::vec3(0.531f, 0.512f, 0.496f),
+                      0.27f,
+                      1.0f)});
+
+    // something red
+    initPlane(math::Transform(glm::vec3(40.0f, 0.0f, 48.0f),
+                              math::EulerAngles(0.0f, 0.0f, 0.0f),
+                              glm::vec3(5.0f, 10.0f, 1.0f)),
+              std::vector<oi::Material>{oi::Material(
+                      nullptr,
+                      nullptr,
+                      nullptr,
+                      nullptr,
+                      true,
+                      false,
+                      glm::vec3(1.0f, 0.3f, 0.3f),
+                      0.4f,
                       1.0f)});
 }
 

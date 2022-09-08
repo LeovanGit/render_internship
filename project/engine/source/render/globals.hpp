@@ -72,6 +72,16 @@ struct PerEmissiveMeshBufferData
     glm::mat4 g_mesh_to_model;
 };
 
+struct PerShadowMapMeshBufferData
+{
+    glm::mat4 g_mesh_to_model;
+};
+
+struct PerShadowCameraBufferData
+{
+    glm::mat4 g_proj_view;
+};
+
 // Singleton for global rendering resources
 class Globals final
 {
@@ -118,6 +128,14 @@ public:
     void setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model);
     void updatePerEmissiveMeshBuffer();
 
+    void initPerShadowMapMeshBuffer();
+    void setPerShadowMapMeshBuffer(const glm::mat4 & g_mesh_to_model);
+    void updatePerShadowMapMeshBuffer();
+
+    void initPerShadowCameraBuffer();
+    void setPerShadowCameraBuffer(const glm::mat4 & g_proj_view);
+    void updatePerShadowCameraBuffer();
+    
     DxResPtr<IDXGIFactory5> factory5;
     DxResPtr<ID3D11Device5> device5;
     DxResPtr<ID3D11DeviceContext4> device_context4;
@@ -131,8 +149,15 @@ public:
 
     DxResPtr<ID3D11Buffer> per_emissive_mesh_buffer;
     PerEmissiveMeshBufferData per_emissive_mesh_buffer_data;
+
+    DxResPtr<ID3D11Buffer> per_shadow_map_mesh_buffer;
+    PerShadowMapMeshBufferData per_shadow_map_mesh_buffer_data;
+
+    DxResPtr<ID3D11Buffer> per_shadow_camera_buffer;
+    PerShadowCameraBufferData per_shadow_camera_buffer_data;
     
     DxResPtr<ID3D11SamplerState> sampler;
+    DxResPtr<ID3D11SamplerState> shadow_mapping_sampler;
 
     DxResPtr<ID3D11RasterizerState> one_sided_rasterizer;
     DxResPtr<ID3D11RasterizerState> double_sided_rasterizer;

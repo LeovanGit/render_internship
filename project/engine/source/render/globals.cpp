@@ -23,6 +23,8 @@ void Globals::init()
         instance->initPerFrameBuffer();
         instance->initPerMeshBuffer();
         instance->initPerEmissiveMeshBuffer();
+        instance->initPerShadowMapMeshBuffer();
+        instance->initPerShadowCameraBuffer();
     }
     else spdlog::error("Globals::init() was called twice!");
 }
@@ -126,6 +128,9 @@ void Globals::initD3D()
 
 void Globals::initSamplers()
 {
+    HRESULT result;
+    
+    // default
     D3D11_SAMPLER_DESC sampler_desc;
     ZeroMemory(&sampler_desc, sizeof(sampler_desc));
     // sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -137,8 +142,29 @@ void Globals::initSamplers()
     sampler_desc.MinLOD = 0;
     sampler_desc.MaxLOD = D3D11_FLOAT32_MAX; // unlimited mipmap levels
 
-    HRESULT result = device5->CreateSamplerState(&sampler_desc,
-                                                 sampler.reset());
+    result = device5->CreateSamplerState(&sampler_desc,
+                                         sampler.reset());
+    assert(result >= 0 && "CreateSamplerState");
+
+    // shadow mapping
+    D3D11_SAMPLER_DESC sm_sampler_desc;
+    ZeroMemory(&sm_sampler_desc, sizeof(sm_sampler_desc));
+    sm_sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+    sm_sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+    sm_sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+    sm_sampler_desc.BorderColor[0] = 1.0f;
+    sm_sampler_desc.BorderColor[1] = 1.0f;
+    sm_sampler_desc.BorderColor[2] = 1.0f;
+    sm_sampler_desc.BorderColor[3] = 1.0f;
+    sm_sampler_desc.MinLOD = 0;
+    sm_sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+    sm_sampler_desc.MipLODBias = 0;
+    sm_sampler_desc.MaxAnisotropy = 0;
+    sm_sampler_desc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+    sm_sampler_desc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+
+    result = device5->CreateSamplerState(&sm_sampler_desc,
+                                         shadow_mapping_sampler.reset());
     assert(result >= 0 && "CreateSamplerState");
 }
 
@@ -391,5 +417,99 @@ void Globals::updatePerEmissiveMeshBuffer()
     device_context4->PSSetConstantBuffers(2,
                                           1,
                                           per_emissive_mesh_buffer.get());
+}
+
+void Globals::initPerShadowMapMeshBuffer()
+{
+    D3D11_BUFFER_DESC cb_desc;
+    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+    cb_desc.ByteWidth = sizeof(per_shadow_map_mesh_buffer_data);
+    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb_desc.MiscFlags = 0;
+    cb_desc.StructureByteStride = 0;
+    
+    HRESULT result = device5->CreateBuffer(&cb_desc,
+                                           NULL,
+                                           per_shadow_map_mesh_buffer.reset());
+    assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::setPerShadowMapMeshBuffer(const glm::mat4 & g_mesh_to_model)
+{
+    // fill const buffer data
+    per_shadow_map_mesh_buffer_data.g_mesh_to_model = g_mesh_to_model;
+}
+
+void Globals::updatePerShadowMapMeshBuffer()
+{
+    HRESULT result;
+
+    // write new data to const buffer
+    D3D11_MAPPED_SUBRESOURCE ms;
+    result = device_context4->Map(per_shadow_map_mesh_buffer.ptr(),
+                                  NULL,
+                                  D3D11_MAP_WRITE_DISCARD,
+                                  NULL,
+                                  &ms);
+    assert(result >= 0 && "Map");
+
+    memcpy(ms.pData,
+           &per_shadow_map_mesh_buffer_data,
+           sizeof(per_shadow_map_mesh_buffer_data));
+
+    device_context4->Unmap(per_shadow_map_mesh_buffer.ptr(), NULL);
+
+    // bind const buffer with updated values to vertex shader
+    device_context4->VSSetConstantBuffers(3,
+                                          1,
+                                          per_shadow_map_mesh_buffer.get());
+}
+
+void Globals::initPerShadowCameraBuffer()
+{
+    D3D11_BUFFER_DESC cb_desc;
+    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+    cb_desc.ByteWidth = sizeof(per_shadow_camera_buffer_data);
+    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb_desc.MiscFlags = 0;
+    cb_desc.StructureByteStride = 0;
+    
+    HRESULT result = device5->CreateBuffer(&cb_desc,
+                                           NULL,
+                                           per_shadow_camera_buffer.reset());
+    assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::setPerShadowCameraBuffer(const glm::mat4 & g_proj_view)
+{
+    // fill const buffer data
+    per_shadow_camera_buffer_data.g_proj_view = g_proj_view;
+}
+
+void Globals::updatePerShadowCameraBuffer()
+{
+    HRESULT result;
+
+    // write new data to const buffer
+    D3D11_MAPPED_SUBRESOURCE ms;
+    result = device_context4->Map(per_shadow_camera_buffer.ptr(),
+                                  NULL,
+                                  D3D11_MAP_WRITE_DISCARD,
+                                  NULL,
+                                  &ms);
+    assert(result >= 0 && "Map");
+
+    memcpy(ms.pData,
+           &per_shadow_camera_buffer_data,
+           sizeof(per_shadow_camera_buffer_data));
+
+    device_context4->Unmap(per_shadow_camera_buffer.ptr(), NULL);
+
+    // bind const buffer with updated values to vertex shader
+    device_context4->VSSetConstantBuffers(4,
+                                          1,
+                                          per_shadow_camera_buffer.get());
 }
 } // namespace engine

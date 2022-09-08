@@ -153,13 +153,62 @@ void Controller::initScene(Camera & camera)
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
     };
+
+    D3D11_INPUT_ELEMENT_DESC ied_shadow_map[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         0,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TRANSFORM",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         0, // reset align for instance data!
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         1,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         16,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         2,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         32,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         3,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         48,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
     
     mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
                                                   ied_opaque,
                                                   9),
                             shader_mgr->getShader("../engine/shaders/emissive.hlsl",
                                                   ied_emissive,
-                                                  6));
+                                                  6),
+                            shader_mgr->getShader("../engine/shaders/shadow_cubemap.hlsl",
+                                                  ied_shadow_map,
+                                                  5,
+                                                  true,
+                                                  false,
+                                                  false));
     
     shader_mgr->getShader("../engine/shaders/resolve.hlsl");
     
@@ -168,7 +217,7 @@ void Controller::initScene(Camera & camera)
                     tex_mgr->getTexture("../engine/assets/environment/skybox.dds"));
 
     initDirectionalLight(glm::normalize(glm::vec3(0.25f, -1.0f, 0.25f)),
-                         glm::vec3(20000.0f),
+                         glm::vec3(1000.0f),
                          0.00006794f);
 
     initPointLight(glm::vec3(0.0f, 5.0f, 0.0f),

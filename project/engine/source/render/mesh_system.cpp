@@ -26,17 +26,44 @@ void MeshSystem::del()
 }
 
 void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
-                            std::shared_ptr<Shader> emissive)
+                            std::shared_ptr<Shader> emissive,
+                            std::shared_ptr<Shader> shadow)
 {
     instance->opaque_instances.shader = opaque;
     instance->emissive_instances.shader = emissive;
-}
 
+    shadow_shader = shadow;
+}
 
 void MeshSystem::render()
 {
     opaque_instances.render();
     emissive_instances.render();
+}
+
+void MeshSystem::renderDepthToCubemap(const glm::vec3 & position,
+                                      float near,
+                                      float far)
+{
+    Globals * globals = Globals::getInstance();
+    
+    Camera camera(position,
+                  glm::vec3(0.0f, 1.0f, 0.0f),
+                  glm::vec3(-1.0f, 0.0f, 0.0f));
+    
+    camera.setPerspective(glm::radians(90.0f),
+                          1.0f,
+                          near,
+                          far);
+
+    camera.updateMatrices();
+
+    shadow_shader->bind();
+    globals->setPerShadowCameraBuffer(camera.getViewProj());
+    globals->updatePerShadowCameraBuffer();
+
+
+    opaque_instances.renderWithoutMaterials();
 }
 
 bool MeshSystem::findIntersection(const math::Ray & ray_ws,

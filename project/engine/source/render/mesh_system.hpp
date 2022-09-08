@@ -26,9 +26,15 @@ public:
     static void del();
 
     void setShaders(std::shared_ptr<Shader> opaque,
-                    std::shared_ptr<Shader> emissive);
+                    std::shared_ptr<Shader> emissive,
+                    std::shared_ptr<Shader> shadow);
     
     void render();
+
+    // for shadows from point lights
+    void renderDepthToCubemap(const glm::vec3 & position,
+                              float near,
+                              float far);
 
     bool findIntersection(const math::Ray & ray_ws,
                           math::MeshIntersection & nearest);
@@ -50,6 +56,8 @@ public:
 
     OpaqueInstances opaque_instances;
     EmissiveInstances emissive_instances;
+
+    std::shared_ptr<Shader> shadow_shader;
 
 private:
     MeshSystem() = default;

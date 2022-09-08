@@ -35,12 +35,16 @@ class Shader
 public:
     Shader(const std::string & shader_path,
            D3D11_INPUT_ELEMENT_DESC input_desc[] = nullptr,
-           uint32_t input_desc_size = 0);
+           uint32_t input_desc_size = 0,
+           bool vertex_shader = true,
+           bool geometry_shader = false,
+           bool fragment_shader = true);
 
     void bind();
 
     DxResPtr<ID3D11VertexShader> vert_shader;
     DxResPtr<ID3D11PixelShader> frag_shader;
+    DxResPtr<ID3D11GeometryShader> geom_shader;
     DxResPtr<ID3D11InputLayout> input_layout;
 };
 } // namespace engine

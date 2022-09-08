@@ -126,6 +126,7 @@ public:
     void updateInstanceBuffers();
     
     void render();
+    void renderWithoutMaterials();
 
     std::vector<PerModel> per_model;
     VertexBuffer<glm::mat4> instance_buffer;

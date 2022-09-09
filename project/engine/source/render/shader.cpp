@@ -99,8 +99,8 @@ Shader::Shader(const std::string & shader_path,
         result = D3DCompileFromFile(path.c_str(),
                                     NULL,
                                     &includer,
-                                    "fgeometryShader",
-                                    "ps_5_0",
+                                    "geometryShader",
+                                    "gs_5_0",
                                     SKIP_SHADER_OPTIMIZATIONS,
                                     0,
                                     &geom_shader_buffer,
@@ -131,6 +131,7 @@ void Shader::bind()
     // bind shaders and input layout
     globals->device_context4->VSSetShader(vert_shader.ptr(), 0, 0);
     globals->device_context4->PSSetShader(frag_shader.ptr(), 0, 0);
+    globals->device_context4->GSSetShader(geom_shader.ptr(), 0, 0);
     globals->device_context4->IASetInputLayout(input_layout);
 }
 } // namespace engine

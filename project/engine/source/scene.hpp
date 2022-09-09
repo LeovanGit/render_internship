@@ -46,7 +46,7 @@ public:
     DxResPtr<ID3D11Texture2D> HDR_texture;
     DxResPtr<ID3D11RenderTargetView> HDR_RTV;
     DxResPtr<ID3D11ShaderResourceView> HDR_SRV;
-
+    
     DxResPtr<ID3D11Texture2D> shadow_map;
     DxResPtr<ID3D11DepthStencilView> shadow_map_dsv;
     DxResPtr<ID3D11DepthStencilState> shadow_map_dss;

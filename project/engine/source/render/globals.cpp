@@ -482,10 +482,12 @@ void Globals::initPerShadowCameraBuffer()
     assert(result >= 0 && "CreateBuffer");
 }
 
-void Globals::setPerShadowCameraBuffer(const glm::mat4 & g_proj_view)
+void Globals::setPerShadowCameraBuffer(const std::vector<Camera> & cameras)
 {
-    // fill const buffer data
-    per_shadow_camera_buffer_data.g_proj_view = g_proj_view;
+    for (uint32_t i = 0, size = cameras.size(); i != size; ++i)
+    {
+        per_shadow_camera_buffer_data.g_proj_view[i] = cameras[i].getViewProj();
+    }    
 }
 
 void Globals::updatePerShadowCameraBuffer()
@@ -508,7 +510,7 @@ void Globals::updatePerShadowCameraBuffer()
     device_context4->Unmap(per_shadow_camera_buffer.ptr(), NULL);
 
     // bind const buffer with updated values to vertex shader
-    device_context4->VSSetConstantBuffers(4,
+    device_context4->GSSetConstantBuffers(4,
                                           1,
                                           per_shadow_camera_buffer.get());
 }

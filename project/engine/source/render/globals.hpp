@@ -79,7 +79,7 @@ struct PerShadowMapMeshBufferData
 
 struct PerShadowCameraBufferData
 {
-    glm::mat4 g_proj_view;
+    glm::mat4 g_proj_view[6];
 };
 
 // Singleton for global rendering resources
@@ -133,7 +133,7 @@ public:
     void updatePerShadowMapMeshBuffer();
 
     void initPerShadowCameraBuffer();
-    void setPerShadowCameraBuffer(const glm::mat4 & g_proj_view);
+    void setPerShadowCameraBuffer(const std::vector<Camera> & cameras);
     void updatePerShadowCameraBuffer();
     
     DxResPtr<IDXGIFactory5> factory5;

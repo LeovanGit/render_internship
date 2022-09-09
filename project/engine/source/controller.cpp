@@ -207,7 +207,7 @@ void Controller::initScene(Camera & camera)
                                                   ied_shadow_map,
                                                   5,
                                                   true,
-                                                  false,
+                                                  true,
                                                   false));
     
     shader_mgr->getShader("../engine/shaders/resolve.hlsl");

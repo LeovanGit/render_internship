@@ -42,9 +42,9 @@ void Scene::renderFrame(windows::Window & window,
                                                  nullptr,
                                                  shadow_map_dsv.ptr());
 
-    mesh_system->renderDepthToCubemap(glm::vec3(50.0f, 10.0f, 0.0f), 0.1f, 1000.0f);
+    mesh_system->renderDepthToCubemap(glm::vec3(0.0f, 5.0f, 0.0f), 0.1f, 1000.0f);
 
-    // other 
+    // render
     globals->bind(camera, post_process.EV_100);
 
     window.bindViewport();
@@ -207,14 +207,14 @@ void Scene::initShadowMap(int size)
     shadow_map_desc.Width = size;
     shadow_map_desc.Height = size;
     shadow_map_desc.MipLevels = 1;
-    shadow_map_desc.ArraySize = 1;
+    shadow_map_desc.ArraySize = 6; // * cube_maps_count
     shadow_map_desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
     shadow_map_desc.SampleDesc.Count = 1;
     shadow_map_desc.SampleDesc.Quality = 0;
     shadow_map_desc.Usage = D3D11_USAGE_DEFAULT;
     shadow_map_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_DEPTH_STENCIL;
     shadow_map_desc.CPUAccessFlags = 0; 
-    shadow_map_desc.MiscFlags = 0;
+    shadow_map_desc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 
     result = globals->device5->CreateTexture2D(&shadow_map_desc,
                                                NULL,
@@ -224,9 +224,11 @@ void Scene::initShadowMap(int size)
     D3D11_DEPTH_STENCIL_VIEW_DESC dsv_desc;
     ZeroMemory(&dsv_desc, sizeof(dsv_desc));
     dsv_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-    dsv_desc.Texture2D.MipSlice = 0;
-
+    dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+    dsv_desc.Texture2DArray.ArraySize = 6; // * cube_maps_count
+    dsv_desc.Texture2DArray.FirstArraySlice = 0;
+    dsv_desc.Texture2DArray.MipSlice = 0;
+        
     result = globals->device5->CreateDepthStencilView(shadow_map.ptr(),
                                                       &dsv_desc,
                                                       shadow_map_dsv.reset());
@@ -244,7 +246,7 @@ void Scene::initShadowMap(int size)
 
     D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
     ZeroMemory(&srv_desc, sizeof(srv_desc));
-    srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
     srv_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
     srv_desc.Texture2D.MipLevels = 1;
 

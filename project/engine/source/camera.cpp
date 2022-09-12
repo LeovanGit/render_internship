@@ -174,3 +174,46 @@ glm::vec3 Camera::reproject(float x, float y) const
     return point_ws;
 }
 
+std::vector<Camera> Camera::generateCubemapCameras(const glm::vec3 & position,
+                                                   float near,
+                                                   float far)
+{
+    std::vector<Camera> cameras =
+    {
+        // +x
+        Camera(position,
+               glm::vec3(0.0f, 1.0f, 0.0f),
+               glm::vec3(1.0f, 0.0f, 0.0f)),
+        // -x
+        Camera(position,
+               glm::vec3(0.0f, 1.0f, 0.0f),
+               glm::vec3(-1.0f, 0.0f, 0.0f)),
+        // +y
+        Camera(position,
+               glm::vec3(0.0f, 0.0f, -1.0f),
+               glm::vec3(0.0f, 1.0f, 0.0f)),
+        // -y
+        Camera(position,
+               glm::vec3(0.0f, 0.0f, 1.0f),
+               glm::vec3(0.0f, -1.0f, 0.0f)),
+        // +z
+        Camera(position,
+               glm::vec3(0.0f, 1.0f, 0.0f),
+               glm::vec3(0.0f, 0.0f, 1.0f)),
+        // -z
+        Camera(position,
+               glm::vec3(0.0f, 1.0f, 0.0f),
+               glm::vec3(0.0f, 0.0f, -1.0f)),
+    };
+
+    for (uint32_t i = 0, size = cameras.size(); i != size; ++i)
+    {
+        cameras[i].setPerspective(glm::radians(90.0f),
+                                  1.0f,
+                                  near,
+                                  far);
+        cameras[i].updateMatrices();
+    }
+
+    return cameras;
+}

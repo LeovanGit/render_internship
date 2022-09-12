@@ -7,6 +7,8 @@ static const float g_gamma = 2.2f;
 static const float g_PI = 3.14159265f;
 static const float g_F0_dielectric = 0.04f;
 
+static const float g_shadows_offset = 0.001f;
+
 static const uint g_point_lights_count = 4;
 static const uint g_dir_lights_count = 1;
 
@@ -33,6 +35,8 @@ cbuffer PerFrame : register(b0)
         float3 radiance;
         float solid_angle;
     } g_dir_lights[g_dir_lights_count];
+
+    row_major float4x4 g_light_proj_view[6];
 };
 
 #endif

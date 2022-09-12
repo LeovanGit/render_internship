@@ -125,7 +125,7 @@ public:
 
     void updateInstanceBuffers();
     
-    void render();
+    void render(DxResPtr<ID3D11ShaderResourceView> & shadow_map_srv);
     void renderWithoutMaterials();
 
     std::vector<PerModel> per_model;

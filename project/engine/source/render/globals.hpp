@@ -47,6 +47,8 @@ struct PerFrameBufferData
         glm::vec3 radiance;
         float solid_angle;
     } g_dir_lights[1];
+
+    glm::mat4 g_light_proj_view[6];
 };
 
 struct PerMeshBufferData
@@ -72,14 +74,9 @@ struct PerEmissiveMeshBufferData
     glm::mat4 g_mesh_to_model;
 };
 
-struct PerShadowMapMeshBufferData
+struct PerShadowMeshBufferData
 {
     glm::mat4 g_mesh_to_model;
-};
-
-struct PerShadowCameraBufferData
-{
-    glm::mat4 g_proj_view[6];
 };
 
 // Singleton for global rendering resources
@@ -96,16 +93,13 @@ public:
 
     static void del();
 
-    void bind(const Camera & camera,
-              float EV_100);
-
-    void bindRasterizer(bool is_double_sided = false);
-
     void initD3D();
 
     void initSamplers();
+    void bindSampler();
 
     void initRasterizers();
+    void bindRasterizer(bool is_double_sided = false);
 
     void initPerFrameBuffer();
     void setPerFrameBuffer(const Camera & camera,
@@ -127,14 +121,10 @@ public:
     void initPerEmissiveMeshBuffer();
     void setPerEmissiveMeshBuffer(const glm::mat4 & g_mesh_to_model);
     void updatePerEmissiveMeshBuffer();
-
-    void initPerShadowMapMeshBuffer();
-    void setPerShadowMapMeshBuffer(const glm::mat4 & g_mesh_to_model);
-    void updatePerShadowMapMeshBuffer();
-
-    void initPerShadowCameraBuffer();
-    void setPerShadowCameraBuffer(const std::vector<Camera> & cameras);
-    void updatePerShadowCameraBuffer();
+    
+    void initPerShadowMeshBuffer();
+    void setPerShadowMeshBuffer(const glm::mat4 & g_mesh_to_model);
+    void updatePerShadowMeshBuffer();
     
     DxResPtr<IDXGIFactory5> factory5;
     DxResPtr<ID3D11Device5> device5;
@@ -150,11 +140,8 @@ public:
     DxResPtr<ID3D11Buffer> per_emissive_mesh_buffer;
     PerEmissiveMeshBufferData per_emissive_mesh_buffer_data;
 
-    DxResPtr<ID3D11Buffer> per_shadow_map_mesh_buffer;
-    PerShadowMapMeshBufferData per_shadow_map_mesh_buffer_data;
-
-    DxResPtr<ID3D11Buffer> per_shadow_camera_buffer;
-    PerShadowCameraBufferData per_shadow_camera_buffer_data;
+    DxResPtr<ID3D11Buffer> per_shadow_mesh_buffer;
+    PerShadowMeshBufferData per_shadow_mesh_buffer_data;
     
     DxResPtr<ID3D11SamplerState> sampler;
     DxResPtr<ID3D11SamplerState> shadow_mapping_sampler;

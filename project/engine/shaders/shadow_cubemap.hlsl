@@ -1,11 +1,8 @@
-cbuffer PerShadowMapMesh : register(b3)
+#include "globals.hlsl"
+
+cbuffer PerShadowMesh : register(b3)
 {
     row_major float4x4 g_mesh_to_model;
-}
-
-cbuffer PerShadowCamera : register(b4)
-{
-    row_major float4x4 g_proj_view[6];
 }
 
 struct VS_INPUT
@@ -41,7 +38,7 @@ GS_INPUT vertexShader(VS_INPUT input)
 
     float4 pos_MS = mul(float4(input.pos, 1.0f), g_mesh_to_model);
     float4 pos_WS = mul(pos_MS, transform);
-
+    
     GS_INPUT output;
     output.pos_WS = pos_WS;
 
@@ -62,7 +59,7 @@ void geometryShader(triangle GS_INPUT input[3],
         {
             GS_OUTPUT output;
             output.slice = face;
-            output.pos_CS = mul(input[i].pos_WS, g_proj_view[face]);
+            output.pos_CS = mul(input[i].pos_WS, g_light_proj_view[face]);
 
             output_stream.Append(output);
         }

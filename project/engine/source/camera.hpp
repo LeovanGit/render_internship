@@ -1,6 +1,7 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 #include <iostream>
+#include <vector>
 #include "glm.hpp"
 #include "gtc/quaternion.hpp"
 
@@ -46,6 +47,10 @@ public:
     void updateMatrices();
 
     glm::vec3 reproject(float x, float y) const;
+
+    static std::vector<Camera> generateCubemapCameras(const glm::vec3 & position,
+                                                      float near = 0.1f,
+                                                      float far = 1000.0f);
 
     bool is_roll_enabled;
 

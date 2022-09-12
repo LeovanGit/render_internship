@@ -5,7 +5,45 @@ Texture2D<float2> g_reflectance : register(t4);
 TextureCube g_irradiance : register(t5);
 TextureCube g_reflection : register(t6);
 
+TextureCube g_shadow_maps : register(t7);
+
 static const int g_reflection_mips_count = 8;
+
+uint calculateCubeMapFaceIndex(float3 direction)
+{
+    float angles_with_world_axes[6];
+    angles_with_world_axes[0] = dot(direction, float3(+1.0f, 0.0f, 0.0f));
+    angles_with_world_axes[1] = dot(direction, float3(-1.0f, 0.0f, 0.0f));
+    angles_with_world_axes[2] = dot(direction, float3(0.0f, +1.0f, 0.0f));
+    angles_with_world_axes[3] = dot(direction, float3(0.0f, -1.0f, 0.0f));
+    angles_with_world_axes[4] = dot(direction, float3(0.0f, 0.0f, +1.0f));
+    angles_with_world_axes[5] = dot(direction, float3(0.0f, 0.0f, -1.0f));
+
+    float max_cosa = -1.0f;
+    uint index = 0;
+
+    for (uint i = 0; i != 6; ++i)
+    {
+        if (max_cosa < angles_with_world_axes[i])
+        {
+            max_cosa = angles_with_world_axes[i];
+            index = i;
+        }
+    }
+
+    return index;
+}
+
+bool is_visible(float3 pos_WS,
+                float3 direction)
+{
+    uint index = calculateCubeMapFaceIndex(direction);
+
+    float shadow_map_depth = g_shadow_maps.Sample(g_sampler, direction);
+    float4 pos_shadow_CS = mul(float4(pos_WS, 1.0f), g_light_proj_view[index]);
+
+    return (shadow_map_depth < pos_shadow_CS.z / pos_shadow_CS.w + g_shadows_offset);
+}
 
 // May return direction pointing beneath surface horizon (dot(N, dir) < 0),
 // use clampDirToHorizon to fix it.
@@ -183,9 +221,11 @@ float3 calculatePointLights(float3 albedo,
     float3 color = float3(0.0f, 0.0f, 0.0f);
     
     for (uint i = 0; i != g_point_lights_count; ++i)
-    {
+    {        
         float3 L = g_point_lights[i].position - pos_WS;
         float3 L_norm = normalize(L);
+
+        if (!is_visible(pos_WS, -L)) continue;
 
         float3 H = normalize(L_norm + V);
         float NL = max(dot(N, L_norm), 0.001f);

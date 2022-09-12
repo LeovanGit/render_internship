@@ -35,59 +35,15 @@ void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
     shadow_shader = shadow;
 }
 
-void MeshSystem::render()
+void MeshSystem::render(DxResPtr<ID3D11ShaderResourceView> & shadow_map_srv)
 {
-    opaque_instances.render();
+    opaque_instances.render(shadow_map_srv);
     emissive_instances.render();
 }
 
-void MeshSystem::renderDepthToCubemap(const glm::vec3 & position,
-                                      float near,
-                                      float far)
-{
-    Globals * globals = Globals::getInstance();
-
-    std::vector<Camera> cameras =
-    {
-        // +x
-        Camera(position,
-               glm::vec3(0.0f, 1.0f, 0.0f),
-               glm::vec3(1.0f, 0.0f, 0.0f)),
-        // -x
-        Camera(position,
-               glm::vec3(0.0f, 1.0f, 0.0f),
-               glm::vec3(-1.0f, 0.0f, 0.0f)),
-        // +y
-        Camera(position,
-               glm::vec3(0.0f, 0.0f, -1.0f),
-               glm::vec3(0.0f, 1.0f, 0.0f)),
-        // -y
-        Camera(position,
-               glm::vec3(0.0f, 0.0f, 1.0f),
-               glm::vec3(0.0f, -1.0f, 0.0f)),
-        // +z
-        Camera(position,
-               glm::vec3(0.0f, 1.0f, 0.0f),
-               glm::vec3(0.0f, 0.0f, 1.0f)),
-        // -z
-        Camera(position,
-               glm::vec3(0.0f, 1.0f, 0.0f),
-               glm::vec3(0.0f, 0.0f, -1.0f)),
-    };
-
-    for (uint32_t i = 0, size = cameras.size(); i != size; ++i)
-    {
-        cameras[i].setPerspective(glm::radians(90.0f),
-                                  1.0f,
-                                  near,
-                                  far);
-        cameras[i].updateMatrices();
-    }
-
+void MeshSystem::renderDepthToCubemap()
+{        
     shadow_shader->bind();
-    globals->setPerShadowCameraBuffer(cameras);
-    globals->updatePerShadowCameraBuffer();
-
     opaque_instances.renderWithoutMaterials();
 }
 

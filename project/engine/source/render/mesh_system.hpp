@@ -29,12 +29,10 @@ public:
                     std::shared_ptr<Shader> emissive,
                     std::shared_ptr<Shader> shadow);
     
-    void render();
+    void render(DxResPtr<ID3D11ShaderResourceView> & shadow_map_srv);
 
     // for shadows from point lights
-    void renderDepthToCubemap(const glm::vec3 & position,
-                              float near,
-                              float far);
+    void renderDepthToCubemap();
 
     bool findIntersection(const math::Ray & ray_ws,
                           math::MeshIntersection & nearest);

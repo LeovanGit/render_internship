@@ -30,22 +30,26 @@ void Scene::renderFrame(windows::Window & window,
     ShaderManager * shader_mgr = ShaderManager::getInstance();
     ModelManager * model_mgr = ModelManager::getInstance();
     MeshSystem * mesh_system = MeshSystem::getInstance();
+    LightSystem * light_system = LightSystem::getInstance();
+    TransformSystem * trans_system = TransformSystem::getInstance();
 
-    // shadow map
+    globals->setPerFrameBuffer(camera, post_process.EV_100);
+    globals->updatePerFrameBuffer();
+    
+    // render shadow maps
     bindSquareViewport();
 
     bindShadowMap();
-
     clearShadowMap();
 
     globals->device_context4->OMSetRenderTargets(0,
                                                  nullptr,
                                                  shadow_map_dsv.ptr());
 
-    mesh_system->renderDepthToCubemap(glm::vec3(0.0f, 5.0f, 0.0f), 0.1f, 1000.0f);
+    mesh_system->renderDepthToCubemap();
 
-    // render
-    globals->bind(camera, post_process.EV_100);
+    // render scene
+    globals->bindSampler();
 
     window.bindViewport();
     
@@ -55,7 +59,7 @@ void Scene::renderFrame(windows::Window & window,
     clearRenderTarget();
     clearDepthBuffer();
     
-    mesh_system->render();
+    mesh_system->render(shadow_map_srv);
     sky.render();
 
     post_process.resolve(HDR_SRV, window.getRenderTarget());
@@ -248,7 +252,8 @@ void Scene::initShadowMap(int size)
     ZeroMemory(&srv_desc, sizeof(srv_desc));
     srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
     srv_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-    srv_desc.Texture2D.MipLevels = 1;
+    srv_desc.TextureCube.MipLevels = 1;
+    srv_desc.TextureCube.MostDetailedMip = 0;
 
     result = globals->device5->CreateShaderResourceView(shadow_map.ptr(),
                                                         &srv_desc,

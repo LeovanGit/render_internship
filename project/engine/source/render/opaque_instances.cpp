@@ -40,7 +40,7 @@ void OpaqueInstances::updateInstanceBuffers()
     instance_buffer.unmap();
 }
 
-void OpaqueInstances::render()
+void OpaqueInstances::render(DxResPtr<ID3D11ShaderResourceView> & shadow_map_srv)
 {
     if (instance_buffer.get_size() == 0) return;
 
@@ -56,6 +56,8 @@ void OpaqueInstances::render()
     tex_mgr->getTexture("../engine/assets/environment/reflectance.dds")->bind(4);
     tex_mgr->getTexture("../engine/assets/environment/irradiance.dds")->bind(5);
     tex_mgr->getTexture("../engine/assets/environment/reflection.dds")->bind(6);
+
+    globals->device_context4->PSSetShaderResources(7, 1, shadow_map_srv.get());
     
     uint32_t rendered_instances = 0;
     
@@ -142,8 +144,8 @@ void OpaqueInstances::renderWithoutMaterials()
 
                 globals->bindRasterizer(material.is_double_sided);
 
-                globals->setPerShadowMapMeshBuffer(mesh_range.mesh_to_model);
-                globals->updatePerShadowMapMeshBuffer();
+                globals->setPerShadowMeshBuffer(mesh_range.mesh_to_model);
+                globals->updatePerShadowMeshBuffer();
                 
                 uint32_t instances_count = uint32_t(per_material.instances.size());
 

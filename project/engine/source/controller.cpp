@@ -246,7 +246,7 @@ void Controller::initScene(Camera & camera)
                   nullptr,
                   tex_mgr->getTexture("../engine/assets/floor/tile_normal.dds"),
                   true,
-                  false,
+                  true,
                   glm::vec3(1.0f, 0.0f, 0.0f),
                   0.9f,
                   0.0f)});

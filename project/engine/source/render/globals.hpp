@@ -48,7 +48,7 @@ struct PerFrameBufferData
         float solid_angle;
     } g_dir_lights[1];
 
-    glm::mat4 g_light_proj_view[6];
+    glm::mat4 g_light_proj_view[24]; // 4 cubemaps
 };
 
 struct PerMeshBufferData
@@ -77,6 +77,12 @@ struct PerEmissiveMeshBufferData
 struct PerShadowMeshBufferData
 {
     glm::mat4 g_mesh_to_model;
+};
+
+struct PerShadowCubeMapBufferData
+{
+    int g_cubemap_index;
+    glm::vec3 padding_0;
 };
 
 // Singleton for global rendering resources
@@ -125,6 +131,10 @@ public:
     void initPerShadowMeshBuffer();
     void setPerShadowMeshBuffer(const glm::mat4 & g_mesh_to_model);
     void updatePerShadowMeshBuffer();
+
+    void initPerShadowCubeMapBuffer();
+    void setPerShadowCubeMapBuffer(int g_cubemap_index);
+    void updatePerShadowCubeMapBuffer();
     
     DxResPtr<IDXGIFactory5> factory5;
     DxResPtr<ID3D11Device5> device5;
@@ -142,6 +152,9 @@ public:
 
     DxResPtr<ID3D11Buffer> per_shadow_mesh_buffer;
     PerShadowMeshBufferData per_shadow_mesh_buffer_data;
+
+    DxResPtr<ID3D11Buffer> per_shadow_cubemap_buffer;
+    PerShadowCubeMapBufferData per_shadow_cubemap_buffer_data;
     
     DxResPtr<ID3D11SamplerState> sampler;
     DxResPtr<ID3D11SamplerState> shadow_mapping_sampler;

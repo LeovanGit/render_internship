@@ -5,6 +5,12 @@ cbuffer PerShadowMesh : register(b3)
     row_major float4x4 g_mesh_to_model;
 }
 
+cbuffer PerShadowCubeMap : register(b4)
+{
+    int g_cubemap_index;
+    float3 padding_0;
+}
+
 struct VS_INPUT
 {
     float3 pos : POSITION;
@@ -58,8 +64,9 @@ void geometryShader(triangle GS_INPUT input[3],
         for (uint i = 0; i != 3; ++i)
         {
             GS_OUTPUT output;
-            output.slice = face;
-            output.pos_CS = mul(input[i].pos_WS, g_light_proj_view[face]);
+            output.slice = g_cubemap_index * 6 + face;
+            output.pos_CS = mul(input[i].pos_WS,
+                                g_light_proj_view[g_cubemap_index * 6 + face]);
 
             output_stream.Append(output);
         }

@@ -32,7 +32,7 @@ public:
     void render(DxResPtr<ID3D11ShaderResourceView> & shadow_map_srv);
 
     // for shadows from point lights
-    void renderDepthToCubemap();
+    void renderShadowCubeMaps();
 
     bool findIntersection(const math::Ray & ray_ws,
                           math::MeshIntersection & nearest);

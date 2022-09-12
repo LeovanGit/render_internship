@@ -5,7 +5,7 @@ Texture2D<float2> g_reflectance : register(t4);
 TextureCube g_irradiance : register(t5);
 TextureCube g_reflection : register(t6);
 
-TextureCube g_shadow_maps : register(t7);
+TextureCubeArray<float4> g_shadow_maps : register(t7);
 
 static const int g_reflection_mips_count = 8;
 
@@ -19,10 +19,10 @@ uint calculateCubeMapFaceIndex(float3 direction)
     angles_with_world_axes[4] = dot(direction, float3(0.0f, 0.0f, +1.0f));
     angles_with_world_axes[5] = dot(direction, float3(0.0f, 0.0f, -1.0f));
 
-    float max_cosa = -1.0f;
+    float max_cosa = angles_with_world_axes[0];
     uint index = 0;
 
-    for (uint i = 0; i != 6; ++i)
+    for (uint i = 1; i != 6; ++i)
     {
         if (max_cosa < angles_with_world_axes[i])
         {
@@ -34,15 +34,19 @@ uint calculateCubeMapFaceIndex(float3 direction)
     return index;
 }
 
-bool is_visible(float3 pos_WS,
-                float3 direction)
+bool isVisible(float3 pos_WS,
+               float3 direction,
+               uint cubemap_index)
 {
-    uint index = calculateCubeMapFaceIndex(direction);
+    uint index = 6 * cubemap_index + calculateCubeMapFaceIndex(direction);
+    
+    float shadow_map_depth = g_shadow_maps.Sample(g_sampler,
+                                                  float4(direction, cubemap_index));
 
-    float shadow_map_depth = g_shadow_maps.Sample(g_sampler, direction);
     float4 pos_shadow_CS = mul(float4(pos_WS, 1.0f), g_light_proj_view[index]);
+    float real_depth = pos_shadow_CS.z / pos_shadow_CS.w;
 
-    return (shadow_map_depth < pos_shadow_CS.z / pos_shadow_CS.w + g_shadows_offset);
+    return (real_depth + g_shadows_offset > shadow_map_depth);
 }
 
 // May return direction pointing beneath surface horizon (dot(N, dir) < 0),
@@ -225,7 +229,7 @@ float3 calculatePointLights(float3 albedo,
         float3 L = g_point_lights[i].position - pos_WS;
         float3 L_norm = normalize(L);
 
-        if (!is_visible(pos_WS, -L)) continue;
+        if (!isVisible(pos_WS, -L, i)) continue;
 
         float3 H = normalize(L_norm + V);
         float NL = max(dot(N, L_norm), 0.001f);

@@ -4,6 +4,7 @@ namespace
 {
 constexpr float BACKGROUND[4] = {0.4f, 0.44f, 0.4f, 1.0f};
 constexpr int SHADOW_MAP_SIZE = 1024;
+constexpr uint32_t shadow_cubemaps_count = 4;
 } // namespace
 
 namespace engine
@@ -42,13 +43,9 @@ void Scene::renderFrame(windows::Window & window,
     bindShadowMap();
     clearShadowMap();
 
-    globals->device_context4->OMSetRenderTargets(0,
-                                                 nullptr,
-                                                 shadow_map_dsv.ptr());
+    mesh_system->renderShadowCubeMaps();
 
-    mesh_system->renderDepthToCubemap();
-
-    // render scene
+    // render scene to main camera
     globals->bindSampler();
 
     window.bindViewport();
@@ -211,7 +208,7 @@ void Scene::initShadowMap(int size)
     shadow_map_desc.Width = size;
     shadow_map_desc.Height = size;
     shadow_map_desc.MipLevels = 1;
-    shadow_map_desc.ArraySize = 6; // * cube_maps_count
+    shadow_map_desc.ArraySize = 6 * shadow_cubemaps_count;
     shadow_map_desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
     shadow_map_desc.SampleDesc.Count = 1;
     shadow_map_desc.SampleDesc.Quality = 0;
@@ -229,7 +226,7 @@ void Scene::initShadowMap(int size)
     ZeroMemory(&dsv_desc, sizeof(dsv_desc));
     dsv_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
     dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-    dsv_desc.Texture2DArray.ArraySize = 6; // * cube_maps_count
+    dsv_desc.Texture2DArray.ArraySize = 6 * shadow_cubemaps_count;
     dsv_desc.Texture2DArray.FirstArraySlice = 0;
     dsv_desc.Texture2DArray.MipSlice = 0;
         
@@ -250,10 +247,12 @@ void Scene::initShadowMap(int size)
 
     D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
     ZeroMemory(&srv_desc, sizeof(srv_desc));
-    srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+    srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
     srv_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-    srv_desc.TextureCube.MipLevels = 1;
-    srv_desc.TextureCube.MostDetailedMip = 0;
+    srv_desc.TextureCubeArray.MipLevels = 1;
+    srv_desc.TextureCubeArray.MostDetailedMip = 0;
+    srv_desc.TextureCubeArray.First2DArrayFace = 0;
+    srv_desc.TextureCubeArray.NumCubes = shadow_cubemaps_count;
 
     result = globals->device5->CreateShaderResourceView(shadow_map.ptr(),
                                                         &srv_desc,
@@ -277,6 +276,10 @@ void Scene::bindShadowMap()
 {
     Globals * globals = Globals::getInstance();
 
+    globals->device_context4->OMSetRenderTargets(0,
+                                                 nullptr,
+                                                 shadow_map_dsv.ptr());
+    
     globals->device_context4->OMSetDepthStencilState(shadow_map_dss.ptr(),
                                                      0);
 }

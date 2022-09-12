@@ -1,5 +1,11 @@
 #include "mesh_system.hpp"
 
+namespace
+{
+constexpr uint32_t shadow_cubemaps_count = 4;
+} // namespace
+
+
 namespace engine
 {
 MeshSystem * MeshSystem::instance = nullptr;
@@ -41,10 +47,19 @@ void MeshSystem::render(DxResPtr<ID3D11ShaderResourceView> & shadow_map_srv)
     emissive_instances.render();
 }
 
-void MeshSystem::renderDepthToCubemap()
-{        
+void MeshSystem::renderShadowCubeMaps()
+{
+    Globals * globals = Globals::getInstance();
+    
     shadow_shader->bind();
-    opaque_instances.renderWithoutMaterials();
+
+    for (uint32_t i = 0; i != shadow_cubemaps_count; ++i)
+    {
+        globals->setPerShadowCubeMapBuffer(i);
+        globals->updatePerShadowCubeMapBuffer();
+        
+        opaque_instances.renderWithoutMaterials();   
+    }
 }
 
 bool MeshSystem::findIntersection(const math::Ray & ray_ws,

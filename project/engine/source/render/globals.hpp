@@ -48,6 +48,10 @@ struct PerFrameBufferData
         float solid_angle;
     } g_dir_lights[1];
 
+    int g_reflection_mips_count;
+    int g_shadow_map_size;
+    glm::vec2 padding_3;
+    
     glm::mat4 g_light_proj_view[24]; // 4 cubemaps
 };
 
@@ -102,14 +106,16 @@ public:
     void initD3D();
 
     void initSamplers();
-    void bindSampler();
+    void bindSamplers();
 
     void initRasterizers();
     void bindRasterizer(bool is_double_sided = false);
 
     void initPerFrameBuffer();
     void setPerFrameBuffer(const Camera & camera,
-                           float EV_100);
+                           float EV_100,
+                           int g_reflection_mips_count,
+                           int g_shadow_map_size);
     void updatePerFrameBuffer();
 
     void initPerMeshBuffer();
@@ -157,7 +163,7 @@ public:
     PerShadowCubeMapBufferData per_shadow_cubemap_buffer_data;
     
     DxResPtr<ID3D11SamplerState> sampler;
-    DxResPtr<ID3D11SamplerState> shadow_mapping_sampler;
+    DxResPtr<ID3D11SamplerState> comparison_sampler;
 
     DxResPtr<ID3D11RasterizerState> one_sided_rasterizer;
     DxResPtr<ID3D11RasterizerState> double_sided_rasterizer;

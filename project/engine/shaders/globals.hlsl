@@ -1,13 +1,12 @@
 #ifndef GLOBALS_HLSL
 #define GLOBALS_HLSL
 
-SamplerState g_sampler;
+SamplerState g_sampler : register(s0);
+SamplerComparisonState g_comparison_sampler : register(s1);
 
 static const float g_gamma = 2.2f;
 static const float g_PI = 3.14159265f;
 static const float g_F0_dielectric = 0.04f;
-
-static const float g_shadows_offset = 0.00001f;
 
 static const uint g_point_lights_count = 4;
 static const uint g_dir_lights_count = 1;
@@ -36,7 +35,11 @@ cbuffer PerFrame : register(b0)
         float solid_angle;
     } g_dir_lights[g_dir_lights_count];
 
-    row_major float4x4 g_light_proj_view[24]; // 4 cubemaps
+    int g_reflection_mips_count;
+    int g_shadow_map_size;
+    float2 padding_3;
+    
+    row_major float4x4 g_light_proj_view[24]; // 4 cubemaps    
 };
 
 #endif

@@ -8,7 +8,7 @@ cbuffer PerShadowMesh : register(b3)
 cbuffer PerShadowCubeMap : register(b4)
 {
     int g_cubemap_index;
-    float3 padding_0;
+    float3 padding_1;
 }
 
 struct VS_INPUT

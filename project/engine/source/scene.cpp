@@ -5,6 +5,7 @@ namespace
 constexpr float BACKGROUND[4] = {0.4f, 0.44f, 0.4f, 1.0f};
 constexpr int SHADOW_MAP_SIZE = 1024;
 constexpr uint32_t shadow_cubemaps_count = 4;
+constexpr uint32_t reflection_mips_count = 8;
 } // namespace
 
 namespace engine
@@ -34,8 +35,13 @@ void Scene::renderFrame(windows::Window & window,
     LightSystem * light_system = LightSystem::getInstance();
     TransformSystem * trans_system = TransformSystem::getInstance();
 
-    globals->setPerFrameBuffer(camera, post_process.EV_100);
+    globals->setPerFrameBuffer(camera,
+                               post_process.EV_100,
+                               reflection_mips_count,
+                               SHADOW_MAP_SIZE);
     globals->updatePerFrameBuffer();
+
+    globals->bindSamplers();
     
     // render shadow maps
     bindSquareViewport();
@@ -46,8 +52,6 @@ void Scene::renderFrame(windows::Window & window,
     mesh_system->renderShadowCubeMaps();
 
     // render scene to main camera
-    globals->bindSampler();
-
     window.bindViewport();
     
     bindRenderTarget();
@@ -60,8 +64,7 @@ void Scene::renderFrame(windows::Window & window,
     sky.render();
 
     post_process.resolve(HDR_SRV, window.getRenderTarget());
-
-    window.switchBuffer();    
+    window.switchBuffer();
 }
 
 void Scene::initDepthBuffer(int width, int height)

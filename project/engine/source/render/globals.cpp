@@ -112,10 +112,9 @@ void Globals::initSamplers()
 {
     HRESULT result;
     
-    // default
+    // default AF X2 sampler
     D3D11_SAMPLER_DESC sampler_desc;
     ZeroMemory(&sampler_desc, sizeof(sampler_desc));
-    // sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
     sampler_desc.MaxAnisotropy = 2;
     sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -128,33 +127,36 @@ void Globals::initSamplers()
                                          sampler.reset());
     assert(result >= 0 && "CreateSamplerState");
 
-    // shadow mapping
-    D3D11_SAMPLER_DESC sm_sampler_desc;
-    ZeroMemory(&sm_sampler_desc, sizeof(sm_sampler_desc));
-    sm_sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-    sm_sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-    sm_sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-    sm_sampler_desc.BorderColor[0] = 1.0f;
-    sm_sampler_desc.BorderColor[1] = 1.0f;
-    sm_sampler_desc.BorderColor[2] = 1.0f;
-    sm_sampler_desc.BorderColor[3] = 1.0f;
-    sm_sampler_desc.MinLOD = 0;
-    sm_sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
-    sm_sampler_desc.MipLODBias = 0;
-    sm_sampler_desc.MaxAnisotropy = 0;
-    sm_sampler_desc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
-    sm_sampler_desc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+    // comparison sampler for smooth shadow mapping
+    D3D11_SAMPLER_DESC comp_sampler_desc;
+    ZeroMemory(&comp_sampler_desc, sizeof(comp_sampler_desc));
+    comp_sampler_desc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+    comp_sampler_desc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+    comp_sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+    comp_sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+    comp_sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+    comp_sampler_desc.BorderColor[0] = 1.0f;
+    comp_sampler_desc.BorderColor[1] = 1.0f;
+    comp_sampler_desc.BorderColor[2] = 1.0f;
+    comp_sampler_desc.BorderColor[3] = 1.0f;
+    comp_sampler_desc.MinLOD = 0;
+    comp_sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+    comp_sampler_desc.MipLODBias = 0;
 
-    result = device5->CreateSamplerState(&sm_sampler_desc,
-                                         shadow_mapping_sampler.reset());
+    result = device5->CreateSamplerState(&comp_sampler_desc,
+                                         comparison_sampler.reset());
     assert(result >= 0 && "CreateSamplerState");
 }
 
-void Globals::bindSampler()
+void Globals::bindSamplers()
 {
     device_context4->PSSetSamplers(0,
                                    1,
                                    sampler.get());
+
+    device_context4->PSSetSamplers(1,
+                                   1,
+                                   comparison_sampler.get());
 }
 
 void Globals::initRasterizers()
@@ -217,7 +219,9 @@ void Globals::initPerFrameBuffer()
 }
 
 void Globals::setPerFrameBuffer(const Camera & camera,
-                                float EV_100)
+                                float EV_100,
+                                int g_reflection_mips_count,
+                                int g_shadow_map_size)
 {
     LightSystem * light_system = LightSystem::getInstance();
     TransformSystem * trans_system = TransformSystem::getInstance();
@@ -234,6 +238,8 @@ void Globals::setPerFrameBuffer(const Camera & camera,
     per_frame_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);
     per_frame_buffer_data.g_frustum_corners[1] = glm::vec4(top_left_WS, 1.0f);
     per_frame_buffer_data.g_frustum_corners[2] = glm::vec4(bottom_right_WS, 1.0f);
+    per_frame_buffer_data.g_reflection_mips_count = g_reflection_mips_count;
+    per_frame_buffer_data.g_shadow_map_size = g_shadow_map_size;
 
     auto & point_lights = light_system->getPointLights();
     for (uint32_t size = point_lights.size(), i = 0; i != size; ++i)

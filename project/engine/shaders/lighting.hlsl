@@ -7,46 +7,43 @@ TextureCube g_reflection : register(t6);
 
 TextureCubeArray<float4> g_shadow_maps : register(t7);
 
-static const int g_reflection_mips_count = 8;
+static const float g_depth_offset = 0.01f;
 
-uint calculateCubeMapFaceIndex(float3 direction)
+uint calculateCubeMapFaceIndex(float3 dir)
 {
-    float angles_with_world_axes[6];
-    angles_with_world_axes[0] = dot(direction, float3(+1.0f, 0.0f, 0.0f));
-    angles_with_world_axes[1] = dot(direction, float3(-1.0f, 0.0f, 0.0f));
-    angles_with_world_axes[2] = dot(direction, float3(0.0f, +1.0f, 0.0f));
-    angles_with_world_axes[3] = dot(direction, float3(0.0f, -1.0f, 0.0f));
-    angles_with_world_axes[4] = dot(direction, float3(0.0f, 0.0f, +1.0f));
-    angles_with_world_axes[5] = dot(direction, float3(0.0f, 0.0f, -1.0f));
+    // compare positive axes
+    float max_value = max(abs(dir.x), max(abs(dir.y), abs(dir.z)));
+    uint index = abs(dir.x) == max_value ? 0 : (abs(dir.y) == max_value ? 2 : 4);
 
-    float max_cosa = angles_with_world_axes[0];
-    uint index = 0;
-
-    for (uint i = 1; i != 6; ++i)
-    {
-        if (max_cosa < angles_with_world_axes[i])
-        {
-            max_cosa = angles_with_world_axes[i];
-            index = i;
-        }
-    }
-
-    return index;
+    // compare positive with negative axes and
+    // increment index if negative is dominates
+    return index + (asuint(dir[index / 2]) >> 31);
 }
 
-bool isVisible(float3 pos_WS,
-               float3 direction,
-               uint cubemap_index)
+float calculateShadowCoefficient(float3 pos_WS,
+                                 float3 N,
+                                 float3 L,
+                                 float3 light_pos_WS,
+                                 uint cubemap_index)
 {
-    uint index = 6 * cubemap_index + calculateCubeMapFaceIndex(direction);
+    // normal offset is shadow map texel size on L distance
+    float normal_offset = 2.0f * length(L) / g_shadow_map_size;
+
+    pos_WS += N * normal_offset;
+    float3 sample_dir = pos_WS - light_pos_WS;
     
-    float shadow_map_depth = g_shadow_maps.Sample(g_sampler,
-                                                  float4(direction, cubemap_index));
+    pos_WS += L * g_depth_offset;
 
-    float4 pos_shadow_CS = mul(float4(pos_WS, 1.0f), g_light_proj_view[index]);
-    float real_depth = pos_shadow_CS.z / pos_shadow_CS.w;
+    uint index = 6 * cubemap_index + calculateCubeMapFaceIndex(sample_dir);
 
-    return (real_depth + g_shadows_offset > shadow_map_depth);
+    float4 pos_CS = mul(float4(pos_WS, 1.0f), g_light_proj_view[index]);
+    float depth = pos_CS.z / pos_CS.w;
+    
+    float result = g_shadow_maps.SampleCmp(g_comparison_sampler,
+                                           float4(sample_dir, cubemap_index),
+                                           depth);
+    
+    return 1.0f - result;
 }
 
 // May return direction pointing beneath surface horizon (dot(N, dir) < 0),
@@ -229,8 +226,6 @@ float3 calculatePointLights(float3 albedo,
         float3 L = g_point_lights[i].position - pos_WS;
         float3 L_norm = normalize(L);
 
-        if (!isVisible(pos_WS, -L, i)) continue;
-
         float3 H = normalize(L_norm + V);
         float NL = max(dot(N, L_norm), 0.001f);
         float NV = max(dot(N, V), 0.001f);
@@ -278,7 +273,13 @@ float3 calculatePointLights(float3 albedo,
                                            solid_angle);
         float3 color_i = (diffuse * solid_angle + specular) * g_point_lights[i].radiance;
 
-        color += color_i * fading_micro * fading_macro;
+        float shadow = calculateShadowCoefficient(pos_WS,
+                                                  N,
+                                                  L,
+                                                  g_point_lights[i].position,
+                                                  i);
+        
+        color += color_i * fading_micro * fading_macro * shadow;
     }
 
     return color;

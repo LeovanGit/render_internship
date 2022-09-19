@@ -41,9 +41,9 @@ void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
     shadow_shader = shadow;
 }
 
-void MeshSystem::render(DxResPtr<ID3D11ShaderResourceView> & shadow_map_srv)
+void MeshSystem::render()
 {
-    opaque_instances.render(shadow_map_srv);
+    opaque_instances.render();
     emissive_instances.render();
 }
 
@@ -52,14 +52,7 @@ void MeshSystem::renderShadowCubeMaps()
     Globals * globals = Globals::getInstance();
     
     shadow_shader->bind();
-
-    for (uint32_t i = 0; i != shadow_cubemaps_count; ++i)
-    {
-        globals->setPerShadowCubeMapBuffer(i);
-        globals->updatePerShadowCubeMapBuffer();
-        
-        opaque_instances.renderWithoutMaterials();   
-    }
+    opaque_instances.renderWithoutMaterials();
 }
 
 bool MeshSystem::findIntersection(const math::Ray & ray_ws,

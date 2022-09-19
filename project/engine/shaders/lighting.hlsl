@@ -29,7 +29,7 @@ float calculateShadowCoefficient(float3 pos_WS,
     // normal offset is shadow map texel size on L distance
     float normal_offset = 2.0f * length(L) / g_shadow_map_size;
 
-    pos_WS += N * normal_offset;
+    pos_WS.xy += N.xy * normal_offset;
     float3 sample_dir = pos_WS - light_pos_WS;
     
     pos_WS += L * g_depth_offset;
@@ -317,7 +317,7 @@ float3 calculateLighting(float3 albedo,
                                   fresnel,
                                   N,
                                   V);
-
+    
     return color;
 }
 

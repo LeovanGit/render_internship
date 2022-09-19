@@ -5,12 +5,6 @@ cbuffer PerShadowMesh : register(b3)
     row_major float4x4 g_mesh_to_model;
 }
 
-cbuffer PerShadowCubeMap : register(b4)
-{
-    int g_cubemap_index;
-    float3 padding_1;
-}
-
 struct VS_INPUT
 {
     float3 pos : POSITION;
@@ -54,23 +48,26 @@ GS_INPUT vertexShader(VS_INPUT input)
 //------------------------------------------------------------------------------
 // GEOMETRY SHADER
 //------------------------------------------------------------------------------
-[maxvertexcount(18)]
+[maxvertexcount(18 * 4)]
 void geometryShader(triangle GS_INPUT input[3],
                     inout TriangleStream<GS_OUTPUT> output_stream)
 {
     // generate 6 triangles for each camera from 1 main triangle
-    for (uint face = 0; face != 6; ++face)
+    for (uint cubemap_index = 0; cubemap_index != 4; ++cubemap_index)
     {
-        for (uint i = 0; i != 3; ++i)
+        for (uint face = 0; face != 6; ++face)
         {
-            GS_OUTPUT output;
-            output.slice = g_cubemap_index * 6 + face;
-            output.pos_CS = mul(input[i].pos_WS,
-                                g_light_proj_view[g_cubemap_index * 6 + face]);
+            for (uint i = 0; i != 3; ++i)
+            {
+                GS_OUTPUT output;
+                output.slice = cubemap_index * 6 + face;
+                output.pos_CS = mul(input[i].pos_WS,
+                                    g_light_proj_view[cubemap_index * 6 + face]);
 
-            output_stream.Append(output);
+                output_stream.Append(output);            
+            }
+            output_stream.RestartStrip();
         }
-        output_stream.RestartStrip();
     }
 }
 

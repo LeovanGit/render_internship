@@ -5,8 +5,11 @@
 #include <memory>
 #include "glm.hpp"
 #include <unordered_map>
+#include <d3d11_4.h>
+#include <dx_res_ptr.hpp>
 
 #include "constants.hpp"
+#include "globals.hpp"
 
 namespace engine
 {
@@ -71,6 +74,15 @@ public:
                                                       float distance,
                                                       float radius);
 
+    void initSquareViewport(int size);
+    void bindSquareViewport();
+
+    void initShadowMap(int size);
+    void clearShadowMap();
+    void bindShadowMap();
+
+    void bindShadowMapSRV(int slot);
+    
     const std::vector<DirectionalLight> & getDirectionalLights() const;
     const std::vector<PointLight> & getPointLights() const;
     
@@ -82,6 +94,13 @@ private:
 
     std::vector<DirectionalLight> directional_lights;
     std::vector<PointLight> point_lights;
+
+    D3D11_VIEWPORT shadow_map_viewport;
+
+    DxResPtr<ID3D11Texture2D> shadow_map;
+    DxResPtr<ID3D11DepthStencilView> shadow_map_dsv;
+    DxResPtr<ID3D11DepthStencilState> shadow_map_dss;
+    DxResPtr<ID3D11ShaderResourceView> shadow_map_srv;
 };
 } // namespace engine
 

@@ -32,11 +32,5 @@ void Postprocess::resolve(DxResPtr<ID3D11ShaderResourceView> source_HDR,
     shader->bind();
 
     globals->device_context4->Draw(3, 0);
-
-    // unset HDR SRV (because of warnings)
-    ID3D11ShaderResourceView * null_resource = nullptr;
-    globals->device_context4->PSSetShaderResources(0,
-                                                   1,
-                                                   &null_resource);
 }
 } // namespace engine

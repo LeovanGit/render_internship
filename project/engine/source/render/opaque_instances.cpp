@@ -40,12 +40,13 @@ void OpaqueInstances::updateInstanceBuffers()
     instance_buffer.unmap();
 }
 
-void OpaqueInstances::render(DxResPtr<ID3D11ShaderResourceView> & shadow_map_srv)
+void OpaqueInstances::render()
 {
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
     TextureManager * tex_mgr = TextureManager::getInstance();
+    LightSystem * light_sys = LightSystem::getInstance();
 
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -57,7 +58,7 @@ void OpaqueInstances::render(DxResPtr<ID3D11ShaderResourceView> & shadow_map_srv
     tex_mgr->getTexture("../engine/assets/environment/irradiance.dds")->bind(5);
     tex_mgr->getTexture("../engine/assets/environment/reflection.dds")->bind(6);
 
-    globals->device_context4->PSSetShaderResources(7, 1, shadow_map_srv.get());
+    light_sys->bindShadowMapSRV(7);
     
     uint32_t rendered_instances = 0;
     

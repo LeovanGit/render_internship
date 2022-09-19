@@ -221,22 +221,22 @@ void Controller::initScene(Camera & camera)
                          0.00006794f);
 
     initPointLight(glm::vec3(0.0f, 5.0f, 0.0f),
-                   glm::vec3(100.0f),
+                   glm::vec3(1000.0f),
                    1.0f,
                    2.0f);
 
     initPointLight(glm::vec3(20.0f, 0.0f, 0.0f),
-                   glm::vec3(100.0f, 0.0f, 0.0f),
+                   glm::vec3(1000.0f, 0.0f, 0.0f),
                    1.0f,
                    1.0f);
 
     initPointLight(glm::vec3(-20.0f, 0.0f, 0.0f),
-                   glm::vec3(0.0f, 100.0f, 0.0f),
+                   glm::vec3(0.0f, 1000.0f, 0.0f),
                    1.0f,
                    1.0f);
 
     initPointLight(glm::vec3(0.0f, 0.0f, 20.0f),
-                   glm::vec3(0.0f, 0.0f, 100.0f),
+                   glm::vec3(0.0f, 0.0f, 1000.0f),
                    1.0f,
                    1.0f);
 

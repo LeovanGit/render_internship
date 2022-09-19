@@ -24,7 +24,6 @@ void Globals::init()
         instance->initPerMeshBuffer();
         instance->initPerEmissiveMeshBuffer();
         instance->initPerShadowMeshBuffer();
-        instance->initPerShadowCubeMapBuffer();
     }
     else spdlog::error("Globals::init() was called twice!");
 }
@@ -479,56 +478,5 @@ void Globals::updatePerShadowMeshBuffer()
     device_context4->VSSetConstantBuffers(3,
                                           1,
                                           per_shadow_mesh_buffer.get());
-}
-
-void Globals::initPerShadowCubeMapBuffer()
-{
-    D3D11_BUFFER_DESC cb_desc;
-    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
-    cb_desc.ByteWidth = sizeof(per_shadow_cubemap_buffer_data);
-    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    cb_desc.MiscFlags = 0;
-    cb_desc.StructureByteStride = 0;
-    
-    HRESULT result = device5->CreateBuffer(&cb_desc,
-                                           NULL,
-                                           per_shadow_cubemap_buffer.reset());
-    assert(result >= 0 && "CreateBuffer");
-}
-
-void Globals::setPerShadowCubeMapBuffer(int g_cubemap_index)
-{
-    // fill const buffer data
-    per_shadow_cubemap_buffer_data.g_cubemap_index = g_cubemap_index;
-}
-
-void Globals::updatePerShadowCubeMapBuffer()
-{
-    HRESULT result;
-
-    // write new data to const buffer
-    D3D11_MAPPED_SUBRESOURCE ms;
-    result = device_context4->Map(per_shadow_cubemap_buffer.ptr(),
-                                  NULL,
-                                  D3D11_MAP_WRITE_DISCARD,
-                                  NULL,
-                                  &ms);
-    assert(result >= 0 && "Map");
-
-    memcpy(ms.pData,
-           &per_shadow_cubemap_buffer_data,
-           sizeof(per_shadow_cubemap_buffer_data));
-
-    device_context4->Unmap(per_shadow_cubemap_buffer.ptr(), NULL);
-
-    // bind const buffer with updated values to vertex shader
-    device_context4->VSSetConstantBuffers(4,
-                                          1,
-                                          per_shadow_cubemap_buffer.get());
-
-    device_context4->GSSetConstantBuffers(4,
-                                          1,
-                                          per_shadow_cubemap_buffer.get());
 }
 } // namespace engine

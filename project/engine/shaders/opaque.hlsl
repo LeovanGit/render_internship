@@ -105,7 +105,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     material.roughness = g_has_roughness_texture ? g_roughness.Sample(g_sampler, input.uv).r :
                                                    g_roughness_default;
     // perception roughness -> roughness
-    material.roughness *= material.roughness;
+    // material.roughness *= material.roughness;
 
     material.metalness = g_has_metalness_texture ? g_metalness.Sample(g_sampler, input.uv).r :
                                                    g_metalness_default;

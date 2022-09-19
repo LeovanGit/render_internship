@@ -29,7 +29,7 @@ public:
                     std::shared_ptr<Shader> emissive,
                     std::shared_ptr<Shader> shadow);
     
-    void render(DxResPtr<ID3D11ShaderResourceView> & shadow_map_srv);
+    void render();
 
     // for shadows from point lights
     void renderShadowCubeMaps();

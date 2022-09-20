@@ -3,7 +3,7 @@
 namespace
 {
 constexpr int SHADOW_MAP_SIZE = 1024;
-constexpr uint32_t shadow_cubemaps_count = 4;
+constexpr uint32_t SHADOW_CUBEMAPS_COUNT = 4;
 } // namespace
 
 
@@ -96,7 +96,7 @@ void LightSystem::initShadowMap(int size)
     shadow_map_desc.Width = size;
     shadow_map_desc.Height = size;
     shadow_map_desc.MipLevels = 1;
-    shadow_map_desc.ArraySize = 6 * shadow_cubemaps_count;
+    shadow_map_desc.ArraySize = 6 * SHADOW_CUBEMAPS_COUNT;
     shadow_map_desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
     shadow_map_desc.SampleDesc.Count = 1;
     shadow_map_desc.SampleDesc.Quality = 0;
@@ -114,7 +114,7 @@ void LightSystem::initShadowMap(int size)
     ZeroMemory(&dsv_desc, sizeof(dsv_desc));
     dsv_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
     dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-    dsv_desc.Texture2DArray.ArraySize = 6 * shadow_cubemaps_count;
+    dsv_desc.Texture2DArray.ArraySize = 6 * SHADOW_CUBEMAPS_COUNT;
     dsv_desc.Texture2DArray.FirstArraySlice = 0;
     dsv_desc.Texture2DArray.MipSlice = 0;
         
@@ -140,7 +140,7 @@ void LightSystem::initShadowMap(int size)
     srv_desc.TextureCubeArray.MipLevels = 1;
     srv_desc.TextureCubeArray.MostDetailedMip = 0;
     srv_desc.TextureCubeArray.First2DArrayFace = 0;
-    srv_desc.TextureCubeArray.NumCubes = shadow_cubemaps_count;
+    srv_desc.TextureCubeArray.NumCubes = SHADOW_CUBEMAPS_COUNT;
 
     result = globals->device5->CreateShaderResourceView(shadow_map.ptr(),
                                                         &srv_desc,

@@ -27,11 +27,6 @@ namespace engine
 // size of cbuffers must be multiple of 16
 struct PerFrameBufferData
 {
-    glm::mat4 g_proj_view;
-    glm::vec3 g_camera_pos;
-    float g_EV_100;
-    glm::vec4 g_frustum_corners[3];
-
     struct
     {
         glm::vec3 position;
@@ -53,6 +48,14 @@ struct PerFrameBufferData
     glm::vec2 padding_3;
     
     glm::mat4 g_light_proj_view[24]; // 4 cubemaps
+};
+
+struct PerViewBufferData
+{
+    glm::mat4 g_proj_view;
+    glm::vec3 g_camera_pos;
+    float g_EV_100;
+    glm::vec4 g_frustum_corners[3];
 };
 
 struct PerMeshBufferData
@@ -106,12 +109,15 @@ public:
     void bindRasterizer(bool is_double_sided = false);
 
     void initPerFrameBuffer();
-    void setPerFrameBuffer(const Camera & camera,
-                           float EV_100,
-                           int g_reflection_mips_count,
+    void setPerFrameBuffer(int g_reflection_mips_count,
                            int g_shadow_map_size);
     void updatePerFrameBuffer();
 
+    void initPerViewBuffer();
+    void setPerViewBuffer(const Camera & camera,
+                          float EV_100);
+    void updatePerViewBuffer();
+    
     void initPerMeshBuffer();
     void setPerMeshBuffer(const glm::mat4 & g_mesh_to_model,
                           bool g_has_albedo_texture,
@@ -140,6 +146,9 @@ public:
     DxResPtr<ID3D11Buffer> per_frame_buffer;
     PerFrameBufferData per_frame_buffer_data;
 
+    DxResPtr<ID3D11Buffer> per_view_buffer;
+    PerViewBufferData per_view_buffer_data;
+    
     DxResPtr<ID3D11Buffer> per_mesh_buffer;
     PerMeshBufferData per_mesh_buffer_data;
 
@@ -149,7 +158,8 @@ public:
     DxResPtr<ID3D11Buffer> per_shadow_mesh_buffer;
     PerShadowMeshBufferData per_shadow_mesh_buffer_data;
     
-    DxResPtr<ID3D11SamplerState> sampler;
+    DxResPtr<ID3D11SamplerState> wrap_sampler;
+    DxResPtr<ID3D11SamplerState> clamp_sampler;
     DxResPtr<ID3D11SamplerState> comparison_sampler;
 
     DxResPtr<ID3D11RasterizerState> one_sided_rasterizer;

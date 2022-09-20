@@ -22,346 +22,9 @@ void Controller::initScene(Camera & camera)
                           1.0f,
                           1000.0f);
 
-    engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
-    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
-    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
-    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
-
-    // CREATE SHADERS
-    D3D11_INPUT_ELEMENT_DESC ied_opaque[] =
-    {
-        {"POSITION",
-         0,
-         DXGI_FORMAT_R32G32B32_FLOAT,
-         0,
-         0,
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0},
-
-        {"TEXCOORD",
-         0,
-         DXGI_FORMAT_R32G32_FLOAT,
-         0,
-         12, // 3 floats of 4 bytes
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0},
-
-        {"NORMAL",
-         0,
-         DXGI_FORMAT_R32G32B32_FLOAT,
-         0,
-         20,
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0},
-
-        {"TANGENT",
-         0,
-         DXGI_FORMAT_R32G32B32_FLOAT,
-         0,
-         32,
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0},
-
-        {"BITANGENT",
-         0,
-         DXGI_FORMAT_R32G32B32_FLOAT,
-         0,
-         44,
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0},
-        
-        {"TRANSFORM",
-         0,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         0, // reset align for instance data!
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-
-        {"TRANSFORM",
-         1,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         16,
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-
-        {"TRANSFORM",
-         2,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         32,
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-
-        {"TRANSFORM",
-         3,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         48,
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-    };
-    
-    D3D11_INPUT_ELEMENT_DESC ied_emissive[] =
-    {
-        {"POSITION",
-         0,
-         DXGI_FORMAT_R32G32B32_FLOAT,
-         0,
-         0,
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0},
-
-        {"TRANSFORM",
-         0,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         0, // reset align for instance data!
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-
-        {"TRANSFORM",
-         1,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         16,
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-
-        {"TRANSFORM",
-         2,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         32,
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-
-        {"TRANSFORM",
-         3,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         48,
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-
-        {"RADIANCE",
-         0,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         64,
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-    };
-
-    D3D11_INPUT_ELEMENT_DESC ied_shadow_map[] =
-    {
-        {"POSITION",
-         0,
-         DXGI_FORMAT_R32G32B32_FLOAT,
-         0,
-         0,
-         D3D11_INPUT_PER_VERTEX_DATA,
-         0},
-
-        {"TRANSFORM",
-         0,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         0, // reset align for instance data!
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-
-        {"TRANSFORM",
-         1,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         16,
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-
-        {"TRANSFORM",
-         2,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         32,
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-
-        {"TRANSFORM",
-         3,
-         DXGI_FORMAT_R32G32B32A32_FLOAT,
-         1,
-         48,
-         D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
-    };
-    
-    mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
-                                                  ied_opaque,
-                                                  9),
-                            shader_mgr->getShader("../engine/shaders/emissive.hlsl",
-                                                  ied_emissive,
-                                                  6),
-                            shader_mgr->getShader("../engine/shaders/shadow_cubemap.hlsl",
-                                                  ied_shadow_map,
-                                                  5,
-                                                  true,
-                                                  true,
-                                                  false));
-    
-    shader_mgr->getShader("../engine/shaders/resolve.hlsl");
-    
-    // CREATE OBJECTS
-    scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
-                    tex_mgr->getTexture("../engine/assets/environment/skybox.dds"));
-
-    initDirectionalLight(glm::normalize(glm::vec3(0.25f, -1.0f, 0.25f)),
-                         glm::vec3(1000.0f),
-                         0.00006794f);
-
-    initPointLight(glm::vec3(0.0f, 5.0f, 0.0f),
-                   glm::vec3(1000.0f),
-                   1.0f,
-                   2.0f);
-
-    initPointLight(glm::vec3(20.0f, 0.0f, 0.0f),
-                   glm::vec3(1000.0f, 0.0f, 0.0f),
-                   1.0f,
-                   1.0f);
-
-    initPointLight(glm::vec3(-20.0f, 0.0f, 0.0f),
-                   glm::vec3(0.0f, 1000.0f, 0.0f),
-                   1.0f,
-                   1.0f);
-
-    initPointLight(glm::vec3(0.0f, 0.0f, 20.0f),
-                   glm::vec3(0.0f, 0.0f, 1000.0f),
-                   1.0f,
-                   1.0f);
-
-    initFloor(std::vector<oi::Material>{oi::Material(
-                  tex_mgr->getTexture("../engine/assets/floor/tile_albedo.dds"),
-                  tex_mgr->getTexture("../engine/assets/floor/tile_roughness.dds"),
-                  nullptr,
-                  tex_mgr->getTexture("../engine/assets/floor/tile_normal.dds"),
-                  true,
-                  true,
-                  glm::vec3(1.0f, 0.0f, 0.0f),
-                  0.9f,
-                  0.0f)});
-    
-    // initSphere(math::Transform(glm::vec3(20.0f, 0.0f, 20.0f),
-    //                            math::EulerAngles(0.0f, 0.0f, 0.0f),
-    //                            glm::vec3(4.0f, 4.0f, 4.0f)),
-    //            std::vector<oi::Material>{oi::Material(
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_albedo.dds"),
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_roughness.dds"),
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_metallic.dds"),
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_normal.dds"))});
-    
-    initCube(math::Transform(glm::vec3(-30.0f, 0.0f, 0.0f),
-                             math::EulerAngles(45.0f, 0.0f, 0.0f),
-                             glm::vec3(4.0f, 4.0f, 4.0f)),
-             std::vector<oi::Material>{oi::Material(
-                 tex_mgr->getTexture("../engine/assets/space/space_albedo.dds"),
-                 tex_mgr->getTexture("../engine/assets/space/space_roughness.dds"),
-                 tex_mgr->getTexture("../engine/assets/space/space_metallic.dds"),
-                 tex_mgr->getTexture("../engine/assets/space/space_normal.dds"))});
-
-    initCube(math::Transform(glm::vec3(-30.0f, 0.0f, 20.0f),
-                             math::EulerAngles(45.0f, 0.0f, 0.0f),
-                             glm::vec3(4.0f, 4.0f, 4.0f)),
-             std::vector<oi::Material>{oi::Material(
-                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_albedo.dds"),
-                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_roughness.dds"),
-                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_metallic.dds"),
-                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_normal.dds"))});
-
-    initCube(math::Transform(glm::vec3(-30.0f, 0.0f, -20.0f),
-                             math::EulerAngles(45.0f, 0.0f, 0.0f),
-                             glm::vec3(4.0f, 4.0f, 4.0f)),
-             std::vector<oi::Material>{oi::Material(
-                 tex_mgr->getTexture("../engine/assets/leather/leather_albedo.dds"),
-                 tex_mgr->getTexture("../engine/assets/leather/leather_roughness.dds"),
-                 tex_mgr->getTexture("../engine/assets/leather/leather_metallic.dds"),
-                 tex_mgr->getTexture("../engine/assets/leather/leather_normal.dds"))});
-    
-    initKnight(math::Transform(glm::vec3(15.0f, -10.0f, 0.0f),
-                               math::EulerAngles(90.0f, 0.0f, 0.0f),
-                               glm::vec3(10.0f, 10.0f, 10.0f)));
-
-    initKnight(math::Transform(glm::vec3(-15.0f, -10.0f, 0.0f),
-                               math::EulerAngles(-90.0f, 0.0f, 0.0f),
-                               glm::vec3(10.0f, 10.0f, 10.0f)));
-
-    initKnight(math::Transform(glm::vec3(0.0f, -10.0f, 15.0f),
-                               math::EulerAngles(0.0f, 0.0f, 0.0f),
-                               glm::vec3(10.0f, 10.0f, 10.0f)));
-
-    initWall(math::Transform(glm::vec3(0.0f, -10.0f, 50.0f),
-                             math::EulerAngles(0.0f, 0.0f, 0.0f),
-                             glm::vec3(10.0f, 10.0f, 10.0f)));
-
-    // gold
-    initPlane(math::Transform(glm::vec3(10.0f, 0.0f, 48.0f),
-                              math::EulerAngles(0.0f, 0.0f, 0.0f),
-                              glm::vec3(5.0f, 10.0f, 1.0f)),
-              std::vector<oi::Material>{oi::Material(
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      true,
-                      false,
-                      glm::vec3(0.944f, 0.776f, 0.373f),
-                      0.01f,
-                      1.0f)});
-
-    // copper
-    initPlane(math::Transform(glm::vec3(20.0f, 0.0f, 48.0f),
-                              math::EulerAngles(0.0f, 0.0f, 0.0f),
-                              glm::vec3(5.0f, 10.0f, 1.0f)),
-              std::vector<oi::Material>{oi::Material(
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      true,
-                      false,
-                      glm::vec3(0.926f, 0.721f, 0.504f),
-                      0.15f,
-                      1.0f)});
-
-    // iron
-    initPlane(math::Transform(glm::vec3(30.0f, 0.0f, 48.0f),
-                              math::EulerAngles(0.0f, 0.0f, 0.0f),
-                              glm::vec3(5.0f, 10.0f, 1.0f)),
-              std::vector<oi::Material>{oi::Material(
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      true,
-                      false,
-                      glm::vec3(0.531f, 0.512f, 0.496f),
-                      0.27f,
-                      1.0f)});
-
-    // something red
-    initPlane(math::Transform(glm::vec3(40.0f, 0.0f, 48.0f),
-                              math::EulerAngles(0.0f, 0.0f, 0.0f),
-                              glm::vec3(5.0f, 10.0f, 1.0f)),
-              std::vector<oi::Material>{oi::Material(
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      true,
-                      false,
-                      glm::vec3(1.0f, 0.3f, 0.3f),
-                      0.4f,
-                      1.0f)});
+    initShaders();
+    initTextures();
+    initSceneObjects();    
 }
 
 void Controller::initPostprocess()
@@ -628,6 +291,344 @@ void Controller::initPointLight(const glm::vec3 & position,
     mesh_system->addInstance<engine::EmissiveInstances>(model_mgr->getDefaultSphere("sphere"),
                                                         materials,
                                                         ei::Instance(transform_id, radiance));
+}
+
+void Controller::initShaders()
+{
+    engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    
+    D3D11_INPUT_ELEMENT_DESC ied_opaque[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         0,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TEXCOORD",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         0,
+         12, // 3 floats of 4 bytes
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"NORMAL",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         20,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         32,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"BITANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         44,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+        
+        {"TRANSFORM",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         0, // reset align for instance data!
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         1,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         16,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         2,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         32,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         3,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         48,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
+    
+    D3D11_INPUT_ELEMENT_DESC ied_emissive[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         0,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TRANSFORM",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         0, // reset align for instance data!
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         1,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         16,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         2,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         32,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         3,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         48,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"RADIANCE",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         64,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
+
+    D3D11_INPUT_ELEMENT_DESC ied_shadow_map[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         0,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TRANSFORM",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         0, // reset align for instance data!
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         1,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         16,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         2,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         32,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         3,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         48,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
+    
+    mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
+                                                  ied_opaque,
+                                                  9),
+                            shader_mgr->getShader("../engine/shaders/emissive.hlsl",
+                                                  ied_emissive,
+                                                  6),
+                            shader_mgr->getShader("../engine/shaders/shadow_cubemap.hlsl",
+                                                  ied_shadow_map,
+                                                  5,
+                                                  true,
+                                                  true,
+                                                  false));
+}
+
+void Controller::initTextures()
+{
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    
+    mesh_system->setTextures(tex_mgr->getTexture("../engine/assets/environment/reflectance.dds"),
+                             tex_mgr->getTexture("../engine/assets/environment/irradiance.dds"),
+                             tex_mgr->getTexture("../engine/assets/environment/reflection.dds"));
+}
+
+void Controller::initSceneObjects()
+{
+    engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
+    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+
+    scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
+                    tex_mgr->getTexture("../engine/assets/environment/skybox.dds"));
+
+    initDirectionalLight(glm::normalize(glm::vec3(0.25f, -1.0f, 0.25f)),
+                         glm::vec3(0.0f),
+                         0.00006794f);
+
+    initPointLight(glm::vec3(0.0f, 5.0f, 0.0f),
+                   glm::vec3(1000.0f),
+                   1.0f,
+                   2.0f);
+
+    initPointLight(glm::vec3(20.0f, 0.0f, 0.0f),
+                   glm::vec3(1000.0f, 0.0f, 0.0f),
+                   1.0f,
+                   1.0f);
+
+    initPointLight(glm::vec3(-20.0f, 0.0f, 0.0f),
+                   glm::vec3(0.0f, 1000.0f, 0.0f),
+                   1.0f,
+                   1.0f);
+
+    initPointLight(glm::vec3(0.0f, 0.0f, 20.0f),
+                   glm::vec3(0.0f, 0.0f, 1000.0f),
+                   1.0f,
+                   1.0f);
+
+    initFloor(std::vector<oi::Material>{oi::Material(
+                  tex_mgr->getTexture("../engine/assets/floor/tile_albedo.dds"),
+                  tex_mgr->getTexture("../engine/assets/floor/tile_roughness.dds"),
+                  nullptr,
+                  tex_mgr->getTexture("../engine/assets/floor/tile_normal.dds"),
+                  true,
+                  true,
+                  glm::vec3(1.0f, 0.0f, 0.0f),
+                  0.9f,
+                  0.0f)});
+    
+    // initSphere(math::Transform(glm::vec3(20.0f, 0.0f, 20.0f),
+    //                            math::EulerAngles(0.0f, 0.0f, 0.0f),
+    //                            glm::vec3(4.0f, 4.0f, 4.0f)),
+    //            std::vector<oi::Material>{oi::Material(
+    //                tex_mgr->getTexture("../engine/assets/copper/copper_albedo.dds"),
+    //                tex_mgr->getTexture("../engine/assets/copper/copper_roughness.dds"),
+    //                tex_mgr->getTexture("../engine/assets/copper/copper_metallic.dds"),
+    //                tex_mgr->getTexture("../engine/assets/copper/copper_normal.dds"))});
+    
+    initCube(math::Transform(glm::vec3(-30.0f, 0.0f, 0.0f),
+                             math::EulerAngles(45.0f, 0.0f, 0.0f),
+                             glm::vec3(4.0f, 4.0f, 4.0f)),
+             std::vector<oi::Material>{oi::Material(
+                 tex_mgr->getTexture("../engine/assets/space/space_albedo.dds"),
+                 tex_mgr->getTexture("../engine/assets/space/space_roughness.dds"),
+                 tex_mgr->getTexture("../engine/assets/space/space_metallic.dds"),
+                 tex_mgr->getTexture("../engine/assets/space/space_normal.dds"))});
+
+    initCube(math::Transform(glm::vec3(-30.0f, 0.0f, 20.0f),
+                             math::EulerAngles(45.0f, 0.0f, 0.0f),
+                             glm::vec3(4.0f, 4.0f, 4.0f)),
+             std::vector<oi::Material>{oi::Material(
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_albedo.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_roughness.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_metallic.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_normal.dds"))});
+
+    initCube(math::Transform(glm::vec3(-30.0f, 0.0f, -20.0f),
+                             math::EulerAngles(45.0f, 0.0f, 0.0f),
+                             glm::vec3(4.0f, 4.0f, 4.0f)),
+             std::vector<oi::Material>{oi::Material(
+                 tex_mgr->getTexture("../engine/assets/leather/leather_albedo.dds"),
+                 tex_mgr->getTexture("../engine/assets/leather/leather_roughness.dds"),
+                 tex_mgr->getTexture("../engine/assets/leather/leather_metallic.dds"),
+                 tex_mgr->getTexture("../engine/assets/leather/leather_normal.dds"))});
+    
+    initKnight(math::Transform(glm::vec3(15.0f, -10.0f, 0.0f),
+                               math::EulerAngles(90.0f, 0.0f, 0.0f),
+                               glm::vec3(10.0f, 10.0f, 10.0f)));
+
+    initKnight(math::Transform(glm::vec3(-15.0f, -10.0f, 0.0f),
+                               math::EulerAngles(-90.0f, 0.0f, 0.0f),
+                               glm::vec3(10.0f, 10.0f, 10.0f)));
+
+    initKnight(math::Transform(glm::vec3(0.0f, -10.0f, 15.0f),
+                               math::EulerAngles(0.0f, 0.0f, 0.0f),
+                               glm::vec3(10.0f, 10.0f, 10.0f)));
+
+    initWall(math::Transform(glm::vec3(0.0f, -10.0f, 50.0f),
+                             math::EulerAngles(0.0f, 0.0f, 0.0f),
+                             glm::vec3(10.0f, 10.0f, 10.0f)));
+
+    // gold mirror
+    initPlane(math::Transform(glm::vec3(10.0f, 0.0f, 48.0f),
+                              math::EulerAngles(0.0f, 0.0f, 0.0f),
+                              glm::vec3(5.0f, 10.0f, 1.0f)),
+              std::vector<oi::Material>{oi::Material(
+                  glm::vec3(0.944f, 0.776f, 0.373f),
+                  0.01f,
+                  1.0f,
+                  true,
+                  false)});
+
+    // copper mirror
+    initPlane(math::Transform(glm::vec3(20.0f, 0.0f, 48.0f),
+                              math::EulerAngles(0.0f, 0.0f, 0.0f),
+                              glm::vec3(5.0f, 10.0f, 1.0f)),
+              std::vector<oi::Material>{oi::Material(
+                  glm::vec3(0.926f, 0.721f, 0.504f),
+                  0.15f,
+                  1.0f,
+                  true,
+                  false)});
+
+    // iron mirror
+    initPlane(math::Transform(glm::vec3(30.0f, 0.0f, 48.0f),
+                              math::EulerAngles(0.0f, 0.0f, 0.0f),
+                              glm::vec3(5.0f, 10.0f, 1.0f)),
+              std::vector<oi::Material>{oi::Material(
+                  glm::vec3(0.531f, 0.512f, 0.496f),
+                  0.27f,
+                  1.0f,
+                  true,
+                  false)});
+
+    // red mirror
+    initPlane(math::Transform(glm::vec3(40.0f, 0.0f, 48.0f),
+                              math::EulerAngles(0.0f, 0.0f, 0.0f),
+                              glm::vec3(5.0f, 10.0f, 1.0f)),
+              std::vector<oi::Material>{oi::Material(
+                  glm::vec3(1.0f, 0.3f, 0.3f),
+                  0.4f,
+                  1.0f,
+                  true,
+                  false)});
 }
 
 void Controller::processInput(Camera & camera,

@@ -14,10 +14,10 @@ Shader::Shader(const std::string & shader_path,
     HRESULT result;
     Globals * globals = Globals::getInstance();
 
-    ID3D10Blob * error_message(0);
-    ID3D10Blob * vert_shader_buffer(0);
-    ID3D10Blob * frag_shader_buffer(0);
-    ID3D10Blob * geom_shader_buffer(0);
+    ID3DBlob * error_message(0);
+    ID3DBlob * vert_shader_buffer(0);
+    ID3DBlob * frag_shader_buffer(0);
+    ID3DBlob * geom_shader_buffer(0);
 
     // pass only path to shader
     ShaderIncluder includer(shader_path.substr(0, shader_path.rfind("/")));

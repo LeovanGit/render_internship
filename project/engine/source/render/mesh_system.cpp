@@ -41,6 +41,15 @@ void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
     shadow_shader = shadow;
 }
 
+void MeshSystem::setTextures(std::shared_ptr<Texture> reflectance,
+                             std::shared_ptr<Texture> irradiance,
+                             std::shared_ptr<Texture> reflection)
+{
+    instance->opaque_instances.reflectance = reflectance;
+    instance->opaque_instances.irradiance = irradiance;
+    instance->opaque_instances.reflection = reflection;
+}
+
 void MeshSystem::render()
 {
     opaque_instances.render();

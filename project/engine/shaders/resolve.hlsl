@@ -56,7 +56,7 @@ float3 toneMappingACES(float3 hdr)
 
 float3 gammaCorrection(float3 color)
 {
-    return pow(color, 1.0f / g_gamma);
+    return pow(color, 1.0f / g_GAMMA);
 }
 
 float4 fragmentShader(PS_INPUT input) : SV_TARGET

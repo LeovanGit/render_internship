@@ -31,9 +31,7 @@ public:
     void initRenderTarget(int width, int height);
     void clearRenderTarget();
     void bindRenderTarget();
-
-    void renderShadows();
-
+    
     void unbindSRV(int slot);
 
     DxResPtr<ID3D11Texture2D> depth_stencil_buffer;
@@ -45,6 +43,11 @@ public:
     DxResPtr<ID3D11ShaderResourceView> HDR_SRV;
         
     Sky sky;
+    
+private:
+    void renderSceneObjects(windows::Window & window);
+    void renderShadows();
+
 };
 } // namespace engine
 

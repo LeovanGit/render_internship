@@ -54,9 +54,9 @@ void OpaqueInstances::render()
     shader->bind();
     instance_buffer.bind(1);
 
-    tex_mgr->getTexture("../engine/assets/environment/reflectance.dds")->bind(4);
-    tex_mgr->getTexture("../engine/assets/environment/irradiance.dds")->bind(5);
-    tex_mgr->getTexture("../engine/assets/environment/reflection.dds")->bind(6);
+    reflectance->bind(4);
+    irradiance->bind(5);
+    reflection->bind(6);
 
     light_sys->bindShadowMapSRV(7);
     

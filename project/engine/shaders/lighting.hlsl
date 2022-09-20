@@ -7,7 +7,7 @@ TextureCube g_reflection : register(t6);
 
 TextureCubeArray<float4> g_shadow_maps : register(t7);
 
-static const float g_depth_offset = 0.01f;
+static const float g_DEPTH_OFFSET = 0.005f;
 
 uint calculateCubeMapFaceIndex(float3 dir)
 {
@@ -25,25 +25,27 @@ float calculateShadowCoefficient(float3 pos_WS,
                                  float3 L,
                                  float3 light_pos_WS,
                                  uint cubemap_index)
-{
-    // normal offset is shadow map texel size on L distance
-    float normal_offset = 2.0f * length(L) / g_shadow_map_size;
+{    
+    float4x4 face_proj_view =
+        g_light_proj_view[6 * cubemap_index + calculateCubeMapFaceIndex(-L)];
 
-    pos_WS.xy += N.xy * normal_offset;
+    pos_WS += L * g_DEPTH_OFFSET; // affects only comp_depth, but not sample_dir
+
+    // only 3 and 4 rows are used (.z and .w):
+    float4 pos_CS = mul(float4(pos_WS, 1.0f), face_proj_view);
+    float comp_depth = pos_CS.z / pos_CS.w;
+
+    float linear_depth = pos_CS.w;
+    float normal_offset = 2.0f * linear_depth / g_shadow_map_size;
+
+    pos_WS += N * normal_offset; // affects only sample_dir, but not comp_depth
     float3 sample_dir = pos_WS - light_pos_WS;
-    
-    pos_WS += L * g_depth_offset;
 
-    uint index = 6 * cubemap_index + calculateCubeMapFaceIndex(sample_dir);
-
-    float4 pos_CS = mul(float4(pos_WS, 1.0f), g_light_proj_view[index]);
-    float depth = pos_CS.z / pos_CS.w;
+    float visibility = g_shadow_maps.SampleCmp(g_comparison_sampler,
+                                               float4(sample_dir, cubemap_index),
+                                               comp_depth);
     
-    float result = g_shadow_maps.SampleCmp(g_comparison_sampler,
-                                           float4(sample_dir, cubemap_index),
-                                           depth);
-    
-    return 1.0f - result;
+    return 1.0f - visibility;
 }
 
 // May return direction pointing beneath surface horizon (dot(N, dir) < 0),
@@ -104,12 +106,12 @@ float3 calculateEnvironment(float3 albedo,
 {
     float NV = max(dot(N, V), 0.001f);
     
-    float3 diffuse = albedo * (1.0f - metalness) * g_irradiance.SampleLevel(g_sampler, N, 0);
+    float3 diffuse = albedo * (1.0f - metalness) * g_irradiance.SampleLevel(g_clamp_sampler, N, 0);
 
-    float2 reflectanceLUT = g_reflectance.Sample(g_sampler, float2(NV, roughness));
+    float2 reflectanceLUT = g_reflectance.SampleLevel(g_clamp_sampler, float2(roughness, 1.0f - NV), 0);
     float3 reflectance = reflectanceLUT.x * fresnel + reflectanceLUT.y;
     int mip = roughness * g_reflection_mips_count;
-    float3 specular = reflectance * g_reflection.SampleLevel(g_sampler, reflect(-V, N), mip);
+    float3 specular = reflectance * g_reflection.SampleLevel(g_clamp_sampler, reflect(-V, N), mip);
 
     return diffuse + specular;
 }
@@ -184,7 +186,7 @@ float3 calculateDirectionalLights(float3 albedo,
 {
     float3 color = 0.0f;
     
-    for (uint i = 0; i != g_dir_lights_count; ++i)
+    for (uint i = 0; i != g_DIR_LIGHTS_COUNT; ++i)
     {
         float3 L = -normalize(g_dir_lights[i].direction);
 
@@ -221,7 +223,7 @@ float3 calculatePointLights(float3 albedo,
 {
     float3 color = float3(0.0f, 0.0f, 0.0f);
     
-    for (uint i = 0; i != g_point_lights_count; ++i)
+    for (uint i = 0; i != g_POINT_LIGHTS_COUNT; ++i)
     {        
         float3 L = g_point_lights[i].position - pos_WS;
         float3 L_norm = normalize(L);

@@ -3,8 +3,10 @@
 namespace
 {
 constexpr float BACKGROUND[4] = {0.4f, 0.44f, 0.4f, 1.0f};
-constexpr uint32_t reflection_mips_count = 8;
+constexpr uint32_t REFLECTION_MIPS_COUNT = 8;
 constexpr int SHADOW_MAP_SIZE = 1024;
+
+constexpr uint32_t MSAA_SAMPLES_COUNT = 4;
 } // namespace
 
 namespace engine
@@ -24,33 +26,19 @@ void Scene::renderFrame(windows::Window & window,
                         engine::Postprocess & post_process) 
 {
     Globals * globals = Globals::getInstance();
-    TextureManager * tex_mgr = TextureManager::getInstance();
-    ShaderManager * shader_mgr = ShaderManager::getInstance();
-    ModelManager * model_mgr = ModelManager::getInstance();
-    MeshSystem * mesh_system = MeshSystem::getInstance();
-    LightSystem * light_system = LightSystem::getInstance();
-    TransformSystem * trans_system = TransformSystem::getInstance();
 
-    globals->setPerFrameBuffer(camera,
-                               post_process.EV_100,
-                               reflection_mips_count,
+    globals->setPerFrameBuffer(REFLECTION_MIPS_COUNT,
                                SHADOW_MAP_SIZE);
     globals->updatePerFrameBuffer();
 
+    globals->setPerViewBuffer(camera,
+                              post_process.EV_100);
+    globals->updatePerViewBuffer();
+    
     globals->bindSamplers();
     
     renderShadows();
-    mesh_system->renderShadowCubeMaps();
-    
-    window.bindViewport();
-    
-    bindRenderTarget();
-    bindDepthBuffer();
-
-    clearRenderTarget();
-    clearDepthBuffer();
-    
-    mesh_system->render();
+    renderSceneObjects(window);
     sky.render();
 
     post_process.resolve(HDR_SRV, window.getRenderTarget());
@@ -73,7 +61,7 @@ void Scene::initDepthBuffer(int width, int height)
     dsb_desc.MipLevels = 1;
     dsb_desc.ArraySize = 1;
     dsb_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    dsb_desc.SampleDesc.Count = 4;
+    dsb_desc.SampleDesc.Count = MSAA_SAMPLES_COUNT;
     dsb_desc.SampleDesc.Quality = 0;
     dsb_desc.Usage = D3D11_USAGE_DEFAULT;
     dsb_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
@@ -141,7 +129,7 @@ void Scene::initRenderTarget(int width, int height)
     texture_desc.MipLevels = 1;
     texture_desc.ArraySize = 1;
     texture_desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
-    texture_desc.SampleDesc.Count = 4;
+    texture_desc.SampleDesc.Count = MSAA_SAMPLES_COUNT;
     texture_desc.Usage = D3D11_USAGE_DEFAULT;
     texture_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
     texture_desc.CPUAccessFlags = 0;
@@ -194,14 +182,33 @@ void Scene::bindRenderTarget()
                                                  depth_stencil_view.ptr());
 }
 
+void Scene::renderSceneObjects(windows::Window & window)
+{
+    MeshSystem * mesh_system = MeshSystem::getInstance();
+    
+    window.bindViewport();
+    
+    bindRenderTarget();
+    bindDepthBuffer();
+
+    clearRenderTarget();
+    clearDepthBuffer();
+    
+    mesh_system->render();
+
+}
+
 void Scene::renderShadows()
 {
-    LightSystem * light_sys = LightSystem::getInstance();
+    LightSystem * light_system = LightSystem::getInstance();
+    MeshSystem * mesh_system = MeshSystem::getInstance();
 
-    light_sys->bindSquareViewport();
+    light_system->bindSquareViewport();
 
-    light_sys->bindShadowMap();
-    light_sys->clearShadowMap();
+    light_system->bindShadowMap();
+    light_system->clearShadowMap();
+
+    mesh_system->renderShadowCubeMaps();
 }
 
 void Scene::unbindSRV(int slot)

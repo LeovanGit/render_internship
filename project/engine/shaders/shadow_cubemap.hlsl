@@ -48,7 +48,7 @@ GS_INPUT vertexShader(VS_INPUT input)
 //------------------------------------------------------------------------------
 // GEOMETRY SHADER
 //------------------------------------------------------------------------------
-[maxvertexcount(18 * 4)]
+[maxvertexcount(18 * 4)] // 4 cubemaps
 void geometryShader(triangle GS_INPUT input[3],
                     inout TriangleStream<GS_OUTPUT> output_stream)
 {

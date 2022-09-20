@@ -28,6 +28,10 @@ public:
     void setShaders(std::shared_ptr<Shader> opaque,
                     std::shared_ptr<Shader> emissive,
                     std::shared_ptr<Shader> shadow);
+
+    void setTextures(std::shared_ptr<Texture> reflectance,
+                     std::shared_ptr<Texture> irradiance,
+                     std::shared_ptr<Texture> reflection);
     
     void render();
 

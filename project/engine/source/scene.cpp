@@ -29,8 +29,7 @@ void Scene::renderFrame(windows::Window & window,
     Globals * globals = Globals::getInstance();
 
     globals->setPerFrameBuffer(REFLECTION_MIPS_COUNT,
-                               SHADOW_MAP_SIZE,
-                               SHADOW_CUBEMAPS_COUNT);
+                               SHADOW_MAP_SIZE);
     globals->updatePerFrameBuffer();
 
     globals->setPerViewBuffer(camera,

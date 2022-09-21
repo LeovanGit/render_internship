@@ -45,8 +45,7 @@ struct PerFrameBufferData
 
     int g_reflection_mips_count;
     int g_shadow_map_size;
-    int g_cubemaps_count;
-    float padding_3;
+    glm::vec2 padding_3;
     
     glm::mat4 g_light_proj_view[24]; // 4 cubemaps
 };
@@ -117,8 +116,7 @@ public:
 
     void initPerFrameBuffer();
     void setPerFrameBuffer(int g_reflection_mips_count,
-                           int g_shadow_map_size,
-                           int g_cubemaps_count);
+                           int g_shadow_map_size);
     void updatePerFrameBuffer();
 
     void initPerViewBuffer();

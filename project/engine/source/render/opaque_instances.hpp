@@ -141,7 +141,7 @@ public:
     void updateInstanceBuffers();
     
     void render();
-    void renderWithoutMaterials();
+    void renderWithoutMaterials(int cubemaps_count);
 
     std::vector<PerModel> per_model;
     VertexBuffer<glm::mat4> instance_buffer;

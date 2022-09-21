@@ -56,12 +56,12 @@ void MeshSystem::render()
     emissive_instances.render();
 }
 
-void MeshSystem::renderShadowCubeMaps()
+void MeshSystem::renderShadowCubeMaps(int cubemaps_count)
 {
     Globals * globals = Globals::getInstance();
     
     shadow_shader->bind();
-    opaque_instances.renderWithoutMaterials();
+    opaque_instances.renderWithoutMaterials(cubemaps_count);
 }
 
 bool MeshSystem::findIntersection(const math::Ray & ray_ws,

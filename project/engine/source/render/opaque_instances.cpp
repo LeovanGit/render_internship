@@ -111,7 +111,7 @@ void OpaqueInstances::render()
     }
 }
 
-void OpaqueInstances::renderWithoutMaterials()
+void OpaqueInstances::renderWithoutMaterials(int cubemaps_count)
 {
     if (instance_buffer.get_size() == 0) return;
 
@@ -150,11 +150,17 @@ void OpaqueInstances::renderWithoutMaterials()
                 
                 uint32_t instances_count = uint32_t(per_material.instances.size());
 
-                globals->device_context4->DrawIndexedInstanced(mesh_range.index_count,
-                                                               instances_count,
-                                                               mesh_range.index_offset,
-                                                               mesh_range.vertex_offset,
-                                                               rendered_instances);
+                for (int cubemap_index = 0; cubemap_index != cubemaps_count; ++cubemap_index)
+                {
+                    globals->setPerShadowCubemapBuffer(cubemap_index);
+                    globals->updatePerShadowCubemapBuffer();
+                    
+                    globals->device_context4->DrawIndexedInstanced(mesh_range.index_count,
+                                                                   instances_count,
+                                                                   mesh_range.index_offset,
+                                                                   mesh_range.vertex_offset,
+                                                                   rendered_instances);
+                }                
                 rendered_instances += instances_count;
             }
         }

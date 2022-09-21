@@ -45,7 +45,8 @@ struct PerFrameBufferData
 
     int g_reflection_mips_count;
     int g_shadow_map_size;
-    glm::vec2 padding_3;
+    int g_cubemaps_count;
+    float padding_3;
     
     glm::mat4 g_light_proj_view[24]; // 4 cubemaps
 };
@@ -86,6 +87,12 @@ struct PerShadowMeshBufferData
     glm::mat4 g_mesh_to_model;
 };
 
+struct PerShadowCubemapBufferData
+{
+    int cubemap_index;
+    glm::vec3 padding_4;
+};
+
 // Singleton for global rendering resources
 class Globals final
 {
@@ -110,7 +117,8 @@ public:
 
     void initPerFrameBuffer();
     void setPerFrameBuffer(int g_reflection_mips_count,
-                           int g_shadow_map_size);
+                           int g_shadow_map_size,
+                           int g_cubemaps_count);
     void updatePerFrameBuffer();
 
     void initPerViewBuffer();
@@ -137,6 +145,10 @@ public:
     void initPerShadowMeshBuffer();
     void setPerShadowMeshBuffer(const glm::mat4 & g_mesh_to_model);
     void updatePerShadowMeshBuffer();
+
+    void initPerShadowCubemapBuffer();
+    void setPerShadowCubemapBuffer(int cubemap_index);
+    void updatePerShadowCubemapBuffer();
     
     DxResPtr<IDXGIFactory5> factory5;
     DxResPtr<ID3D11Device5> device5;
@@ -157,6 +169,9 @@ public:
 
     DxResPtr<ID3D11Buffer> per_shadow_mesh_buffer;
     PerShadowMeshBufferData per_shadow_mesh_buffer_data;
+
+    DxResPtr<ID3D11Buffer> per_shadow_cubemap_buffer;
+    PerShadowCubemapBufferData per_shadow_cubemap_buffer_data;
     
     DxResPtr<ID3D11SamplerState> wrap_sampler;
     DxResPtr<ID3D11SamplerState> clamp_sampler;

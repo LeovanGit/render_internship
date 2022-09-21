@@ -4,6 +4,7 @@ namespace
 {
 constexpr float BACKGROUND[4] = {0.4f, 0.44f, 0.4f, 1.0f};
 constexpr uint32_t REFLECTION_MIPS_COUNT = 8;
+constexpr uint32_t SHADOW_CUBEMAPS_COUNT = 4;
 constexpr int SHADOW_MAP_SIZE = 1024;
 
 constexpr uint32_t MSAA_SAMPLES_COUNT = 4;
@@ -28,7 +29,8 @@ void Scene::renderFrame(windows::Window & window,
     Globals * globals = Globals::getInstance();
 
     globals->setPerFrameBuffer(REFLECTION_MIPS_COUNT,
-                               SHADOW_MAP_SIZE);
+                               SHADOW_MAP_SIZE,
+                               SHADOW_CUBEMAPS_COUNT);
     globals->updatePerFrameBuffer();
 
     globals->setPerViewBuffer(camera,
@@ -208,7 +210,7 @@ void Scene::renderShadows()
     light_system->bindShadowMap();
     light_system->clearShadowMap();
 
-    mesh_system->renderShadowCubeMaps();
+    mesh_system->renderShadowCubeMaps(SHADOW_CUBEMAPS_COUNT);
 }
 
 void Scene::unbindSRV(int slot)

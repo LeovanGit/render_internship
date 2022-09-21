@@ -25,6 +25,7 @@ void Globals::init()
         instance->initPerMeshBuffer();
         instance->initPerEmissiveMeshBuffer();
         instance->initPerShadowMeshBuffer();
+        instance->initPerShadowCubemapBuffer();
     }
     else spdlog::error("Globals::init() was called twice!");
 }
@@ -237,13 +238,15 @@ void Globals::initPerFrameBuffer()
 }
 
 void Globals::setPerFrameBuffer(int g_reflection_mips_count,
-                                int g_shadow_map_size)
+                                int g_shadow_map_size,
+                                int g_cubemaps_count)
 {
     LightSystem * light_system = LightSystem::getInstance();
     TransformSystem * trans_system = TransformSystem::getInstance();
     
     per_frame_buffer_data.g_reflection_mips_count = g_reflection_mips_count;
     per_frame_buffer_data.g_shadow_map_size = g_shadow_map_size;
+    per_frame_buffer_data.g_cubemaps_count = g_cubemaps_count;
 
     auto & point_lights = light_system->getPointLights();
     for (uint32_t size = point_lights.size(), i = 0; i != size; ++i)
@@ -549,5 +552,51 @@ void Globals::updatePerShadowMeshBuffer()
     device_context4->VSSetConstantBuffers(3,
                                           1,
                                           per_shadow_mesh_buffer.get());
+}
+
+void Globals::initPerShadowCubemapBuffer()
+{
+    D3D11_BUFFER_DESC cb_desc;
+    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+    cb_desc.ByteWidth = sizeof(per_shadow_cubemap_buffer_data);
+    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb_desc.MiscFlags = 0;
+    cb_desc.StructureByteStride = 0;
+    
+    HRESULT result = device5->CreateBuffer(&cb_desc,
+                                           NULL,
+                                           per_shadow_cubemap_buffer.reset());
+    assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::setPerShadowCubemapBuffer(int cubemap_index)
+{
+    per_shadow_cubemap_buffer_data.cubemap_index = cubemap_index;
+}
+
+void Globals::updatePerShadowCubemapBuffer()
+{
+    HRESULT result;
+
+    // write new data to const buffer
+    D3D11_MAPPED_SUBRESOURCE ms;
+    result = device_context4->Map(per_shadow_cubemap_buffer.ptr(),
+                                  NULL,
+                                  D3D11_MAP_WRITE_DISCARD,
+                                  NULL,
+                                  &ms);
+    assert(result >= 0 && "Map");
+
+    memcpy(ms.pData,
+           &per_shadow_cubemap_buffer_data,
+           sizeof(per_shadow_cubemap_buffer_data));
+
+    device_context4->Unmap(per_shadow_cubemap_buffer.ptr(), NULL);
+
+    // bind const buffer with updated values to vertex shader
+    device_context4->GSSetConstantBuffers(5,
+                                          1,
+                                          per_shadow_cubemap_buffer.get());
 }
 } // namespace engine

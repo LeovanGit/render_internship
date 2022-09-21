@@ -36,7 +36,7 @@ public:
     void render();
 
     // for shadows from point lights
-    void renderShadowCubeMaps();
+    void renderShadowCubeMaps(int cubemaps_count);
 
     bool findIntersection(const math::Ray & ray_ws,
                           math::MeshIntersection & nearest);

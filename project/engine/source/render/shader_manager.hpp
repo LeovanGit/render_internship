@@ -27,7 +27,10 @@ public:
 
     std::shared_ptr<Shader> getShader(const std::string shader_path,
                                       D3D11_INPUT_ELEMENT_DESC input_desc[] = nullptr,
-                                      uint32_t input_desc_size = 0);
+                                      uint32_t input_desc_size = 0,
+                                      bool vertex_shader = true,
+                                      bool geometry_shader = false,
+                                      bool fragment_shader = true);
 
     void bindShader(const std::string & key);
        

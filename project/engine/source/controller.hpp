@@ -103,6 +103,10 @@ private:
                         const glm::vec3 & irradiance,
                         float distance,
                         float radius);
+
+    void initShaders();
+    void initTextures();
+    void initSceneObjects();
 };
 
 #endif

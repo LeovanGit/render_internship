@@ -4,13 +4,20 @@ namespace engine
 {
 Shader::Shader(const std::string & shader_path,
                D3D11_INPUT_ELEMENT_DESC input_desc[],
-               uint32_t input_desc_size)
+               uint32_t input_desc_size,
+               bool vertex_shader,
+               bool geometry_shader,
+               bool fragment_shader)
 {
+    if (!vertex_shader && !geometry_shader && !fragment_shader) return;
+    
     HRESULT result;
+    Globals * globals = Globals::getInstance();
 
-    ID3D10Blob * error_message(0);
-    ID3D10Blob * vert_shader_buffer(0);
-    ID3D10Blob * frag_shader_buffer(0);
+    ID3DBlob * error_message(0);
+    ID3DBlob * vert_shader_buffer(0);
+    ID3DBlob * frag_shader_buffer(0);
+    ID3DBlob * geom_shader_buffer(0);
 
     // pass only path to shader
     ShaderIncluder includer(shader_path.substr(0, shader_path.rfind("/")));
@@ -19,74 +26,101 @@ Shader::Shader(const std::string & shader_path,
     std::wstring path = std::wstring(shader_path.begin(),
                                      shader_path.end());
 
-    // Compile the vertex shader code
-    result = D3DCompileFromFile(path.c_str(),
-                                NULL,
-                                &includer,
-                                "vertexShader", // entry point
-                                "vs_5_0",
-                                SKIP_SHADER_OPTIMIZATIONS,
-                                0,
-                                &vert_shader_buffer,
-                                &error_message);
-
-    if(FAILED(result))
+    if (vertex_shader)
     {
-        if (error_message) std::cout << "\nVERTEX SHADER COMPILATION ERROR:\n"
-                                     << (char *)error_message->GetBufferPointer()
-                                     << "\n\n";
-        else std::cout << "\nVERTEX SHADER NOT FOUND\n";
-        assert(result >= 0 && "D3DCompileFromFile vertex shader");
-    }
+        result = D3DCompileFromFile(path.c_str(),
+                                    NULL,
+                                    &includer,
+                                    "vertexShader",
+                                    "vs_5_0",
+                                    SKIP_SHADER_OPTIMIZATIONS,
+                                    0,
+                                    &vert_shader_buffer,
+                                    &error_message);
 
-    // Compile the fragment shader code
-    result = D3DCompileFromFile(path.c_str(),
-                                NULL,
-                                &includer,
-                                "fragmentShader", // entry point
-                                "ps_5_0",
-                                SKIP_SHADER_OPTIMIZATIONS,
-                                0,
-                                &frag_shader_buffer,
-                                &error_message);
+        if(FAILED(result))
+        {
+            if (error_message) std::cout << "\nVERTEX SHADER COMPILATION ERROR:\n"
+                                         << (char *)error_message->GetBufferPointer()
+                                         << "\n\n";
+            else std::cout << "\nVERTEX SHADER NOT FOUND\n";
+            assert(result >= 0 && "D3DCompileFromFile vertex shader");
+        }
 
-    if(FAILED(result))
-    {
-        if (error_message) std::cout << "\nFRAGMENT SHADER COMPILATION ERROR:\n" 
-                                     << (char *)error_message->GetBufferPointer()
-                                     << "\n\n";
-        else std::cout << "FRAGMENT SHADER NOT FOUND\n";
-        assert(result >= 0 && "D3DCompileFromFile fragment shader");
-    }
+        result = globals->device5->
+            CreateVertexShader(vert_shader_buffer->GetBufferPointer(),
+                               vert_shader_buffer->GetBufferSize(),
+                               NULL,
+                               vert_shader.reset());
+        assert(result >= 0 && "CreateVertexShader");
 
-    // get access to global render variables
-    Globals * globals = Globals::getInstance();
-
-    // Create the vertex shader from the buffer
-    result = globals->device5->
-        CreateVertexShader(vert_shader_buffer->GetBufferPointer(),
-                           vert_shader_buffer->GetBufferSize(),
-                           NULL,
-                           vert_shader.reset());
-    assert(result >= 0 && "CreateVertexShader");
-
-    // Create the fragment shader from the buffer
-    result = globals->device5->
-        CreatePixelShader(frag_shader_buffer->GetBufferPointer(),
-                          frag_shader_buffer->GetBufferSize(),
-                          NULL,
-                          frag_shader.reset());
-    assert(result >= 0 && "CreatePixelShader");
-
-    // CREATE INPUT LAYOUT (VAO)
-    if (input_desc)
-    {
-        globals->device5->
+        if (input_desc)
+        {
+            globals->device5->
             CreateInputLayout(input_desc,
                               input_desc_size,
                               vert_shader_buffer->GetBufferPointer(),
                               vert_shader_buffer->GetBufferSize(),
                               input_layout.reset());        
+        }
+    }
+
+    if (fragment_shader)
+    {
+        result = D3DCompileFromFile(path.c_str(),
+                                    NULL,
+                                    &includer,
+                                    "fragmentShader",
+                                    "ps_5_0",
+                                    SKIP_SHADER_OPTIMIZATIONS,
+                                    0,
+                                    &frag_shader_buffer,
+                                    &error_message);
+
+        if(FAILED(result))
+        {
+            if (error_message) std::cout << "\nFRAGMENT SHADER COMPILATION ERROR:\n" 
+                                         << (char *)error_message->GetBufferPointer()
+                                         << "\n\n";
+            else std::cout << "FRAGMENT SHADER NOT FOUND\n";
+            assert(result >= 0 && "D3DCompileFromFile fragment shader");
+        }
+
+        result = globals->device5->
+            CreatePixelShader(frag_shader_buffer->GetBufferPointer(),
+                              frag_shader_buffer->GetBufferSize(),
+                              NULL,
+                              frag_shader.reset());
+        assert(result >= 0 && "CreatePixelShader");
+    }
+
+    if (geometry_shader)
+    {
+        result = D3DCompileFromFile(path.c_str(),
+                                    NULL,
+                                    &includer,
+                                    "geometryShader",
+                                    "gs_5_0",
+                                    SKIP_SHADER_OPTIMIZATIONS,
+                                    0,
+                                    &geom_shader_buffer,
+                                    &error_message);
+
+        if(FAILED(result))
+        {
+            if (error_message) std::cout << "\nGEOMETRY SHADER COMPILATION ERROR:\n" 
+                                         << (char *)error_message->GetBufferPointer()
+                                         << "\n\n";
+            else std::cout << "GEOMETRY SHADER NOT FOUND\n";
+            assert(result >= 0 && "D3DCompileFromFile geometry shader");
+        }
+
+        result = globals->device5->
+            CreateGeometryShader(geom_shader_buffer->GetBufferPointer(),
+                                 geom_shader_buffer->GetBufferSize(),
+                                 NULL,
+                                 geom_shader.reset());
+        assert(result >= 0 && "CreateGeometryShader");
     }
 }
 
@@ -97,6 +131,7 @@ void Shader::bind()
     // bind shaders and input layout
     globals->device_context4->VSSetShader(vert_shader.ptr(), 0, 0);
     globals->device_context4->PSSetShader(frag_shader.ptr(), 0, 0);
+    globals->device_context4->GSSetShader(geom_shader.ptr(), 0, 0);
     globals->device_context4->IASetInputLayout(input_layout);
 }
 } // namespace engine

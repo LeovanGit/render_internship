@@ -45,6 +45,8 @@ void OpaqueInstances::render()
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
+    TextureManager * tex_mgr = TextureManager::getInstance();
+    LightSystem * light_sys = LightSystem::getInstance();
 
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -52,6 +54,12 @@ void OpaqueInstances::render()
     shader->bind();
     instance_buffer.bind(1);
 
+    reflectance->bind(4);
+    irradiance->bind(5);
+    reflection->bind(6);
+
+    light_sys->bindShadowMapSRV(7);
+    
     uint32_t rendered_instances = 0;
     
     for (auto & per_model: per_model)
@@ -97,6 +105,62 @@ void OpaqueInstances::render()
                                                                mesh_range.index_offset,
                                                                mesh_range.vertex_offset,
                                                                rendered_instances);
+                rendered_instances += instances_count;
+            }
+        }
+    }
+}
+
+void OpaqueInstances::renderWithoutMaterials(int cubemaps_count)
+{
+    if (instance_buffer.get_size() == 0) return;
+
+    Globals * globals = Globals::getInstance();
+    TextureManager * tex_mgr = TextureManager::getInstance();
+
+    globals->device_context4->
+        IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    instance_buffer.bind(1);
+    
+    uint32_t rendered_instances = 0;
+    
+    for (auto & per_model: per_model)
+    {
+        if (!static_cast<bool>(per_model.model)) continue;
+
+        // bind vertex and index buffers
+        per_model.model->bind();
+
+        uint32_t per_mesh_size = per_model.per_mesh.size();
+        for (uint32_t i = 0; i < per_mesh_size; ++i)
+        {
+            Model::MeshRange & mesh_range = per_model.model->getMeshRange(i);
+
+            for (auto & per_material : per_model.per_mesh[i].per_material)
+            {
+                if (per_material.instances.empty()) continue;
+
+                Material & material = per_material.material;
+
+                globals->bindRasterizer(material.is_double_sided);
+
+                globals->setPerShadowMeshBuffer(mesh_range.mesh_to_model);
+                globals->updatePerShadowMeshBuffer();
+                
+                uint32_t instances_count = uint32_t(per_material.instances.size());
+
+                for (int cubemap_index = 0; cubemap_index != cubemaps_count; ++cubemap_index)
+                {
+                    globals->setPerShadowCubemapBuffer(cubemap_index);
+                    globals->updatePerShadowCubemapBuffer();
+                    
+                    globals->device_context4->DrawIndexedInstanced(mesh_range.index_count,
+                                                                   instances_count,
+                                                                   mesh_range.index_offset,
+                                                                   mesh_range.vertex_offset,
+                                                                   rendered_instances);
+                }                
                 rendered_instances += instances_count;
             }
         }

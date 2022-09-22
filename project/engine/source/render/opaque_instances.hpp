@@ -26,27 +26,42 @@ public:
     
     struct Material
     {
-        Material() = default;
-        Material(std::shared_ptr<Texture> albedo,
+        Material(std::shared_ptr<Texture> albedo = nullptr,
                  std::shared_ptr<Texture> roughness = nullptr,
                  std::shared_ptr<Texture> metalness = nullptr,
                  std::shared_ptr<Texture> normal = nullptr,
                  bool is_directx_style_normal_map = true,
                  bool is_double_sided = false,
-                 glm::vec3 albedo_default = glm::vec3(-1.0f),
-                 float roughness_default = -1.0f,
-                 float metalness_default = -1.0f) :
+                 const glm::vec3 & albedo_default = glm::vec3(0.0f),
+                 float roughness_default = 0.0f,
+                 float metalness_default = 0.0f) :
                  albedo(albedo),
                  roughness(roughness),
                  metalness(metalness),
                  normal(normal),
                  is_directx_style_normal_map(is_directx_style_normal_map),
+                 is_double_sided(is_double_sided),
                  albedo_default(albedo_default),
                  roughness_default(roughness_default),
-                 metalness_default(metalness_default),
-                 is_double_sided(is_double_sided)
+                 metalness_default(metalness_default)
         {}
 
+        Material(const glm::vec3 & albedo_default,
+                 float roughness_default,
+                 float metalness_default,
+                 bool is_directx_style_normal_map = true,
+                 bool is_double_sided = false) :
+                 albedo(nullptr),
+                 roughness(nullptr),
+                 metalness(nullptr),
+                 normal(nullptr),
+                 is_directx_style_normal_map(is_directx_style_normal_map),
+                 is_double_sided(is_double_sided),
+                 albedo_default(albedo_default),
+                 roughness_default(roughness_default),
+                 metalness_default(metalness_default)
+        {}
+        
         bool operator==(const Material & other)
         {
             if (static_cast<bool>(albedo))
@@ -126,11 +141,16 @@ public:
     void updateInstanceBuffers();
     
     void render();
+    void renderWithoutMaterials(int cubemaps_count);
 
     std::vector<PerModel> per_model;
     VertexBuffer<glm::mat4> instance_buffer;
 
     std::shared_ptr<Shader> shader;
+
+    std::shared_ptr<Texture> reflectance;
+    std::shared_ptr<Texture> irradiance;
+    std::shared_ptr<Texture> reflection;
 };
 } // namespace engine
 

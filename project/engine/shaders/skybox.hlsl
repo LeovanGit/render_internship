@@ -40,6 +40,6 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID)
 //------------------------------------------------------------------------------
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
-    float3 color = g_skybox.Sample(g_sampler, input.dirWS);
+    float3 color = g_skybox.Sample(g_wrap_sampler, input.dirWS);
     return float4(color, 1.0f);
 }

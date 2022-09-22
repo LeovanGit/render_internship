@@ -27,7 +27,10 @@ void ShaderManager::del()
 
 std::shared_ptr<Shader> ShaderManager::getShader(const std::string shader_path,
                                                  D3D11_INPUT_ELEMENT_DESC input_desc[],
-                                                 uint32_t input_desc_size)
+                                                 uint32_t input_desc_size,
+                                                 bool vertex_shader,
+                                                 bool geometry_shader,
+                                                 bool fragment_shader)
 {
     auto item = shaders.find(shader_path);
     if (item != shaders.end()) return item->second;
@@ -35,7 +38,10 @@ std::shared_ptr<Shader> ShaderManager::getShader(const std::string shader_path,
     auto result = shaders.try_emplace(shader_path,
                                       std::make_shared<Shader>(shader_path,
                                                                input_desc,
-                                                               input_desc_size));
+                                                               input_desc_size,
+                                                               vertex_shader,
+                                                               geometry_shader,
+                                                               fragment_shader));
     return result.first->second;
 }
 

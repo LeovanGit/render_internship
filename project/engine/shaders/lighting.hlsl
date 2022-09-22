@@ -1,6 +1,53 @@
 #ifndef LIGHTING_HLSL
 #define LIGHTING_HLSL
 
+Texture2D<float2> g_reflectance : register(t4);
+TextureCube g_irradiance : register(t5);
+TextureCube g_reflection : register(t6);
+
+TextureCubeArray<float4> g_shadow_maps : register(t7);
+
+static const float g_DEPTH_OFFSET = 0.005f;
+
+uint calculateCubeMapFaceIndex(float3 dir)
+{
+    // compare positive axes
+    float max_value = max(abs(dir.x), max(abs(dir.y), abs(dir.z)));
+    uint index = abs(dir.x) == max_value ? 0 : (abs(dir.y) == max_value ? 2 : 4);
+
+    // compare positive with negative axes and
+    // increment index if negative is dominates
+    return index + (asuint(dir[index / 2]) >> 31);
+}
+
+float calculateShadowCoefficient(float3 pos_WS,
+                                 float3 N,
+                                 float3 L,
+                                 float3 light_pos_WS,
+                                 uint cubemap_index)
+{    
+    float4x4 face_proj_view =
+        g_light_proj_view[6 * cubemap_index + calculateCubeMapFaceIndex(-L)];
+
+    pos_WS += L * g_DEPTH_OFFSET; // affects only comp_depth, but not sample_dir
+
+    // only 3 and 4 rows are used (.z and .w):
+    float4 pos_CS = mul(float4(pos_WS, 1.0f), face_proj_view);
+    float comp_depth = pos_CS.z / pos_CS.w;
+
+    float linear_depth = pos_CS.w;
+    float normal_offset = 2.0f * linear_depth / g_shadow_map_size;
+
+    pos_WS += N * normal_offset; // affects only sample_dir, but not comp_depth
+    float3 sample_dir = pos_WS - light_pos_WS;
+
+    float visibility = g_shadow_maps.SampleCmp(g_comparison_sampler,
+                                               float4(sample_dir, cubemap_index),
+                                               comp_depth);
+    
+    return 1.0f - visibility;
+}
+
 // May return direction pointing beneath surface horizon (dot(N, dir) < 0),
 // use clampDirToHorizon to fix it.
 // R = reflect(V, N)
@@ -48,6 +95,25 @@ float calculateSolidAngle(float L_length,
     float cosa = sqrt(1.0f - sina * sina);
 
     return 2.0f * g_PI * (1.0f - cosa);
+}
+
+float3 calculateEnvironment(float3 albedo,
+                            float roughness,
+                            float metalness,
+                            float3 fresnel,
+                            float3 N,
+                            float3 V)
+{
+    float NV = max(dot(N, V), 0.001f);
+    
+    float3 diffuse = albedo * (1.0f - metalness) * g_irradiance.SampleLevel(g_clamp_sampler, N, 0);
+
+    float2 reflectanceLUT = g_reflectance.SampleLevel(g_clamp_sampler, float2(roughness, 1.0f - NV), 0);
+    float3 reflectance = reflectanceLUT.x * fresnel + reflectanceLUT.y;
+    int mip = roughness * g_reflection_mips_count;
+    float3 specular = reflectance * g_reflection.SampleLevel(g_clamp_sampler, reflect(-V, N), mip);
+
+    return diffuse + specular;
 }
 
 // G
@@ -120,7 +186,7 @@ float3 calculateDirectionalLights(float3 albedo,
 {
     float3 color = 0.0f;
     
-    for (uint i = 0; i != g_dir_lights_count; ++i)
+    for (uint i = 0; i != g_DIR_LIGHTS_COUNT; ++i)
     {
         float3 L = -normalize(g_dir_lights[i].direction);
 
@@ -157,8 +223,8 @@ float3 calculatePointLights(float3 albedo,
 {
     float3 color = float3(0.0f, 0.0f, 0.0f);
     
-    for (uint i = 0; i != g_point_lights_count; ++i)
-    {
+    for (uint i = 0; i != g_POINT_LIGHTS_COUNT; ++i)
+    {        
         float3 L = g_point_lights[i].position - pos_WS;
         float3 L_norm = normalize(L);
 
@@ -209,7 +275,13 @@ float3 calculatePointLights(float3 albedo,
                                            solid_angle);
         float3 color_i = (diffuse * solid_angle + specular) * g_point_lights[i].radiance;
 
-        color += color_i * fading_micro * fading_macro;
+        float shadow = calculateShadowCoefficient(pos_WS,
+                                                  N,
+                                                  L,
+                                                  g_point_lights[i].position,
+                                                  i);
+        
+        color += color_i * fading_micro * fading_macro * shadow;
     }
 
     return color;
@@ -231,6 +303,7 @@ float3 calculateLighting(float3 albedo,
                                         fresnel,
                                         N,
                                         V);
+    
     color += calculatePointLights(albedo,
                                   roughness,
                                   metalness,
@@ -240,6 +313,13 @@ float3 calculateLighting(float3 albedo,
                                   V,
                                   pos_WS);
 
+    color += calculateEnvironment(albedo,
+                                  roughness,
+                                  metalness,
+                                  fresnel,
+                                  N,
+                                  V);
+    
     return color;
 }
 

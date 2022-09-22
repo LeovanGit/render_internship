@@ -5,7 +5,8 @@ struct PS_INPUT
     float4 pos : SV_POSITION; 
 };
 
-Texture2D g_hdr_scene;
+Texture2DMS<float4> g_hdr_scene;
+static const int g_samples_count = 4;
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -55,15 +56,21 @@ float3 toneMappingACES(float3 hdr)
 
 float3 gammaCorrection(float3 color)
 {
-    return pow(color, 1.0f / g_gamma);
+    return pow(color, 1.0f / g_GAMMA);
 }
 
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
-{
-    float3 color = g_hdr_scene.Load(int3(input.pos.x, input.pos.y, 0));
+{    
+    float3 color = 0.0f;
+    for (uint i = 0; i != g_samples_count; ++i)
+    {
+        float3 sample = g_hdr_scene.Load(int3(input.pos.xy, 0), i);
+        sample = adjustExposure(sample);
+        sample = toneMappingACES(sample);
 
-    color = adjustExposure(color);
-    color = toneMappingACES(color);
+        color += sample;
+    }
+    color /= g_samples_count;
     color = gammaCorrection(color);
     
     return float4(color, 1.0f);

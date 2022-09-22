@@ -1,5 +1,11 @@
 #include "mesh_system.hpp"
 
+namespace
+{
+constexpr uint32_t shadow_cubemaps_count = 4;
+} // namespace
+
+
 namespace engine
 {
 MeshSystem * MeshSystem::instance = nullptr;
@@ -26,17 +32,36 @@ void MeshSystem::del()
 }
 
 void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
-                            std::shared_ptr<Shader> emissive)
+                            std::shared_ptr<Shader> emissive,
+                            std::shared_ptr<Shader> shadow)
 {
     instance->opaque_instances.shader = opaque;
     instance->emissive_instances.shader = emissive;
+
+    shadow_shader = shadow;
 }
 
+void MeshSystem::setTextures(std::shared_ptr<Texture> reflectance,
+                             std::shared_ptr<Texture> irradiance,
+                             std::shared_ptr<Texture> reflection)
+{
+    instance->opaque_instances.reflectance = reflectance;
+    instance->opaque_instances.irradiance = irradiance;
+    instance->opaque_instances.reflection = reflection;
+}
 
 void MeshSystem::render()
 {
     opaque_instances.render();
     emissive_instances.render();
+}
+
+void MeshSystem::renderShadowCubeMaps(int cubemaps_count)
+{
+    Globals * globals = Globals::getInstance();
+    
+    shadow_shader->bind();
+    opaque_instances.renderWithoutMaterials(cubemaps_count);
 }
 
 bool MeshSystem::findIntersection(const math::Ray & ray_ws,

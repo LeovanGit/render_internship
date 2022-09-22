@@ -99,19 +99,19 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
 
     // conversion from sRGB to linear by raising to the power of 2.2
     // is delegated to DDSTextureLoader
-    material.albedo = g_has_albedo_texture ? g_albedo.Sample(g_sampler, input.uv).rgb :
+    material.albedo = g_has_albedo_texture ? g_albedo.Sample(g_wrap_sampler, input.uv).rgb :
                                              g_albedo_default;
 
-    material.roughness = g_has_roughness_texture ? g_roughness.Sample(g_sampler, input.uv).r :
+    material.roughness = g_has_roughness_texture ? g_roughness.Sample(g_wrap_sampler, input.uv).r :
                                                    g_roughness_default;
     // perception roughness -> roughness
-    material.roughness *= material.roughness;
+    // material.roughness *= material.roughness;
 
-    material.metalness = g_has_metalness_texture ? g_metalness.Sample(g_sampler, input.uv).r :
+    material.metalness = g_has_metalness_texture ? g_metalness.Sample(g_wrap_sampler, input.uv).r :
                                                    g_metalness_default;
         
     // use albedo as F0 for metals
-    material.fresnel = lerp(g_F0_dielectric, material.albedo, material.metalness);
+    material.fresnel = lerp(g_F0_DIELECTRIC, material.albedo, material.metalness);
 
     // geometry normal
     float3 GN = input.normal;
@@ -122,7 +122,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     float3 N;
     if (g_has_normal_map)
     {
-        N = g_normal.Sample(g_sampler, input.uv).rgb;
+        N = g_normal.Sample(g_wrap_sampler, input.uv).rgb;
         N = 2.0f * N - 1.0f; // [0; 1] -> [-1; 1]
         N = normalize(mul(N, TBN));
     }

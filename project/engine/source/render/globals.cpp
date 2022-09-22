@@ -21,8 +21,11 @@ void Globals::init()
         instance->initSamplers();
         instance->initRasterizers();
         instance->initPerFrameBuffer();
+        instance->initPerViewBuffer();
         instance->initPerMeshBuffer();
         instance->initPerEmissiveMeshBuffer();
+        instance->initPerShadowMeshBuffer();
+        instance->initPerShadowCubemapBuffer();
     }
     else spdlog::error("Globals::init() was called twice!");
 }
@@ -40,24 +43,6 @@ void Globals::del()
         instance = nullptr;
     }
     else spdlog::error("Globals::del() was called twice!");
-}
-
-void Globals::bind(const Camera & camera,
-                   float EV_100)
-{
-    setPerFrameBuffer(camera, EV_100);
-    updatePerFrameBuffer();
-
-    // bind sampler to fragment shader
-    device_context4->PSSetSamplers(0,
-                                   1,
-                                   sampler.get());
-}
-
-void Globals::bindRasterizer(bool is_double_sided)
-{
-    if (is_double_sided) device_context4->RSSetState(double_sided_rasterizer.ptr());
-    else device_context4->RSSetState(one_sided_rasterizer.ptr());
 }
 
 void Globals::initD3D()
@@ -126,20 +111,71 @@ void Globals::initD3D()
 
 void Globals::initSamplers()
 {
-    D3D11_SAMPLER_DESC sampler_desc;
-    ZeroMemory(&sampler_desc, sizeof(sampler_desc));
-    // sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
-    sampler_desc.MaxAnisotropy = 2;
-    sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampler_desc.MinLOD = 0;
-    sampler_desc.MaxLOD = D3D11_FLOAT32_MAX; // unlimited mipmap levels
+    HRESULT result;
+    
+    D3D11_SAMPLER_DESC wrap_sampler_desc;
+    ZeroMemory(&wrap_sampler_desc, sizeof(wrap_sampler_desc));
+    wrap_sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
+    wrap_sampler_desc.MaxAnisotropy = 2;
+    wrap_sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    wrap_sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    wrap_sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    wrap_sampler_desc.MinLOD = 0;
+    wrap_sampler_desc.MaxLOD = D3D11_FLOAT32_MAX; // unlimited mipmap levels
 
-    HRESULT result = device5->CreateSamplerState(&sampler_desc,
-                                                 sampler.reset());
+    result = device5->CreateSamplerState(&wrap_sampler_desc,
+                                         wrap_sampler.reset());
     assert(result >= 0 && "CreateSamplerState");
+
+    D3D11_SAMPLER_DESC clamp_sampler_desc;
+    ZeroMemory(&clamp_sampler_desc, sizeof(clamp_sampler_desc));
+    clamp_sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
+    clamp_sampler_desc.MaxAnisotropy = 2;
+    clamp_sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    clamp_sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    clamp_sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    clamp_sampler_desc.MinLOD = 0;
+    clamp_sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    result = device5->CreateSamplerState(&clamp_sampler_desc,
+                                         clamp_sampler.reset());
+    assert(result >= 0 && "CreateSamplerState");
+
+    
+    // comparison sampler for smooth shadow mapping
+    D3D11_SAMPLER_DESC comp_sampler_desc;
+    ZeroMemory(&comp_sampler_desc, sizeof(comp_sampler_desc));
+    comp_sampler_desc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+    comp_sampler_desc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+    comp_sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+    comp_sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+    comp_sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+    comp_sampler_desc.BorderColor[0] = 1.0f;
+    comp_sampler_desc.BorderColor[1] = 1.0f;
+    comp_sampler_desc.BorderColor[2] = 1.0f;
+    comp_sampler_desc.BorderColor[3] = 1.0f;
+    comp_sampler_desc.MinLOD = 0;
+    comp_sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+    comp_sampler_desc.MipLODBias = 0;
+
+    result = device5->CreateSamplerState(&comp_sampler_desc,
+                                         comparison_sampler.reset());
+    assert(result >= 0 && "CreateSamplerState");
+}
+
+void Globals::bindSamplers()
+{
+    device_context4->PSSetSamplers(0,
+                                   1,
+                                   wrap_sampler.get());
+
+    device_context4->PSSetSamplers(1,
+                                   1,
+                                   clamp_sampler.get());
+
+    device_context4->PSSetSamplers(2,
+                                   1,
+                                   comparison_sampler.get());
 }
 
 void Globals::initRasterizers()
@@ -155,7 +191,7 @@ void Globals::initRasterizers()
     one_sided_raster_desc.DepthBiasClamp = 0.0f;
     one_sided_raster_desc.DepthClipEnable = true;
     one_sided_raster_desc.ScissorEnable = false;
-    one_sided_raster_desc.MultisampleEnable = false;
+    one_sided_raster_desc.MultisampleEnable = true;
     one_sided_raster_desc.AntialiasedLineEnable = false;
 
     result = device->CreateRasterizerState(&one_sided_raster_desc,
@@ -171,12 +207,18 @@ void Globals::initRasterizers()
     double_sided_raster_desc.DepthBiasClamp = 0.0f;
     double_sided_raster_desc.DepthClipEnable = true;
     double_sided_raster_desc.ScissorEnable = false;
-    double_sided_raster_desc.MultisampleEnable = false;
+    double_sided_raster_desc.MultisampleEnable = true;
     double_sided_raster_desc.AntialiasedLineEnable = false;
 
     result = device->CreateRasterizerState(&double_sided_raster_desc,
                                            double_sided_rasterizer.reset());
     assert(result >= 0 && "CreateRasterizerState");    
+}
+
+void Globals::bindRasterizer(bool is_double_sided)
+{
+    if (is_double_sided) device_context4->RSSetState(double_sided_rasterizer.ptr());
+    else device_context4->RSSetState(one_sided_rasterizer.ptr());
 }
 
 void Globals::initPerFrameBuffer()
@@ -195,26 +237,16 @@ void Globals::initPerFrameBuffer()
     assert(result >= 0 && "CreateBuffer");
 }
 
-void Globals::setPerFrameBuffer(const Camera & camera,
-                                float EV_100)
+void Globals::setPerFrameBuffer(int g_reflection_mips_count,
+                                int g_shadow_map_size)
 {
     LightSystem * light_system = LightSystem::getInstance();
     TransformSystem * trans_system = TransformSystem::getInstance();
     
-    // find CS corner points in WS
-    glm::vec3 bottom_left_WS = camera.reproject(-1.0f, -1.0f);
-    glm::vec3 top_left_WS = camera.reproject(-1.0f, 1.0f);
-    glm::vec3 bottom_right_WS = camera.reproject(1.0f, -1.0f);
+    per_frame_buffer_data.g_reflection_mips_count = g_reflection_mips_count;
+    per_frame_buffer_data.g_shadow_map_size = g_shadow_map_size;
 
-    // fill const buffer data
-    per_frame_buffer_data.g_proj_view = camera.getViewProj();
-    per_frame_buffer_data.g_camera_pos = camera.getPosition();
-    per_frame_buffer_data.g_EV_100 = EV_100;
-    per_frame_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);
-    per_frame_buffer_data.g_frustum_corners[1] = glm::vec4(top_left_WS, 1.0f);
-    per_frame_buffer_data.g_frustum_corners[2] = glm::vec4(bottom_right_WS, 1.0f);
-
-    auto & point_lights = light_system->getPointLights();    
+    auto & point_lights = light_system->getPointLights();
     for (uint32_t size = point_lights.size(), i = 0; i != size; ++i)
     {
         uint32_t transform_id = point_lights[i].transform_id;
@@ -227,6 +259,16 @@ void Globals::setPerFrameBuffer(const Camera & camera,
 
         per_frame_buffer_data.g_point_lights[i].radius =
             point_lights[i].radius;
+
+        // shadow map
+        std::vector<Camera> cameras = Camera::generateCubemapCameras(
+            trans_system->transforms[transform_id].position);
+
+        for (uint32_t c_size = cameras.size(), c = 0; c != c_size; ++c)
+        {
+            per_frame_buffer_data.g_light_proj_view[6 * i + c] =
+                cameras[c].getViewProj();
+        }
     }
 
     auto & directional_lights = light_system->getDirectionalLights();
@@ -267,9 +309,79 @@ void Globals::updatePerFrameBuffer()
                                           1,
                                           per_frame_buffer.get());
 
+    device_context4->GSSetConstantBuffers(0,
+                                          1,
+                                          per_frame_buffer.get());
+    
     device_context4->PSSetConstantBuffers(0,
                                           1,
                                           per_frame_buffer.get());
+}
+
+void Globals::initPerViewBuffer()
+{
+    D3D11_BUFFER_DESC cb_desc;
+    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+    cb_desc.ByteWidth = sizeof(per_view_buffer_data);
+    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb_desc.MiscFlags = 0;
+    cb_desc.StructureByteStride = 0;
+    
+    HRESULT result = device5->CreateBuffer(&cb_desc,
+                                           NULL,
+                                           per_view_buffer.reset());
+    assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::setPerViewBuffer(const Camera & camera,
+                               float EV_100)
+{
+    // find CS corner points in WS
+    glm::vec3 bottom_left_WS = camera.reproject(-1.0f, -1.0f);
+    glm::vec3 top_left_WS = camera.reproject(-1.0f, 1.0f);
+    glm::vec3 bottom_right_WS = camera.reproject(1.0f, -1.0f);
+
+    // fill const buffer data
+    per_view_buffer_data.g_proj_view = camera.getViewProj();
+    per_view_buffer_data.g_camera_pos = camera.getPosition();
+    per_view_buffer_data.g_EV_100 = EV_100;
+    per_view_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);
+    per_view_buffer_data.g_frustum_corners[1] = glm::vec4(top_left_WS, 1.0f);
+    per_view_buffer_data.g_frustum_corners[2] = glm::vec4(bottom_right_WS, 1.0f);
+}
+
+void Globals::updatePerViewBuffer()
+{
+    HRESULT result;
+
+    // write new data to const buffer
+    D3D11_MAPPED_SUBRESOURCE ms;
+    result = device_context4->Map(per_view_buffer.ptr(),
+                                  NULL,
+                                  D3D11_MAP_WRITE_DISCARD,
+                                  NULL,
+                                  &ms);
+    assert(result >= 0 && "Map");
+
+    memcpy(ms.pData,
+           &per_view_buffer_data,
+           sizeof(per_view_buffer_data));
+
+    device_context4->Unmap(per_view_buffer.ptr(), NULL);
+
+    // bind const buffer with updated values to vertex shader
+    device_context4->VSSetConstantBuffers(4,
+                                          1,
+                                          per_view_buffer.get());
+
+    device_context4->GSSetConstantBuffers(4,
+                                          1,
+                                          per_view_buffer.get());
+    
+    device_context4->PSSetConstantBuffers(4,
+                                          1,
+                                          per_view_buffer.get());
 }
 
 void Globals::initPerMeshBuffer()
@@ -391,5 +503,98 @@ void Globals::updatePerEmissiveMeshBuffer()
     device_context4->PSSetConstantBuffers(2,
                                           1,
                                           per_emissive_mesh_buffer.get());
+}
+
+void Globals::initPerShadowMeshBuffer()
+{
+    D3D11_BUFFER_DESC cb_desc;
+    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+    cb_desc.ByteWidth = sizeof(per_shadow_mesh_buffer_data);
+    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb_desc.MiscFlags = 0;
+    cb_desc.StructureByteStride = 0;
+    
+    HRESULT result = device5->CreateBuffer(&cb_desc,
+                                           NULL,
+                                           per_shadow_mesh_buffer.reset());
+    assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::setPerShadowMeshBuffer(const glm::mat4 & g_mesh_to_model)
+{
+    // fill const buffer data
+    per_shadow_mesh_buffer_data.g_mesh_to_model = g_mesh_to_model;
+}
+
+void Globals::updatePerShadowMeshBuffer()
+{
+    HRESULT result;
+
+    // write new data to const buffer
+    D3D11_MAPPED_SUBRESOURCE ms;
+    result = device_context4->Map(per_shadow_mesh_buffer.ptr(),
+                                  NULL,
+                                  D3D11_MAP_WRITE_DISCARD,
+                                  NULL,
+                                  &ms);
+    assert(result >= 0 && "Map");
+
+    memcpy(ms.pData,
+           &per_shadow_mesh_buffer_data,
+           sizeof(per_shadow_mesh_buffer_data));
+
+    device_context4->Unmap(per_shadow_mesh_buffer.ptr(), NULL);
+
+    // bind const buffer with updated values to vertex shader
+    device_context4->VSSetConstantBuffers(3,
+                                          1,
+                                          per_shadow_mesh_buffer.get());
+}
+
+void Globals::initPerShadowCubemapBuffer()
+{
+    D3D11_BUFFER_DESC cb_desc;
+    cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+    cb_desc.ByteWidth = sizeof(per_shadow_cubemap_buffer_data);
+    cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb_desc.MiscFlags = 0;
+    cb_desc.StructureByteStride = 0;
+    
+    HRESULT result = device5->CreateBuffer(&cb_desc,
+                                           NULL,
+                                           per_shadow_cubemap_buffer.reset());
+    assert(result >= 0 && "CreateBuffer");
+}
+
+void Globals::setPerShadowCubemapBuffer(int cubemap_index)
+{
+    per_shadow_cubemap_buffer_data.cubemap_index = cubemap_index;
+}
+
+void Globals::updatePerShadowCubemapBuffer()
+{
+    HRESULT result;
+
+    // write new data to const buffer
+    D3D11_MAPPED_SUBRESOURCE ms;
+    result = device_context4->Map(per_shadow_cubemap_buffer.ptr(),
+                                  NULL,
+                                  D3D11_MAP_WRITE_DISCARD,
+                                  NULL,
+                                  &ms);
+    assert(result >= 0 && "Map");
+
+    memcpy(ms.pData,
+           &per_shadow_cubemap_buffer_data,
+           sizeof(per_shadow_cubemap_buffer_data));
+
+    device_context4->Unmap(per_shadow_cubemap_buffer.ptr(), NULL);
+
+    // bind const buffer with updated values to vertex shader
+    device_context4->GSSetConstantBuffers(5,
+                                          1,
+                                          per_shadow_cubemap_buffer.get());
 }
 } // namespace engine

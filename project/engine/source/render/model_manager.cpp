@@ -157,15 +157,15 @@ std::shared_ptr<Model> ModelManager::getDefaultPlane(const std::string & key)
     return result.first->second;
 }
 
-std::shared_ptr<Model> ModelManager::getDefaultSphere(const std::string & key)
+std::shared_ptr<Model> ModelManager::getDefaultSphere(const std::string & key,
+                                                      const uint32_t grid_size)
 {
     auto item = models.find(key);
     if (item != models.end()) return item->second;   
 
     // GENERATE SPHERE FROM CUBE
     const uint32_t SIDES = 6;
-    const uint32_t GRID_SIZE = 12;
-    const uint32_t TRIS_PER_SIDE = GRID_SIZE * GRID_SIZE * 2;
+    const uint32_t TRIS_PER_SIDE = grid_size * grid_size * 2;
     const uint32_t VERT_PER_SIDE = TRIS_PER_SIDE * 3;
     
     std::vector<Vertex> vertices;
@@ -194,14 +194,14 @@ std::shared_ptr<Model> ModelManager::getDefaultSphere(const std::string & key)
 
     for (int side = 0; side != SIDES; ++side)
     {
-        for (int row = 0; row != GRID_SIZE; ++row)
+        for (int row = 0; row != grid_size; ++row)
         {
-            for (int col = 0; col != GRID_SIZE; ++col)
+            for (int col = 0; col != grid_size; ++col)
             {
-                float left = (col + 0) / float(GRID_SIZE) * 2.0f - 1.0f;
-                float right = (col + 1) / float(GRID_SIZE) * 2.0f - 1.0f;
-                float bottom = (row + 0) / float(GRID_SIZE) * 2.0f - 1.0f;
-                float top = (row + 1) / float(GRID_SIZE) * 2.0f - 1.0f;
+                float left = (col + 0) / float(grid_size) * 2.0f - 1.0f;
+                float right = (col + 1) / float(grid_size) * 2.0f - 1.0f;
+                float bottom = (row + 0) / float(grid_size) * 2.0f - 1.0f;
+                float top = (row + 1) / float(grid_size) * 2.0f - 1.0f;
 
                 // front quad (will be transformed to the other side
                 // using side_masks and side_signs)
@@ -215,10 +215,10 @@ std::shared_ptr<Model> ModelManager::getDefaultSphere(const std::string & key)
 
                 // (0, 0) - top left corner
                 // V is inversed, because the quads starts from the left bot corner
-                float uv_left = (col + 0) / float(GRID_SIZE);
-                float uv_right = (col + 1) / float(GRID_SIZE);
-                float uv_bottom = (GRID_SIZE - (row + 0)) / float(GRID_SIZE);
-                float uv_top = (GRID_SIZE - (row + 1)) / float(GRID_SIZE);
+                float uv_left = (col + 0) / float(grid_size);
+                float uv_right = (col + 1) / float(grid_size);
+                float uv_bottom = (grid_size - (row + 0)) / float(grid_size);
+                float uv_top = (grid_size - (row + 1)) / float(grid_size);
                 
                 glm::vec2 uv[4]
                 {

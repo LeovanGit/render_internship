@@ -383,6 +383,22 @@ void Controller::initShaders()
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
 
+        {"TEXCOORD",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         0,
+         12,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+        
+        {"NORMAL",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         20,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
         {"TRANSFORM",
          0,
          DXGI_FORMAT_R32G32B32A32_FLOAT,
@@ -472,7 +488,7 @@ void Controller::initShaders()
                                                   9),
                             shader_mgr->getShader("../engine/shaders/emissive.hlsl",
                                                   ied_emissive,
-                                                  6),
+                                                  8),
                             shader_mgr->getShader("../engine/shaders/shadow_cubemap.hlsl",
                                                   ied_shadow_map,
                                                   5,
@@ -526,22 +542,19 @@ void Controller::initSceneObjects()
     initFloor(std::vector<oi::Material>{oi::Material(
                   tex_mgr->getTexture("../engine/assets/floor/tile_albedo.dds"),
                   tex_mgr->getTexture("../engine/assets/floor/tile_roughness.dds"),
-                  nullptr,
+                  tex_mgr->getTexture("../engine/assets/floor/tile_metallic.dds"),
                   tex_mgr->getTexture("../engine/assets/floor/tile_normal.dds"),
                   true,
-                  true,
-                  glm::vec3(1.0f, 0.0f, 0.0f),
-                  0.9f,
-                  0.0f)});
+                  true)});
     
-    // initSphere(math::Transform(glm::vec3(20.0f, 0.0f, 20.0f),
-    //                            math::EulerAngles(0.0f, 0.0f, 0.0f),
-    //                            glm::vec3(4.0f, 4.0f, 4.0f)),
-    //            std::vector<oi::Material>{oi::Material(
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_albedo.dds"),
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_roughness.dds"),
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_metallic.dds"),
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_normal.dds"))});
+    initSphere(math::Transform(glm::vec3(-13.0f, -6.0f, 42.0f),
+                               math::EulerAngles(0.0f, 0.0f, 0.0f),
+                               glm::vec3(4.0f, 4.0f, 4.0f)),
+               std::vector<oi::Material>{oi::Material(
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_albedo.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_roughness.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_metallic.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_normal.dds"))});
     
     initCube(math::Transform(glm::vec3(-30.0f, 0.0f, 0.0f),
                              math::EulerAngles(45.0f, 0.0f, 0.0f),

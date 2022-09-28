@@ -40,6 +40,8 @@ cbuffer PerFrame : register(b0)
 cbuffer PerView : register(b4)
 {
     row_major float4x4 g_proj_view;
+    row_major float4x4 g_view;
+    row_major float4x4 g_proj;
     float3 g_camera_position;
     float g_EV_100;
     // 0 - bottom_left, 1 - top_left, 2 - bottom_right

@@ -57,7 +57,6 @@ PS_INPUT vertexShader(VS_INPUT input)
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
     float3 N = normalize(input.normal);
-    
     float3 V = normalize(g_camera_position - input.pos_WS);
     float NV = max(dot(N, V), 0.001f);
 

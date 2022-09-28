@@ -20,6 +20,7 @@ void Globals::init()
         instance->initD3D();
         instance->initSamplers();
         instance->initRasterizers();
+        instance->initBlendStates();
         instance->initPerFrameBuffer();
         instance->initPerViewBuffer();
         instance->initPerMeshBuffer();
@@ -219,6 +220,39 @@ void Globals::bindRasterizer(bool is_double_sided)
 {
     if (is_double_sided) device_context4->RSSetState(double_sided_rasterizer.ptr());
     else device_context4->RSSetState(one_sided_rasterizer.ptr());
+}
+
+void Globals::initBlendStates()
+{
+    HRESULT result;
+    
+    D3D11_BLEND_DESC translucent_blend_desc;
+    ZeroMemory(&translucent_blend_desc, sizeof(translucent_blend_desc));
+    translucent_blend_desc.RenderTarget[0].BlendEnable = true;
+    translucent_blend_desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    translucent_blend_desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    translucent_blend_desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    translucent_blend_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    translucent_blend_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+    translucent_blend_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    translucent_blend_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    result = device->CreateBlendState(&translucent_blend_desc,
+                                      translucent_blend_state.reset());
+    assert(result >= 0 && "CreateBlendState");
+}
+
+void Globals::bindBlendState(bool is_translucent)
+{
+    if (is_translucent)
+        device_context4->OMSetBlendState(translucent_blend_state.ptr(),
+                                         nullptr,
+                                         0xffffffff);
+    else
+        // default
+        device_context4->OMSetBlendState(nullptr,
+                                         nullptr,
+                                         0xffffffff);
 }
 
 void Globals::initPerFrameBuffer()

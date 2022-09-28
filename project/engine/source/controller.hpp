@@ -19,6 +19,7 @@
 #include "opaque_instances.hpp"
 #include "emissive_instances.hpp"
 #include "post_process.hpp"
+#include "particle_system.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -107,6 +108,7 @@ private:
     void initShaders();
     void initTextures();
     void initSceneObjects();
+    void initParticleEmitters();
 };
 
 #endif

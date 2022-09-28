@@ -47,6 +47,7 @@ bool frameTimeElapsed()
 {
     using namespace std::chrono;
 
+
     duration<float> elapsed_time = steady_clock::now() - start_time;
         
     if (elapsed_time.count() >= FRAME_DURATION)
@@ -113,7 +114,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
             controller.processInput(camera, post_process, delta_time, win);
             camera.updateMatrices();
-            controller.scene->renderFrame(win, camera, post_process);
+            controller.scene->renderFrame(win, camera, post_process, delta_time);
         }
     }
     exit:

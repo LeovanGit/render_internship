@@ -24,7 +24,8 @@ void Controller::initScene(Camera & camera)
 
     initShaders();
     initTextures();
-    initSceneObjects();    
+    initSceneObjects();
+    initParticleEmitters();
 }
 
 void Controller::initPostprocess()
@@ -297,6 +298,7 @@ void Controller::initShaders()
 {
     engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
     
     D3D11_INPUT_ELEMENT_DESC ied_opaque[] =
     {
@@ -495,6 +497,46 @@ void Controller::initShaders()
                                                   true,
                                                   true,
                                                   false));
+
+    D3D11_INPUT_ELEMENT_DESC ied_particles[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         0,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"SIZE",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         12,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"ANGLE",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         24,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+             
+        {"TINT",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         28,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
+    
+    particle_sys->shader =
+        shader_mgr->getShader("../engine/shaders/particles.hlsl",
+                              ied_particles,
+                              4);
 }
 
 void Controller::initTextures()
@@ -642,6 +684,48 @@ void Controller::initSceneObjects()
                   1.0f,
                   true,
                   false)});
+}
+
+void Controller::initParticleEmitters()
+{
+    engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
+    engine::TextureManager * texture_mgr = engine::TextureManager::getInstance();
+
+    particle_sys->texture = texture_mgr->
+                                getTexture("../engine/assets/smoke/smoke.dds");
+    
+    // red
+    particle_sys->addSmokeEmitter(
+        engine::SmokeEmitter(glm::vec3(40.0f, -9.0f, 20.0f),
+                             1.0f,
+                             glm::vec3(1.0f, 0.0f, 0.0f),
+                             0.8f,
+                             3.0f,
+                             0.5f,
+                             0.2f,
+                             0.05f));
+
+    // white
+    particle_sys->addSmokeEmitter(
+        engine::SmokeEmitter(glm::vec3(40.0f, -9.0f, 0.0f),
+                             5.0f,
+                             glm::vec3(1.0f, 1.0f, 1.0f),
+                             0.5f,
+                             2.0f,
+                             0.5f,
+                             0.2f,
+                             0.05f));
+
+    // green
+    particle_sys->addSmokeEmitter(
+        engine::SmokeEmitter(glm::vec3(40.0f, -9.0f, -30.0f),
+                             8.0f,
+                             glm::vec3(0.0f, 1.0f, 0.0f),
+                             0.25f,
+                             1.0f,
+                             0.5f,
+                             0.2f,
+                             0.02f));
 }
 
 void Controller::processInput(Camera & camera,

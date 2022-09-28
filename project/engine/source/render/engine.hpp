@@ -8,6 +8,7 @@
 #include "mesh_system.hpp"
 #include "light_system.hpp"
 #include "transform_system.hpp"
+#include "particle_system.hpp"
 
 namespace engine
 {

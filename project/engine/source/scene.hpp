@@ -10,6 +10,7 @@
 #include "model_manager.hpp"
 #include "sky.hpp"
 #include "mesh_system.hpp"
+#include "particle_system.hpp"
 
 namespace engine
 {
@@ -22,7 +23,8 @@ public:
 
     void renderFrame(windows::Window & window,
                      const Camera & camera,
-                     engine::Postprocess & post_process);
+                     engine::Postprocess & post_process,
+                     float delta_time);
 
     void initDepthBuffer(int width, int heigth);
     void clearDepthBuffer();

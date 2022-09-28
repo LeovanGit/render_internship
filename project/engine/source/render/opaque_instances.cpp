@@ -45,7 +45,6 @@ void OpaqueInstances::render()
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
-    TextureManager * tex_mgr = TextureManager::getInstance();
     LightSystem * light_sys = LightSystem::getInstance();
 
     globals->device_context4->
@@ -116,7 +115,6 @@ void OpaqueInstances::renderWithoutMaterials(int cubemaps_count)
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
-    TextureManager * tex_mgr = TextureManager::getInstance();
 
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

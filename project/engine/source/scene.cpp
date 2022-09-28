@@ -24,9 +24,11 @@ void Scene::init(const windows::Window & window)
 
 void Scene::renderFrame(windows::Window & window,
                         const Camera & camera,
-                        engine::Postprocess & post_process) 
+                        engine::Postprocess & post_process,
+                        float delta_time) 
 {
     Globals * globals = Globals::getInstance();
+    engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
 
     globals->setPerFrameBuffer(REFLECTION_MIPS_COUNT,
                                SHADOW_MAP_SIZE);
@@ -37,10 +39,12 @@ void Scene::renderFrame(windows::Window & window,
     globals->updatePerViewBuffer();
     
     globals->bindSamplers();
+    globals->bindBlendState();
     
-    renderShadows();
+    renderShadows();    
     renderSceneObjects(window);
     sky.render();
+    particle_sys->render(delta_time);
 
     post_process.resolve(HDR_SRV, window.getRenderTarget());
     window.switchBuffer();

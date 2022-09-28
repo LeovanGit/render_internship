@@ -12,11 +12,13 @@ void Engine::init()
     MeshSystem::init();
     LightSystem::init();
     TransformSystem::init();
+    ParticleSystem::init();
 }
 
 void Engine::del()
 {
     // destruct singletons in reverse order!
+    ParticleSystem::del();
     TransformSystem::del();
     LightSystem::del();
     MeshSystem::del();

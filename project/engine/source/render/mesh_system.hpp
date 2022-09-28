@@ -12,7 +12,7 @@
 
 namespace engine
 {
-class MeshSystem
+class MeshSystem final
 {
 public:
     // deleted methods should be public for better error messages

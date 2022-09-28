@@ -85,7 +85,10 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/mesh_system.hpp
                    engine/source/render/light_system.hpp
                    engine/source/render/vertex.hpp
-                   engine/source/render/post_process.hpp)
+                   engine/source/render/post_process.hpp
+                   engine/source/render/particle.hpp
+                   engine/source/render/smoke_emitter.hpp
+                   engine/source/render/particle_system.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/globals.cpp
@@ -103,7 +106,10 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/emissive_instances.cpp
                    engine/source/render/mesh_system.cpp
                    engine/source/render/light_system.cpp
-                   engine/source/render/post_process.cpp)
+                   engine/source/render/post_process.cpp
+                   engine/source/render/particle.cpp
+                   engine/source/render/smoke_emitter.cpp
+                   engine/source/render/particle_system.cpp)
 
 source_group("Header Files/source/render" FILES ${RENDER_HEADERS})
 source_group("Source Files/source/render" FILES ${RENDER_SOURCES})

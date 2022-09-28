@@ -1,11 +1,12 @@
 #ifndef PARTICLE_SYSTEM_HPP
 #define PARTICLE_SYSTEM_HPP
 
-#include <dxgiformat.h>
+#include <algorithm>
 #include "glm.hpp"
 
 #include "smoke_emitter.hpp"
 #include "vertex_buffer.hpp"
+#include "camera.hpp"
 
 namespace engine
 {
@@ -24,8 +25,9 @@ public:
 
     void addSmokeEmitter(const SmokeEmitter & smoke_emitter);
 
-    void updateInstanceBuffer();
-    void render(float delta_time);
+    void updateInstanceBuffer(const Camera & camera);
+    void render(float delta_time,
+                const Camera & camera);
 
     std::shared_ptr<Shader> shader;
     std::shared_ptr<Texture> texture; // move it to Emitter class for different textures

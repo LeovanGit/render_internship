@@ -40,11 +40,14 @@ void Scene::renderFrame(windows::Window & window,
     
     globals->bindSamplers();
     globals->bindBlendState();
-    
+
     renderShadows();    
     renderSceneObjects(window);
-    sky.render();
-    particle_sys->render(delta_time);
+    sky.render();   
+
+    changeDepthBufferAccess(true);
+    particle_sys->render(delta_time, camera);
+    changeDepthBufferAccess(false);
 
     post_process.resolve(HDR_SRV, window.getRenderTarget());
     window.switchBuffer();
@@ -119,6 +122,23 @@ void Scene::bindDepthBuffer()
 
     globals->device_context4->OMSetDepthStencilState(depth_stencil_state.ptr(),
                                                      0);
+}
+
+void Scene::changeDepthBufferAccess(bool is_read_only)
+{
+    Globals * globals = Globals::getInstance();
+    
+    D3D11_DEPTH_STENCIL_DESC dss_desc;
+    depth_stencil_state.ptr()->GetDesc(&dss_desc);
+
+    if (is_read_only) dss_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    else dss_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+
+    HRESULT result = globals->device5->CreateDepthStencilState(&dss_desc,
+                                                                   depth_stencil_state.reset());
+    assert(result >= 0 && "CreateDepthStencilState");
+
+    bindDepthBuffer();
 }
 
 void Scene::initRenderTarget(int width, int height)

@@ -29,6 +29,7 @@ public:
     void initDepthBuffer(int width, int heigth);
     void clearDepthBuffer();
     void bindDepthBuffer();
+    void changeDepthBufferAccess(bool is_read_only = false);
 
     void initRenderTarget(int width, int height);
     void clearRenderTarget();

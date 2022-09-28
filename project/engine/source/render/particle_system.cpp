@@ -30,41 +30,51 @@ void ParticleSystem::addSmokeEmitter(const SmokeEmitter & smoke_emitter)
     smoke_emitters.push_back(smoke_emitter);
 }
 
-void ParticleSystem::updateInstanceBuffer()
+void ParticleSystem::updateInstanceBuffer(const Camera & camera)
 {
-    uint32_t total_instances = 0;
+    std::vector<Particle> instances;
 
     for (auto & smoke_emitter : smoke_emitters)
-        total_instances += smoke_emitter.getParticles().size();
+    {
+        auto & src = smoke_emitter.getParticles();
+        instances.insert(instances.end(), src.begin(), src.end());
+    }
+    if (instances.size() == 0) return;
 
-    if (total_instances == 0) return;
+    std::sort(instances.begin(),
+              instances.end(),
+              [camera](const Particle & a, const Particle & b)
+              {
+                  float dist_1 = glm::length(a.position - camera.getPosition());
+                  float dist_2 = glm::length(b.position - camera.getPosition());
 
-    instance_buffer.init(total_instances);
+                  return dist_1 > dist_2;
+              });
+
+    instance_buffer.init(instances.size());
     D3D11_MAPPED_SUBRESOURCE mapped = instance_buffer.map();
     GPUInstance * dst = static_cast<GPUInstance *>(mapped.pData);
 
     uint32_t copied_count = 0;
-    for (auto & smoke_emitter : smoke_emitters)
+    for (auto & particle : instances)
     {
-        for (auto & particle : smoke_emitter.getParticles())
-        {
-            dst[copied_count++] = GPUInstance(particle.position,
-                                              glm::vec3(particle.size,
-                                                        particle.thickness),
-                                              particle.angle,
-                                              particle.tint);
-        }
-    }
+        dst[copied_count++] = GPUInstance(particle.position,
+                                          glm::vec3(particle.size,
+                                                    particle.thickness),
+                                          particle.angle,
+                                          particle.tint);
+    }    
     
-    instance_buffer.unmap();    
+    instance_buffer.unmap();
 }
 
-void ParticleSystem::render(float delta_time)
+void ParticleSystem::render(float delta_time,
+                            const Camera & camera)
 {       
     for (auto & smoke_emitter : smoke_emitters)
         smoke_emitter.update(delta_time);
     
-    updateInstanceBuffer();
+    updateInstanceBuffer(camera);
 
     if (instance_buffer.get_size() == 0) return;
 

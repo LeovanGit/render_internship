@@ -6,7 +6,7 @@ constexpr float BACKGROUND[4] = {0.4f, 0.44f, 0.4f, 1.0f};
 constexpr uint32_t REFLECTION_MIPS_COUNT = 8;
 constexpr uint32_t SHADOW_CUBEMAPS_COUNT = 4;
 constexpr int SHADOW_MAP_SIZE = 1024;
-
+constexpr glm::vec<2, int> PARTICLES_ATLAS_SIZE(8, 8);
 constexpr uint32_t MSAA_SAMPLES_COUNT = 4;
 } // namespace
 
@@ -31,7 +31,8 @@ void Scene::renderFrame(windows::Window & window,
     engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
 
     globals->setPerFrameBuffer(REFLECTION_MIPS_COUNT,
-                               SHADOW_MAP_SIZE);
+                               SHADOW_MAP_SIZE,
+                               PARTICLES_ATLAS_SIZE);
     globals->updatePerFrameBuffer();
 
     globals->setPerViewBuffer(camera,

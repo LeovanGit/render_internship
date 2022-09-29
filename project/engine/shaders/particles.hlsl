@@ -6,6 +6,7 @@ struct VS_INPUT
     float3 size : SIZE;
     float angle : ANGLE;
     float4 tint : TINT;
+    float lifetime : LIFETIME;
 };
 
 struct PS_INPUT
@@ -13,6 +14,7 @@ struct PS_INPUT
     float4 posCS : SV_POSITION;
     float2 uv : TEXCOORD;
     float4 tint : TINT;
+    float lifetime : LIFETIME;
 };
 
 Texture2D<float4> g_particle : register(t8);
@@ -57,6 +59,7 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
     output.posCS = mul(float4(vertexVS[vertex_index], posVS.z, 1.0f), g_proj);
     output.uv = vertexUV[vertex_index];
     output.tint = input.tint;
+    output.lifetime = input.lifetime;
 
     return output;
 }
@@ -65,6 +68,13 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
 // FRAGMENT SHADER
 //------------------------------------------------------------------------------
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
-{
-    return input.tint * g_particle.Sample(g_wrap_sampler, input.uv);
+{    
+    int sprites_count = g_particles_atlas_size.x * g_particles_atlas_size.y;
+    int sprite_index = int(input.lifetime * (sprites_count - 1));
+    int2 sprite = int2(sprite_index / g_particles_atlas_size.x,
+                       sprite_index % g_particles_atlas_size.y);
+    
+    float2 uv = (input.uv + float2(sprite.y, sprite.x)) / 8.0f;
+    
+    return input.tint * g_particle.Sample(g_wrap_sampler, uv);
 }

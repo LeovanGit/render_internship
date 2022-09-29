@@ -531,12 +531,20 @@ void Controller::initShaders()
          28,
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
+
+        {"LIFETIME",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         44,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
     };
     
     particle_sys->shader =
         shader_mgr->getShader("../engine/shaders/particles.hlsl",
                               ied_particles,
-                              4);
+                              5);
 }
 
 void Controller::initTextures()
@@ -692,40 +700,40 @@ void Controller::initParticleEmitters()
     engine::TextureManager * texture_mgr = engine::TextureManager::getInstance();
 
     particle_sys->texture = texture_mgr->
-                                getTexture("../engine/assets/smoke/smoke.dds");
+                                getTexture("../engine/assets/smoke/motion_vectors.dds");
     
     // red
     particle_sys->addSmokeEmitter(
-        engine::SmokeEmitter(glm::vec3(40.0f, -9.0f, 20.0f),
-                             1.0f,
-                             glm::vec3(1.0f, 0.0f, 0.0f),
-                             0.8f,
-                             3.0f,
+        engine::SmokeEmitter(glm::vec3(40.0f, -13.0f, 20.0f),
                              0.5f,
-                             0.2f,
-                             0.05f));
+                             glm::vec3(1.0f, 0.0f, 0.0f),
+                             0.1f,
+                             4.0f,
+                             0.5f,
+                             0.05f,
+                             0.25f));
 
     // white
     particle_sys->addSmokeEmitter(
-        engine::SmokeEmitter(glm::vec3(40.0f, -9.0f, 0.0f),
-                             5.0f,
+        engine::SmokeEmitter(glm::vec3(40.0f, -12.0f, 0.0f),
+                             3.0f,
                              glm::vec3(1.0f, 1.0f, 1.0f),
-                             0.5f,
-                             2.0f,
-                             0.5f,
-                             0.2f,
-                             0.05f));
-
-    // green
-    particle_sys->addSmokeEmitter(
-        engine::SmokeEmitter(glm::vec3(40.0f, -9.0f, -30.0f),
-                             8.0f,
-                             glm::vec3(0.0f, 1.0f, 0.0f),
                              0.25f,
+                             2.0f,
                              1.0f,
-                             0.5f,
+                             0.025f,
+                             0.5f));
+
+    // yellow
+    particle_sys->addSmokeEmitter(
+        engine::SmokeEmitter(glm::vec3(40.0f, -7.5f, -30.0f),
+                             10.0f,
+                             glm::vec3(0.86f, 0.47f, 0.0f),
+                             0.25f,
                              0.2f,
-                             0.02f));
+                             1.0f,
+                             0.025f,
+                             0.1f));
 }
 
 void Controller::processInput(Camera & camera,
@@ -736,21 +744,6 @@ void Controller::processInput(Camera & camera,
     RECT client_area = win.getClientSize();
     int width = client_area.right - client_area.left;
     int height = client_area.bottom - client_area.top;
-
-    // was any user input
-    // for (int i = 0; i != KEYS_COUNT; ++i)
-    // {
-    //     if(keys_log[i] == true)
-    //     {
-    //         if (scene->is_image_ready)
-    //         {
-    //             scene->is_global_illumination = false;
-    //             scene->is_image_ready = false;
-    //         }
-            
-    //         break;
-    //     }
-    // }
 
     if (keys_log[KEY_W])
     {
@@ -868,20 +861,5 @@ void Controller::processInput(Camera & camera,
     {
         post_process.EV_100 -= 2.0f * delta_time;
     }
-    // if (keys_log[KEY_G] && 
-    //     !scene->is_global_illumination && 
-    //     !scene->is_image_ready)
-    // {
-    //     scene->is_global_illumination = true;
-    //     scene->is_image_ready = false;
-    // }
-    // if (keys_log[KEY_R])
-    // {
-    //     if (was_released[KEY_R])
-    //     {
-    //         scene->is_smooth_reflection = !scene->is_smooth_reflection;
-    //         was_released[KEY_R] = false;
-    //     }
-    // }
 }
 

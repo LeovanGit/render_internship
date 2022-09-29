@@ -62,7 +62,8 @@ void ParticleSystem::updateInstanceBuffer(const Camera & camera)
                                           glm::vec3(particle.size,
                                                     particle.thickness),
                                           particle.angle,
-                                          particle.tint);
+                                          particle.tint,
+                                          particle.lifetime);
     }    
     
     instance_buffer.unmap();

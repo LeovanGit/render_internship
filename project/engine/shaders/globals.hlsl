@@ -32,7 +32,7 @@ cbuffer PerFrame : register(b0)
 
     int g_reflection_mips_count;
     int g_shadow_map_size;
-    float2 padding_3;
+    int2 g_particles_atlas_size;
     
     row_major float4x4 g_light_proj_view[24]; // 4 cubemaps
 };

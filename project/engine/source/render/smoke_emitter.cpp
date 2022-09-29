@@ -14,18 +14,21 @@ SmokeEmitter::SmokeEmitter(const glm::vec3 & position,
                            float spawn_rate,
                            float movement_speed,
                            float resize_speed,
-                           float appear_speed,
-                           float disappear_speed) :
+                           float life_speed,
+                           float appear_lifetime_value) :
                            position(position),
                            radius(radius),
                            tint(tint),
                            spawn_rate(spawn_rate),
                            movement_speed(movement_speed),
                            resize_speed(resize_speed),
-                           appear_speed(appear_speed),
-                           disappear_speed(disappear_speed),
+                           life_speed(life_speed),
+                           appear_lifetime_value(appear_lifetime_value),
                            start_time(std::chrono::steady_clock::now())
-{}
+{
+    this->appear_speed = life_speed / appear_lifetime_value;
+    this->disappear_speed = life_speed / (1.0f - appear_lifetime_value);
+}
 
 bool SmokeEmitter::spawnTimeElapsed()
 {
@@ -71,20 +74,22 @@ void SmokeEmitter::update(float delta_time)
 
     for (uint32_t i = 0; i != particles.size(); ++i)
     {
-        particles[i].position.y += movement_speed * delta_time;
-        particles[i].size += glm::vec2(resize_speed * delta_time);
+        particles[i].lifetime += life_speed * delta_time;
 
-        if (particles[i].is_disappears)
-            particles[i].tint.w -= disappear_speed * delta_time;
-        else
-            particles[i].tint.w += appear_speed * delta_time;
-
-        if (particles[i].tint.w >= 1.0f) particles[i].is_disappears = true;        
-        else if (particles[i].tint.w <= 0)
+        if (particles[i].lifetime >= 1.0f)
         {
             particles.erase(particles.begin() + i);
             --i;
+            continue;
         }
+
+        particles[i].position.y += movement_speed * delta_time;
+        particles[i].size += glm::vec2(resize_speed * delta_time);
+        
+        if (particles[i].lifetime < appear_lifetime_value)
+            particles[i].tint.w += appear_speed * delta_time;
+        else
+            particles[i].tint.w -= disappear_speed * delta_time;
     }
 }
 

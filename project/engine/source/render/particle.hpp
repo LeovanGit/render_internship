@@ -13,15 +13,14 @@ public:
              float thickness,
              float angle,
              const glm::vec4 tint,
-             bool is_disappears = false);
+             float lifetime = 0.0f);
     
     glm::vec3 position;
     glm::vec2 size;
     float thickness;
     float angle;
     glm::vec4 tint;
-
-    bool is_disappears;
+    float lifetime; // [0; 1]
 };
 } // namespace engine
 

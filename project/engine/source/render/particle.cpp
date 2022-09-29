@@ -7,12 +7,12 @@ Particle::Particle(const glm::vec3 & position,
                    float thickness,
                    float angle,
                    const glm::vec4 tint,
-                   bool is_disappears) :
+                   float lifetime) :
                    position(position),
                    size(size),
                    thickness(thickness),
                    angle(angle),
                    tint(tint),
-                   is_disappears(is_disappears)
+                   lifetime(lifetime)
 {}
 } // namespace enigne

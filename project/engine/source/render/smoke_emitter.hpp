@@ -22,8 +22,8 @@ public:
                  float spawn_rate,
                  float movement_speed,
                  float resize_speed,
-                 float appear_speed,
-                 float disappear_speed);
+                 float life_speed,
+                 float appear_lifetime_value);
 
     void update(float delta_time);
     
@@ -34,12 +34,16 @@ public:
     float spawn_rate; // in seconds
     float movement_speed;
     float resize_speed;
-    float appear_speed;
-    float disappear_speed;
 
     const std::vector<Particle> & getParticles() const;
     
 private:
+    float life_speed;
+
+    float appear_lifetime_value;
+    float appear_speed;
+    float disappear_speed;
+    
     bool spawnTimeElapsed();
     float randomFromRange(float min, float max);
 

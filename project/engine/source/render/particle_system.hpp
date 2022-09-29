@@ -41,17 +41,20 @@ private:
         GPUInstance(const glm::vec3 & posWS,
                     const glm::vec3 & size,
                     float angle,
-                    const glm::vec4 & tint) :
+                    const glm::vec4 & tint,
+                    float lifetime) :
                     posWS(posWS),
                     size(size),
                     angle(angle),
-                    tint(tint)
+                    tint(tint),
+                    lifetime(lifetime)
         {}
         
         glm::vec3 posWS;
         glm::vec3 size;
         float angle;
         glm::vec4 tint;
+        float lifetime;
     };
     
     static ParticleSystem * instance;

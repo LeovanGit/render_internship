@@ -1,4 +1,5 @@
 #include "globals.hlsl"
+#include "lighting.hlsl"
 
 struct VS_INPUT
 {
@@ -12,12 +13,18 @@ struct VS_INPUT
 struct PS_INPUT
 {
     float4 posCS : SV_POSITION;
+    float3 posWS : POSITION;
     float2 uv : TEXCOORD;
     float4 tint : TINT;
     float lifetime : LIFETIME;
+    float3 normal : NORMAL;
+    float3 right : RIGHT;
+    float3 up : UP;
 };
 
-Texture2D<float4> g_particle : register(t8);
+Texture2D<float4> g_lightmap_RLT : register(t8);
+Texture2D<float4> g_lightmap_BotBF : register(t9);
+Texture2D<float4> g_motion_vectors : register(t10);
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -57,9 +64,13 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
     
     PS_INPUT output;
     output.posCS = mul(float4(vertexVS[vertex_index], posVS.z, 1.0f), g_proj);
+    output.posWS = mul(float4(vertexVS[vertex_index], posVS.z, 1.0f), g_view_inv).xyz;
     output.uv = vertexUV[vertex_index];
     output.tint = input.tint;
     output.lifetime = input.lifetime;
+    output.normal = mul(float4(0.0f, 0.0f, -1.0f, 0.0f), g_view_inv).xyz;
+    output.right = mul(float4(right, 0.0, 0.0f), g_view_inv).xyz;
+    output.up = mul(float4(up, -1.0f, 0.0f), g_view_inv).xyz;
 
     return output;
 }
@@ -75,6 +86,17 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
                        sprite_index % g_particles_atlas_size.y);
     
     float2 uv = (input.uv + float2(sprite.y, sprite.x)) / 8.0f;
-    
-    return input.tint * g_particle.Sample(g_wrap_sampler, uv);
+
+    float3 lightmap_RLT = g_lightmap_RLT.Sample(g_wrap_sampler, uv).rgb;
+    float3 lightmap_BotBF = g_lightmap_BotBF.Sample(g_wrap_sampler, uv).rgb;
+    float4 motion_vectors = g_motion_vectors.Sample(g_wrap_sampler, uv);
+
+    float3 color = calculateLighting(input.posWS,
+                                     input.right,
+                                     input.up,
+                                     input.normal,
+                                     lightmap_RLT,
+                                     lightmap_BotBF);
+
+    return float4(color, motion_vectors.a) * input.tint;
 }

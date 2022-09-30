@@ -81,6 +81,11 @@ const glm::mat4 & Camera::getView() const
     return view_matrix;
 }
 
+const glm::mat4 & Camera::getViewInv() const
+{
+    return view_matrix_inv;
+}
+
 const glm::mat4 & Camera::getProj() const
 {
     return proj_matrix;

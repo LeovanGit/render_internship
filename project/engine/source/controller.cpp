@@ -249,6 +249,16 @@ void Controller::initFloor(const std::vector<oi::Material> & materials)
                               math::EulerAngles(0.0f, 90.0f, 0.0f),
                               glm::vec3(25.0f)),
               materials);
+
+    initPlane(math::Transform(glm::vec3(75.0f, -10.0f, -25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);
+              
+    initPlane(math::Transform(glm::vec3(75.0f, -10.0f, 25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);
 }
 
 void Controller::initDirectionalLight(const glm::vec3 & radiance,
@@ -650,7 +660,7 @@ void Controller::initSceneObjects()
                              glm::vec3(10.0f, 10.0f, 10.0f)));
 
     // gold mirror
-    initPlane(math::Transform(glm::vec3(10.0f, 0.0f, 48.0f),
+    initPlane(math::Transform(glm::vec3(25.0f, 0.0f, 48.0f),
                               math::EulerAngles(0.0f, 0.0f, 0.0f),
                               glm::vec3(5.0f, 10.0f, 1.0f)),
               std::vector<oi::Material>{oi::Material(
@@ -658,10 +668,10 @@ void Controller::initSceneObjects()
                   0.01f,
                   1.0f,
                   true,
-                  false)});
+                  true)});
 
     // copper mirror
-    initPlane(math::Transform(glm::vec3(20.0f, 0.0f, 48.0f),
+    initPlane(math::Transform(glm::vec3(35.0f, 0.0f, 48.0f),
                               math::EulerAngles(0.0f, 0.0f, 0.0f),
                               glm::vec3(5.0f, 10.0f, 1.0f)),
               std::vector<oi::Material>{oi::Material(
@@ -669,10 +679,10 @@ void Controller::initSceneObjects()
                   0.15f,
                   1.0f,
                   true,
-                  false)});
+                  true)});
 
     // iron mirror
-    initPlane(math::Transform(glm::vec3(30.0f, 0.0f, 48.0f),
+    initPlane(math::Transform(glm::vec3(45.0f, 0.0f, 48.0f),
                               math::EulerAngles(0.0f, 0.0f, 0.0f),
                               glm::vec3(5.0f, 10.0f, 1.0f)),
               std::vector<oi::Material>{oi::Material(
@@ -680,10 +690,10 @@ void Controller::initSceneObjects()
                   0.27f,
                   1.0f,
                   true,
-                  false)});
+                  true)});
 
     // red mirror
-    initPlane(math::Transform(glm::vec3(40.0f, 0.0f, 48.0f),
+    initPlane(math::Transform(glm::vec3(55.0f, 0.0f, 48.0f),
                               math::EulerAngles(0.0f, 0.0f, 0.0f),
                               glm::vec3(5.0f, 10.0f, 1.0f)),
               std::vector<oi::Material>{oi::Material(
@@ -691,7 +701,7 @@ void Controller::initSceneObjects()
                   0.4f,
                   1.0f,
                   true,
-                  false)});
+                  true)});
 }
 
 void Controller::initParticleEmitters()
@@ -699,23 +709,29 @@ void Controller::initParticleEmitters()
     engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
     engine::TextureManager * texture_mgr = engine::TextureManager::getInstance();
 
-    particle_sys->texture = texture_mgr->
-                                getTexture("../engine/assets/smoke/motion_vectors.dds");
+    particle_sys->lightmap_RLT = texture_mgr->
+        getTexture("../engine/assets/smoke/lightmap_RLT.dds");
+
+    particle_sys->lightmap_BotBF = texture_mgr->
+        getTexture("../engine/assets/smoke/lightmap_BotBF.dds");
+    
+    particle_sys->motion_vectors = texture_mgr->
+        getTexture("../engine/assets/smoke/motion_vectors.dds");
     
     // red
     particle_sys->addSmokeEmitter(
-        engine::SmokeEmitter(glm::vec3(40.0f, -13.0f, 20.0f),
+        engine::SmokeEmitter(glm::vec3(80.0f, -13.0f, 30.0f),
                              0.5f,
                              glm::vec3(1.0f, 0.0f, 0.0f),
                              0.1f,
-                             4.0f,
+                             5.0f,
                              0.5f,
                              0.05f,
                              0.25f));
 
     // white
     particle_sys->addSmokeEmitter(
-        engine::SmokeEmitter(glm::vec3(40.0f, -12.0f, 0.0f),
+        engine::SmokeEmitter(glm::vec3(80.0f, -12.0f, 0.0f),
                              3.0f,
                              glm::vec3(1.0f, 1.0f, 1.0f),
                              0.25f,
@@ -726,7 +742,7 @@ void Controller::initParticleEmitters()
 
     // yellow
     particle_sys->addSmokeEmitter(
-        engine::SmokeEmitter(glm::vec3(40.0f, -7.5f, -30.0f),
+        engine::SmokeEmitter(glm::vec3(80.0f, -7.5f, -30.0f),
                              10.0f,
                              glm::vec3(0.86f, 0.47f, 0.0f),
                              0.25f,

@@ -29,8 +29,11 @@ public:
     void render(float delta_time,
                 const Camera & camera);
 
+    // move them to Emitter class for different textures:
     std::shared_ptr<Shader> shader;
-    std::shared_ptr<Texture> texture; // move it to Emitter class for different textures
+    std::shared_ptr<Texture> lightmap_RLT;
+    std::shared_ptr<Texture> lightmap_BotBF;
+    std::shared_ptr<Texture> motion_vectors;
     
 private:
     ParticleSystem() = default;

@@ -88,7 +88,10 @@ void ParticleSystem::render(float delta_time,
 
     shader->bind();
     instance_buffer.bind(1);
-    texture->bind(8);
+    
+    lightmap_RLT->bind(8);
+    lightmap_BotBF->bind(9);
+    motion_vectors->bind(10);    
     
     globals->device_context4->DrawInstanced(6,
                                             instance_buffer.get_size(),

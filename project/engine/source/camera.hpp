@@ -34,6 +34,8 @@ public:
 
     const glm::mat4 & getView() const;
 
+    const glm::mat4 & getViewInv() const;
+
     const glm::mat4 & getProj() const;
 
     void setWorldPosition(const glm::vec3 & position);

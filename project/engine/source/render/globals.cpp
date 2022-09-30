@@ -381,6 +381,7 @@ void Globals::setPerViewBuffer(const Camera & camera,
     // fill const buffer data
     per_view_buffer_data.g_proj_view = camera.getViewProj();
     per_view_buffer_data.g_view = camera.getView();
+    per_view_buffer_data.g_view_inv = camera.getViewInv();
     per_view_buffer_data.g_proj = camera.getProj();
     per_view_buffer_data.g_camera_pos = camera.getPosition();
     per_view_buffer_data.g_EV_100 = EV_100;

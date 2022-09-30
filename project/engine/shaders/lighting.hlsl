@@ -323,4 +323,92 @@ float3 calculateLighting(float3 albedo,
     return color;
 }
 
+//------------------------------------------------------------------------------
+// LIGHTMAPS LIGHTING
+//------------------------------------------------------------------------------
+float3 calculateDirectionalLights(float3 right,
+                                  float3 up,
+                                  float3 normal,
+                                  float3 lightmap_RLT,
+                                  float3 lightmap_BotBF)
+{
+    float3 color = 0.0f;
+
+    for (uint i = 0; i != g_DIR_LIGHTS_COUNT; ++i)
+    {
+        float3 L = -g_dir_lights[i].direction;
+
+        float3 color_i = g_dir_lights[i].radiance *
+                         g_dir_lights[i].solid_angle;
+
+        float RL = dot(right, L);
+        float UL = dot(up, L);
+        float NL = dot(normal, L);
+
+        color_i = color_i * (RL > 0 ? lightmap_RLT.r : lightmap_RLT.g) * abs(RL) +
+                  color_i * (UL > 0 ? lightmap_RLT.b : lightmap_BotBF.r) * abs(UL) +
+                  color_i * (NL > 0 ? lightmap_BotBF.b : lightmap_BotBF.g) * abs(NL);
+
+        color += color_i;
+    }
+
+    return color;
+}
+
+float3 calculatePointLights(float3 pos_WS,
+                            float3 right,
+                            float3 up,
+                            float3 normal,
+                            float3 lightmap_RLT,
+                            float3 lightmap_BotBF)
+{
+    float3 color = 0.0f;
+    
+    for (uint i = 0; i != g_POINT_LIGHTS_COUNT; ++i)
+    {
+        float3 L = g_point_lights[i].position - pos_WS;
+        float3 L_norm = normalize(L);
+        
+        float3 color_i = g_point_lights[i].radiance *
+                         calculateSolidAngle(length(L), g_point_lights[i].radius);
+
+        float RL = dot(normalize(right), L_norm);
+        float UL = dot(normalize(up), L_norm);
+        float NL = dot(normalize(normal), L_norm);
+
+        color_i = color_i * (RL > 0 ? lightmap_RLT.r : lightmap_RLT.g) * abs(RL) +
+                  color_i * (UL > 0 ? lightmap_RLT.b : lightmap_BotBF.r) * abs(UL) +
+                  color_i * (NL > 0 ? lightmap_BotBF.b : lightmap_BotBF.g) * abs(NL);
+        
+        color += color_i;
+    }
+
+    return color;
+}
+
+float3 calculateLighting(float3 pos_WS,
+                         float3 right, // particle basis
+                         float3 up,
+                         float3 normal,
+                         float3 lightmap_RLT,
+                         float3 lightmap_BotBF)
+{
+    float3 color = 0.0f;
+
+    color += calculateDirectionalLights(right,
+                                        up,
+                                        normal,
+                                        lightmap_RLT,
+                                        lightmap_BotBF);
+
+    color += calculatePointLights(pos_WS,
+                                  right,
+                                  up,
+                                  normal,
+                                  lightmap_RLT,
+                                  lightmap_BotBF);
+
+    return color;
+}
+
 #endif

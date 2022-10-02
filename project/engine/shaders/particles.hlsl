@@ -26,6 +26,8 @@ Texture2D<float4> g_lightmap_RLT : register(t8);
 Texture2D<float4> g_lightmap_BotBF : register(t9);
 Texture2D<float4> g_motion_vectors : register(t10);
 
+static const float g_MV_SCALE = 0.004f;
+
 //------------------------------------------------------------------------------
 // VERTEX SHADER
 //------------------------------------------------------------------------------
@@ -79,24 +81,51 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
 // FRAGMENT SHADER
 //------------------------------------------------------------------------------
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
-{    
+{
     int sprites_count = g_particles_atlas_size.x * g_particles_atlas_size.y;
+    float frame_frac_time = frac(input.lifetime * (sprites_count - 1));
+    
+    // last particle from atlas lerp with first because of wrap sampler
     int sprite_index = int(input.lifetime * (sprites_count - 1));
+    int next_sprite_index = sprite_index + 1;
+    
     int2 sprite = int2(sprite_index / g_particles_atlas_size.x,
                        sprite_index % g_particles_atlas_size.y);
+    int2 next_sprite = int2(next_sprite_index / g_particles_atlas_size.x,
+                            next_sprite_index % g_particles_atlas_size.y);
+
+    float2 uv = (input.uv + float2(sprite.y, sprite.x)) /
+                g_particles_atlas_size.x;
+    float2 next_uv = (input.uv + float2(next_sprite.y, next_sprite.x)) /
+                     g_particles_atlas_size.x;
+
+    float2 mvA = g_motion_vectors.Sample(g_wrap_sampler, uv).gb;
+    float2 mvB = g_motion_vectors.Sample(g_wrap_sampler, next_uv).gb;
+    mvA *= 2.0f - 1.0f;
+    mvB *= 2.0f - 1.0f;
     
-    float2 uv = (input.uv + float2(sprite.y, sprite.x)) / 8.0f;
+    float2 uvA = uv;
+    uvA -= mvA * g_MV_SCALE * frame_frac_time;
 
-    float3 lightmap_RLT = g_lightmap_RLT.Sample(g_wrap_sampler, uv).rgb;
-    float3 lightmap_BotBF = g_lightmap_BotBF.Sample(g_wrap_sampler, uv).rgb;
-    float4 motion_vectors = g_motion_vectors.Sample(g_wrap_sampler, uv);
+    float2 uvB = next_uv;
+    uvB -= mvB * g_MV_SCALE * (frame_frac_time - 1.0f);
+        
+    float3 valueA = g_lightmap_RLT.Sample(g_wrap_sampler, uvA).rgb;
+    float3 valueB = g_lightmap_RLT.Sample(g_wrap_sampler, uvB).rgb;
+    float3 lightmap_RLT = lerp(valueA, valueB, frame_frac_time);
 
+    valueA = g_lightmap_BotBF.Sample(g_wrap_sampler, uvA).rgb;
+    valueB = g_lightmap_BotBF.Sample(g_wrap_sampler, uvB).rgb;
+    float3 lightmap_BotBF = lerp(valueA, valueB, frame_frac_time);
+    
     float3 color = calculateLighting(input.posWS,
-                                     input.right,
-                                     input.up,
-                                     input.normal,
+                                     normalize(input.right),
+                                     normalize(input.up),
+                                     normalize(input.normal),
                                      lightmap_RLT,
                                      lightmap_BotBF);
 
-    return float4(color, motion_vectors.a) * input.tint;
+    float alpha = g_motion_vectors.Sample(g_wrap_sampler, uv).a;
+    
+    return float4(color, alpha) * input.tint;
 }

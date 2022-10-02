@@ -336,14 +336,14 @@ float3 calculateDirectionalLights(float3 right,
 
     for (uint i = 0; i != g_DIR_LIGHTS_COUNT; ++i)
     {
-        float3 L = -g_dir_lights[i].direction;
+        float3 L_norm = -normalize(g_dir_lights[i].direction);
 
         float3 color_i = g_dir_lights[i].radiance *
                          g_dir_lights[i].solid_angle;
 
-        float RL = dot(right, L);
-        float UL = dot(up, L);
-        float NL = dot(normal, L);
+        float RL = dot(right, L_norm);
+        float UL = dot(up, L_norm);
+        float NL = dot(normal, L_norm);
 
         color_i = color_i * (RL > 0 ? lightmap_RLT.r : lightmap_RLT.g) * abs(RL) +
                   color_i * (UL > 0 ? lightmap_RLT.b : lightmap_BotBF.r) * abs(UL) +
@@ -372,9 +372,9 @@ float3 calculatePointLights(float3 pos_WS,
         float3 color_i = g_point_lights[i].radiance *
                          calculateSolidAngle(length(L), g_point_lights[i].radius);
 
-        float RL = dot(normalize(right), L_norm);
-        float UL = dot(normalize(up), L_norm);
-        float NL = dot(normalize(normal), L_norm);
+        float RL = dot(right, L_norm);
+        float UL = dot(up, L_norm);
+        float NL = dot(normal, L_norm);
 
         color_i = color_i * (RL > 0 ? lightmap_RLT.r : lightmap_RLT.g) * abs(RL) +
                   color_i * (UL > 0 ? lightmap_RLT.b : lightmap_BotBF.r) * abs(UL) +
@@ -387,7 +387,7 @@ float3 calculatePointLights(float3 pos_WS,
 }
 
 float3 calculateLighting(float3 pos_WS,
-                         float3 right, // particle basis
+                         float3 right, // normalized particle basis
                          float3 up,
                          float3 normal,
                          float3 lightmap_RLT,

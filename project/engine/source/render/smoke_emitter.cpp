@@ -76,7 +76,8 @@ void SmokeEmitter::update(float delta_time)
     {
         particles[i].lifetime += life_speed * delta_time;
 
-        if (particles[i].lifetime >= 1.0f)
+        if (particles[i].lifetime >= 1.0f ||
+            particles[i].tint.w < 0.0f)
         {
             particles.erase(particles.begin() + i);
             --i;

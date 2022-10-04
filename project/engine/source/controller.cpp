@@ -508,6 +508,8 @@ void Controller::initShaders()
                                                   true,
                                                   false));
 
+    scene->depth_copy_shader = shader_mgr->getShader("../engine/shaders/copy_ms_depth.hlsl");
+
     D3D11_INPUT_ELEMENT_DESC ied_particles[] =
     {
         {"POSITION",

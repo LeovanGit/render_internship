@@ -273,7 +273,8 @@ void Globals::initPerFrameBuffer()
 
 void Globals::setPerFrameBuffer(int g_reflection_mips_count,
                                 int g_shadow_map_size,
-                                const glm::vec<2, int> & g_particles_atlas_size)
+                                const glm::vec<2, int> & g_particles_atlas_size,
+                                int g_samples_count)
 {
     LightSystem * light_system = LightSystem::getInstance();
     TransformSystem * trans_system = TransformSystem::getInstance();
@@ -281,6 +282,7 @@ void Globals::setPerFrameBuffer(int g_reflection_mips_count,
     per_frame_buffer_data.g_reflection_mips_count = g_reflection_mips_count;
     per_frame_buffer_data.g_shadow_map_size = g_shadow_map_size;
     per_frame_buffer_data.g_particles_atlas_size = g_particles_atlas_size;
+    per_frame_buffer_data.g_samples_count = g_samples_count;
 
     auto & point_lights = light_system->getPointLights();
     for (uint32_t size = point_lights.size(), i = 0; i != size; ++i)

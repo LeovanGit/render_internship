@@ -2,8 +2,8 @@
 
 namespace
 {
-constexpr float PARTICLE_INITIAL_SIZE = 1.0f;
-constexpr float PARTICLE_THICKNESS = 1.0f;
+constexpr float PARTICLE_INIT_SIZE = 1.0f;
+constexpr float PARTICLE_INIT_THICKNESS = 0.004f; // contact fading range
 } // namespace
 
 namespace engine
@@ -62,8 +62,8 @@ void SmokeEmitter::spawnParticle()
     float angle = randomFromRange(0.0f, 2 * math::PI);
     
     particles.push_back(Particle(pos,
-                                 glm::vec2(PARTICLE_INITIAL_SIZE),
-                                 PARTICLE_THICKNESS,
+                                 glm::vec2(PARTICLE_INIT_SIZE),
+                                 PARTICLE_INIT_THICKNESS,
                                  angle,
                                  glm::vec4(tint, 0.0f)));
 }

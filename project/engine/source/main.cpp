@@ -23,6 +23,11 @@ namespace
 {
 constexpr float FRAME_DURATION = 1.0f / 60.0f;
 
+constexpr uint32_t WINDOW_INIT_POS_X = 100;
+constexpr uint32_t WINDOW_INIT_POS_Y = 100;
+constexpr uint32_t WINDOW_INIT_POS_WIDTH = 1280;
+constexpr uint32_t WINDOW_INIT_POS_HEIGHT = 720;
+
 engine::windows::Window win;
 engine::Scene scene;
 Controller controller;
@@ -67,7 +72,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 {
     // INIT ENGINE
     engine::Engine::init();
-
+    
     // REGISTER WINDOW CLASS
     WNDCLASSEX wclass;
     ZeroMemory(&wclass, sizeof(WNDCLASSEX));
@@ -82,7 +87,11 @@ int WINAPI WinMain(HINSTANCE hInstance,
     RegisterClassEx(&wclass);
 
     // CREATE WINDOW
-    win.init(hInstance, 100, 100, 1280, 720);
+    win.init(hInstance,
+             WINDOW_INIT_POS_X,
+             WINDOW_INIT_POS_Y,
+             WINDOW_INIT_POS_WIDTH,
+             WINDOW_INIT_POS_HEIGHT);
 
     // CREATE SCENE
     scene.init(win);
@@ -150,7 +159,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                 win.resize(LOWORD(lParam), HIWORD(lParam));
                 scene.initDepthBuffer(LOWORD(lParam), HIWORD(lParam));
                 scene.initRenderTarget(LOWORD(lParam), HIWORD(lParam));
-            
+
                 camera.setPerspective(glm::radians(45.0f),
                                       float(LOWORD(lParam)) / HIWORD(lParam),
                                       1.0f,

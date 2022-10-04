@@ -20,13 +20,15 @@ struct PS_INPUT
     float3 normal : NORMAL;
     float3 right : RIGHT;
     float3 up : UP;
+    float3 size : SIZE;
 };
 
 Texture2D<float4> g_lightmap_RLT : register(t8);
 Texture2D<float4> g_lightmap_BotBF : register(t9);
 Texture2D<float4> g_motion_vectors : register(t10);
+Texture2D<float> g_depth_buffer : register(t11);
 
-static const float g_MV_SCALE = 0.004f;
+static const float g_MV_SCALE = 0.001f;
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -73,6 +75,7 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
     output.normal = mul(float4(0.0f, 0.0f, -1.0f, 0.0f), g_view_inv).xyz;
     output.right = mul(float4(right, 0.0, 0.0f), g_view_inv).xyz;
     output.up = mul(float4(up, -1.0f, 0.0f), g_view_inv).xyz;
+    output.size = input.size;
 
     return output;
 }
@@ -125,7 +128,12 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
                                      lightmap_RLT,
                                      lightmap_BotBF);
 
-    float alpha = g_motion_vectors.Sample(g_wrap_sampler, uv).a;
+    float alpha = lerp(g_motion_vectors.Sample(g_wrap_sampler, uvA).a,
+                       g_motion_vectors.Sample(g_wrap_sampler, uvB).a,
+                       frame_frac_time);
     
-    return float4(color, alpha) * input.tint;
+    float scene_depth = g_depth_buffer.Load(int3(input.posCS.xy, 0)).r;
+    float particle_fading = saturate((input.posCS.z - scene_depth) / input.size.z);
+       
+    return float4(color, alpha * particle_fading) * input.tint;
 }

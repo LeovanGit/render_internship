@@ -21,7 +21,6 @@ void Texture::bind(uint32_t slot)
 {
     Globals * globals = Globals::getInstance();
 
-    // bind texture to fragment shader
     globals->device_context4->PSSetShaderResources(slot,
                                                    1,
                                                    texture_view.get());

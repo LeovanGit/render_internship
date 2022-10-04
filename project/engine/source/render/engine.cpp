@@ -6,8 +6,8 @@ void Engine::init()
 {
     // INIT SINGLETONS
     Globals::init();
-    ShaderManager::init(); // depends on Globals
-    TextureManager::init(); // depends on Globals
+    ShaderManager::init();
+    TextureManager::init();
     ModelManager::init();
     MeshSystem::init();
     LightSystem::init();

@@ -22,12 +22,13 @@ public:
     static ParticleSystem * getInstance();
     
     static void del();
-
+    
     void addSmokeEmitter(const SmokeEmitter & smoke_emitter);
 
     void updateInstanceBuffer(const Camera & camera);
     void render(float delta_time,
-                const Camera & camera);
+                const Camera & camera,
+                DxResPtr<ID3D11ShaderResourceView> depth_srv_not_ms);
 
     // move them to Emitter class for different textures:
     std::shared_ptr<Shader> shader;
@@ -39,6 +40,8 @@ private:
     ParticleSystem() = default;
     ~ParticleSystem() = default;
 
+    static ParticleSystem * instance;
+    
     struct GPUInstance
     {
         GPUInstance(const glm::vec3 & posWS,
@@ -59,12 +62,10 @@ private:
         glm::vec4 tint;
         float lifetime;
     };
-    
-    static ParticleSystem * instance;
-
-    std::vector<SmokeEmitter> smoke_emitters;
 
     VertexBuffer<GPUInstance> instance_buffer;
+    
+    std::vector<SmokeEmitter> smoke_emitters;
 };
 } // namespace engine
 

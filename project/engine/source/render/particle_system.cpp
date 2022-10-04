@@ -1,5 +1,10 @@
 #include "particle_system.hpp"
 
+namespace
+{
+constexpr uint32_t MSAA_SAMPLES_COUNT = 4;
+} // namespace
+
 namespace engine
 {
 ParticleSystem * ParticleSystem::instance = nullptr;
@@ -70,7 +75,8 @@ void ParticleSystem::updateInstanceBuffer(const Camera & camera)
 }
 
 void ParticleSystem::render(float delta_time,
-                            const Camera & camera)
+                            const Camera & camera,
+                            DxResPtr<ID3D11ShaderResourceView> depth_srv_not_ms)
 {       
     for (auto & smoke_emitter : smoke_emitters)
         smoke_emitter.update(delta_time);
@@ -91,13 +97,16 @@ void ParticleSystem::render(float delta_time,
     
     lightmap_RLT->bind(8);
     lightmap_BotBF->bind(9);
-    motion_vectors->bind(10);    
+    motion_vectors->bind(10);
+
+    globals->device_context4->PSSetShaderResources(11,
+                                                   1,
+                                                   depth_srv_not_ms.get());
     
     globals->device_context4->DrawInstanced(6,
                                             instance_buffer.get_size(),
                                             0,
                                             0);
 }
-
 } // namespace engine
 

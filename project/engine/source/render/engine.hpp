@@ -9,6 +9,7 @@
 #include "light_system.hpp"
 #include "transform_system.hpp"
 #include "particle_system.hpp"
+#include "window.hpp"
 
 namespace engine
 {

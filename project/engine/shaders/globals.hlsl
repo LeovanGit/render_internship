@@ -35,7 +35,9 @@ cbuffer PerFrame : register(b0)
     int2 g_particles_atlas_size;
 
     int g_samples_count;
-    int3 padding_per_frame_0;
+
+    int2 g_screen_size;
+    int padding_per_frame_0;
     
     row_major float4x4 g_light_proj_view[24]; // 4 cubemaps
 };
@@ -43,13 +45,15 @@ cbuffer PerFrame : register(b0)
 cbuffer PerView : register(b4)
 {
     row_major float4x4 g_proj_view;
+    row_major float4x4 g_proj_view_inv;
     row_major float4x4 g_view;
     row_major float4x4 g_view_inv;
     row_major float4x4 g_proj;
+    row_major float4x4 g_proj_inv;
     float3 g_camera_position;
     float g_EV_100;
     // 0 - bottom_left, 1 - top_left, 2 - bottom_right
-    float4 g_frustum_corners[3];   
+    float4 g_frustum_corners[3];
 };
 
 #endif

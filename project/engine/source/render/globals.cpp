@@ -274,7 +274,8 @@ void Globals::initPerFrameBuffer()
 void Globals::setPerFrameBuffer(int g_reflection_mips_count,
                                 int g_shadow_map_size,
                                 const glm::vec<2, int> & g_particles_atlas_size,
-                                int g_samples_count)
+                                int g_samples_count,
+                                const glm::vec<2, int> & g_screen_size)
 {
     LightSystem * light_system = LightSystem::getInstance();
     TransformSystem * trans_system = TransformSystem::getInstance();
@@ -283,6 +284,7 @@ void Globals::setPerFrameBuffer(int g_reflection_mips_count,
     per_frame_buffer_data.g_shadow_map_size = g_shadow_map_size;
     per_frame_buffer_data.g_particles_atlas_size = g_particles_atlas_size;
     per_frame_buffer_data.g_samples_count = g_samples_count;
+    per_frame_buffer_data.g_screen_size = g_screen_size;
 
     auto & point_lights = light_system->getPointLights();
     for (uint32_t size = point_lights.size(), i = 0; i != size; ++i)
@@ -382,9 +384,11 @@ void Globals::setPerViewBuffer(const Camera & camera,
 
     // fill const buffer data
     per_view_buffer_data.g_proj_view = camera.getViewProj();
+    per_view_buffer_data.g_proj_view_inv = camera.getViewProjInv();
     per_view_buffer_data.g_view = camera.getView();
     per_view_buffer_data.g_view_inv = camera.getViewInv();
     per_view_buffer_data.g_proj = camera.getProj();
+    per_view_buffer_data.g_proj_inv = camera.getProjInv();
     per_view_buffer_data.g_camera_pos = camera.getPosition();
     per_view_buffer_data.g_EV_100 = EV_100;
     per_view_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);

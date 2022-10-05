@@ -48,7 +48,9 @@ struct PerFrameBufferData
     glm::vec<2, int> g_particles_atlas_size;
 
     int g_samples_count;
-    glm::vec<3, int> padding_0;
+
+    glm::vec<2, int> g_screen_size;
+    int padding_0;
     
     glm::mat4 g_light_proj_view[24]; // 4 cubemaps
 };
@@ -56,9 +58,11 @@ struct PerFrameBufferData
 struct PerViewBufferData
 {
     glm::mat4 g_proj_view;
+    glm::mat4 g_proj_view_inv;
     glm::mat4 g_view;
     glm::mat4 g_view_inv;
     glm::mat4 g_proj;
+    glm::mat4 g_proj_inv;
     glm::vec3 g_camera_pos;
     float g_EV_100;
     glm::vec4 g_frustum_corners[3];
@@ -127,7 +131,8 @@ public:
     void setPerFrameBuffer(int g_reflection_mips_count,
                            int g_shadow_map_size,
                            const glm::vec<2, int> & g_particles_atlas_size,
-                           int g_samples_count);
+                           int g_samples_count,
+                           const glm::vec<2, int> & g_screen_size);
     void updatePerFrameBuffer();
 
     void initPerViewBuffer();

@@ -3,7 +3,7 @@
 namespace
 {
 constexpr float PARTICLE_INIT_SIZE = 1.0f;
-constexpr float PARTICLE_INIT_THICKNESS = 0.004f; // contact fading range
+constexpr float PARTICLE_INIT_THICKNESS = 3.0f; // contact fading range
 } // namespace
 
 namespace engine

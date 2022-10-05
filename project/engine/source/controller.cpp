@@ -752,16 +752,6 @@ void Controller::initParticleEmitters()
                              1.0f,
                              0.025f,
                              0.1f));
-
-    // particle_sys->addSmokeEmitter(
-    //     engine::SmokeEmitter(glm::vec3(80.0f, -7.5f, -30.0f),
-    //                          10.0f,
-    //                          glm::vec3(0.86f, 0.47f, 0.0f),
-    //                          0.25f,
-    //                          0.2f,
-    //                          1.0f,
-    //                          0.2f,
-    //                          0.1f));
 }
 
 void Controller::processInput(Camera & camera,

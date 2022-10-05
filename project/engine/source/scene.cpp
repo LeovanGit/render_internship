@@ -29,10 +29,15 @@ void Scene::renderFrame(windows::Window & window,
 {
     Globals * globals = Globals::getInstance();
 
+    RECT client_size = window.getClientSize();
+    int width = client_size.right - client_size.left;
+    int height = client_size.bottom - client_size.top;
+    
     globals->setPerFrameBuffer(REFLECTION_MIPS_COUNT,
                                SHADOW_MAP_SIZE,
                                PARTICLES_ATLAS_SIZE,
-                               MSAA_SAMPLES_COUNT);
+                               MSAA_SAMPLES_COUNT,
+                               glm::vec<2, int>(width, height));
     globals->updatePerFrameBuffer();
 
     globals->setPerViewBuffer(camera,

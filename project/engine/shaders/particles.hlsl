@@ -36,8 +36,8 @@ static const float g_MV_SCALE = 0.001f;
 PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
                       VS_INPUT input)
 {
-    float3 posVS = mul(float4(input.posWS, 1.0f), g_view).xyz;
-    float half_size = input.size.x / 2.0f;
+    float4 posVS = mul(float4(input.posWS, 1.0f), g_view);
+    float half_size = input.size.x / 2.0f;    
     
     float sina;
     float cosa;
@@ -65,10 +65,12 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
                           {1.0f, 0.0f},
                           {1.0f, 1.0f},
                           {0.0f, 1.0f}};
+
+    float4 posWS_h = mul(float4(vertexVS[vertex_index], posVS.z, 1.0f), g_view_inv);
     
     PS_INPUT output;
     output.posCS = mul(float4(vertexVS[vertex_index], posVS.z, 1.0f), g_proj);
-    output.posWS = mul(float4(vertexVS[vertex_index], posVS.z, 1.0f), g_view_inv).xyz;
+    output.posWS = posWS_h.xyz / posWS_h.w;
     output.uv = vertexUV[vertex_index];
     output.tint = input.tint;
     output.lifetime = input.lifetime;
@@ -76,11 +78,11 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
     output.right = mul(float4(right, 0.0, 0.0f), g_view_inv).xyz;
     output.up = mul(float4(up, -1.0f, 0.0f), g_view_inv).xyz;
     output.size = input.size;
-
+    
     return output;
 }
 
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 // FRAGMENT SHADER
 //------------------------------------------------------------------------------
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
@@ -133,7 +135,14 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
                        frame_frac_time);
     
     float scene_depth = g_depth_buffer.Load(int3(input.posCS.xy, 0)).r;
-    float particle_fading = saturate((input.posCS.z - scene_depth) / input.size.z);
-       
+
+    float2 scene_posCS = float2((input.posCS.x / g_screen_size.x) * 2.0f - 1.0f,
+                                1.0f - 2.0f * (input.posCS.y / g_screen_size.y));
+    
+    float4 scene_posWS_h = mul(float4(scene_posCS, scene_depth, 1.0f), g_proj_view_inv);
+    float3 scene_posWS = scene_posWS_h.xyz / scene_posWS_h.w;
+    
+    float particle_fading = saturate(length(scene_posWS - input.posWS) / input.size.z);
+
     return float4(color, alpha * particle_fading) * input.tint;
 }

@@ -91,6 +91,11 @@ const glm::mat4 & Camera::getProj() const
     return proj_matrix;
 }
 
+const glm::mat4 & Camera::getProjInv() const
+{
+    return proj_matrix_inv;
+}
+
 void Camera::setWorldPosition(const glm::vec3 & position)
 {
     view_matrix_inv[3][0] = position.x;

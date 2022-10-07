@@ -20,6 +20,8 @@
 #include "emissive_instances.hpp"
 #include "post_process.hpp"
 #include "particle_system.hpp"
+#include "engine.hpp"
+#include "time_system.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -41,6 +43,7 @@ constexpr int KEY_RMOUSE = 2;
 
 typedef engine::OpaqueInstances oi;
 typedef engine::EmissiveInstances ei;
+typedef engine::DissolutionInstances di;
 
 class Controller
 {
@@ -85,6 +88,7 @@ public:
 
 private:
     void initKnight(const math::Transform & transform);
+    void spawnKnight(const math::Transform & transform);
 
     void initWall(const math::Transform & transform);
 

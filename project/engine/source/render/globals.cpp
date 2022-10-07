@@ -285,6 +285,7 @@ void Globals::setPerFrameBuffer(int g_reflection_mips_count,
     per_frame_buffer_data.g_particles_atlas_size = g_particles_atlas_size;
     per_frame_buffer_data.g_samples_count = g_samples_count;
     per_frame_buffer_data.g_screen_size = g_screen_size;
+    per_frame_buffer_data.g_time = TimeSystem::getTimePoint();
 
     auto & point_lights = light_system->getPointLights();
     for (uint32_t size = point_lights.size(), i = 0; i != size; ++i)

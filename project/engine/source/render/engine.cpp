@@ -3,7 +3,7 @@
 namespace engine
 {
 void Engine::init()
-{
+{    
     // INIT SINGLETONS
     Globals::init();
     ShaderManager::init();
@@ -13,6 +13,8 @@ void Engine::init()
     LightSystem::init();
     TransformSystem::init();
     ParticleSystem::init();
+
+    TimeSystem::init();
 }
 
 void Engine::del()

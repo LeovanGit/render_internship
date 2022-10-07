@@ -118,11 +118,104 @@ void Controller::initKnight(const math::Transform & transform)
     };
 
     uint32_t transform_id = trans_system->transforms.insert(transform);
-    
+
     mesh_system->addInstance<engine::OpaqueInstances>(
         model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
         materials,
         transform_id);
+}
+
+void Controller::spawnKnight(const math::Transform & transform)
+{    
+    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
+
+    std::vector<di::Material> materials =
+    {
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Normal.dds"),
+                     true,
+                     true,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.95f,
+                     0.0f),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Normal.dds")),
+
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Normal.dds")),
+
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Head_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Normal.dds"),
+                     true,
+                     false,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.95f,
+                     0.0f),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Eye_BaseColor.dds"),
+                     nullptr,
+                     nullptr,
+                     nullptr,
+                     true,
+                     false,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.1f,
+                     0.0f),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Normal.dds"),
+                     true,
+                     true),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Normal.dds"),
+                     true,
+                     true,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.95f,
+                     0.0f),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Normal.dds"),
+                     true,
+                     true,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.95f,
+                     0.0f),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Normal.dds")),
+    };
+
+    uint32_t transform_id = trans_system->transforms.insert(transform);
+    float spawn_time = engine::TimeSystem::getTimePoint();
+
+    di::Instance instance(transform_id, spawn_time);
+    
+    mesh_system->addInstance<engine::DissolutionInstances>(
+        model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
+        materials,
+        instance);
 }
 
 void Controller::initWall(const math::Transform & transform)
@@ -494,6 +587,89 @@ void Controller::initShaders()
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
     };
+
+    D3D11_INPUT_ELEMENT_DESC ied_dissolve[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         0,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TEXCOORD",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         0,
+         12, // 3 floats of 4 bytes
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"NORMAL",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         20,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         32,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"BITANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         44,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+        
+        {"TRANSFORM",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         0, // reset align for instance data!
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         1,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         16,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         2,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         32,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         3,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         48,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"SPAWN_TIME",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         64,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
     
     mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
                                                   ied_opaque,
@@ -506,7 +682,10 @@ void Controller::initShaders()
                                                   5,
                                                   true,
                                                   true,
-                                                  false));
+                                                  false),
+                            shader_mgr->getShader("../engine/shaders/dissolve.hlsl",
+                                                  ied_dissolve,
+                                                  10));
 
     scene->depth_copy_shader = shader_mgr->getShader("../engine/shaders/copy_ms_depth.hlsl");
 
@@ -566,7 +745,8 @@ void Controller::initTextures()
     
     mesh_system->setTextures(tex_mgr->getTexture("../engine/assets/environment/reflectance.dds"),
                              tex_mgr->getTexture("../engine/assets/environment/irradiance.dds"),
-                             tex_mgr->getTexture("../engine/assets/environment/reflection.dds"));
+                             tex_mgr->getTexture("../engine/assets/environment/reflection.dds"),
+                             tex_mgr->getTexture("../engine/assets/dissolve.dds"));
 }
 
 void Controller::initSceneObjects()
@@ -899,9 +1079,9 @@ void Controller::processInput(Camera & camera,
                              30.0f * camera.getForward() +
                              glm::vec3(0.0f, -10.0f, 0.0f);
         
-        initKnight(math::Transform(position,
-                                   math::EulerAngles(0.0f, 0.0f, 0.0f),
-                                   glm::vec3(10.0f, 10.0f, 10.0f)));
+        spawnKnight(math::Transform(position,
+                                    math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                    glm::vec3(10.0f, 10.0f, 10.0f)));
     }
 }
 

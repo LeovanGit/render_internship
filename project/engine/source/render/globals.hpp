@@ -17,6 +17,7 @@
 #include "camera.hpp"
 #include "light_system.hpp"
 #include "transform_system.hpp"
+#include "time_system.hpp"
 
 #include "win_undef.hpp"
 
@@ -46,11 +47,9 @@ struct PerFrameBufferData
     int g_reflection_mips_count;
     int g_shadow_map_size;
     glm::vec<2, int> g_particles_atlas_size;
-
     int g_samples_count;
-
     glm::vec<2, int> g_screen_size;
-    int padding_0;
+    float g_time;
     
     glm::mat4 g_light_proj_view[24]; // 4 cubemaps
 };

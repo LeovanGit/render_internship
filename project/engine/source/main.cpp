@@ -52,7 +52,6 @@ bool frameTimeElapsed()
 {
     using namespace std::chrono;
 
-
     duration<float> elapsed_time = steady_clock::now() - start_time;
         
     if (elapsed_time.count() >= FRAME_DURATION)

@@ -25,6 +25,7 @@ struct PS_INPUT
     float3 pos_WS : POSITION;
     float3 normal : NORMAL;
     float3 radiance : RADIANCE;
+    float4x4 transform : TRANSFORM;
 };
 
 //------------------------------------------------------------------------------
@@ -44,9 +45,9 @@ PS_INPUT vertexShader(VS_INPUT input)
     PS_INPUT output;
     output.pos_CS = pos_CS;
     output.pos_WS = pos_WS.xyz;
-    
     output.normal = input.normal;
     output.radiance = input.radiance.xyz;
+    output.transform = transform;
 
     return output;
 }
@@ -56,7 +57,10 @@ PS_INPUT vertexShader(VS_INPUT input)
 //------------------------------------------------------------------------------
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
-    float3 N = normalize(input.normal);
+    float3 N = input.normal;
+    N = normalize(mul(float4(N, 0.0f), g_mesh_to_model).xyz);
+    N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
+    
     float3 V = normalize(g_camera_position - input.pos_WS);
     float NV = max(dot(N, V), 0.001f);
 
@@ -64,7 +68,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
                                                 max(input.radiance.y,
                                                     max(input.radiance.z, 1.0)));
 
-    float3 color = lerp(radiance_norm, input.radiance, pow(NV, 6));
+    float3 color = lerp(radiance_norm, input.radiance, pow(NV, 6));    
     
     return float4(color, 1.0f);
 }

@@ -33,7 +33,8 @@ constexpr int KEY_E = 69;
 constexpr int KEY_PLUS = 187;
 constexpr int KEY_MINUS = 189;
 constexpr int KEY_R = 82;
-constexpr int KEY_G = 71;
+constexpr int KEY_T = 84;
+constexpr int KEY_N = 78;
 constexpr int KEY_SHIFT = 16;
 constexpr int KEY_LMOUSE = 1;
 constexpr int KEY_RMOUSE = 2;
@@ -67,8 +68,10 @@ public:
     bool keys_log[KEYS_COUNT];
     bool was_released[KEYS_COUNT];
 
-    glm::vec3 movement_speed = glm::vec3(5.0f);
-    glm::vec3 rotation_speed = glm::vec3(360.0f, 360.0f, 60.0f);
+    glm::vec3 camera_movement_speed = glm::vec3(5.0f);
+    glm::vec3 camera_rotation_speed = glm::vec3(360.0f, 360.0f, 60.0f);
+
+    math::EulerAngles object_rotation_speed = math::EulerAngles(10.0f, 0.0f, 0.0f);
 
     bool is_accelerated;
 

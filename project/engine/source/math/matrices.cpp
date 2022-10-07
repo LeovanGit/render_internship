@@ -1,20 +1,17 @@
 #include "matrices.hpp"
 #include "euler_angles.hpp"
 
-math::Transform::Transform(const glm::vec3 & position,
-                           const EulerAngles & angles,
-                           const glm::vec3 & scale) :
-                           position(position),
-                           scale(scale)                   
+namespace math
 {
-    math::Basis basis(glm::vec3(1.0f, 0, 0),
-                      glm::vec3(0, 1.0f, 0),
-                      glm::vec3(0, 0, 1.0f));
+Transform::Transform(const glm::vec3 & position,
+                     const EulerAngles & angles,
+                     const glm::vec3 & scale) :
+                     position(position),
+                     rotation(quatFromEuler(angles, Basis())),
+                     scale(scale)
+{}
 
-    rotation = math::quatFromEuler(angles, basis);
-}
-
-glm::mat4 math::Transform::toMat4() const
+glm::mat4 Transform::toMat4() const
 {
     // glm is column-major!!!
     glm::mat4 translation(1.0f,       0,          0,          0,
@@ -30,3 +27,4 @@ glm::mat4 math::Transform::toMat4() const
     // scale -> rotate -> translate
     return translation * glm::mat4_cast(rotation) * scaling;
 }
+} // namespace math

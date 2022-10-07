@@ -213,8 +213,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	case WM_MOUSEWHEEL:
         {
             float wheel_delta = GET_WHEEL_DELTA_WPARAM(wParam);
-            if (wheel_delta >= 0) controller.movement_speed *= 1.1f;
-            else controller.movement_speed /= 1.1f;
+            if (wheel_delta >= 0) controller.camera_movement_speed *= 1.1f;
+            else controller.camera_movement_speed /= 1.1f;
             break;
         }
         break;

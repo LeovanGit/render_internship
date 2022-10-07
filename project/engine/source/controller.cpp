@@ -759,45 +759,48 @@ void Controller::processInput(Camera & camera,
                               const float delta_time,
                               const engine::windows::Window & win)
 {
+    engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    
     RECT client_area = win.getClientSize();
     int width = client_area.right - client_area.left;
     int height = client_area.bottom - client_area.top;
 
     if (keys_log[KEY_W])
     {
-        glm::vec3 offset = camera.getForward() * movement_speed * delta_time;
+        glm::vec3 offset = camera.getForward() * camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_S])
     {
-        glm::vec3 offset = camera.getForward() * -movement_speed * delta_time;
+        glm::vec3 offset = camera.getForward() * -camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_D])
     {
-        glm::vec3 offset = camera.getRight() * movement_speed * delta_time;
+        glm::vec3 offset = camera.getRight() * camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_A])
     {
-        glm::vec3 offset = camera.getRight() * -movement_speed * delta_time;
+        glm::vec3 offset = camera.getRight() * -camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_Q])
     {
-        glm::vec3 offset = camera.getUp() * -movement_speed * delta_time;
+        glm::vec3 offset = camera.getUp() * -camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_E])
     {
-        glm::vec3 offset = camera.getUp() * movement_speed * delta_time;
+        glm::vec3 offset = camera.getUp() * camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_SHIFT])
     {
         if (!is_accelerated)
         {
-            movement_speed *= 5.0f;
+            camera_movement_speed *= 5.0f;
             is_accelerated = true;
         }
     }
@@ -805,7 +808,7 @@ void Controller::processInput(Camera & camera,
     {
         if(is_accelerated)
         {
-            movement_speed /= 5.0f;
+            camera_movement_speed /= 5.0f;
             is_accelerated = false;
         }
     }
@@ -815,8 +818,8 @@ void Controller::processInput(Camera & camera,
         
         // delta_fixed_mouse normalized
         glm::vec2 speed(0);
-        speed.x = (delta_mouse.y / float(height)) * rotation_speed.x;
-        speed.y = (delta_mouse.x / float(width)) * rotation_speed.y;
+        speed.x = (delta_mouse.y / float(height)) * camera_rotation_speed.x;
+        speed.y = (delta_mouse.x / float(width)) * camera_rotation_speed.y;
 
         math::EulerAngles euler(speed.y * delta_time,
                                 speed.x * delta_time,
@@ -826,9 +829,6 @@ void Controller::processInput(Camera & camera,
     }
     if (keys_log[KEY_RMOUSE])
     {        
-        engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
-        engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
-        
         camera.updateMatrices();
 
         glm::vec2 xy;
@@ -878,6 +878,30 @@ void Controller::processInput(Camera & camera,
     if (keys_log[KEY_MINUS])
     {
         post_process.EV_100 -= 2.0f * delta_time;
+    }
+    if (keys_log[KEY_R] && object.is_grabbed)
+    {
+        auto & transform = trans_system->transforms[object.transform_id];
+        transform.rotation *= math::quatFromEuler(object_rotation_speed,
+                                                  math::Basis());
+    }
+    else if (keys_log[KEY_T] && object.is_grabbed)
+    {
+        auto & transform = trans_system->transforms[object.transform_id];
+        transform.rotation *= math::quatFromEuler(-object_rotation_speed,
+                                                  math::Basis());
+    }
+    if (keys_log[KEY_N] && was_released[KEY_N])
+    {
+        was_released[KEY_N] = false;
+        
+        glm::vec3 position = camera.getPosition() +
+                             30.0f * camera.getForward() +
+                             glm::vec3(0.0f, -10.0f, 0.0f);
+        
+        initKnight(math::Transform(position,
+                                   math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                   glm::vec3(10.0f, 10.0f, 10.0f)));
     }
 }
 

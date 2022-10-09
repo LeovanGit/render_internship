@@ -32,7 +32,8 @@ void DissolutionInstances::updateInstanceBuffers()
                     dst[copied_count++] = GPUInstance(
                         trans_system->
                             transforms[per_material.instances[i].transform_id].toMat4(),
-                        per_material.instances[i].spawn_time);
+                        per_material.instances[i].spawn_time,
+                        per_material.instances[i].animation_time);
                 }
             }
         }

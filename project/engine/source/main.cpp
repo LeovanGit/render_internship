@@ -122,6 +122,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
             controller.processInput(camera, post_process, delta_time, win);
             camera.updateMatrices();
+            controller.moveDissolutionToOpaqueInstances();
             controller.scene->renderFrame(win, camera, post_process, delta_time);
         }
     }

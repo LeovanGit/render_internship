@@ -1,21 +1,26 @@
 #include "time_system.hpp"
 
+namespace
+{
+using namespace std::chrono;
+} // namespace
+
 namespace engine
 {
-std::chrono::steady_clock::time_point TimeSystem::init_time;
+steady_clock::time_point TimeSystem::init_time;
 
 void TimeSystem::init()
 {    
-    init_time = std::chrono::steady_clock::now();
+    init_time = steady_clock::now();
 }
 
-const std::chrono::steady_clock::time_point & TimeSystem::getInitTime()
+const steady_clock::time_point & TimeSystem::getInitTime()
 {
     return init_time;
 }
 
 float TimeSystem::getTimePoint()
 {
-    return (std::chrono::steady_clock::now() - init_time).count();
+    return duration_cast<milliseconds>(steady_clock::now() - init_time).count();
 }
 } // namespace engine

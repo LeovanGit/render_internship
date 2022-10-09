@@ -210,7 +210,9 @@ void Controller::spawnKnight(const math::Transform & transform)
     uint32_t transform_id = trans_system->transforms.insert(transform);
     float spawn_time = engine::TimeSystem::getTimePoint();
 
-    di::Instance instance(transform_id, spawn_time);
+    di::Instance instance(transform_id,
+                          spawn_time,
+                          3000.0f);
     
     mesh_system->addInstance<engine::DissolutionInstances>(
         model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
@@ -669,6 +671,14 @@ void Controller::initShaders()
          64,
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
+
+        {"ANIMATION_TIME",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         68,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
     };
     
     mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
@@ -685,7 +695,7 @@ void Controller::initShaders()
                                                   false),
                             shader_mgr->getShader("../engine/shaders/dissolve.hlsl",
                                                   ied_dissolve,
-                                                  10));
+                                                  11));
 
     scene->depth_copy_shader = shader_mgr->getShader("../engine/shaders/copy_ms_depth.hlsl");
 
@@ -932,6 +942,61 @@ void Controller::initParticleEmitters()
                              1.0f,
                              0.025f,
                              0.1f));
+}
+
+void Controller::moveDissolutionToOpaqueInstances()
+{
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
+    float engine_time = engine::TimeSystem::getTimePoint();
+
+    for (auto & per_model : mesh_system->dissolution_instances.per_model)
+    {
+        bool should_move = false;
+        std::vector<oi::Material> materials;
+        uint32_t transform_id;
+        
+        for (auto & per_mesh : per_model.per_mesh)
+        {
+            for (auto & per_material : per_mesh.per_material)
+            {
+                auto & instance = per_material.instances;
+                
+                for (int i = 0; i != instance.size(); ++i)
+                {
+                    if (engine_time - instance[i].spawn_time > instance[i].animation_time)
+                    {
+                        should_move = true;
+
+                        // Dissolve Material -> Opaque Material
+                        auto & material = per_material.material;
+                        materials.push_back(oi::Material(material.albedo,
+                                                         material.roughness,
+                                                         material.metalness,
+                                                         material.normal,
+                                                         material.is_directx_style_normal_map,
+                                                         material.is_double_sided,
+                                                         material.albedo_default,
+                                                         material.roughness_default,
+                                                         material.metalness_default));
+
+                        transform_id = instance[i].transform_id;
+                                                
+                        instance.erase(instance.begin() + i--);
+                    }
+                }
+            }
+        }
+
+        if (should_move)
+        {
+            mesh_system->addInstance<engine::OpaqueInstances>(per_model.model,
+                                                              materials,
+                                                              transform_id);
+        }
+    }
+    
+    mesh_system->dissolution_instances.updateInstanceBuffers();
 }
 
 void Controller::processInput(Camera & camera,

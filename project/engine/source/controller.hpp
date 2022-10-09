@@ -57,6 +57,8 @@ public:
 
     void initPostprocess();
 
+    void moveDissolutionToOpaqueInstances();
+    
     void processInput(Camera & camera,
                       engine::Postprocess & post_process, 
                       const float delta_time,

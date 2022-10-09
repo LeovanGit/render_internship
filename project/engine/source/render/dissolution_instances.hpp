@@ -19,13 +19,16 @@ private:
     struct GPUInstance
     {
         GPUInstance(const glm::mat4 & transform,
-                    float spawn_time) :
+                    float spawn_time,
+                    float animation_time) :
                     transform(transform),
-                    spawn_time(spawn_time)
+                    spawn_time(spawn_time),
+                    animation_time(animation_time)
         {}
         
         glm::mat4 transform;
         float spawn_time;
+        float animation_time; // in ms
     };
 
 public:
@@ -33,13 +36,16 @@ public:
     {
         Instance() = default;
         Instance(uint32_t transform_id,
-                 float spawn_time) :
+                 float spawn_time,
+                 float animation_time) :
                  transform_id(transform_id),
-                 spawn_time(spawn_time)
+                 spawn_time(spawn_time),
+                 animation_time(animation_time)
         {}
         
         uint32_t transform_id;
         float spawn_time;
+        float animation_time;
     };    
     
     struct Material

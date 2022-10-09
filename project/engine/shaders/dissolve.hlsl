@@ -32,6 +32,7 @@ struct VS_INPUT
     float4 transform_3 : TRANSFORM3;
 
     float spawn_time : SPAWN_TIME;
+    float animation_time : ANIMATION_TIME;
 };
 
 struct PS_INPUT
@@ -43,6 +44,9 @@ struct PS_INPUT
     float3 tangent : TANGENT;
     float3 bitangent : BITANGENT;
     float4x4 transform : TRANSFORM;
+
+    float spawn_time : SPAWN_TIME;
+    float animation_time : ANIMATION_TIME;
 };
 
 Texture2D g_albedo : register(t0);
@@ -51,6 +55,9 @@ Texture2D g_metalness : register(t2);
 Texture2D g_normal : register(t3);
 
 Texture2D g_dissolve : register(t13);
+
+static const float4 g_BORDER_COLOR = float4(2.0f, 0.0f, 0.0f, 1.0f);
+static const float g_BORDER_THRESHOLD = 0.01f;
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -78,6 +85,9 @@ PS_INPUT vertexShader(VS_INPUT input)
                                                       -input.bitangent;
 
     output.transform = transform;
+    
+    output.spawn_time = input.spawn_time;
+    output.animation_time = input.animation_time;
 
     return output;
 }
@@ -95,6 +105,22 @@ struct Material
 
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
+    float alpha = g_dissolve.Sample(g_wrap_sampler, input.uv).r;
+    float threshold = (g_time - input.spawn_time) / input.animation_time;
+    
+    if (alpha > threshold)
+    {
+        if ((alpha - threshold) < g_BORDER_THRESHOLD)
+        {
+            return g_BORDER_COLOR;
+        }
+        else
+        {
+            discard;
+            return g_BORDER_COLOR;
+        }      
+    }
+    
     float3x3 TBN = float3x3(input.tangent,
                             input.bitangent,
                             input.normal);

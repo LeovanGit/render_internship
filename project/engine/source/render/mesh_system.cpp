@@ -71,6 +71,9 @@ void MeshSystem::renderShadowCubeMaps(int cubemaps_count)
     
     shadow_shader->bind();
     opaque_instances.renderWithoutMaterials(cubemaps_count);
+
+    // uncomment if you want shadows from dissolve instances
+    //dissolution_instances.renderWithoutMaterials(cubemaps_count);
 }
 
 bool MeshSystem::findIntersection(const math::Ray & ray_ws,

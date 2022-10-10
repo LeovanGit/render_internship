@@ -240,19 +240,36 @@ void Globals::initBlendStates()
     result = device->CreateBlendState(&translucent_blend_desc,
                                       translucent_blend_state.reset());
     assert(result >= 0 && "CreateBlendState");
+
+    D3D11_BLEND_DESC dissolve_blend_desc;
+    ZeroMemory(&dissolve_blend_desc, sizeof(dissolve_blend_desc));
+    dissolve_blend_desc.AlphaToCoverageEnable = true;
+    dissolve_blend_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    result = device->CreateBlendState(&dissolve_blend_desc,
+                                      dissolve_blend_state.reset());
+    assert(result >= 0 && "CreateBlendState");
 }
 
-void Globals::bindBlendState(bool is_translucent)
+void Globals::bindDefaultBlendState()
 {
-    if (is_translucent)
-        device_context4->OMSetBlendState(translucent_blend_state.ptr(),
-                                         nullptr,
-                                         0xffffffff);
-    else
-        // default
-        device_context4->OMSetBlendState(nullptr,
-                                         nullptr,
-                                         0xffffffff);
+    device_context4->OMSetBlendState(nullptr,
+                                     nullptr,
+                                     0xffffffff);
+}
+
+void Globals::bindTranslucentBlendState()
+{
+    device_context4->OMSetBlendState(translucent_blend_state.ptr(),
+                                     nullptr,
+                                     0xffffffff);
+}
+
+void Globals::bindDissolveBlendState()
+{
+    device_context4->OMSetBlendState(dissolve_blend_state.ptr(),
+                                     nullptr,
+                                     0xffffffff);
 }
 
 void Globals::initPerFrameBuffer()

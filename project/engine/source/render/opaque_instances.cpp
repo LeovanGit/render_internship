@@ -47,6 +47,8 @@ void OpaqueInstances::render()
     Globals * globals = Globals::getInstance();
     LightSystem * light_sys = LightSystem::getInstance();
 
+    globals->bindDefaultBlendState();
+    
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -116,6 +118,8 @@ void OpaqueInstances::renderWithoutMaterials(int cubemaps_count)
 
     Globals * globals = Globals::getInstance();
 
+    globals->bindDefaultBlendState();
+    
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 

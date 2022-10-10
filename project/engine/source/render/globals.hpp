@@ -124,7 +124,14 @@ public:
     void bindRasterizer(bool is_double_sided = false);
 
     void initBlendStates();
-    void bindBlendState(bool is_translucent = false);
+    void bindDefaultBlendState();
+    void bindTranslucentBlendState();
+    void bindDissolveBlendState();
+    
+    void bindBlendState(bool is_translucent = false,
+                        bool is_dissolve = false);
+
+    
 
     void initPerFrameBuffer();
     void setPerFrameBuffer(int g_reflection_mips_count,
@@ -194,6 +201,7 @@ public:
     DxResPtr<ID3D11RasterizerState> double_sided_rasterizer;
 
     DxResPtr<ID3D11BlendState> translucent_blend_state;
+    DxResPtr<ID3D11BlendState> dissolve_blend_state;
 
 private:
     Globals() = default;

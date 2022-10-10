@@ -87,10 +87,12 @@ void ParticleSystem::render(float delta_time,
 
     Globals * globals = Globals::getInstance();
 
+    globals->bindTranslucentBlendState();
+    
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    globals->bindBlendState(true);
+    globals->bindTranslucentBlendState();
 
     shader->bind();
     instance_buffer.bind(1);

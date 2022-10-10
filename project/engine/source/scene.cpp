@@ -45,9 +45,8 @@ void Scene::renderFrame(windows::Window & window,
     globals->updatePerViewBuffer();
     
     globals->bindSamplers();
-    globals->bindBlendState();
 
-    renderShadows();    
+    renderShadows();
     renderSceneObjects(window);
     sky.render();
     renderParticles(delta_time, camera);
@@ -241,9 +240,12 @@ void Scene::renderSceneObjects(windows::Window & window)
 
 void Scene::renderShadows()
 {
+    Globals * globals = Globals::getInstance();
     LightSystem * light_system = LightSystem::getInstance();
     MeshSystem * mesh_system = MeshSystem::getInstance();
 
+    globals->bindDefaultBlendState();
+    
     light_system->bindSquareViewport();
 
     light_system->bindShadowMap();
@@ -255,6 +257,7 @@ void Scene::renderShadows()
 void Scene::renderParticles(float delta_time,
                             const Camera & camera)
 {
+    Globals * globals = Globals::getInstance();
     engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
     
     copyDepthBuffer();

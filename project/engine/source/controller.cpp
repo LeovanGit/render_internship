@@ -950,50 +950,59 @@ void Controller::moveDissolutionToOpaqueInstances()
     engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
     float engine_time = engine::TimeSystem::getTimePoint();
 
-    for (auto & per_model : mesh_system->dissolution_instances.per_model)
+    auto & per_model = mesh_system->dissolution_instances.per_model;
+    for (uint32_t model = 0; model != per_model.size(); ++model)
     {
         bool should_move = false;
         std::vector<oi::Material> materials;
         uint32_t transform_id;
-        
-        for (auto & per_mesh : per_model.per_mesh)
+
+        auto & per_mesh = per_model[model].per_mesh;
+        for (uint32_t mesh = 0; mesh != per_mesh.size(); ++mesh)
         {
-            for (auto & per_material : per_mesh.per_material)
+            auto & per_material = per_mesh[mesh].per_material;
+            for (uint32_t material = 0; material != per_material.size(); ++material)
             {
-                auto & instance = per_material.instances;
-                
-                for (int i = 0; i != instance.size(); ++i)
+                auto & instances = per_material[material].instances;
+                for (uint32_t i = 0; i != instances.size(); ++i)
                 {
-                    if (engine_time - instance[i].spawn_time > instance[i].animation_time)
+                    if (engine_time - instances[i].spawn_time > instances[i].animation_time)
                     {
                         should_move = true;
 
                         // Dissolve Material -> Opaque Material
-                        auto & material = per_material.material;
-                        materials.push_back(oi::Material(material.albedo,
-                                                         material.roughness,
-                                                         material.metalness,
-                                                         material.normal,
-                                                         material.is_directx_style_normal_map,
-                                                         material.is_double_sided,
-                                                         material.albedo_default,
-                                                         material.roughness_default,
-                                                         material.metalness_default));
+                        auto & mat = per_material[material].material;
+                        materials.push_back(oi::Material(mat.albedo,
+                                                         mat.roughness,
+                                                         mat.metalness,
+                                                         mat.normal,
+                                                         mat.is_directx_style_normal_map,
+                                                         mat.is_double_sided,
+                                                         mat.albedo_default,
+                                                         mat.roughness_default,
+                                                         mat.metalness_default));
 
-                        transform_id = instance[i].transform_id;
-                                                
-                        instance.erase(instance.begin() + i--);
+                        transform_id = instances[i].transform_id;
+
+                        instances.erase(instances.begin() + i--);
                     }
                 }
+                if (instances.size() == 0)
+                    per_material.erase(per_material.begin() + material--);
             }
+            if (per_material.size() == 0)
+                per_mesh.erase(per_mesh.begin() + mesh--);
         }
 
         if (should_move)
         {
-            mesh_system->addInstance<engine::OpaqueInstances>(per_model.model,
+            mesh_system->addInstance<engine::OpaqueInstances>(per_model[model].model,
                                                               materials,
                                                               transform_id);
         }
+        
+        if (per_mesh.size() == 0)
+            per_model.erase(per_model.begin() + model--);
     }
     
     mesh_system->dissolution_instances.updateInstanceBuffers();

@@ -56,8 +56,8 @@ Texture2D g_normal : register(t3);
 
 Texture2D g_dissolve : register(t13);
 
-static const float4 g_BORDER_COLOR = float4(2.0f, 0.0f, 0.0f, 1.0f);
-static const float g_BORDER_THRESHOLD = 0.01f;
+static const float4 g_EMISSIVE_COLOR = float4(30.0f, 0.0f, 0.0f, 1.0f);
+static const float g_EMISSIVE_THRESHOLD = 0.02f;
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -110,15 +110,27 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     
     if (alpha > threshold)
     {
-        if ((alpha - threshold) < g_BORDER_THRESHOLD)
+        float delta = alpha - threshold;
+        if (delta < g_EMISSIVE_THRESHOLD)
         {
-            return g_BORDER_COLOR;
+            // [0; g_EMISSIVE_THRESHOLD] -> [0; 1]
+            delta *= (1.0f / g_EMISSIVE_THRESHOLD);
+
+            // convert range using power func to get dull edges of emissive border
+            // size of dull edges depends on power
+            // attention: only even powers!!!
+            delta = -pow((2.0f * delta - 1.0f), 2.0f) + 1.0f;
+            
+            float denom = max(g_EMISSIVE_COLOR.x,
+                              max(g_EMISSIVE_COLOR.y,
+                                  max(g_EMISSIVE_COLOR.z, 1.0f)));
+            float4 g_emissive_color_norm = float4(g_EMISSIVE_COLOR.rgb / denom, 1.0f);
+            
+            return lerp(g_emissive_color_norm,
+                        g_EMISSIVE_COLOR,
+                        delta);
         }
-        else
-        {
-            discard;
-            return g_BORDER_COLOR;
-        }      
+        else return float4(0.0f, 0.0f, 0.0f, 0.0f);
     }
     
     float3x3 TBN = float3x3(input.tangent,

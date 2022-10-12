@@ -57,7 +57,7 @@ Texture2D g_normal : register(t3);
 Texture2D g_dissolve : register(t13);
 
 static const float4 g_EMISSIVE_COLOR = float4(30.0f, 0.0f, 0.0f, 1.0f);
-static const float g_EMISSIVE_THRESHOLD = 0.02f;
+static const float g_EMISSIVE_THRESHOLD = 0.04f;
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -109,7 +109,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     float threshold = (g_time - input.spawn_time) / input.animation_time;
     
     if (alpha > threshold)
-    {
+    {        
         float delta = alpha - threshold;
         if (delta < g_EMISSIVE_THRESHOLD)
         {
@@ -125,7 +125,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
                               max(g_EMISSIVE_COLOR.y,
                                   max(g_EMISSIVE_COLOR.z, 1.0f)));
             float4 g_emissive_color_norm = float4(g_EMISSIVE_COLOR.rgb / denom, 1.0f);
-            
+
             return lerp(g_emissive_color_norm,
                         g_EMISSIVE_COLOR,
                         delta);

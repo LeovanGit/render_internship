@@ -22,6 +22,7 @@
 #include "particle_system.hpp"
 #include "engine.hpp"
 #include "time_system.hpp"
+#include "grass_system.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -118,6 +119,7 @@ private:
     void initTextures();
     void initSceneObjects();
     void initParticleEmitters();
+    void initGrassFields();
 };
 
 #endif

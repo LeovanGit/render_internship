@@ -11,6 +11,7 @@
 #include "sky.hpp"
 #include "mesh_system.hpp"
 #include "particle_system.hpp"
+#include "grass_system.hpp"
 
 namespace engine
 {
@@ -66,6 +67,7 @@ private:
     void renderShadows();
     void renderParticles(float delta_time,
                          const Camera & camera);
+    void renderGrass();
 
     void initDepthBufferMS(int width, int height);
     void initDepthBufferMSCopy(int width, int height);

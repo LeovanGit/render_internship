@@ -90,7 +90,10 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/particle.hpp
                    engine/source/render/smoke_emitter.hpp
                    engine/source/render/particle_system.hpp
-                   engine/source/render/time_system.hpp)
+                   engine/source/render/time_system.hpp
+                   engine/source/render/grass.hpp
+                   engine/source/render/grass_field.hpp
+                   engine/source/render/grass_system.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/globals.cpp
@@ -113,7 +116,10 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/particle.cpp
                    engine/source/render/smoke_emitter.cpp
                    engine/source/render/particle_system.cpp
-                   engine/source/render/time_system.cpp)
+                   engine/source/render/time_system.cpp
+                   engine/source/render/grass.cpp
+                   engine/source/render/grass_field.cpp
+                   engine/source/render/grass_system.cpp)
 
 source_group("Header Files/source/render" FILES ${RENDER_HEADERS})
 source_group("Source Files/source/render" FILES ${RENDER_SOURCES})
@@ -127,13 +133,15 @@ set(MATH_HEADERS engine/source/math/matrices.hpp
                  engine/source/math/solid_vector.hpp
                  engine/source/math/triangle_octree.hpp
                  engine/source/math/ray.hpp
-                 engine/source/math/mesh_intersection.hpp)
+                 engine/source/math/mesh_intersection.hpp
+                 engine/source/math/random.hpp)
 
 set(MATH_SOURCES engine/source/math/matrices.cpp
                  engine/source/math/euler_angles.cpp
                  engine/source/math/matrices.cpp
                  engine/source/math/triangle_octree.cpp
-                 engine/source/math/ray.cpp)
+                 engine/source/math/ray.cpp
+                 engine/source/math/random.cpp)
 
 source_group("Header Files/source/math" FILES ${MATH_HEADERS})
 source_group("Source Files/source/math" FILES ${MATH_SOURCES})

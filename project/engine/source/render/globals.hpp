@@ -126,7 +126,7 @@ public:
     void initBlendStates();
     void bindDefaultBlendState();
     void bindTranslucentBlendState();
-    void bindDissolveBlendState();
+    void bindA2CBlendState();
     
     void bindBlendState(bool is_translucent = false,
                         bool is_dissolve = false);
@@ -201,7 +201,7 @@ public:
     DxResPtr<ID3D11RasterizerState> double_sided_rasterizer;
 
     DxResPtr<ID3D11BlendState> translucent_blend_state;
-    DxResPtr<ID3D11BlendState> dissolve_blend_state;
+    DxResPtr<ID3D11BlendState> a2c_blend_state;
 
 private:
     Globals() = default;

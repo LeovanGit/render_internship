@@ -44,22 +44,13 @@ bool SmokeEmitter::spawnTimeElapsed()
     return false;    
 }
 
-float SmokeEmitter::randomFromRange(float min, float max)
-{
-    std::random_device random_device;
-    std::mt19937 mersenne_random(random_device());
-    
-    std::uniform_real_distribution<float> distribution(min, max);
-    return distribution(random_device);
-}
-
 void SmokeEmitter::spawnParticle()
-{    
-    glm::vec3 pos = glm::vec3(randomFromRange(position.x - radius, position.x + radius),
+{
+    glm::vec3 pos = glm::vec3(math::randomFromRange(position.x - radius, position.x + radius),
                               position.y,
-                              randomFromRange(position.z - radius, position.z + radius));
+                              math::randomFromRange(position.z - radius, position.z + radius));
 
-    float angle = randomFromRange(0.0f, 2 * math::PI);
+    float angle = math::randomFromRange(0.0f, 2 * math::PI);
     
     particles.push_back(Particle(pos,
                                  glm::vec2(PARTICLE_INIT_SIZE),

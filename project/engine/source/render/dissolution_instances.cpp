@@ -49,7 +49,7 @@ void DissolutionInstances::render()
     Globals * globals = Globals::getInstance();
     LightSystem * light_sys = LightSystem::getInstance();
 
-    globals->bindDissolveBlendState();
+    globals->bindA2CBlendState();
     
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -122,7 +122,7 @@ void DissolutionInstances::renderWithoutMaterials(int cubemaps_count)
 
     Globals * globals = Globals::getInstance();
 
-    globals->bindDissolveBlendState();
+    globals->bindA2CBlendState();
     
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

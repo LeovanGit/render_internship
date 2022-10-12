@@ -11,6 +11,7 @@
 #include "particle_system.hpp"
 #include "window.hpp"
 #include "time_system.hpp"
+#include "grass_system.hpp"
 
 namespace engine
 {

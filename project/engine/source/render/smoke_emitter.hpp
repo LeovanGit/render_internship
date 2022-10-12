@@ -4,12 +4,12 @@
 #include "glm.hpp"
 #include <vector>
 #include <chrono>
-#include <random>
 
 #include "particle.hpp"
 #include "texture_manager.hpp"
 #include "shader_manager.hpp"
 #include "constants.hpp"
+#include "random.hpp"
 
 namespace engine
 {
@@ -45,7 +45,6 @@ private:
     float disappear_speed;
     
     bool spawnTimeElapsed();
-    float randomFromRange(float min, float max);
 
     void spawnParticle();
     

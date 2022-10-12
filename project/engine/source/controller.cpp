@@ -26,6 +26,7 @@ void Controller::initScene(Camera & camera)
     initTextures();
     initSceneObjects();
     initParticleEmitters();
+    initGrassFields();
 }
 
 void Controller::initPostprocess()
@@ -404,6 +405,7 @@ void Controller::initShaders()
     engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
+    engine::GrassSystem * grass_sys = engine::GrassSystem::getInstance();
     
     D3D11_INPUT_ELEMENT_DESC ied_opaque[] =
     {
@@ -746,6 +748,30 @@ void Controller::initShaders()
         shader_mgr->getShader("../engine/shaders/particles.hlsl",
                               ied_particles,
                               5);
+
+    D3D11_INPUT_ELEMENT_DESC ied_grass[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         0,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"SIZE",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         1,
+         12,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
+
+    grass_sys->shader =
+        shader_mgr->getShader("../engine/shaders/grass.hlsl",
+                              ied_grass,
+                              2);
 }
 
 void Controller::initTextures()
@@ -942,6 +968,23 @@ void Controller::initParticleEmitters()
                              1.0f,
                              0.025f,
                              0.1f));
+}
+
+void Controller::initGrassFields()
+{
+    engine::GrassSystem * grass_sys = engine::GrassSystem::getInstance();
+    engine::TextureManager * texture_mgr = engine::TextureManager::getInstance();
+
+    grass_sys->albedo = texture_mgr->
+        getTexture("../engine/assets/grass/albedo.dds");
+
+    grass_sys->opacity = texture_mgr->
+        getTexture("../engine/assets/grass/opacity.dds");
+    
+    grass_sys->addGrassField(
+        engine::GrassField(glm::vec3(60.0f, -10.0f, 0.0f),
+                           glm::vec2(40.0f, 40.0f),
+                           40));
 }
 
 void Controller::moveDissolutionToOpaqueInstances()

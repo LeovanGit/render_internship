@@ -241,13 +241,13 @@ void Globals::initBlendStates()
                                       translucent_blend_state.reset());
     assert(result >= 0 && "CreateBlendState");
 
-    D3D11_BLEND_DESC dissolve_blend_desc;
-    ZeroMemory(&dissolve_blend_desc, sizeof(dissolve_blend_desc));
-    dissolve_blend_desc.AlphaToCoverageEnable = true;
-    dissolve_blend_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    D3D11_BLEND_DESC a2c_blend_desc;
+    ZeroMemory(&a2c_blend_desc, sizeof(a2c_blend_desc));
+    a2c_blend_desc.AlphaToCoverageEnable = true;
+    a2c_blend_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-    result = device->CreateBlendState(&dissolve_blend_desc,
-                                      dissolve_blend_state.reset());
+    result = device->CreateBlendState(&a2c_blend_desc,
+                                      a2c_blend_state.reset());
     assert(result >= 0 && "CreateBlendState");
 }
 
@@ -265,9 +265,9 @@ void Globals::bindTranslucentBlendState()
                                      0xffffffff);
 }
 
-void Globals::bindDissolveBlendState()
+void Globals::bindA2CBlendState()
 {
-    device_context4->OMSetBlendState(dissolve_blend_state.ptr(),
+    device_context4->OMSetBlendState(a2c_blend_state.ptr(),
                                      nullptr,
                                      0xffffffff);
 }

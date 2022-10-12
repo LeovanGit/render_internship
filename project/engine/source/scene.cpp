@@ -48,6 +48,7 @@ void Scene::renderFrame(windows::Window & window,
 
     renderShadows();
     renderSceneObjects(window);
+    renderGrass();
     sky.render();
     renderParticles(delta_time, camera);
     
@@ -269,6 +270,13 @@ void Scene::renderParticles(float delta_time,
     particle_sys->render(delta_time, camera, depth_srv_not_ms);
 
     changeDepthBufferAccess(false);
+}
+
+void Scene::renderGrass()
+{
+    engine::GrassSystem * grass_system = engine::GrassSystem::getInstance();
+
+    grass_system->render();
 }
 
 void Scene::initDepthBufferMS(int width, int height)

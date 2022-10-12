@@ -116,6 +116,15 @@ float3 calculateEnvironment(float3 albedo,
     return diffuse + specular;
 }
 
+// ignore specular IBL
+float3 calculateEnvironment(float3 albedo,
+                            float metalness,
+                            float3 N)
+{   
+    return albedo * (1.0f - metalness) * g_irradiance.SampleLevel(g_clamp_sampler, N, 0);
+}
+
+
 // G
 float ggxSmith(float roughness_sqr,
                float NL,
@@ -323,6 +332,38 @@ float3 calculateLighting(float3 albedo,
     return color;
 }
 
+float3 calculateGrassLighting(float3 albedo,
+                              float roughness,
+                              float metalness,
+                              float3 fresnel,
+                              float3 N,
+                              float3 GN,
+                              float3 V,
+                              float3 pos_WS)
+{
+    float3 color = 0.0f;
+    color += calculateDirectionalLights(albedo,
+                                        roughness,
+                                        metalness,
+                                        fresnel,
+                                        N,
+                                        V);
+    
+    color += calculatePointLights(albedo,
+                                  roughness,
+                                  metalness,
+                                  fresnel,
+                                  N,
+                                  GN,
+                                  V,
+                                  pos_WS);
+
+    color += calculateEnvironment(albedo,
+                                  metalness,
+                                  N);
+    
+    return color;
+}
 //------------------------------------------------------------------------------
 // LIGHTMAPS LIGHTING
 //------------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 
 namespace
 {
-constexpr float MIN_GRASS_SIZE = 10.0f;
+constexpr float MIN_GRASS_SIZE = 4.0f;
 constexpr float MAX_GRASS_SIZE = 10.0f;
 } // namespace 
 

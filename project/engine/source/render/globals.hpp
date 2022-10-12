@@ -163,7 +163,11 @@ public:
     void updatePerEmissiveMeshBuffer();
     
     void initPerShadowMeshBuffer();
-    void setPerShadowMeshBuffer(const glm::mat4 & g_mesh_to_model);
+    void setPerShadowMeshBuffer(const glm::mat4 & g_mesh_to_model =
+                                    glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+                                              0.0f, 1.0f, 0.0f, 0.0f,
+                                              0.0f, 0.0f, 1.0f, 0.0f,
+                                              0.0f, 0.0f, 0.0f, 1.0f));
     void updatePerShadowMeshBuffer();
 
     void initPerShadowCubemapBuffer();

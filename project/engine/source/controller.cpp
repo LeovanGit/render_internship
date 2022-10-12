@@ -345,16 +345,32 @@ void Controller::initFloor(const std::vector<oi::Material> & materials)
                               math::EulerAngles(0.0f, 90.0f, 0.0f),
                               glm::vec3(25.0f)),
               materials);
+}
 
-    initPlane(math::Transform(glm::vec3(75.0f, -10.0f, -25.0f),
+void Controller::initSwamp(const std::vector<oi::Material> & materials)
+{
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    
+    initPlane(math::Transform(glm::vec3(125.0f, -10.0f, -25.0f),
                               math::EulerAngles(0.0f, 90.0f, 0.0f),
                               glm::vec3(25.0f)),
               materials);
               
-    initPlane(math::Transform(glm::vec3(75.0f, -10.0f, 25.0f),
+    initPlane(math::Transform(glm::vec3(75.0f, -10.0f, -25.0f),
                               math::EulerAngles(0.0f, 90.0f, 0.0f),
                               glm::vec3(25.0f)),
               materials);
+    
+    initPlane(math::Transform(glm::vec3(125.0f, -10.0f, 25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);
+    
+    initPlane(math::Transform(glm::vec3(75.0f, -10.0f, 25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);    
 }
 
 void Controller::initDirectionalLight(const glm::vec3 & radiance,
@@ -824,6 +840,15 @@ void Controller::initSceneObjects()
                   tex_mgr->getTexture("../engine/assets/floor/tile_normal.dds"),
                   true,
                   true)});
+
+    initSwamp(std::vector<oi::Material>{oi::Material(
+                tex_mgr->getTexture("../engine/assets/swamp/albedo.dds"),
+                tex_mgr->getTexture("../engine/assets/swamp/roughness.dds"),
+                tex_mgr->getTexture("../engine/assets/swamp/metallic.dds"),
+                tex_mgr->getTexture("../engine/assets/swamp/normal.dds"),
+                true,
+                true)});
+
     
     initSphere(math::Transform(glm::vec3(-13.0f, -6.0f, 42.0f),
                                math::EulerAngles(0.0f, 0.0f, 0.0f),
@@ -938,7 +963,7 @@ void Controller::initParticleEmitters()
     
     // red
     particle_sys->addSmokeEmitter(
-        engine::SmokeEmitter(glm::vec3(80.0f, -13.0f, 30.0f),
+        engine::SmokeEmitter(glm::vec3(120.0f, -13.0f, 30.0f),
                              0.5f,
                              glm::vec3(1.0f, 0.0f, 0.0f),
                              0.1f,
@@ -949,7 +974,7 @@ void Controller::initParticleEmitters()
 
     // white
     particle_sys->addSmokeEmitter(
-        engine::SmokeEmitter(glm::vec3(80.0f, -12.0f, 0.0f),
+        engine::SmokeEmitter(glm::vec3(120.0f, -12.0f, 0.0f),
                              3.0f,
                              glm::vec3(1.0f, 1.0f, 1.0f),
                              0.25f,
@@ -960,7 +985,7 @@ void Controller::initParticleEmitters()
 
     // yellow
     particle_sys->addSmokeEmitter(
-        engine::SmokeEmitter(glm::vec3(80.0f, -7.5f, -30.0f),
+        engine::SmokeEmitter(glm::vec3(120.0f, -7.5f, -30.0f),
                              10.0f,
                              glm::vec3(0.86f, 0.47f, 0.0f),
                              0.25f,
@@ -980,11 +1005,22 @@ void Controller::initGrassFields()
 
     grass_sys->opacity = texture_mgr->
         getTexture("../engine/assets/grass/opacity.dds");
+
+    grass_sys->roughness = texture_mgr->
+        getTexture("../engine/assets/grass/roughness.dds");
+
+    grass_sys->normal = texture_mgr->
+        getTexture("../engine/assets/grass/normal.dds");
     
+    // grass_sys->addGrassField(
+    //     engine::GrassField(glm::vec3(70.0f, -10.0f, -5.0f),
+    //                        glm::vec2(30.0f, 80.0f),
+    //                        200));
+
     grass_sys->addGrassField(
-        engine::GrassField(glm::vec3(60.0f, -10.0f, 0.0f),
-                           glm::vec2(40.0f, 40.0f),
-                           40));
+        engine::GrassField(glm::vec3(70.0f, -10.0f, -5.0f),
+                           glm::vec2(10.0f, 10.0f),
+                           3));
 }
 
 void Controller::moveDissolutionToOpaqueInstances()

@@ -28,11 +28,14 @@ public:
 
     void updateInstanceBuffer();
     void render();
+    void renderWithoutMaterials(int cubemaps_count);
 
     // move them to GrassField class for different grass:
     std::shared_ptr<Shader> shader;
     std::shared_ptr<Texture> albedo;
     std::shared_ptr<Texture> opacity;
+    std::shared_ptr<Texture> roughness;
+    std::shared_ptr<Texture> normal;
     
 private:
     GrassSystem() = default;

@@ -62,9 +62,6 @@ void GrassSystem::render()
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
-
-    //globals->bindTranslucentBlendState();
-    globals->bindDefaultBlendState();
     
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -77,10 +74,44 @@ void GrassSystem::render()
     
     albedo->bind(0);
     opacity->bind(1);
+    roughness->bind(2);
+    normal->bind(3);
 
     globals->device_context4->DrawInstanced(18,
                                             instance_buffer.get_size(),
                                             0,
                                             0);
+}
+
+void GrassSystem::renderWithoutMaterials(int cubemaps_count)
+{
+    updateInstanceBuffer();
+
+    if (instance_buffer.get_size() == 0) return;
+
+    Globals * globals = Globals::getInstance();
+    
+    globals->device_context4->
+        IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    globals->bindA2CBlendState();
+    globals->bindRasterizer(true);
+
+    instance_buffer.bind(1);
+    // bind special shadow shader for grass
+
+    globals->setPerShadowMeshBuffer();
+    globals->updatePerShadowMeshBuffer();
+
+    for (int cubemap_index = 0; cubemap_index != cubemaps_count; ++cubemap_index)
+    {
+        globals->setPerShadowCubemapBuffer(cubemap_index);
+        globals->updatePerShadowCubemapBuffer();
+                    
+        globals->device_context4->DrawInstanced(18,
+                                                instance_buffer.get_size(),
+                                                0,
+                                                0);
+    }
 }
 } // namespace engine

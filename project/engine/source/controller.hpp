@@ -105,6 +105,8 @@ private:
                     const std::vector<oi::Material> & materials);
 
     void initFloor(const std::vector<oi::Material> & materials);
+
+    void initSwamp(const std::vector<oi::Material> & materials);
     
     void initDirectionalLight(const glm::vec3 & radiance,
                               const glm::vec3 & direction,

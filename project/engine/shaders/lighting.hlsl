@@ -129,7 +129,7 @@ float3 calculateSurfaceLightTransmission(float3 posWS,
                                          float3 N,
                                          float3 transmittance_color)
 {
-    float transmittion = 0.0f;
+    float3 transmittion = 0.0f;
     
     for (uint i = 0; i != g_POINT_LIGHTS_COUNT; ++i)
     {

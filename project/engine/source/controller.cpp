@@ -1029,6 +1029,10 @@ void Controller::initGrassFields()
     grass_sys->addGrassField(
         engine::GrassField(glm::vec3(75.0f, -10.5f, -5.0f),
                            glm::vec2(40.0f, 80.0f)));
+
+    // grass_sys->addGrassField(
+    //     engine::GrassField(glm::vec3(75.0f, -10.5f, -5.0f),
+    //                        glm::vec2(2.0f, 2.0f)));
 }
 
 void Controller::moveDissolutionToOpaqueInstances()

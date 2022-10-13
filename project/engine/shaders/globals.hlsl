@@ -7,6 +7,7 @@ SamplerComparisonState g_comparison_sampler : register(s2);
 
 static const float g_GAMMA = 2.2f;
 static const float g_PI = 3.14159265f;
+static const float g_EPSILON = 0.001f;
 static const float g_F0_DIELECTRIC = 0.04f;
 
 static const uint g_POINT_LIGHTS_COUNT = 4;

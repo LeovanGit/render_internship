@@ -106,9 +106,14 @@ void geometryShader(triangle GS_INPUT input[3],
 //------------------------------------------------------------------------------
 // FRAGMENT SHADER
 //------------------------------------------------------------------------------
-float4 fragmentShader(PS_INPUT input) : SV_TARGET
+float fragmentShader(PS_INPUT input) : SV_DEPTH
 {
     float opacity = g_grass_opacity.Sample(g_wrap_sampler, input.uv);
-    
-    return float4(0.0f, 0.0f, 0.0f, opacity);
+
+    if (abs(opacity) < g_EPSILON)
+    {
+        discard;
+        return 0.0f;
+    }
+    else return input.posCS.z;
 }

@@ -245,7 +245,7 @@ void Scene::renderShadows()
     LightSystem * light_system = LightSystem::getInstance();
     MeshSystem * mesh_system = MeshSystem::getInstance();
     GrassSystem * grass_system = GrassSystem::getInstance();
-
+    
     globals->bindDefaultBlendState();
     
     light_system->bindSquareViewport();

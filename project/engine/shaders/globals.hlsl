@@ -12,6 +12,8 @@ static const float g_F0_DIELECTRIC = 0.04f;
 static const uint g_POINT_LIGHTS_COUNT = 4;
 static const uint g_DIR_LIGHTS_COUNT = 1;
 
+static const float g_PLANES_PER_GRASS = 3;
+
 cbuffer PerFrame : register(b0)
 {
     struct

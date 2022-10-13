@@ -254,7 +254,7 @@ void Scene::renderShadows()
     light_system->clearShadowMap();
 
     mesh_system->renderShadowCubeMaps(SHADOW_CUBEMAPS_COUNT);
-    // grass_system->renderWithoutMaterials(SHADOW_CUBEMAPS_COUNT);
+    grass_system->renderWithoutMaterials(SHADOW_CUBEMAPS_COUNT);
 }
 
 void Scene::renderParticles(float delta_time,

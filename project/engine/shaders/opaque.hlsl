@@ -89,11 +89,12 @@ struct Material
     float3 fresnel;
 };
 
-float4 fragmentShader(PS_INPUT input) : SV_TARGET
+float4 fragmentShader(PS_INPUT input,
+                      bool is_front_face: SV_IsFrontFace) : SV_TARGET
 {
     float3x3 TBN = float3x3(input.tangent,
                             input.bitangent,
-                            input.normal);
+                            is_front_face ? input.normal : -input.normal);
     
     Material material;
 
@@ -114,7 +115,7 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     material.fresnel = lerp(g_F0_DIELECTRIC, material.albedo, material.metalness);
 
     // geometry normal
-    float3 GN = input.normal;
+    float3 GN = is_front_face ? input.normal : -input.normal;
     GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
     GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
 

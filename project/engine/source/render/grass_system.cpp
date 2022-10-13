@@ -76,6 +76,8 @@ void GrassSystem::render()
     opacity->bind(1);
     roughness->bind(2);
     normal->bind(3);
+    ambient_occlusion->bind(8);
+    translucency->bind(9);
 
     globals->device_context4->DrawInstanced(18,
                                             instance_buffer.get_size(),
@@ -97,8 +99,10 @@ void GrassSystem::renderWithoutMaterials(int cubemaps_count)
     globals->bindA2CBlendState();
     globals->bindRasterizer(true);
 
+    shadow_shader->bind();
     instance_buffer.bind(1);
-    // bind special shadow shader for grass
+
+    opacity->bind(0);
 
     globals->setPerShadowMeshBuffer();
     globals->updatePerShadowMeshBuffer();

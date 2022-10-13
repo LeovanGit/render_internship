@@ -36,6 +36,10 @@ public:
     std::shared_ptr<Texture> opacity;
     std::shared_ptr<Texture> roughness;
     std::shared_ptr<Texture> normal;
+    std::shared_ptr<Texture> ambient_occlusion;
+    std::shared_ptr<Texture> translucency;
+
+    std::shared_ptr<Shader> shadow_shader;
     
 private:
     GrassSystem() = default;

@@ -699,24 +699,6 @@ void Controller::initShaders()
          1},
     };
     
-    mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
-                                                  ied_opaque,
-                                                  9),
-                            shader_mgr->getShader("../engine/shaders/emissive.hlsl",
-                                                  ied_emissive,
-                                                  8),
-                            shader_mgr->getShader("../engine/shaders/shadow_cubemap.hlsl",
-                                                  ied_shadow_map,
-                                                  5,
-                                                  true,
-                                                  true,
-                                                  false),
-                            shader_mgr->getShader("../engine/shaders/dissolve.hlsl",
-                                                  ied_dissolve,
-                                                  11));
-
-    scene->depth_copy_shader = shader_mgr->getShader("../engine/shaders/copy_ms_depth.hlsl");
-
     D3D11_INPUT_ELEMENT_DESC ied_particles[] =
     {
         {"POSITION",
@@ -760,11 +742,6 @@ void Controller::initShaders()
          1},
     };
     
-    particle_sys->shader =
-        shader_mgr->getShader("../engine/shaders/particles.hlsl",
-                              ied_particles,
-                              5);
-
     D3D11_INPUT_ELEMENT_DESC ied_grass[] =
     {
         {"POSITION",
@@ -783,11 +760,42 @@ void Controller::initShaders()
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
     };
+        
+    mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
+                                                  ied_opaque,
+                                                  9),
+                            shader_mgr->getShader("../engine/shaders/emissive.hlsl",
+                                                  ied_emissive,
+                                                  8),
+                            shader_mgr->getShader("../engine/shaders/shadow_cubemap.hlsl",
+                                                  ied_shadow_map,
+                                                  5,
+                                                  true,
+                                                  true,
+                                                  false),
+                            shader_mgr->getShader("../engine/shaders/dissolve.hlsl",
+                                                  ied_dissolve,
+                                                  11));        
+
+    scene->depth_copy_shader = shader_mgr->getShader("../engine/shaders/copy_ms_depth.hlsl");
+
+    particle_sys->shader =
+        shader_mgr->getShader("../engine/shaders/particles.hlsl",
+                              ied_particles,
+                              5);
 
     grass_sys->shader =
         shader_mgr->getShader("../engine/shaders/grass.hlsl",
                               ied_grass,
                               2);
+
+    grass_sys->shadow_shader =
+        shader_mgr->getShader("../engine/shaders/grass_shadow_cubemap.hlsl",
+                              ied_grass,
+                              2,
+                              true,
+                              true,
+                              true);
 }
 
 void Controller::initTextures()
@@ -1011,15 +1019,21 @@ void Controller::initGrassFields()
 
     grass_sys->normal = texture_mgr->
         getTexture("../engine/assets/grass/normal.dds");
+
+    grass_sys->ambient_occlusion = texture_mgr->
+        getTexture("../engine/assets/grass/ao.dds");
+
+    grass_sys->translucency = texture_mgr->
+        getTexture("../engine/assets/grass/translucency.dds");
     
     // grass_sys->addGrassField(
-    //     engine::GrassField(glm::vec3(70.0f, -10.0f, -5.0f),
+    //     engine::GrassField(glm::vec3(70.0f, -10.5f, -5.0f),
     //                        glm::vec2(30.0f, 80.0f),
     //                        200));
 
     grass_sys->addGrassField(
-        engine::GrassField(glm::vec3(70.0f, -10.0f, -5.0f),
-                           glm::vec2(10.0f, 10.0f),
+        engine::GrassField(glm::vec3(70.0f, -10.5f, -5.0f),
+                           glm::vec2(3.0f, 3.0f),
                            3));
 }
 

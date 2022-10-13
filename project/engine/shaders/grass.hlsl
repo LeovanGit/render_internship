@@ -21,8 +21,8 @@ Texture2D<float3> g_grass_albedo : register(t0);
 Texture2D<float> g_grass_opacity : register(t1);
 Texture2D<float> g_grass_roughness : register(t2);
 Texture2D<float3> g_grass_normal : register(t3);
-
-static const float g_PLANES_PER_GRASS = 3;
+Texture2D<float> g_ambient_occlusion : register(t8);
+Texture2D<float3> g_grass_translucency : register(t9);
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -94,7 +94,7 @@ float4 fragmentShader(PS_INPUT input,
 {
     float3x3 TBN = float3x3(input.tangent,
                             input.bitangent,
-                            input.normal);
+                            is_front_face ? input.normal : -input.normal);
     
     Material material;
     
@@ -110,9 +110,10 @@ float4 fragmentShader(PS_INPUT input,
     float3 N = g_grass_normal.Sample(g_wrap_sampler, input.uv).rgb;
     N = 2.0f * N - 1.0f; // [0; 1] -> [-1; 1]
     N = normalize(mul(N, TBN));
-    N = is_front_face ? N : -N;
 
     float3 V = normalize(g_camera_position - input.posWS);
+
+    float3 transmittance_color = g_grass_translucency.Sample(g_wrap_sampler, input.uv);
     
     float3 color = calculateGrassLighting(material.albedo,
                                           material.roughness,
@@ -121,11 +122,11 @@ float4 fragmentShader(PS_INPUT input,
                                           N,
                                           GN,
                                           V,
-                                          input.posWS);
+                                          input.posWS,
+                                          transmittance_color);
 
+    float ao = g_ambient_occlusion.Sample(g_wrap_sampler, input.uv);
     float opacity = g_grass_opacity.Sample(g_wrap_sampler, input.uv);
-
-    return float4(color, opacity);
     
-    //return float4(material.albedo, opacity);
+    return float4(color * ao, opacity);
 }

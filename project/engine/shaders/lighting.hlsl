@@ -8,6 +8,7 @@ TextureCube g_reflection : register(t6);
 TextureCubeArray<float4> g_shadow_maps : register(t7);
 
 static const float g_DEPTH_OFFSET = 0.005f;
+static const float g_TRANSMITTANCE_POWER = 32.0f;
 
 uint calculateCubeMapFaceIndex(float3 dir)
 {
@@ -124,6 +125,52 @@ float3 calculateEnvironment(float3 albedo,
     return albedo * (1.0f - metalness) * g_irradiance.SampleLevel(g_clamp_sampler, N, 0);
 }
 
+float3 calculateSurfaceLightTransmission(float3 posWS,
+                                         float3 N,
+                                         float3 transmittance_color)
+{
+    float transmittion = 0.0f;
+    
+    for (uint i = 0; i != g_POINT_LIGHTS_COUNT; ++i)
+    {
+        float3 L = g_point_lights[i].position - posWS;
+        float3 L_norm = normalize(L);
+
+        float solid_angle = calculateSolidAngle(length(L),
+                                                g_point_lights[i].radius);
+        float NL = dot(N, L_norm);
+
+        // if light source is behind the surface
+        if (NL < 0.0f)
+        {
+            float shadow = calculateShadowCoefficient(posWS,
+                                                      N,
+                                                      L,
+                                                      g_point_lights[i].position,
+                                                      i);
+
+            transmittion += g_point_lights[i].radiance *
+                            transmittance_color *
+                            solid_angle *
+                            pow(-NL, g_TRANSMITTANCE_POWER) *
+                            shadow;
+        }
+    }
+
+    for (uint i = 0; i != g_DIR_LIGHTS_COUNT; ++i)
+    {
+        float3 L = -normalize(g_dir_lights[i].direction);
+        float NL = dot(N, L);
+
+        // if light source is behind the surface
+        if (NL < 0.0f) transmittion += g_dir_lights[i].radiance *
+                                    transmittance_color *
+                                    pow(-NL, g_TRANSMITTANCE_POWER) *
+                                    g_dir_lights[i].solid_angle;
+    }
+    
+    return transmittion;
+}
 
 // G
 float ggxSmith(float roughness_sqr,
@@ -339,7 +386,8 @@ float3 calculateGrassLighting(float3 albedo,
                               float3 N,
                               float3 GN,
                               float3 V,
-                              float3 pos_WS)
+                              float3 posWS,
+                              float3 transmittance_color)
 {
     float3 color = 0.0f;
     color += calculateDirectionalLights(albedo,
@@ -356,11 +404,15 @@ float3 calculateGrassLighting(float3 albedo,
                                   N,
                                   GN,
                                   V,
-                                  pos_WS);
+                                  posWS);
 
     color += calculateEnvironment(albedo,
                                   metalness,
                                   N);
+
+    color += calculateSurfaceLightTransmission(posWS,
+                                               N,
+                                               transmittance_color);
     
     return color;
 }

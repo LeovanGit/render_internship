@@ -41,7 +41,12 @@ set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/skybox.hlsl
             engine/shaders/resolve.hlsl
             engine/shaders/lighting.hlsl
-            engine/shaders/shadow_cubemap.hlsl)
+            engine/shaders/shadow_cubemap.hlsl
+            engine/shaders/copy_ms_depth.hlsl
+            engine/shaders/dissolve.hlsl
+            engine/shaders/grass.hlsl
+            engine/shaders/grass_shadow_cubemap.hlsl
+            engine/shaders/particles.hlsl)
 
 # does not participate in the compilation:
 set_source_files_properties(${SHADERS} PROPERTIES HEADER_FILE_ONLY TRUE)

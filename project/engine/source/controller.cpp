@@ -1026,15 +1026,9 @@ void Controller::initGrassFields()
     grass_sys->translucency = texture_mgr->
         getTexture("../engine/assets/grass/translucency.dds");
     
-    // grass_sys->addGrassField(
-    //     engine::GrassField(glm::vec3(70.0f, -10.5f, -5.0f),
-    //                        glm::vec2(30.0f, 80.0f),
-    //                        200));
-
     grass_sys->addGrassField(
-        engine::GrassField(glm::vec3(70.0f, -10.5f, -5.0f),
-                           glm::vec2(3.0f, 3.0f),
-                           3));
+        engine::GrassField(glm::vec3(75.0f, -10.5f, -5.0f),
+                           glm::vec2(40.0f, 80.0f)));
 }
 
 void Controller::moveDissolutionToOpaqueInstances()

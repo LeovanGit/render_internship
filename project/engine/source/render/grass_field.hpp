@@ -13,8 +13,7 @@ class GrassField
 {
 public:
     GrassField(const glm::vec3 & position,
-               const glm::vec2 & size,
-               uint32_t grass_count);
+               const glm::vec2 & size);
     
     glm::vec3 position;
     glm::vec2 size;
@@ -22,7 +21,7 @@ public:
     const std::vector<Grass> & getGrass() const;
     
 private:
-    void initGrass(uint32_t grass_count);
+    void initGrass();
 
     std::vector<Grass> grass;
 };

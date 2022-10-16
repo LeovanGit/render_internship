@@ -1,4 +1,5 @@
 #include "globals.hlsl"
+#include "math.hlsl"
 
 cbuffer PerEmissiveMesh : register(b2)
 {
@@ -57,17 +58,15 @@ PS_INPUT vertexShader(VS_INPUT input)
 //------------------------------------------------------------------------------
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
-    float3 N = input.normal;
+    float3 N = normalize(input.normal);
     N = normalize(mul(float4(N, 0.0f), g_mesh_to_model).xyz);
     N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
     
     float3 V = normalize(g_camera_position - input.pos_WS);
     float NV = max(dot(N, V), 0.001f);
 
-    float3 radiance_norm = input.radiance / max(input.radiance.x,
-                                                max(input.radiance.y,
-                                                    max(input.radiance.z, 1.0f)));
-
+    float3 radiance_norm = input.radiance / max3(input.radiance);
+    
     float3 color = lerp(radiance_norm, input.radiance, pow(NV, 6));    
     
     return float4(color, 1.0f);

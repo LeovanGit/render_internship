@@ -20,7 +20,7 @@ public:
     static float getTimePoint();
 
 private:
-    static std::chrono::steady_clock::time_point init_time;    
+    static std::chrono::steady_clock::time_point init_time;
 };
 } // namespace engine
 

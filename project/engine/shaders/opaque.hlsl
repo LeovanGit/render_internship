@@ -92,9 +92,15 @@ struct Material
 float4 fragmentShader(PS_INPUT input,
                       bool is_front_face: SV_IsFrontFace) : SV_TARGET
 {
+    // geometry normal
+    float3 GN = normalize(is_front_face ? input.normal : -input.normal);
+    
     float3x3 TBN = float3x3(input.tangent,
                             input.bitangent,
-                            is_front_face ? input.normal : -input.normal);
+                            GN);
+
+    GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
+    GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
     
     Material material;
 
@@ -114,11 +120,6 @@ float4 fragmentShader(PS_INPUT input,
     // use albedo as F0 for metals
     material.fresnel = lerp(g_F0_DIELECTRIC, material.albedo, material.metalness);
 
-    // geometry normal
-    float3 GN = is_front_face ? input.normal : -input.normal;
-    GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
-    GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
-
     // texture normal
     float3 N;
     if (g_has_normal_map)
@@ -126,10 +127,10 @@ float4 fragmentShader(PS_INPUT input,
         N = g_normal.Sample(g_wrap_sampler, input.uv).rgb;
         N = 2.0f * N - 1.0f; // [0; 1] -> [-1; 1]
         N = normalize(mul(N, TBN));
+        N = normalize(mul(float4(N, 0.0f), g_mesh_to_model).xyz);
+        N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
     }
-    else N = input.normal;
-    N = normalize(mul(float4(N, 0.0f), g_mesh_to_model).xyz);
-    N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
+    else N = GN;
     
     float3 V = normalize(g_camera_position - input.pos_WS);
     

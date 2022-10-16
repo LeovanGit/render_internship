@@ -46,7 +46,8 @@ set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/dissolve.hlsl
             engine/shaders/grass.hlsl
             engine/shaders/grass_shadow_cubemap.hlsl
-            engine/shaders/particles.hlsl)
+            engine/shaders/particles.hlsl
+            engine/shaders/math.hlsl)
 
 # does not participate in the compilation:
 set_source_files_properties(${SHADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -57,13 +58,15 @@ source_group("shaders" FILES ${SHADERS})
 set(HEADERS engine/source/controller.hpp
             engine/source/scene.hpp
             engine/source/camera.hpp
-            engine/source/transform_system.hpp)
+            engine/source/transform_system.hpp
+            engine/source/timer.hpp)
 
 set(SOURCES engine/source/controller.cpp
             engine/source/scene.cpp
             engine/source/camera.cpp
             engine/source/main.cpp
-            engine/source/transform_system.cpp)
+            engine/source/transform_system.cpp
+            engine/source/timer.cpp)
 
 source_group("Header Files/source" FILES ${HEADERS})
 source_group("Source Files/source" FILES ${SOURCES})

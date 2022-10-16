@@ -438,9 +438,9 @@ float3 calculateDirectionalLights(float3 right,
         float UL = dot(up, L_norm);
         float NL = dot(normal, L_norm);
 
-        color_i = color_i * (RL > 0 ? lightmap_RLT.r : lightmap_RLT.g) * abs(RL) +
-                  color_i * (UL > 0 ? lightmap_RLT.b : lightmap_BotBF.r) * abs(UL) +
-                  color_i * (NL > 0 ? lightmap_BotBF.b : lightmap_BotBF.g) * abs(NL);
+        color_i *= ((RL > 0 ? lightmap_RLT.r : lightmap_RLT.g) * abs(RL) +
+                    (UL > 0 ? lightmap_RLT.b : lightmap_BotBF.r) * abs(UL) +
+                    (NL > 0 ? lightmap_BotBF.b : lightmap_BotBF.g) * abs(NL));
 
         color += color_i;
     }

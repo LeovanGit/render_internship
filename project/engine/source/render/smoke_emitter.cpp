@@ -23,8 +23,7 @@ SmokeEmitter::SmokeEmitter(const glm::vec3 & position,
                            movement_speed(movement_speed),
                            resize_speed(resize_speed),
                            life_speed(life_speed),
-                           appear_lifetime_value(appear_lifetime_value),
-                           start_time(std::chrono::steady_clock::now())
+                           appear_lifetime_value(appear_lifetime_value)
 {
     this->appear_speed = life_speed / appear_lifetime_value;
     this->disappear_speed = life_speed / (1.0f - appear_lifetime_value);
@@ -32,16 +31,12 @@ SmokeEmitter::SmokeEmitter(const glm::vec3 & position,
 
 bool SmokeEmitter::spawnTimeElapsed()
 {
-    using namespace std::chrono;
-
-    duration<float> elapsed_time = steady_clock::now() - start_time;
-
-    if (elapsed_time.count() >= spawn_rate)
+    if (timer.getElapsedTime() >= spawn_rate)
     {
-        start_time = steady_clock::now();
+        timer.restart();
         return true;
     }
-    return false;    
+    return false;
 }
 
 void SmokeEmitter::spawnParticle()
@@ -50,7 +45,7 @@ void SmokeEmitter::spawnParticle()
                               position.y,
                               math::randomFromRange(position.z - radius, position.z + radius));
 
-    float angle = math::randomFromRange(0.0f, 2 * math::PI);
+    float angle = math::randomFromRange(0.0f, 2.0f * math::PI);
     
     particles.push_back(Particle(pos,
                                  glm::vec2(PARTICLE_INIT_SIZE),

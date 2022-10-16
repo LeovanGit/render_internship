@@ -3,13 +3,13 @@
 
 #include "glm.hpp"
 #include <vector>
-#include <chrono>
 
 #include "particle.hpp"
 #include "texture_manager.hpp"
 #include "shader_manager.hpp"
 #include "constants.hpp"
 #include "random.hpp"
+#include "timer.hpp"
 
 namespace engine
 {
@@ -50,7 +50,7 @@ private:
     
     std::vector<Particle> particles;
 
-    std::chrono::steady_clock::time_point start_time;
+    Timer timer;
 };
 } // namespace engine
 

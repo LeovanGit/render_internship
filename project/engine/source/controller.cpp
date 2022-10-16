@@ -775,7 +775,7 @@ void Controller::initShaders()
                                                   false),
                             shader_mgr->getShader("../engine/shaders/dissolve.hlsl",
                                                   ied_dissolve,
-                                                  11));        
+                                                  11));
 
     scene->depth_copy_shader = shader_mgr->getShader("../engine/shaders/copy_ms_depth.hlsl");
 

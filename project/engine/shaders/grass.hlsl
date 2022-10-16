@@ -1,5 +1,6 @@
 #include "globals.hlsl"
 #include "lighting.hlsl"
+#include "math.hlsl"
 
 struct VS_INPUT
 {
@@ -35,18 +36,8 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
     int plane_index = int(vertex_index / 6.0f);
 
     float angle = (1.0f / g_PLANES_PER_GRASS) * plane_index * g_PI;
-    float sina, cosa;
-    sincos(angle, sina, cosa);
-    
-    float4x4 rotate = float4x4(cosa, 0.0f, sina, 0.0f,
-                               0.0f, 1.0f, 0.0f, 0.0f,
-                               -sina, 0.0f, cosa, 0.0f,
-                               0.0f, 0.0f, 0.0f, 1.0f);
-
-    float4x4 translate = float4x4(1.0f, 0.0f, 0.0f, 0.0f,
-                                  0.0f, 1.0f, 0.0f, 0.0f,
-                                  0.0f, 0.0f, 1.0f, 0.0f,
-                                  input.posWS, 1.0f);   
+    float4x4 rotate = rotateY(angle);
+    float4x4 trans = translate(input.posWS);
     
     float3 planeMS[6] = {float3(-half_size.x, -half_size.y, 0.0f),
                          float3(-half_size.x, +half_size.y, 0.0f),
@@ -65,7 +56,7 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
                     {0.0f, 1.0f}};
 
     float4 posWS = mul(float4(planeMS[vertex_index % 6.0f], 1.0f), rotate);
-    posWS = mul(posWS, translate);
+    posWS = mul(posWS, trans);
 
     PS_INPUT output;
     output.posCS = mul(posWS, g_proj_view);
@@ -92,9 +83,12 @@ struct Material
 float4 fragmentShader(PS_INPUT input,
                       bool is_front_face : SV_IsFrontFace) : SV_TARGET
 {
+    // geometry normal
+    float3 GN = normalize(is_front_face ? input.normal : -input.normal);
+    
     float3x3 TBN = float3x3(input.tangent,
                             input.bitangent,
-                            is_front_face ? input.normal : -input.normal);
+                            GN);
     
     Material material;
     
@@ -102,10 +96,7 @@ float4 fragmentShader(PS_INPUT input,
     material.roughness = g_grass_roughness.Sample(g_wrap_sampler, input.uv);
     material.metalness = 0.0f;
     material.fresnel = g_F0_DIELECTRIC;
-
-    // geometry normal
-    float3 GN = is_front_face ? input.normal : -input.normal;
-
+    
     // texture normal
     float3 N = g_grass_normal.Sample(g_wrap_sampler, input.uv).rgb;
     N = 2.0f * N - 1.0f; // [0; 1] -> [-1; 1]

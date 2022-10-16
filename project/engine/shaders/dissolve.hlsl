@@ -1,5 +1,6 @@
 #include "globals.hlsl"
 #include "lighting.hlsl"
+#include "math.hlsl"
 
 cbuffer PerMesh : register(b1)
 {
@@ -103,7 +104,8 @@ struct Material
     float3 fresnel;
 };
 
-float4 fragmentShader(PS_INPUT input) : SV_TARGET
+float4 fragmentShader(PS_INPUT input,
+                      bool is_front_face : SV_IsFrontFace) : SV_TARGET
 {
     float alpha = g_dissolve.Sample(g_wrap_sampler, input.uv).r;
     float threshold = (g_time - input.spawn_time) / input.animation_time;
@@ -120,11 +122,9 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
             // size of dull edges depends on power
             // attention: only even powers!!!
             delta = -pow((2.0f * delta - 1.0f), 2.0f) + 1.0f;
-            
-            float denom = max(g_EMISSIVE_COLOR.x,
-                              max(g_EMISSIVE_COLOR.y,
-                                  max(g_EMISSIVE_COLOR.z, 1.0f)));
-            float4 g_emissive_color_norm = float4(g_EMISSIVE_COLOR.rgb / denom, 1.0f);
+
+            float4 g_emissive_color_norm = float4(g_EMISSIVE_COLOR.rgb /
+                                                  max3(g_EMISSIVE_COLOR), 1.0f);
 
             return lerp(g_emissive_color_norm,
                         g_EMISSIVE_COLOR,
@@ -132,10 +132,16 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
         }
         else return float4(0.0f, 0.0f, 0.0f, 0.0f);
     }
+
+    // geometry normal
+    float3 GN = normalize(is_front_face ? input.normal : -input.normal);
     
     float3x3 TBN = float3x3(input.tangent,
                             input.bitangent,
-                            input.normal);
+                            GN);
+
+    GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
+    GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
     
     Material material;
 
@@ -155,11 +161,6 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
     // use albedo as F0 for metals
     material.fresnel = lerp(g_F0_DIELECTRIC, material.albedo, material.metalness);
 
-    // geometry normal
-    float3 GN = input.normal;
-    GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
-    GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
-
     // texture normal
     float3 N;
     if (g_has_normal_map)
@@ -167,10 +168,10 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
         N = g_normal.Sample(g_wrap_sampler, input.uv).rgb;
         N = 2.0f * N - 1.0f; // [0; 1] -> [-1; 1]
         N = normalize(mul(N, TBN));
+        N = normalize(mul(float4(N, 0.0f), g_mesh_to_model).xyz);
+        N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
     }
-    else N = input.normal;
-    N = normalize(mul(float4(N, 0.0f), g_mesh_to_model).xyz);
-    N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
+    else N = GN;
     
     float3 V = normalize(g_camera_position - input.pos_WS);
     

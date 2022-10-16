@@ -6,7 +6,6 @@
 
 #include <windows.h>
 #include <windowsx.h>
-#include <chrono>
 #include <string>
 #include "glm.hpp"
 
@@ -16,6 +15,7 @@
 #include "controller.hpp"
 #include "scene.hpp"
 #include "engine.hpp"
+#include "timer.hpp"
 
 #include "win_undef.hpp"
 
@@ -45,20 +45,18 @@ LRESULT CALLBACK WindowProc(HWND hWnd,
                             WPARAM wParam,
                             LPARAM lParam);
 
-auto start_time = std::chrono::steady_clock::now();
-float delta_time = 0;
+engine::Timer timer;
+float delta_time = 0.0f;
 
 bool frameTimeElapsed()
 {
-    using namespace std::chrono;
-
-    duration<float> elapsed_time = steady_clock::now() - start_time;
-        
-    if (elapsed_time.count() >= FRAME_DURATION)
+    float elapsed_time = timer.getElapsedTime();
+    
+    if (elapsed_time >= FRAME_DURATION)
     {
-        delta_time = elapsed_time.count();
-
-        start_time = steady_clock::now();
+        timer.restart();
+        delta_time = elapsed_time;
+        
         return true;
     }
     return false;
@@ -97,7 +95,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     controller.init(scene, post_process);
     controller.initScene(camera);
     controller.initPostprocess();
-
+    
     ShowWindow(win.handle, nCmdShow);
 
     // MAIN LOOP (EVENT HANDLING)

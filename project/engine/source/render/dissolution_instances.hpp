@@ -28,7 +28,7 @@ private:
         
         glm::mat4 transform;
         float spawn_time;
-        float animation_time; // in ms
+        float animation_time; // in seconds
     };
 
 public:

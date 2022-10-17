@@ -7,14 +7,18 @@ using namespace std::chrono;
 
 namespace engine
 {
-Timer::Timer() { restart(); }
+Timer::Timer()
+{
+    restart();
+}
 
 float Timer::getElapsedTime()
 {
-    duration<float> elapsed_time = steady_clock::now() - start_time;
-
-    return elapsed_time.count();
+    return TimeSystem::getTimePoint() - start_time;
 }
 
-void Timer::restart() { start_time = steady_clock::now(); }
+void Timer::restart()
+{
+    start_time = TimeSystem::getTimePoint();
+}
 } // namespace engine

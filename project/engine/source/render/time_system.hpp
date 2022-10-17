@@ -19,8 +19,14 @@ public:
 
     static float getTimePoint();
 
+    static void pause();
+    static void unpause();
+
 private:
     static std::chrono::steady_clock::time_point init_time;
+
+    static bool is_paused;
+    static std::chrono::steady_clock::time_point pause_start;
 };
 } // namespace engine
 

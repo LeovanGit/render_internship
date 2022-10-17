@@ -34,7 +34,7 @@ engine::Scene scene;
 Controller controller;
 
 // CREATE CAMERA
-Camera camera(glm::vec3(0.0f, 0.0f, -30.0f),
+Camera camera(glm::vec3(0.0f, 4.0f, -30.0f),
               glm::vec3(0, 1.0f, 0), // up
               glm::vec3(0, 0, 1.0f)); // forward
 
@@ -96,6 +96,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
     controller.init(scene, post_process);
     controller.initScene(camera);
     controller.initPostprocess();
+
+    timer.restart();
     
     ShowWindow(win.handle, nCmdShow);
 
@@ -165,6 +167,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                                       1000.0f);
             }
 
+            break;
+        }
+        case WM_ENTERSIZEMOVE:
+        {
+            engine::TimeSystem::pause();
+            break;
+        }
+        case WM_EXITSIZEMOVE:
+        {
+            engine::TimeSystem::unpause();
             break;
         }
         case WM_KEYDOWN:

@@ -213,7 +213,7 @@ void Controller::spawnKnight(const math::Transform & transform)
 
     di::Instance instance(transform_id,
                           spawn_time,
-                          3000.0f);
+                          3.0f);
     
     mesh_system->addInstance<engine::DissolutionInstances>(
         model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
@@ -840,22 +840,22 @@ void Controller::initSceneObjects()
                          glm::vec3(0.0f),
                          0.00006794f);
 
-    initPointLight(glm::vec3(0.0f, 5.0f, 0.0f),
+    initPointLight(glm::vec3(0.0f, 12.0f, 0.0f),
                    glm::vec3(1000.0f),
                    1.0f,
                    2.0f);
 
-    initPointLight(glm::vec3(20.0f, 0.0f, 0.0f),
+    initPointLight(glm::vec3(5.0f, 14.0f, 0.0f),
                    glm::vec3(1000.0f, 0.0f, 0.0f),
                    1.0f,
                    1.0f);
 
-    initPointLight(glm::vec3(-20.0f, 0.0f, 0.0f),
+    initPointLight(glm::vec3(-5.0f, 10.0f, 0.0f),
                    glm::vec3(0.0f, 1000.0f, 0.0f),
                    1.0f,
                    1.0f);
 
-    initPointLight(glm::vec3(0.0f, 0.0f, 20.0f),
+    initPointLight(glm::vec3(-3.0f, 12.0f, 5.0f),
                    glm::vec3(0.0f, 0.0f, 1000.0f),
                    1.0f,
                    1.0f);

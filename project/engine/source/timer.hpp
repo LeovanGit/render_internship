@@ -1,7 +1,7 @@
 #ifndef TIMER_HPP
 #define TIMER_HPP
 
-#include <chrono>
+#include "time_system.hpp"
 
 namespace engine
 {
@@ -14,7 +14,7 @@ public:
     void restart();
     
 private:
-    std::chrono::steady_clock::time_point start_time;
+    float start_time;
 };
 } // namespace engine
 

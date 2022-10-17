@@ -59,14 +59,16 @@ set(HEADERS engine/source/controller.hpp
             engine/source/scene.hpp
             engine/source/camera.hpp
             engine/source/transform_system.hpp
-            engine/source/timer.hpp)
+            engine/source/timer.hpp
+            engine/source/additional.hpp)
 
 set(SOURCES engine/source/controller.cpp
             engine/source/scene.cpp
             engine/source/camera.cpp
             engine/source/main.cpp
             engine/source/transform_system.cpp
-            engine/source/timer.cpp)
+            engine/source/timer.cpp
+            engine/source/additional.cpp)
 
 source_group("Header Files/source" FILES ${HEADERS})
 source_group("Source Files/source" FILES ${SOURCES})

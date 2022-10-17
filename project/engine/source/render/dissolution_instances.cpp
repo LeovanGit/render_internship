@@ -69,7 +69,7 @@ void DissolutionInstances::render()
     
     for (auto & per_model: per_model)
     {
-        if (!static_cast<bool>(per_model.model)) continue;
+        if (per_model.model == nullptr) continue;
 
         // bind vertex and index buffers
         per_model.model->bind();
@@ -133,7 +133,7 @@ void DissolutionInstances::renderWithoutMaterials(int cubemaps_count)
     
     for (auto & per_model: per_model)
     {
-        if (!static_cast<bool>(per_model.model)) continue;
+        if (per_model.model == nullptr) continue;
 
         // bind vertex and index buffers
         per_model.model->bind();

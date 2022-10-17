@@ -238,7 +238,7 @@ std::shared_ptr<Model> ModelManager::getDefaultSphere(const std::string & key,
                     dst.position[side_masks[side][2]] = pos.z * side_signs[side][2];
 
                     dst.position = glm::normalize(dst.position);
-
+                    dst.normal = dst.position;
                     dst.uv = uv;
                 };
 
@@ -249,8 +249,6 @@ std::shared_ptr<Model> ModelManager::getDefaultSphere(const std::string & key,
                 {
                     glm::vec3 AB = vertex[1].position - vertex[0].position;
                     glm::vec3 AC = vertex[2].position - vertex[0].position;
-                    vertex[0].normal = vertex[1].normal = vertex[2].normal =
-                        glm::normalize(glm::cross(AB, AC));
 
                     vertex[0].tangent = vertex[1].tangent = vertex[2].tangent = AB;
                     vertex[0].bitangent = vertex[1].bitangent = vertex[2].bitangent = AC;
@@ -265,9 +263,7 @@ std::shared_ptr<Model> ModelManager::getDefaultSphere(const std::string & key,
                 {
                     glm::vec3 AB = vertex[1].position - vertex[0].position;
                     glm::vec3 AC = vertex[2].position - vertex[0].position;
-                    vertex[0].normal = vertex[1].normal = vertex[2].normal =
-                        glm::normalize(glm::cross(AB, AC));
-
+                    
                     vertex[0].tangent = vertex[1].tangent = vertex[2].tangent = AB;
                     vertex[0].bitangent = vertex[1].bitangent = vertex[2].bitangent = AC;
                 }

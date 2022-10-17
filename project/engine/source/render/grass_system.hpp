@@ -51,8 +51,8 @@ private:
     {
         GPUInstance(const glm::vec3 & position,
                     glm::vec2 size) :
-            position(position),
-            size(size)
+                    position(position),
+                    size(size)
         {}
 
         glm::vec3 position;

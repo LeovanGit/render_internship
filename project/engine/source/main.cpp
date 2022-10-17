@@ -16,6 +16,7 @@
 #include "scene.hpp"
 #include "engine.hpp"
 #include "timer.hpp"
+#include "additional.hpp"
 
 #include "win_undef.hpp"
 
@@ -120,7 +121,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
             controller.processInput(camera, post_process, delta_time, win);
             camera.updateMatrices();
-            controller.moveDissolutionToOpaqueInstances();
+            engine::moveDissolutionToOpaqueInstances();
             controller.scene->renderFrame(win, camera, post_process, delta_time);
         }
     }

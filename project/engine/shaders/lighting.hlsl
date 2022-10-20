@@ -8,6 +8,7 @@ TextureCube g_reflection : register(t6);
 TextureCubeArray<float4> g_shadow_maps : register(t7);
 
 static const float g_DEPTH_OFFSET = 0.005f;
+static const float g_TRANSMITTANCE_POWER = 32.0f;
 
 uint calculateCubeMapFaceIndex(float3 dir)
 {
@@ -114,6 +115,61 @@ float3 calculateEnvironment(float3 albedo,
     float3 specular = reflectance * g_reflection.SampleLevel(g_clamp_sampler, reflect(-V, N), mip);
 
     return diffuse + specular;
+}
+
+// ignore specular IBL
+float3 calculateEnvironment(float3 albedo,
+                            float metalness,
+                            float3 N)
+{   
+    return albedo * (1.0f - metalness) * g_irradiance.SampleLevel(g_clamp_sampler, N, 0);
+}
+
+float3 calculateSurfaceLightTransmission(float3 posWS,
+                                         float3 N,
+                                         float3 transmittance_color)
+{
+    float3 transmittion = 0.0f;
+    
+    for (uint i = 0; i != g_POINT_LIGHTS_COUNT; ++i)
+    {
+        float3 L = g_point_lights[i].position - posWS;
+        float3 L_norm = normalize(L);
+
+        float solid_angle = calculateSolidAngle(length(L),
+                                                g_point_lights[i].radius);
+        float NL = dot(N, L_norm);
+
+        // if light source is behind the surface
+        if (NL < 0.0f)
+        {
+            float shadow = calculateShadowCoefficient(posWS,
+                                                      N,
+                                                      L,
+                                                      g_point_lights[i].position,
+                                                      i);
+
+            transmittion += g_point_lights[i].radiance *
+                            transmittance_color *
+                            solid_angle *
+                            pow(-NL, g_TRANSMITTANCE_POWER) *
+                            shadow;
+        }
+    }
+
+    for (uint i = 0; i != g_DIR_LIGHTS_COUNT; ++i)
+    {
+        float3 L = -normalize(g_dir_lights[i].direction);
+        float NL = dot(N, L);
+
+        // if light source is behind the surface
+        if (NL < 0.0f) transmittion += g_dir_lights[i].radiance *
+                                    transmittance_color *
+                                    pow(-NL, g_TRANSMITTANCE_POWER) *
+                                    g_dir_lights[i].solid_angle;
+    }
+    
+    return transmittion;
 }
 
 // G
@@ -320,6 +376,131 @@ float3 calculateLighting(float3 albedo,
                                   N,
                                   V);
     
+    return color;
+}
+
+float3 calculateGrassLighting(float3 albedo,
+                              float roughness,
+                              float metalness,
+                              float3 fresnel,
+                              float3 N,
+                              float3 GN,
+                              float3 V,
+                              float3 posWS,
+                              float3 transmittance_color)
+{
+    float3 color = 0.0f;
+    color += calculateDirectionalLights(albedo,
+                                        roughness,
+                                        metalness,
+                                        fresnel,
+                                        N,
+                                        V);
+    
+    color += calculatePointLights(albedo,
+                                  roughness,
+                                  metalness,
+                                  fresnel,
+                                  N,
+                                  GN,
+                                  V,
+                                  posWS);
+
+    color += calculateEnvironment(albedo,
+                                  metalness,
+                                  N);
+
+    color += calculateSurfaceLightTransmission(posWS,
+                                               N,
+                                               transmittance_color);
+    
+    return color;
+}
+//------------------------------------------------------------------------------
+// LIGHTMAPS LIGHTING
+//------------------------------------------------------------------------------
+float3 calculateDirectionalLights(float3 right,
+                                  float3 up,
+                                  float3 normal,
+                                  float3 lightmap_RLT,
+                                  float3 lightmap_BotBF)
+{
+    float3 color = 0.0f;
+
+    for (uint i = 0; i != g_DIR_LIGHTS_COUNT; ++i)
+    {
+        float3 L_norm = -normalize(g_dir_lights[i].direction);
+
+        float3 color_i = g_dir_lights[i].radiance *
+                         g_dir_lights[i].solid_angle;
+
+        float RL = dot(right, L_norm);
+        float UL = dot(up, L_norm);
+        float NL = dot(normal, L_norm);
+
+        color_i *= ((RL > 0 ? lightmap_RLT.r : lightmap_RLT.g) * abs(RL) +
+                    (UL > 0 ? lightmap_RLT.b : lightmap_BotBF.r) * abs(UL) +
+                    (NL > 0 ? lightmap_BotBF.b : lightmap_BotBF.g) * abs(NL));
+
+        color += color_i;
+    }
+
+    return color;
+}
+
+float3 calculatePointLights(float3 pos_WS,
+                            float3 right,
+                            float3 up,
+                            float3 normal,
+                            float3 lightmap_RLT,
+                            float3 lightmap_BotBF)
+{
+    float3 color = 0.0f;
+    
+    for (uint i = 0; i != g_POINT_LIGHTS_COUNT; ++i)
+    {
+        float3 L = g_point_lights[i].position - pos_WS;
+        float3 L_norm = normalize(L);
+        
+        float3 color_i = g_point_lights[i].radiance *
+                         calculateSolidAngle(length(L), g_point_lights[i].radius);
+
+        float RL = dot(right, L_norm);
+        float UL = dot(up, L_norm);
+        float NL = dot(normal, L_norm);
+
+        color_i = color_i * (RL > 0 ? lightmap_RLT.r : lightmap_RLT.g) * abs(RL) +
+                  color_i * (UL > 0 ? lightmap_RLT.b : lightmap_BotBF.r) * abs(UL) +
+                  color_i * (NL > 0 ? lightmap_BotBF.b : lightmap_BotBF.g) * abs(NL);
+        
+        color += color_i;
+    }
+
+    return color;
+}
+
+float3 calculateLighting(float3 pos_WS,
+                         float3 right, // normalized particle basis
+                         float3 up,
+                         float3 normal,
+                         float3 lightmap_RLT,
+                         float3 lightmap_BotBF)
+{
+    float3 color = 0.0f;
+
+    color += calculateDirectionalLights(right,
+                                        up,
+                                        normal,
+                                        lightmap_RLT,
+                                        lightmap_BotBF);
+
+    color += calculatePointLights(pos_WS,
+                                  right,
+                                  up,
+                                  normal,
+                                  lightmap_RLT,
+                                  lightmap_BotBF);
+
     return color;
 }
 

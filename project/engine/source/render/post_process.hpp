@@ -14,8 +14,8 @@ public:
     void init(std::shared_ptr<Shader> shader,
               float EV_100 = 0.0f);
     
-    void resolve(DxResPtr<ID3D11ShaderResourceView> source_HDR,
-                 DxResPtr<ID3D11RenderTargetView> target_LDR);
+    void resolve(DxResPtr<ID3D11ShaderResourceView> source_hdr,
+                 DxResPtr<ID3D11RenderTargetView> target_ldr);
     
     float EV_100;
     std::shared_ptr<Shader> shader;

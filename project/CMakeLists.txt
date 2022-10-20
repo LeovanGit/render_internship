@@ -41,7 +41,13 @@ set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/skybox.hlsl
             engine/shaders/resolve.hlsl
             engine/shaders/lighting.hlsl
-            engine/shaders/shadow_cubemap.hlsl)
+            engine/shaders/shadow_cubemap.hlsl
+            engine/shaders/copy_ms_depth.hlsl
+            engine/shaders/dissolve.hlsl
+            engine/shaders/grass.hlsl
+            engine/shaders/grass_shadow_cubemap.hlsl
+            engine/shaders/particles.hlsl
+            engine/shaders/math.hlsl)
 
 # does not participate in the compilation:
 set_source_files_properties(${SHADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -52,13 +58,17 @@ source_group("shaders" FILES ${SHADERS})
 set(HEADERS engine/source/controller.hpp
             engine/source/scene.hpp
             engine/source/camera.hpp
-            engine/source/transform_system.hpp)
+            engine/source/transform_system.hpp
+            engine/source/timer.hpp
+            engine/source/additional.hpp)
 
 set(SOURCES engine/source/controller.cpp
             engine/source/scene.cpp
             engine/source/camera.cpp
             engine/source/main.cpp
-            engine/source/transform_system.cpp)
+            engine/source/transform_system.cpp
+            engine/source/timer.cpp
+            engine/source/additional.cpp)
 
 source_group("Header Files/source" FILES ${HEADERS})
 source_group("Source Files/source" FILES ${SOURCES})
@@ -82,10 +92,18 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/index_buffer.hpp
                    engine/source/render/opaque_instances.hpp
                    engine/source/render/emissive_instances.hpp
+                   engine/source/render/dissolution_instances.hpp
                    engine/source/render/mesh_system.hpp
                    engine/source/render/light_system.hpp
                    engine/source/render/vertex.hpp
-                   engine/source/render/post_process.hpp)
+                   engine/source/render/post_process.hpp
+                   engine/source/render/particle.hpp
+                   engine/source/render/smoke_emitter.hpp
+                   engine/source/render/particle_system.hpp
+                   engine/source/render/time_system.hpp
+                   engine/source/render/grass.hpp
+                   engine/source/render/grass_field.hpp
+                   engine/source/render/grass_system.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/globals.cpp
@@ -101,9 +119,17 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/index_buffer.cpp
                    engine/source/render/opaque_instances.cpp
                    engine/source/render/emissive_instances.cpp
+                   engine/source/render/dissolution_instances.cpp
                    engine/source/render/mesh_system.cpp
                    engine/source/render/light_system.cpp
-                   engine/source/render/post_process.cpp)
+                   engine/source/render/post_process.cpp
+                   engine/source/render/particle.cpp
+                   engine/source/render/smoke_emitter.cpp
+                   engine/source/render/particle_system.cpp
+                   engine/source/render/time_system.cpp
+                   engine/source/render/grass.cpp
+                   engine/source/render/grass_field.cpp
+                   engine/source/render/grass_system.cpp)
 
 source_group("Header Files/source/render" FILES ${RENDER_HEADERS})
 source_group("Source Files/source/render" FILES ${RENDER_SOURCES})
@@ -117,13 +143,15 @@ set(MATH_HEADERS engine/source/math/matrices.hpp
                  engine/source/math/solid_vector.hpp
                  engine/source/math/triangle_octree.hpp
                  engine/source/math/ray.hpp
-                 engine/source/math/mesh_intersection.hpp)
+                 engine/source/math/mesh_intersection.hpp
+                 engine/source/math/random.hpp)
 
 set(MATH_SOURCES engine/source/math/matrices.cpp
                  engine/source/math/euler_angles.cpp
                  engine/source/math/matrices.cpp
                  engine/source/math/triangle_octree.cpp
-                 engine/source/math/ray.cpp)
+                 engine/source/math/ray.cpp
+                 engine/source/math/random.cpp)
 
 source_group("Header Files/source/math" FILES ${MATH_HEADERS})
 source_group("Source Files/source/math" FILES ${MATH_SOURCES})

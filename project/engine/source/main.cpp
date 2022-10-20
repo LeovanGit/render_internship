@@ -6,7 +6,6 @@
 
 #include <windows.h>
 #include <windowsx.h>
-#include <chrono>
 #include <string>
 #include "glm.hpp"
 
@@ -16,6 +15,8 @@
 #include "controller.hpp"
 #include "scene.hpp"
 #include "engine.hpp"
+#include "timer.hpp"
+#include "additional.hpp"
 
 #include "win_undef.hpp"
 
@@ -23,12 +24,17 @@ namespace
 {
 constexpr float FRAME_DURATION = 1.0f / 60.0f;
 
+constexpr uint32_t WINDOW_INIT_POS_X = 100;
+constexpr uint32_t WINDOW_INIT_POS_Y = 100;
+constexpr uint32_t WINDOW_INIT_POS_WIDTH = 1280;
+constexpr uint32_t WINDOW_INIT_POS_HEIGHT = 720;
+
 engine::windows::Window win;
 engine::Scene scene;
 Controller controller;
 
 // CREATE CAMERA
-Camera camera(glm::vec3(0.0f, 0.0f, -30.0f),
+Camera camera(glm::vec3(0.0f, 4.0f, -30.0f),
               glm::vec3(0, 1.0f, 0), // up
               glm::vec3(0, 0, 1.0f)); // forward
 
@@ -40,20 +46,18 @@ LRESULT CALLBACK WindowProc(HWND hWnd,
                             WPARAM wParam,
                             LPARAM lParam);
 
-auto start_time = std::chrono::steady_clock::now();
-float delta_time = 0;
+engine::Timer timer;
+float delta_time = 0.0f;
 
 bool frameTimeElapsed()
 {
-    using namespace std::chrono;
-
-    duration<float> elapsed_time = steady_clock::now() - start_time;
-        
-    if (elapsed_time.count() >= FRAME_DURATION)
+    float elapsed_time = timer.getElapsedTime();
+    
+    if (elapsed_time >= FRAME_DURATION)
     {
-        delta_time = elapsed_time.count();
-
-        start_time = steady_clock::now();
+        timer.restart();
+        delta_time = elapsed_time;
+        
         return true;
     }
     return false;
@@ -66,7 +70,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 {
     // INIT ENGINE
     engine::Engine::init();
-
+    
     // REGISTER WINDOW CLASS
     WNDCLASSEX wclass;
     ZeroMemory(&wclass, sizeof(WNDCLASSEX));
@@ -81,7 +85,11 @@ int WINAPI WinMain(HINSTANCE hInstance,
     RegisterClassEx(&wclass);
 
     // CREATE WINDOW
-    win.init(hInstance, 100, 100, 1280, 720);
+    win.init(hInstance,
+             WINDOW_INIT_POS_X,
+             WINDOW_INIT_POS_Y,
+             WINDOW_INIT_POS_WIDTH,
+             WINDOW_INIT_POS_HEIGHT);
 
     // CREATE SCENE
     scene.init(win);
@@ -89,6 +97,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
     controller.initScene(camera);
     controller.initPostprocess();
 
+    timer.restart();
+    
     ShowWindow(win.handle, nCmdShow);
 
     // MAIN LOOP (EVENT HANDLING)
@@ -113,7 +123,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
             controller.processInput(camera, post_process, delta_time, win);
             camera.updateMatrices();
-            controller.scene->renderFrame(win, camera, post_process);
+            engine::moveDissolutionToOpaqueInstances();
+            controller.scene->renderFrame(win, camera, post_process, delta_time);
         }
     }
     exit:
@@ -149,13 +160,23 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
                 win.resize(LOWORD(lParam), HIWORD(lParam));
                 scene.initDepthBuffer(LOWORD(lParam), HIWORD(lParam));
                 scene.initRenderTarget(LOWORD(lParam), HIWORD(lParam));
-            
+
                 camera.setPerspective(glm::radians(45.0f),
                                       float(LOWORD(lParam)) / HIWORD(lParam),
                                       1.0f,
                                       1000.0f);
             }
 
+            break;
+        }
+        case WM_ENTERSIZEMOVE:
+        {
+            engine::TimeSystem::pause();
+            break;
+        }
+        case WM_EXITSIZEMOVE:
+        {
+            engine::TimeSystem::unpause();
             break;
         }
         case WM_KEYDOWN:
@@ -203,8 +224,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	case WM_MOUSEWHEEL:
         {
             float wheel_delta = GET_WHEEL_DELTA_WPARAM(wParam);
-            if (wheel_delta >= 0) controller.movement_speed *= 1.1f;
-            else controller.movement_speed /= 1.1f;
+            if (wheel_delta >= 0) controller.camera_movement_speed *= 1.1f;
+            else controller.camera_movement_speed /= 1.1f;
             break;
         }
         break;

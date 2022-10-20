@@ -20,6 +20,7 @@ void Globals::init()
         instance->initD3D();
         instance->initSamplers();
         instance->initRasterizers();
+        instance->initBlendStates();
         instance->initPerFrameBuffer();
         instance->initPerViewBuffer();
         instance->initPerMeshBuffer();
@@ -221,6 +222,56 @@ void Globals::bindRasterizer(bool is_double_sided)
     else device_context4->RSSetState(one_sided_rasterizer.ptr());
 }
 
+void Globals::initBlendStates()
+{
+    HRESULT result;
+    
+    D3D11_BLEND_DESC translucent_blend_desc;
+    ZeroMemory(&translucent_blend_desc, sizeof(translucent_blend_desc));
+    translucent_blend_desc.RenderTarget[0].BlendEnable = true;
+    translucent_blend_desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    translucent_blend_desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    translucent_blend_desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    translucent_blend_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    translucent_blend_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+    translucent_blend_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    translucent_blend_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    result = device->CreateBlendState(&translucent_blend_desc,
+                                      translucent_blend_state.reset());
+    assert(result >= 0 && "CreateBlendState");
+
+    D3D11_BLEND_DESC a2c_blend_desc;
+    ZeroMemory(&a2c_blend_desc, sizeof(a2c_blend_desc));
+    a2c_blend_desc.AlphaToCoverageEnable = true;
+    a2c_blend_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    result = device->CreateBlendState(&a2c_blend_desc,
+                                      a2c_blend_state.reset());
+    assert(result >= 0 && "CreateBlendState");
+}
+
+void Globals::bindDefaultBlendState()
+{
+    device_context4->OMSetBlendState(nullptr,
+                                     nullptr,
+                                     0xffffffff);
+}
+
+void Globals::bindTranslucentBlendState()
+{
+    device_context4->OMSetBlendState(translucent_blend_state.ptr(),
+                                     nullptr,
+                                     0xffffffff);
+}
+
+void Globals::bindA2CBlendState()
+{
+    device_context4->OMSetBlendState(a2c_blend_state.ptr(),
+                                     nullptr,
+                                     0xffffffff);
+}
+
 void Globals::initPerFrameBuffer()
 {
     D3D11_BUFFER_DESC cb_desc;
@@ -238,13 +289,20 @@ void Globals::initPerFrameBuffer()
 }
 
 void Globals::setPerFrameBuffer(int g_reflection_mips_count,
-                                int g_shadow_map_size)
+                                int g_shadow_map_size,
+                                const glm::vec<2, int> & g_particles_atlas_size,
+                                int g_samples_count,
+                                const glm::vec<2, int> & g_screen_size)
 {
     LightSystem * light_system = LightSystem::getInstance();
     TransformSystem * trans_system = TransformSystem::getInstance();
     
     per_frame_buffer_data.g_reflection_mips_count = g_reflection_mips_count;
     per_frame_buffer_data.g_shadow_map_size = g_shadow_map_size;
+    per_frame_buffer_data.g_particles_atlas_size = g_particles_atlas_size;
+    per_frame_buffer_data.g_samples_count = g_samples_count;
+    per_frame_buffer_data.g_screen_size = g_screen_size;
+    per_frame_buffer_data.g_time = TimeSystem::getTimePoint();
 
     auto & point_lights = light_system->getPointLights();
     for (uint32_t size = point_lights.size(), i = 0; i != size; ++i)
@@ -344,6 +402,11 @@ void Globals::setPerViewBuffer(const Camera & camera,
 
     // fill const buffer data
     per_view_buffer_data.g_proj_view = camera.getViewProj();
+    per_view_buffer_data.g_proj_view_inv = camera.getViewProjInv();
+    per_view_buffer_data.g_view = camera.getView();
+    per_view_buffer_data.g_view_inv = camera.getViewInv();
+    per_view_buffer_data.g_proj = camera.getProj();
+    per_view_buffer_data.g_proj_inv = camera.getProjInv();
     per_view_buffer_data.g_camera_pos = camera.getPosition();
     per_view_buffer_data.g_EV_100 = EV_100;
     per_view_buffer_data.g_frustum_corners[0] = glm::vec4(bottom_left_WS, 1.0f);

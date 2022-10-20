@@ -45,9 +45,10 @@ void OpaqueInstances::render()
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
-    TextureManager * tex_mgr = TextureManager::getInstance();
     LightSystem * light_sys = LightSystem::getInstance();
 
+    globals->bindDefaultBlendState();
+    
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -64,7 +65,7 @@ void OpaqueInstances::render()
     
     for (auto & per_model: per_model)
     {
-        if (!static_cast<bool>(per_model.model)) continue;
+        if (per_model.model == nullptr) continue;
 
         // bind vertex and index buffers
         per_model.model->bind();
@@ -116,8 +117,9 @@ void OpaqueInstances::renderWithoutMaterials(int cubemaps_count)
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
-    TextureManager * tex_mgr = TextureManager::getInstance();
 
+    globals->bindDefaultBlendState();
+    
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -127,7 +129,7 @@ void OpaqueInstances::renderWithoutMaterials(int cubemaps_count)
     
     for (auto & per_model: per_model)
     {
-        if (!static_cast<bool>(per_model.model)) continue;
+        if (per_model.model == nullptr) continue;
 
         // bind vertex and index buffers
         per_model.model->bind();

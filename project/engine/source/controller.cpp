@@ -24,7 +24,9 @@ void Controller::initScene(Camera & camera)
 
     initShaders();
     initTextures();
-    initSceneObjects();    
+    initSceneObjects();
+    initParticleEmitters();
+    initGrassFields();
 }
 
 void Controller::initPostprocess()
@@ -117,11 +119,106 @@ void Controller::initKnight(const math::Transform & transform)
     };
 
     uint32_t transform_id = trans_system->transforms.insert(transform);
-    
+
     mesh_system->addInstance<engine::OpaqueInstances>(
         model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
         materials,
         transform_id);
+}
+
+void Controller::spawnKnight(const math::Transform & transform)
+{    
+    engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
+
+    std::vector<di::Material> materials =
+    {
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Fur_Normal.dds"),
+                     true,
+                     true,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.95f,
+                     0.0f),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Legs_Normal.dds")),
+
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Torso_Normal.dds")),
+
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Head_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Head_Normal.dds"),
+                     true,
+                     false,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.95f,
+                     0.0f),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Eye_BaseColor.dds"),
+                     nullptr,
+                     nullptr,
+                     nullptr,
+                     true,
+                     false,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.1f,
+                     0.0f),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Helmet_Normal.dds"),
+                     true,
+                     true),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Skirt_Normal.dds"),
+                     true,
+                     true,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.95f,
+                     0.0f),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Roughness.dds"),
+                     nullptr,
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Cape_Normal.dds"),
+                     true,
+                     true,
+                     glm::vec3(1.0f, 0.0f, 0.0f),
+                     0.95f,
+                     0.0f),
+        
+        di::Material(tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_BaseColor.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Roughness.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Metallic.dds"),
+                     tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Normal.dds")),
+    };
+
+    uint32_t transform_id = trans_system->transforms.insert(transform);
+    float spawn_time = engine::TimeSystem::getTimePoint();
+
+    di::Instance instance(transform_id,
+                          spawn_time,
+                          3.0f);
+    
+    mesh_system->addInstance<engine::DissolutionInstances>(
+        model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
+        materials,
+        instance);
 }
 
 void Controller::initWall(const math::Transform & transform)
@@ -250,6 +347,32 @@ void Controller::initFloor(const std::vector<oi::Material> & materials)
               materials);
 }
 
+void Controller::initSwamp(const std::vector<oi::Material> & materials)
+{
+    engine::ModelManager * model_mgr = engine::ModelManager::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    
+    initPlane(math::Transform(glm::vec3(125.0f, -10.0f, -25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);
+              
+    initPlane(math::Transform(glm::vec3(75.0f, -10.0f, -25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);
+    
+    initPlane(math::Transform(glm::vec3(125.0f, -10.0f, 25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);
+    
+    initPlane(math::Transform(glm::vec3(75.0f, -10.0f, 25.0f),
+                              math::EulerAngles(0.0f, 90.0f, 0.0f),
+                              glm::vec3(25.0f)),
+              materials);    
+}
+
 void Controller::initDirectionalLight(const glm::vec3 & radiance,
                                       const glm::vec3 & direction,
                                       float solid_angle)
@@ -297,6 +420,8 @@ void Controller::initShaders()
 {
     engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
+    engine::GrassSystem * grass_sys = engine::GrassSystem::getInstance();
     
     D3D11_INPUT_ELEMENT_DESC ied_opaque[] =
     {
@@ -383,6 +508,22 @@ void Controller::initShaders()
          D3D11_INPUT_PER_VERTEX_DATA,
          0},
 
+        {"TEXCOORD",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         0,
+         12,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+        
+        {"NORMAL",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         20,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
         {"TRANSFORM",
          0,
          DXGI_FORMAT_R32G32B32A32_FLOAT,
@@ -466,19 +607,214 @@ void Controller::initShaders()
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
     };
+
+    D3D11_INPUT_ELEMENT_DESC ied_dissolve[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         0,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TEXCOORD",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         0,
+         12, // 3 floats of 4 bytes
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"NORMAL",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         20,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         32,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"BITANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         44,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+        
+        {"TRANSFORM",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         0, // reset align for instance data!
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         1,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         16,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         2,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         32,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         3,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         48,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"SPAWN_TIME",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         64,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"ANIMATION_TIME",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         68,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
+    
+    D3D11_INPUT_ELEMENT_DESC ied_particles[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         0,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"SIZE",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         12,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"ANGLE",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         24,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+             
+        {"TINT",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         28,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"LIFETIME",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         44,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
+    
+    D3D11_INPUT_ELEMENT_DESC ied_grass[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         0,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"SIZE",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         1,
+         12,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
+
+    D3D11_INPUT_ELEMENT_DESC ied_grass_shadows[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         0,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"SIZE",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         1,
+         12,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
     
     mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
                                                   ied_opaque,
                                                   9),
                             shader_mgr->getShader("../engine/shaders/emissive.hlsl",
                                                   ied_emissive,
-                                                  6),
+                                                  8),
                             shader_mgr->getShader("../engine/shaders/shadow_cubemap.hlsl",
                                                   ied_shadow_map,
                                                   5,
                                                   true,
                                                   true,
-                                                  false));
+                                                  false),
+                            shader_mgr->getShader("../engine/shaders/dissolve.hlsl",
+                                                  ied_dissolve,
+                                                  11));
+
+    scene->depth_copy_shader = shader_mgr->getShader("../engine/shaders/copy_ms_depth.hlsl");
+
+    particle_sys->shader =
+        shader_mgr->getShader("../engine/shaders/particles.hlsl",
+                              ied_particles,
+                              5);
+
+    grass_sys->shader =
+        shader_mgr->getShader("../engine/shaders/grass.hlsl",
+                              ied_grass,
+                              2);
+
+    grass_sys->shadow_shader =
+        shader_mgr->getShader("../engine/shaders/grass_shadow_cubemap.hlsl",
+                              ied_grass_shadows,
+                              2,
+                              true,
+                              true,
+                              true);
 }
 
 void Controller::initTextures()
@@ -488,7 +824,8 @@ void Controller::initTextures()
     
     mesh_system->setTextures(tex_mgr->getTexture("../engine/assets/environment/reflectance.dds"),
                              tex_mgr->getTexture("../engine/assets/environment/irradiance.dds"),
-                             tex_mgr->getTexture("../engine/assets/environment/reflection.dds"));
+                             tex_mgr->getTexture("../engine/assets/environment/reflection.dds"),
+                             tex_mgr->getTexture("../engine/assets/dissolve.dds"));
 }
 
 void Controller::initSceneObjects()
@@ -503,22 +840,22 @@ void Controller::initSceneObjects()
                          glm::vec3(0.0f),
                          0.00006794f);
 
-    initPointLight(glm::vec3(0.0f, 5.0f, 0.0f),
+    initPointLight(glm::vec3(0.0f, 12.0f, 0.0f),
                    glm::vec3(1000.0f),
                    1.0f,
                    2.0f);
 
-    initPointLight(glm::vec3(20.0f, 0.0f, 0.0f),
+    initPointLight(glm::vec3(5.0f, 14.0f, 0.0f),
                    glm::vec3(1000.0f, 0.0f, 0.0f),
                    1.0f,
                    1.0f);
 
-    initPointLight(glm::vec3(-20.0f, 0.0f, 0.0f),
+    initPointLight(glm::vec3(-5.0f, 10.0f, 0.0f),
                    glm::vec3(0.0f, 1000.0f, 0.0f),
                    1.0f,
                    1.0f);
 
-    initPointLight(glm::vec3(0.0f, 0.0f, 20.0f),
+    initPointLight(glm::vec3(-3.0f, 12.0f, 5.0f),
                    glm::vec3(0.0f, 0.0f, 1000.0f),
                    1.0f,
                    1.0f);
@@ -526,22 +863,28 @@ void Controller::initSceneObjects()
     initFloor(std::vector<oi::Material>{oi::Material(
                   tex_mgr->getTexture("../engine/assets/floor/tile_albedo.dds"),
                   tex_mgr->getTexture("../engine/assets/floor/tile_roughness.dds"),
-                  nullptr,
+                  tex_mgr->getTexture("../engine/assets/floor/tile_metallic.dds"),
                   tex_mgr->getTexture("../engine/assets/floor/tile_normal.dds"),
                   true,
-                  true,
-                  glm::vec3(1.0f, 0.0f, 0.0f),
-                  0.9f,
-                  0.0f)});
+                  true)});
+
+    initSwamp(std::vector<oi::Material>{oi::Material(
+                tex_mgr->getTexture("../engine/assets/swamp/albedo.dds"),
+                tex_mgr->getTexture("../engine/assets/swamp/roughness.dds"),
+                tex_mgr->getTexture("../engine/assets/swamp/metallic.dds"),
+                tex_mgr->getTexture("../engine/assets/swamp/normal.dds"),
+                true,
+                true)});
+
     
-    // initSphere(math::Transform(glm::vec3(20.0f, 0.0f, 20.0f),
-    //                            math::EulerAngles(0.0f, 0.0f, 0.0f),
-    //                            glm::vec3(4.0f, 4.0f, 4.0f)),
-    //            std::vector<oi::Material>{oi::Material(
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_albedo.dds"),
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_roughness.dds"),
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_metallic.dds"),
-    //                tex_mgr->getTexture("../engine/assets/copper/copper_normal.dds"))});
+    initSphere(math::Transform(glm::vec3(-13.0f, -6.0f, 42.0f),
+                               math::EulerAngles(0.0f, 0.0f, 0.0f),
+                               glm::vec3(4.0f, 4.0f, 4.0f)),
+               std::vector<oi::Material>{oi::Material(
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_albedo.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_roughness.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_metallic.dds"),
+                 tex_mgr->getTexture("../engine/assets/rusted_iron/rusted_iron_normal.dds"))});
     
     initCube(math::Transform(glm::vec3(-30.0f, 0.0f, 0.0f),
                              math::EulerAngles(45.0f, 0.0f, 0.0f),
@@ -587,7 +930,7 @@ void Controller::initSceneObjects()
                              glm::vec3(10.0f, 10.0f, 10.0f)));
 
     // gold mirror
-    initPlane(math::Transform(glm::vec3(10.0f, 0.0f, 48.0f),
+    initPlane(math::Transform(glm::vec3(25.0f, 0.0f, 48.0f),
                               math::EulerAngles(0.0f, 0.0f, 0.0f),
                               glm::vec3(5.0f, 10.0f, 1.0f)),
               std::vector<oi::Material>{oi::Material(
@@ -595,10 +938,10 @@ void Controller::initSceneObjects()
                   0.01f,
                   1.0f,
                   true,
-                  false)});
+                  true)});
 
     // copper mirror
-    initPlane(math::Transform(glm::vec3(20.0f, 0.0f, 48.0f),
+    initPlane(math::Transform(glm::vec3(35.0f, 0.0f, 48.0f),
                               math::EulerAngles(0.0f, 0.0f, 0.0f),
                               glm::vec3(5.0f, 10.0f, 1.0f)),
               std::vector<oi::Material>{oi::Material(
@@ -606,10 +949,10 @@ void Controller::initSceneObjects()
                   0.15f,
                   1.0f,
                   true,
-                  false)});
+                  true)});
 
     // iron mirror
-    initPlane(math::Transform(glm::vec3(30.0f, 0.0f, 48.0f),
+    initPlane(math::Transform(glm::vec3(45.0f, 0.0f, 48.0f),
                               math::EulerAngles(0.0f, 0.0f, 0.0f),
                               glm::vec3(5.0f, 10.0f, 1.0f)),
               std::vector<oi::Material>{oi::Material(
@@ -617,10 +960,10 @@ void Controller::initSceneObjects()
                   0.27f,
                   1.0f,
                   true,
-                  false)});
+                  true)});
 
     // red mirror
-    initPlane(math::Transform(glm::vec3(40.0f, 0.0f, 48.0f),
+    initPlane(math::Transform(glm::vec3(55.0f, 0.0f, 48.0f),
                               math::EulerAngles(0.0f, 0.0f, 0.0f),
                               glm::vec3(5.0f, 10.0f, 1.0f)),
               std::vector<oi::Material>{oi::Material(
@@ -628,7 +971,87 @@ void Controller::initSceneObjects()
                   0.4f,
                   1.0f,
                   true,
-                  false)});
+                  true)});
+}
+
+void Controller::initParticleEmitters()
+{
+    engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
+    engine::TextureManager * texture_mgr = engine::TextureManager::getInstance();
+
+    particle_sys->lightmap_RLT = texture_mgr->
+        getTexture("../engine/assets/smoke/lightmap_RLT.dds");
+
+    particle_sys->lightmap_BotBF = texture_mgr->
+        getTexture("../engine/assets/smoke/lightmap_BotBF.dds");
+    
+    particle_sys->motion_vectors = texture_mgr->
+        getTexture("../engine/assets/smoke/motion_vectors.dds");
+    
+    // red
+    particle_sys->addSmokeEmitter(
+        engine::SmokeEmitter(glm::vec3(120.0f, -13.0f, 30.0f),
+                             0.5f,
+                             glm::vec3(1.0f, 0.0f, 0.0f),
+                             0.1f,
+                             5.0f,
+                             0.5f,
+                             0.05f,
+                             0.25f));
+
+    // white
+    particle_sys->addSmokeEmitter(
+        engine::SmokeEmitter(glm::vec3(120.0f, -12.0f, 0.0f),
+                             3.0f,
+                             glm::vec3(1.0f, 1.0f, 1.0f),
+                             0.25f,
+                             2.0f,
+                             1.0f,
+                             0.025f,
+                             0.5f));
+
+    // yellow
+    particle_sys->addSmokeEmitter(
+        engine::SmokeEmitter(glm::vec3(120.0f, -7.5f, -30.0f),
+                             10.0f,
+                             glm::vec3(0.86f, 0.47f, 0.0f),
+                             0.25f,
+                             0.2f,
+                             1.0f,
+                             0.025f,
+                             0.1f));
+}
+
+void Controller::initGrassFields()
+{
+    engine::GrassSystem * grass_sys = engine::GrassSystem::getInstance();
+    engine::TextureManager * texture_mgr = engine::TextureManager::getInstance();
+
+    grass_sys->albedo = texture_mgr->
+        getTexture("../engine/assets/grass/albedo.dds");
+
+    grass_sys->opacity = texture_mgr->
+        getTexture("../engine/assets/grass/opacity.dds");
+
+    grass_sys->roughness = texture_mgr->
+        getTexture("../engine/assets/grass/roughness.dds");
+
+    grass_sys->normal = texture_mgr->
+        getTexture("../engine/assets/grass/normal.dds");
+
+    grass_sys->ambient_occlusion = texture_mgr->
+        getTexture("../engine/assets/grass/ao.dds");
+
+    grass_sys->translucency = texture_mgr->
+        getTexture("../engine/assets/grass/translucency.dds");
+    
+    grass_sys->addGrassField(
+        engine::GrassField(glm::vec3(75.0f, -10.5f, -5.0f),
+                           glm::vec2(40.0f, 80.0f)));
+
+    // grass_sys->addGrassField(
+    //     engine::GrassField(glm::vec3(75.0f, -10.5f, -5.0f),
+    //                        glm::vec2(2.0f, 2.0f)));
 }
 
 void Controller::processInput(Camera & camera,
@@ -636,60 +1059,48 @@ void Controller::processInput(Camera & camera,
                               const float delta_time,
                               const engine::windows::Window & win)
 {
+    engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    
     RECT client_area = win.getClientSize();
     int width = client_area.right - client_area.left;
     int height = client_area.bottom - client_area.top;
 
-    // was any user input
-    // for (int i = 0; i != KEYS_COUNT; ++i)
-    // {
-    //     if(keys_log[i] == true)
-    //     {
-    //         if (scene->is_image_ready)
-    //         {
-    //             scene->is_global_illumination = false;
-    //             scene->is_image_ready = false;
-    //         }
-            
-    //         break;
-    //     }
-    // }
-
     if (keys_log[KEY_W])
     {
-        glm::vec3 offset = camera.getForward() * movement_speed * delta_time;
+        glm::vec3 offset = camera.getForward() * camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_S])
     {
-        glm::vec3 offset = camera.getForward() * -movement_speed * delta_time;
+        glm::vec3 offset = camera.getForward() * -camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_D])
     {
-        glm::vec3 offset = camera.getRight() * movement_speed * delta_time;
+        glm::vec3 offset = camera.getRight() * camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_A])
     {
-        glm::vec3 offset = camera.getRight() * -movement_speed * delta_time;
+        glm::vec3 offset = camera.getRight() * -camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_Q])
     {
-        glm::vec3 offset = camera.getUp() * -movement_speed * delta_time;
+        glm::vec3 offset = camera.getUp() * -camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_E])
     {
-        glm::vec3 offset = camera.getUp() * movement_speed * delta_time;
+        glm::vec3 offset = camera.getUp() * camera_movement_speed * delta_time;
         camera.addWorldPosition(offset);
     }
     if (keys_log[KEY_SHIFT])
     {
         if (!is_accelerated)
         {
-            movement_speed *= 5.0f;
+            camera_movement_speed *= 5.0f;
             is_accelerated = true;
         }
     }
@@ -697,7 +1108,7 @@ void Controller::processInput(Camera & camera,
     {
         if(is_accelerated)
         {
-            movement_speed /= 5.0f;
+            camera_movement_speed /= 5.0f;
             is_accelerated = false;
         }
     }
@@ -707,8 +1118,8 @@ void Controller::processInput(Camera & camera,
         
         // delta_fixed_mouse normalized
         glm::vec2 speed(0);
-        speed.x = (delta_mouse.y / float(height)) * rotation_speed.x;
-        speed.y = (delta_mouse.x / float(width)) * rotation_speed.y;
+        speed.x = (delta_mouse.y / float(height)) * camera_rotation_speed.x;
+        speed.y = (delta_mouse.x / float(width)) * camera_rotation_speed.y;
 
         math::EulerAngles euler(speed.y * delta_time,
                                 speed.x * delta_time,
@@ -718,9 +1129,6 @@ void Controller::processInput(Camera & camera,
     }
     if (keys_log[KEY_RMOUSE])
     {        
-        engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
-        engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
-        
         camera.updateMatrices();
 
         glm::vec2 xy;
@@ -771,20 +1179,29 @@ void Controller::processInput(Camera & camera,
     {
         post_process.EV_100 -= 2.0f * delta_time;
     }
-    // if (keys_log[KEY_G] && 
-    //     !scene->is_global_illumination && 
-    //     !scene->is_image_ready)
-    // {
-    //     scene->is_global_illumination = true;
-    //     scene->is_image_ready = false;
-    // }
-    // if (keys_log[KEY_R])
-    // {
-    //     if (was_released[KEY_R])
-    //     {
-    //         scene->is_smooth_reflection = !scene->is_smooth_reflection;
-    //         was_released[KEY_R] = false;
-    //     }
-    // }
+    if (keys_log[KEY_R] && object.is_grabbed)
+    {
+        auto & transform = trans_system->transforms[object.transform_id];
+        transform.rotation *= math::quatFromEuler(object_rotation_speed,
+                                                  math::Basis());
+    }
+    else if (keys_log[KEY_T] && object.is_grabbed)
+    {
+        auto & transform = trans_system->transforms[object.transform_id];
+        transform.rotation *= math::quatFromEuler(-object_rotation_speed,
+                                                  math::Basis());
+    }
+    if (keys_log[KEY_N] && was_released[KEY_N])
+    {
+        was_released[KEY_N] = false;
+        
+        glm::vec3 position = camera.getPosition() +
+                             30.0f * camera.getForward() +
+                             glm::vec3(0.0f, -10.0f, 0.0f);
+        
+        spawnKnight(math::Transform(position,
+                                    math::EulerAngles(0.0f, 0.0f, 0.0f),
+                                    glm::vec3(10.0f, 10.0f, 10.0f)));
+    }
 }
 

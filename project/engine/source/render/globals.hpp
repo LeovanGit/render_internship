@@ -17,6 +17,7 @@
 #include "camera.hpp"
 #include "light_system.hpp"
 #include "transform_system.hpp"
+#include "time_system.hpp"
 
 #include "win_undef.hpp"
 
@@ -45,7 +46,10 @@ struct PerFrameBufferData
 
     int g_reflection_mips_count;
     int g_shadow_map_size;
-    glm::vec2 padding_3;
+    glm::vec<2, int> g_particles_atlas_size;
+    int g_samples_count;
+    glm::vec<2, int> g_screen_size;
+    float g_time;
     
     glm::mat4 g_light_proj_view[24]; // 4 cubemaps
 };
@@ -53,6 +57,11 @@ struct PerFrameBufferData
 struct PerViewBufferData
 {
     glm::mat4 g_proj_view;
+    glm::mat4 g_proj_view_inv;
+    glm::mat4 g_view;
+    glm::mat4 g_view_inv;
+    glm::mat4 g_proj;
+    glm::mat4 g_proj_inv;
     glm::vec3 g_camera_pos;
     float g_EV_100;
     glm::vec4 g_frustum_corners[3];
@@ -114,9 +123,22 @@ public:
     void initRasterizers();
     void bindRasterizer(bool is_double_sided = false);
 
+    void initBlendStates();
+    void bindDefaultBlendState();
+    void bindTranslucentBlendState();
+    void bindA2CBlendState();
+    
+    void bindBlendState(bool is_translucent = false,
+                        bool is_dissolve = false);
+
+    
+
     void initPerFrameBuffer();
     void setPerFrameBuffer(int g_reflection_mips_count,
-                           int g_shadow_map_size);
+                           int g_shadow_map_size,
+                           const glm::vec<2, int> & g_particles_atlas_size,
+                           int g_samples_count,
+                           const glm::vec<2, int> & g_screen_size);
     void updatePerFrameBuffer();
 
     void initPerViewBuffer();
@@ -141,7 +163,11 @@ public:
     void updatePerEmissiveMeshBuffer();
     
     void initPerShadowMeshBuffer();
-    void setPerShadowMeshBuffer(const glm::mat4 & g_mesh_to_model);
+    void setPerShadowMeshBuffer(const glm::mat4 & g_mesh_to_model =
+                                    glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+                                              0.0f, 1.0f, 0.0f, 0.0f,
+                                              0.0f, 0.0f, 1.0f, 0.0f,
+                                              0.0f, 0.0f, 0.0f, 1.0f));
     void updatePerShadowMeshBuffer();
 
     void initPerShadowCubemapBuffer();
@@ -177,6 +203,9 @@ public:
 
     DxResPtr<ID3D11RasterizerState> one_sided_rasterizer;
     DxResPtr<ID3D11RasterizerState> double_sided_rasterizer;
+
+    DxResPtr<ID3D11BlendState> translucent_blend_state;
+    DxResPtr<ID3D11BlendState> a2c_blend_state;
 
 private:
     Globals() = default;

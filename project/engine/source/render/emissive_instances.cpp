@@ -47,6 +47,8 @@ void EmissiveInstances::render()
 
     Globals * globals = Globals::getInstance();
 
+    globals->bindDefaultBlendState();
+    
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -57,7 +59,7 @@ void EmissiveInstances::render()
     
     for (auto & per_model: per_model)
     {
-        if (!static_cast<bool>(per_model.model)) continue;
+        if (per_model.model == nullptr) continue;
 
         // bind vertex and index buffers
         per_model.model->bind();

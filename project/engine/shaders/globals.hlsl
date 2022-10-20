@@ -7,10 +7,13 @@ SamplerComparisonState g_comparison_sampler : register(s2);
 
 static const float g_GAMMA = 2.2f;
 static const float g_PI = 3.14159265f;
+static const float g_EPSILON = 0.001f;
 static const float g_F0_DIELECTRIC = 0.04f;
 
 static const uint g_POINT_LIGHTS_COUNT = 4;
 static const uint g_DIR_LIGHTS_COUNT = 1;
+
+static const float g_PLANES_PER_GRASS = 3;
 
 cbuffer PerFrame : register(b0)
 {
@@ -32,7 +35,10 @@ cbuffer PerFrame : register(b0)
 
     int g_reflection_mips_count;
     int g_shadow_map_size;
-    float2 padding_3;
+    int2 g_particles_atlas_size;
+    int g_samples_count;
+    int2 g_screen_size;
+    float g_time;
     
     row_major float4x4 g_light_proj_view[24]; // 4 cubemaps
 };
@@ -40,10 +46,15 @@ cbuffer PerFrame : register(b0)
 cbuffer PerView : register(b4)
 {
     row_major float4x4 g_proj_view;
+    row_major float4x4 g_proj_view_inv;
+    row_major float4x4 g_view;
+    row_major float4x4 g_view_inv;
+    row_major float4x4 g_proj;
+    row_major float4x4 g_proj_inv;
     float3 g_camera_position;
     float g_EV_100;
     // 0 - bottom_left, 1 - top_left, 2 - bottom_right
-    float4 g_frustum_corners[3];   
+    float4 g_frustum_corners[3];
 };
 
 #endif

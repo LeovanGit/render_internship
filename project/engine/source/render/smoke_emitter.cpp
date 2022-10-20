@@ -3,7 +3,7 @@
 namespace
 {
 constexpr float PARTICLE_INIT_SIZE = 1.0f;
-constexpr float PARTICLE_INIT_THICKNESS = 3.0f; // contact fading range
+constexpr float PARTICLE_INIT_THICKNESS = 1.0f; // contact fading range
 } // namespace
 
 namespace engine
@@ -72,6 +72,7 @@ void SmokeEmitter::update(float delta_time)
 
         particles[i].position.y += movement_speed * delta_time;
         particles[i].size += glm::vec2(resize_speed * delta_time);
+        particles[i].thickness += resize_speed * delta_time;
         
         if (particles[i].lifetime < appear_lifetime_value)
             particles[i].tint.w += appear_speed * delta_time;

@@ -47,7 +47,7 @@ struct PerFrameBufferData
     int g_reflection_mips_count;
     int g_shadow_map_size;
     glm::vec<2, int> g_particles_atlas_size;
-    int g_samples_count;
+    int padding_0;
     glm::vec<2, int> g_screen_size;
     float g_time;
     
@@ -137,7 +137,6 @@ public:
     void setPerFrameBuffer(int g_reflection_mips_count,
                            int g_shadow_map_size,
                            const glm::vec<2, int> & g_particles_atlas_size,
-                           int g_samples_count,
                            const glm::vec<2, int> & g_screen_size);
     void updatePerFrameBuffer();
 

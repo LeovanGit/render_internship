@@ -1,9 +1,9 @@
 #include "controller.hpp"
 
-void Controller::init(engine::Scene & scene,
+void Controller::init(engine::Renderer & renderer,
                       engine::Postprocess & post_process)
 {
-    this->scene = &scene;
+    this->renderer = &renderer;
     this->post_process = &post_process;
 
     mouse = glm::vec2(0);
@@ -796,8 +796,6 @@ void Controller::initShaders()
                                                   ied_dissolve,
                                                   11));
 
-    scene->depth_copy_shader = shader_mgr->getShader("../engine/shaders/copy_ms_depth.hlsl");
-
     particle_sys->shader =
         shader_mgr->getShader("../engine/shaders/particles.hlsl",
                               ied_particles,
@@ -833,8 +831,8 @@ void Controller::initSceneObjects()
     engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
 
-    scene->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
-                    tex_mgr->getTexture("../engine/assets/environment/skybox.dds"));
+    renderer->sky.init(shader_mgr->getShader("../engine/shaders/skybox.hlsl"),
+                       tex_mgr->getTexture("../engine/assets/environment/skybox.dds"));
 
     initDirectionalLight(glm::normalize(glm::vec3(0.25f, -1.0f, 0.25f)),
                          glm::vec3(0.0f),

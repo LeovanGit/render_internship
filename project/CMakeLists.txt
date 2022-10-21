@@ -42,7 +42,6 @@ set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/resolve.hlsl
             engine/shaders/lighting.hlsl
             engine/shaders/shadow_cubemap.hlsl
-            engine/shaders/copy_ms_depth.hlsl
             engine/shaders/dissolve.hlsl
             engine/shaders/grass.hlsl
             engine/shaders/grass_shadow_cubemap.hlsl
@@ -56,14 +55,14 @@ source_group("shaders" FILES ${SHADERS})
 
 # --------------------[SOURCE]--------------------
 set(HEADERS engine/source/controller.hpp
-            engine/source/scene.hpp
+            engine/source/renderer.hpp
             engine/source/camera.hpp
             engine/source/transform_system.hpp
             engine/source/timer.hpp
             engine/source/additional.hpp)
 
 set(SOURCES engine/source/controller.cpp
-            engine/source/scene.cpp
+            engine/source/renderer.cpp
             engine/source/camera.cpp
             engine/source/main.cpp
             engine/source/transform_system.cpp

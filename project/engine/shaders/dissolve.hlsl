@@ -130,7 +130,12 @@ float4 fragmentShader(PS_INPUT input,
                         g_EMISSIVE_COLOR,
                         delta);
         }
-        else return float4(0.0f, 0.0f, 0.0f, 0.0f);
+        //else return float4(0.0f, 0.0f, 0.0f, 0.0f);
+        else
+        {
+            discard;
+            return float4(0.0f, 0.0f, 0.0f, 0.0f);
+        }
     }
 
     // geometry normal

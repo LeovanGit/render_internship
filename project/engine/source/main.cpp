@@ -13,7 +13,7 @@
 #include "camera.hpp"
 #include "post_process.hpp"
 #include "controller.hpp"
-#include "scene.hpp"
+#include "renderer.hpp"
 #include "engine.hpp"
 #include "timer.hpp"
 #include "additional.hpp"
@@ -30,7 +30,7 @@ constexpr uint32_t WINDOW_INIT_POS_WIDTH = 1280;
 constexpr uint32_t WINDOW_INIT_POS_HEIGHT = 720;
 
 engine::windows::Window win;
-engine::Scene scene;
+engine::Renderer renderer;
 Controller controller;
 
 // CREATE CAMERA
@@ -91,9 +91,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
              WINDOW_INIT_POS_WIDTH,
              WINDOW_INIT_POS_HEIGHT);
 
-    // CREATE SCENE
-    scene.init(win);
-    controller.init(scene, post_process);
+    // CREATE RENDERER
+    renderer.init(win);
+    controller.init(renderer, post_process);
     controller.initScene(camera);
     controller.initPostprocess();
 
@@ -124,7 +124,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
             controller.processInput(camera, post_process, delta_time, win);
             camera.updateMatrices();
             engine::moveDissolutionToOpaqueInstances();
-            controller.scene->renderFrame(win, camera, post_process, delta_time);
+            controller.renderer->renderFrame(win, camera, post_process, delta_time);
         }
     }
     exit:
@@ -158,8 +158,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             if (wParam != SIZE_MINIMIZED)
             {
                 win.resize(LOWORD(lParam), HIWORD(lParam));
-                scene.initDepthBuffer(LOWORD(lParam), HIWORD(lParam));
-                scene.initRenderTarget(LOWORD(lParam), HIWORD(lParam));
+                renderer.initDepthBuffer(LOWORD(lParam), HIWORD(lParam));
+                renderer.initRenderTarget(LOWORD(lParam), HIWORD(lParam));
 
                 camera.setPerspective(glm::radians(45.0f),
                                       float(LOWORD(lParam)) / HIWORD(lParam),

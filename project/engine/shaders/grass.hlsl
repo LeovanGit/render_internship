@@ -83,6 +83,13 @@ struct Material
 float4 fragmentShader(PS_INPUT input,
                       bool is_front_face : SV_IsFrontFace) : SV_TARGET
 {
+    float opacity = g_grass_opacity.Sample(g_wrap_sampler, input.uv);
+    if (opacity < 0.01f)
+    {
+        discard;
+        return float4(0.0f, 0.0f, 0.0f, 0.0f);
+    }
+    
     // geometry normal
     float3 GN = normalize(is_front_face ? input.normal : -input.normal);
     
@@ -117,7 +124,8 @@ float4 fragmentShader(PS_INPUT input,
                                           transmittance_color);
 
     float ao = g_ambient_occlusion.Sample(g_wrap_sampler, input.uv);
-    float opacity = g_grass_opacity.Sample(g_wrap_sampler, input.uv);
+    //float opacity = g_grass_opacity.Sample(g_wrap_sampler, input.uv);
     
-    return float4(color * ao, opacity);
+    //return float4(color * ao, opacity);
+    return float4(color * ao, 1.0f);
 }

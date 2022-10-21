@@ -7,7 +7,7 @@
 #include "camera.hpp"
 #include "euler_angles.hpp"
 #include "matrices.hpp"
-#include "scene.hpp"
+#include "renderer.hpp"
 #include "sky.hpp"
 #include "globals.hpp"
 #include "shader_manager.hpp"
@@ -51,7 +51,7 @@ class Controller
 public:
     Controller() = default;
 
-    void init(engine::Scene & scene,
+    void init(engine::Renderer & renderer,
               engine::Postprocess & post_process);
 
     void initScene(Camera & camera);
@@ -65,7 +65,7 @@ public:
                       const float delta_time,
                       const engine::windows::Window & win);
 
-    engine::Scene * scene;
+    engine::Renderer * renderer;
     engine::Postprocess * post_process;
 
     glm::ivec2 mouse;

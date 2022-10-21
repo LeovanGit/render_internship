@@ -49,7 +49,8 @@ void DissolutionInstances::render()
     Globals * globals = Globals::getInstance();
     LightSystem * light_sys = LightSystem::getInstance();
 
-    globals->bindA2CBlendState();
+    //globals->bindA2CBlendState();
+    globals->bindDefaultBlendState();
     
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

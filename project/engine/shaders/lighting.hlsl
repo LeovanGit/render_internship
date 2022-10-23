@@ -1,11 +1,11 @@
 #ifndef LIGHTING_HLSL
 #define LIGHTING_HLSL
 
-Texture2D<float2> g_reflectance : register(t4);
-TextureCube g_irradiance : register(t5);
-TextureCube g_reflection : register(t6);
+Texture2D<float2> g_reflectance : register(t6);
+TextureCube g_irradiance : register(t7);
+TextureCube g_reflection : register(t8);
 
-TextureCubeArray<float4> g_shadow_maps : register(t7);
+TextureCubeArray<float4> g_shadow_maps : register(t9);
 
 static const float g_DEPTH_OFFSET = 0.005f;
 static const float g_TRANSMITTANCE_POWER = 32.0f;

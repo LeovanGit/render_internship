@@ -43,6 +43,15 @@ struct PS_INPUT
     float4x4 transform : TRANSFORM;
 };
 
+struct PS_OUTPUT
+{
+    float3 normals : SV_TARGET0;
+    float3 geometry_normals : SV_TARGET1;
+    float3 albedo : SV_TARGET2;
+    float2 roughness_metalness : SV_TARGET3;
+    float3 emissive : SV_TARGET4;
+};
+
 Texture2D g_albedo : register(t0);
 Texture2D g_roughness : register(t1);
 Texture2D g_metalness : register(t2);
@@ -81,17 +90,11 @@ PS_INPUT vertexShader(VS_INPUT input)
 //------------------------------------------------------------------------------
 // FRAGMENT SHADER
 //------------------------------------------------------------------------------
-struct Material
+PS_OUTPUT fragmentShader(PS_INPUT input,
+                         bool is_front_face: SV_IsFrontFace)
 {
-    float3 albedo;
-    float roughness;
-    float metalness;
-    float3 fresnel;
-};
-
-float4 fragmentShader(PS_INPUT input,
-                      bool is_front_face: SV_IsFrontFace) : SV_TARGET
-{
+    PS_OUTPUT output;
+    
     // geometry normal
     float3 GN = normalize(is_front_face ? input.normal : -input.normal);
     
@@ -101,24 +104,21 @@ float4 fragmentShader(PS_INPUT input,
 
     GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
     GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
+    output.geometry_normals = (GN + 1.0f) / 2.0f; // [-1; 1] -> [0; 1]
     
-    Material material;
-
     // conversion from sRGB to linear by raising to the power of 2.2
     // is delegated to DDSTextureLoader
-    material.albedo = g_has_albedo_texture ? g_albedo.Sample(g_wrap_sampler, input.uv).rgb :
-                                             g_albedo_default;
+    output.albedo = g_has_albedo_texture ?
+                        g_albedo.Sample(g_wrap_sampler, input.uv).rgb :
+                        g_albedo_default;
 
-    material.roughness = g_has_roughness_texture ? g_roughness.Sample(g_wrap_sampler, input.uv).r :
-                                                   g_roughness_default;
-    // perception roughness -> roughness
-    // material.roughness *= material.roughness;
-
-    material.metalness = g_has_metalness_texture ? g_metalness.Sample(g_wrap_sampler, input.uv).r :
-                                                   g_metalness_default;
-        
-    // use albedo as F0 for metals
-    material.fresnel = lerp(g_F0_DIELECTRIC, material.albedo, material.metalness);
+    output.roughness_metalness.r = g_has_roughness_texture ?
+                                       g_roughness.Sample(g_wrap_sampler, input.uv).r :
+                                       g_roughness_default;
+    
+    output.roughness_metalness.g = g_has_metalness_texture ?
+                                       g_metalness.Sample(g_wrap_sampler, input.uv).r :
+                                       g_metalness_default;
 
     // texture normal
     float3 N;
@@ -131,18 +131,10 @@ float4 fragmentShader(PS_INPUT input,
         N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
     }
     else N = GN;
-    
-    float3 V = normalize(g_camera_position - input.pos_WS);
-    
-    float3 color = calculateLighting(material.albedo,
-                                     material.roughness,
-                                     material.metalness,
-                                     material.fresnel,
-                                     N,
-                                     GN,
-                                     V,
-                                     input.pos_WS);
+    output.normals = (N + 1.0f) / 2.0f;
 
-    return float4(color, 1.0f);
+    output.emissive = float3(0.0f, 0.0f, 0.0f);
+    
+    return output;
 }
 

@@ -813,6 +813,9 @@ void Controller::initShaders()
                               true,
                               true,
                               true);
+
+    renderer->deferred_shader =
+        shader_mgr->getShader("../engine/shaders/deferred.hlsl");
 }
 
 void Controller::initTextures()
@@ -820,10 +823,10 @@ void Controller::initTextures()
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
     
-    mesh_system->setTextures(tex_mgr->getTexture("../engine/assets/environment/reflectance.dds"),
-                             tex_mgr->getTexture("../engine/assets/environment/irradiance.dds"),
-                             tex_mgr->getTexture("../engine/assets/environment/reflection.dds"),
-                             tex_mgr->getTexture("../engine/assets/dissolve.dds"));
+    mesh_system->setTextures(tex_mgr->getTexture("../engine/assets/dissolve.dds"));
+    renderer->reflectance = tex_mgr->getTexture("../engine/assets/environment/reflectance.dds");
+    renderer->irradiance = tex_mgr->getTexture("../engine/assets/environment/irradiance.dds");
+    renderer->reflection = tex_mgr->getTexture("../engine/assets/environment/reflection.dds");
 }
 
 void Controller::initSceneObjects()

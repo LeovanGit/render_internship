@@ -18,6 +18,15 @@ struct PS_INPUT
     float3 bitangent : BITANGENT;
 };
 
+struct PS_OUTPUT
+{
+    float3 normals : SV_TARGET0;
+    float3 geometry_normals : SV_TARGET1;
+    float3 albedo : SV_TARGET2;
+    float2 roughness_metalness : SV_TARGET3;
+    float3 emissive : SV_TARGET4;
+};
+
 Texture2D<float3> g_grass_albedo : register(t0);
 Texture2D<float> g_grass_opacity : register(t1);
 Texture2D<float> g_grass_roughness : register(t2);
@@ -72,60 +81,42 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
 //------------------------------------------------------------------------------
 // FRAGMENT SHADER
 //------------------------------------------------------------------------------
-struct Material
+PS_OUTPUT fragmentShader(PS_INPUT input,
+                         bool is_front_face : SV_IsFrontFace) : SV_TARGET
 {
-    float3 albedo;
-    float roughness;
-    float metalness;
-    float3 fresnel;
-};
-
-float4 fragmentShader(PS_INPUT input,
-                      bool is_front_face : SV_IsFrontFace) : SV_TARGET
-{
+    PS_OUTPUT output;
+    
     float opacity = g_grass_opacity.Sample(g_wrap_sampler, input.uv);
     if (opacity < 0.01f)
     {
         discard;
-        return float4(0.0f, 0.0f, 0.0f, 0.0f);
+        return output;
     }
     
     // geometry normal
     float3 GN = normalize(is_front_face ? input.normal : -input.normal);
+    output.geometry_normals = GN;
     
     float3x3 TBN = float3x3(input.tangent,
                             input.bitangent,
                             GN);
     
-    Material material;
     
-    material.albedo = g_grass_albedo.Sample(g_wrap_sampler, input.uv);
-    material.roughness = g_grass_roughness.Sample(g_wrap_sampler, input.uv);
-    material.metalness = 0.0f;
-    material.fresnel = g_F0_DIELECTRIC;
+    output.albedo = g_grass_albedo.Sample(g_wrap_sampler, input.uv);
+    output.roughness_metalness.r = g_grass_roughness.Sample(g_wrap_sampler, input.uv);
+    output.roughness_metalness.g = 0.0f;
     
     // texture normal
     float3 N = g_grass_normal.Sample(g_wrap_sampler, input.uv).rgb;
     N = 2.0f * N - 1.0f; // [0; 1] -> [-1; 1]
     N = normalize(mul(N, TBN));
-
-    float3 V = normalize(g_camera_position - input.posWS);
+    output.normals = N;
 
     float3 transmittance_color = g_grass_translucency.Sample(g_wrap_sampler, input.uv);
+    output.emissive = transmittance_color;
     
-    float3 color = calculateGrassLighting(material.albedo,
-                                          material.roughness,
-                                          material.metalness,
-                                          material.fresnel,
-                                          N,
-                                          GN,
-                                          V,
-                                          input.posWS,
-                                          transmittance_color);
-
-    float ao = g_ambient_occlusion.Sample(g_wrap_sampler, input.uv);
-    //float opacity = g_grass_opacity.Sample(g_wrap_sampler, input.uv);
+    // float ao = g_ambient_occlusion.Sample(g_wrap_sampler, input.uv); ???
     
-    //return float4(color * ao, opacity);
-    return float4(color * ao, 1.0f);
+    //return float4(color * ao, 1.0f);
+    return output;
 }

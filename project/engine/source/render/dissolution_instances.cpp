@@ -58,13 +58,7 @@ void DissolutionInstances::render()
     shader->bind();
     instance_buffer.bind(1);
 
-    reflectance->bind(4);
-    irradiance->bind(5);
-    reflection->bind(6);
-
     dissolve->bind(13);
-
-    light_sys->bindShadowMapSRV(7);
     
     uint32_t rendered_instances = 0;
     

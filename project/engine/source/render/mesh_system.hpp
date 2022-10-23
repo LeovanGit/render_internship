@@ -31,12 +31,10 @@ public:
                     std::shared_ptr<Shader> shadow,
                     std::shared_ptr<Shader> dissolve);
 
-    void setTextures(std::shared_ptr<Texture> reflectance,
-                     std::shared_ptr<Texture> irradiance,
-                     std::shared_ptr<Texture> reflection,
-                     std::shared_ptr<Texture> dissolve);
+    void setTextures(std::shared_ptr<Texture> dissolve);
     
     void render();
+    void renderLights();
 
     // for shadows from point lights
     void renderShadowCubeMaps(int cubemaps_count);

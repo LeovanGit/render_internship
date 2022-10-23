@@ -32,19 +32,28 @@ public:
     void bindDepthBuffer();
     void changeDepthBufferAccess(bool is_read_only = false);
     void copyDepthBuffer();
+    void fillDepthBufferFromCopy();
     
     void initRenderTarget(int width, int height);
     void clearRenderTarget();
-    void bindRenderTarget();
+    void bindRenderTarget(bool bind_depth_buffer = true);
 
     void initGBuffer(int width, int height);
     void bindGBufferSRV();
     void bindGBufferRTV();
-    
+    void clearGBuffer();
+
     void unbindSRV(int slot);
+    void unbindSRVs();
     void unbindRTVs();
         
     Sky sky;
+
+    std::shared_ptr<Shader> deferred_shader;
+
+    std::shared_ptr<Texture> reflectance;
+    std::shared_ptr<Texture> irradiance;
+    std::shared_ptr<Texture> reflection;
     
 private:
     DxResPtr<ID3D11Texture2D> depth;
@@ -60,6 +69,10 @@ private:
     DxResPtr<ID3D11RenderTargetView> normals_rtv;
     DxResPtr<ID3D11ShaderResourceView> normals_srv;
 
+    DxResPtr<ID3D11Texture2D> geometry_normals;
+    DxResPtr<ID3D11RenderTargetView> geometry_normals_rtv;
+    DxResPtr<ID3D11ShaderResourceView> geometry_normals_srv;
+    
     DxResPtr<ID3D11Texture2D> albedo;
     DxResPtr<ID3D11RenderTargetView> albedo_rtv;
     DxResPtr<ID3D11ShaderResourceView> albedo_srv;
@@ -86,9 +99,12 @@ private:
     void initDepthBufferCopy(int width, int height);
     
     void initNormalsTexture(int width, int height);
+    void initGeometryNormalsTexture(int width, int height);
     void initAlbedoTexture(int width, int height);
     void initRoughnessMetalnessTexture(int width, int height);
     void initEmissiveTexture(int width, int height);
+
+    void deferredShading();
 };
 } // namespace engine
 

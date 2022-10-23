@@ -147,10 +147,6 @@ public:
     VertexBuffer<glm::mat4> instance_buffer;
 
     std::shared_ptr<Shader> shader;
-
-    std::shared_ptr<Texture> reflectance;
-    std::shared_ptr<Texture> irradiance;
-    std::shared_ptr<Texture> reflection;
 };
 } // namespace engine
 

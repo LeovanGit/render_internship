@@ -20,19 +20,18 @@ struct PS_INPUT
 
 struct PS_OUTPUT
 {
-    float3 normals : SV_TARGET0;
-    float3 geometry_normals : SV_TARGET1;
-    float3 albedo : SV_TARGET2;
-    float2 roughness_metalness : SV_TARGET3;
-    float3 emissive : SV_TARGET4;
+    float4 normals : SV_TARGET0;
+    float3 albedo : SV_TARGET1;
+    float2 roughness_metalness : SV_TARGET2;
+    float4 emissive_ao : SV_TARGET3;
 };
 
 Texture2D<float3> g_grass_albedo : register(t0);
 Texture2D<float> g_grass_opacity : register(t1);
 Texture2D<float> g_grass_roughness : register(t2);
 Texture2D<float3> g_grass_normal : register(t3);
-Texture2D<float> g_ambient_occlusion : register(t8);
-Texture2D<float3> g_grass_translucency : register(t9);
+Texture2D<float> g_ambient_occlusion : register(t4);
+Texture2D<float3> g_grass_translucency : register(t5);
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -95,7 +94,7 @@ PS_OUTPUT fragmentShader(PS_INPUT input,
     
     // geometry normal
     float3 GN = normalize(is_front_face ? input.normal : -input.normal);
-    output.geometry_normals = GN;
+    output.normals.ba = packOctahedron(GN);
     
     float3x3 TBN = float3x3(input.tangent,
                             input.bitangent,
@@ -110,13 +109,14 @@ PS_OUTPUT fragmentShader(PS_INPUT input,
     float3 N = g_grass_normal.Sample(g_wrap_sampler, input.uv).rgb;
     N = 2.0f * N - 1.0f; // [0; 1] -> [-1; 1]
     N = normalize(mul(N, TBN));
-    output.normals = N;
+    output.normals.rg = packOctahedron(N);
 
     float3 transmittance_color = g_grass_translucency.Sample(g_wrap_sampler, input.uv);
-    output.emissive = transmittance_color;
+    output.emissive_ao.rgb = calculateSurfaceLightTransmission(input.posWS,
+                                                               GN,
+                                                               transmittance_color);
     
-    // float ao = g_ambient_occlusion.Sample(g_wrap_sampler, input.uv); ???
+    output.emissive_ao.a = g_ambient_occlusion.Sample(g_wrap_sampler, input.uv);
     
-    //return float4(color * ao, 1.0f);
     return output;
 }

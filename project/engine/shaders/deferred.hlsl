@@ -1,11 +1,11 @@
 #include "globals.hlsl"
 #include "lighting.hlsl"
+#include "math.hlsl"
 
-Texture2D<float3> g_normals : register(t0);
-Texture2D<float3> g_geometry_normals : register(t1);
-Texture2D<float3> g_albedo : register(t2);
-Texture2D<float2> g_roughness_metalness : register(t3);
-Texture2D<float3> g_emissive : register(t4);
+Texture2D<float4> g_normals : register(t0);
+Texture2D<float3> g_albedo : register(t1);
+Texture2D<float2> g_roughness_metalness : register(t2);
+Texture2D<float4> g_emissive_ao : register(t3);
 Texture2D<float> g_depth : register(t5);
 
 struct PS_INPUT
@@ -34,15 +34,13 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID)
 //------------------------------------------------------------------------------
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
-    float3 N = g_normals.Load(int3(input.posCS.xy, 0));
-    N = N * 2.0f - 1.0f;
-    
-    float3 GN = g_geometry_normals.Load(int3(input.posCS.xy, 0));
-    GN = GN * 2.0f - 1.0f;
+    float4 normals = g_normals.Load(int3(input.posCS.xy, 0));
+    float3 N = unpackOctahedron(normals.rg);    
+    float3 GN = unpackOctahedron(normals.ba);
     
     float3 albedo = g_albedo.Load(int3(input.posCS.xy, 0));
     float2 RM = g_roughness_metalness.Load(int3(input.posCS.xy, 0));
-    float3 emissive = g_emissive.Load(int3(input.posCS.xy, 0));
+    float4 emissive_ao = g_emissive_ao.Load(int3(input.posCS.xy, 0));
     float depth = g_depth.Load(int3(input.posCS.xy, 0)).r;
 
     float2 posCS = float2((input.posCS.x / g_screen_size.x) * 2.0f - 1.0f,
@@ -64,8 +62,9 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
                                      GN,
                                      V,
                                      posWS);
-
-    color += emissive;
+    
+    color += emissive_ao.rgb;
+    color *= emissive_ao.a;
     
     return float4(color, 1.0f);
 }

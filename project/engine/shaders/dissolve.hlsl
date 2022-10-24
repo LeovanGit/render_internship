@@ -52,11 +52,10 @@ struct PS_INPUT
 
 struct PS_OUTPUT
 {
-    float3 normals : SV_TARGET0;
-    float3 geometry_normals : SV_TARGET1;
-    float3 albedo : SV_TARGET2;
-    float2 roughness_metalness : SV_TARGET3;
-    float3 emissive : SV_TARGET4;
+    float4 normals : SV_TARGET0;
+    float3 albedo : SV_TARGET1;
+    float2 roughness_metalness : SV_TARGET2;
+    float4 emissive_ao : SV_TARGET3;
 };
 
 Texture2D g_albedo : register(t0);
@@ -109,6 +108,7 @@ PS_OUTPUT fragmentShader(PS_INPUT input,
                          bool is_front_face : SV_IsFrontFace)
 {
     PS_OUTPUT output;
+    output.emissive_ao = float4(0.0f, 0.0f, 0.0f, 1.0f);
     
     float alpha = g_dissolve.Sample(g_wrap_sampler, input.uv).r;
     float threshold = (g_time - input.spawn_time) / input.animation_time;
@@ -129,12 +129,10 @@ PS_OUTPUT fragmentShader(PS_INPUT input,
             float4 g_emissive_color_norm = float4(g_EMISSIVE_COLOR.rgb /
                                                   max3(g_EMISSIVE_COLOR), 1.0f);
 
-            output.emissive = lerp(g_emissive_color_norm,
-                                   g_EMISSIVE_COLOR,
-                                   delta);
-            output.albedo = float3(0.0f, 0.0f, 0.0f);
-            output.roughness_metalness = float2(1.0f, 0.0f);
-            return output;
+            output.emissive_ao = lerp(g_emissive_color_norm,
+                                      g_EMISSIVE_COLOR,
+                                      delta);
+            output.emissive_ao.a = 1.0f;
         }
         else
         {
@@ -142,7 +140,6 @@ PS_OUTPUT fragmentShader(PS_INPUT input,
             return output;
         }
     }
-    output.emissive = float3(0.0f, 0.0f, 0.0f);
     
     // geometry normal
     float3 GN = normalize(is_front_face ? input.normal : -input.normal);
@@ -153,7 +150,7 @@ PS_OUTPUT fragmentShader(PS_INPUT input,
 
     GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
     GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
-    output.geometry_normals = (GN + 1.0f) / 2.0f; // [-1; 1] -> [0; 1]
+    output.normals.ba = packOctahedron(GN);
 
     // conversion from sRGB to linear by raising to the power of 2.2
     // is delegated to DDSTextureLoader
@@ -180,7 +177,7 @@ PS_OUTPUT fragmentShader(PS_INPUT input,
         N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
     }
     else N = GN;
-    output.normals = (N + 1.0f) / 2.0f;
+    output.normals.rg = packOctahedron(N);
     
     return output;
 }

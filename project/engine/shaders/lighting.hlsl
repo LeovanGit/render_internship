@@ -164,9 +164,9 @@ float3 calculateSurfaceLightTransmission(float3 posWS,
 
         // if light source is behind the surface
         if (NL < 0.0f) transmittion += g_dir_lights[i].radiance *
-                                    transmittance_color *
-                                    pow(-NL, g_TRANSMITTANCE_POWER) *
-                                    g_dir_lights[i].solid_angle;
+                                       transmittance_color *
+                                       pow(-NL, g_TRANSMITTANCE_POWER) *
+                                       g_dir_lights[i].solid_angle;
     }
     
     return transmittion;
@@ -379,43 +379,6 @@ float3 calculateLighting(float3 albedo,
     return color;
 }
 
-float3 calculateGrassLighting(float3 albedo,
-                              float roughness,
-                              float metalness,
-                              float3 fresnel,
-                              float3 N,
-                              float3 GN,
-                              float3 V,
-                              float3 posWS,
-                              float3 transmittance_color)
-{
-    float3 color = 0.0f;
-    color += calculateDirectionalLights(albedo,
-                                        roughness,
-                                        metalness,
-                                        fresnel,
-                                        N,
-                                        V);
-    
-    color += calculatePointLights(albedo,
-                                  roughness,
-                                  metalness,
-                                  fresnel,
-                                  N,
-                                  GN,
-                                  V,
-                                  posWS);
-
-    color += calculateEnvironment(albedo,
-                                  metalness,
-                                  N);
-
-    color += calculateSurfaceLightTransmission(posWS,
-                                               N,
-                                               transmittance_color);
-    
-    return color;
-}
 //------------------------------------------------------------------------------
 // LIGHTMAPS LIGHTING
 //------------------------------------------------------------------------------

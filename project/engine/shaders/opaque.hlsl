@@ -1,5 +1,6 @@
 #include "globals.hlsl"
 #include "lighting.hlsl"
+#include "math.hlsl"
 
 cbuffer PerMesh : register(b1)
 {
@@ -45,11 +46,10 @@ struct PS_INPUT
 
 struct PS_OUTPUT
 {
-    float3 normals : SV_TARGET0;
-    float3 geometry_normals : SV_TARGET1;
-    float3 albedo : SV_TARGET2;
-    float2 roughness_metalness : SV_TARGET3;
-    float3 emissive : SV_TARGET4;
+    float4 normals : SV_TARGET0;
+    float3 albedo : SV_TARGET1;
+    float2 roughness_metalness : SV_TARGET2;
+    float4 emissive_ao : SV_TARGET3;
 };
 
 Texture2D g_albedo : register(t0);
@@ -104,7 +104,7 @@ PS_OUTPUT fragmentShader(PS_INPUT input,
 
     GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
     GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
-    output.geometry_normals = (GN + 1.0f) / 2.0f; // [-1; 1] -> [0; 1]
+    output.normals.ba = packOctahedron(GN);
     
     // conversion from sRGB to linear by raising to the power of 2.2
     // is delegated to DDSTextureLoader
@@ -131,9 +131,9 @@ PS_OUTPUT fragmentShader(PS_INPUT input,
         N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
     }
     else N = GN;
-    output.normals = (N + 1.0f) / 2.0f;
+    output.normals.rg = packOctahedron(N);
 
-    output.emissive = float3(0.0f, 0.0f, 0.0f);
+    output.emissive_ao = float4(0.0f, 0.0f, 0.0f, 1.0f);
     
     return output;
 }

@@ -69,10 +69,6 @@ private:
     DxResPtr<ID3D11RenderTargetView> normals_rtv;
     DxResPtr<ID3D11ShaderResourceView> normals_srv;
 
-    DxResPtr<ID3D11Texture2D> geometry_normals;
-    DxResPtr<ID3D11RenderTargetView> geometry_normals_rtv;
-    DxResPtr<ID3D11ShaderResourceView> geometry_normals_srv;
-    
     DxResPtr<ID3D11Texture2D> albedo;
     DxResPtr<ID3D11RenderTargetView> albedo_rtv;
     DxResPtr<ID3D11ShaderResourceView> albedo_srv;
@@ -81,9 +77,9 @@ private:
     DxResPtr<ID3D11RenderTargetView> roughness_metalness_rtv;
     DxResPtr<ID3D11ShaderResourceView> roughness_metalness_srv;
 
-    DxResPtr<ID3D11Texture2D> emissive;
-    DxResPtr<ID3D11RenderTargetView> emissive_rtv;
-    DxResPtr<ID3D11ShaderResourceView> emissive_srv;    
+    DxResPtr<ID3D11Texture2D> emissive_ao;
+    DxResPtr<ID3D11RenderTargetView> emissive_ao_rtv;
+    DxResPtr<ID3D11ShaderResourceView> emissive_ao_srv;    
     
     DxResPtr<ID3D11Texture2D> hdr_texture;
     DxResPtr<ID3D11RenderTargetView> hdr_rtv;
@@ -99,7 +95,6 @@ private:
     void initDepthBufferCopy(int width, int height);
     
     void initNormalsTexture(int width, int height);
-    void initGeometryNormalsTexture(int width, int height);
     void initAlbedoTexture(int width, int height);
     void initRoughnessMetalnessTexture(int width, int height);
     void initEmissiveTexture(int width, int height);

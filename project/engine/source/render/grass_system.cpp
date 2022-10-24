@@ -76,8 +76,8 @@ void GrassSystem::render()
     opacity->bind(1);
     roughness->bind(2);
     normal->bind(3);
-    ambient_occlusion->bind(8);
-    translucency->bind(9);
+    ambient_occlusion->bind(4);
+    translucency->bind(5);
 
     globals->device_context4->DrawInstanced(18,
                                             instance_buffer.get_size(),

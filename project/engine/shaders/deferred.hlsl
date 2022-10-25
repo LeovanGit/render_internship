@@ -62,9 +62,9 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
                                      GN,
                                      V,
                                      posWS);
-    
-    color += emissive_ao.rgb;
+
     color *= emissive_ao.a;
+    color += emissive_ao.rgb;
     
     return float4(color, 1.0f);
 }

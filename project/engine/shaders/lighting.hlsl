@@ -152,8 +152,7 @@ float3 calculateSurfaceLightTransmission(float3 posWS,
             transmittion += g_point_lights[i].radiance *
                             transmittance_color *
                             solid_angle *
-                            pow(-NL, g_TRANSMITTANCE_POWER) *
-                            shadow;
+                            pow(-NL, g_TRANSMITTANCE_POWER);
         }
     }
 

@@ -48,9 +48,10 @@ void Renderer::renderFrame(windows::Window & window,
 
     renderShadows();
 
+    setStencilTest(false);    
     bindDepthBuffer();
     clearDepthBuffer();
-
+    
     bindGBufferRTV();
     clearGBuffer();
     
@@ -59,8 +60,10 @@ void Renderer::renderFrame(windows::Window & window,
 
     unbindRTVs();
 
+    setStencilTest(true);
     deferredShading();
 
+    disableStencilTest();
     sky.render();
     mesh_sys->renderLights();
     
@@ -95,7 +98,7 @@ void Renderer::bindDepthBuffer()
     Globals * globals = Globals::getInstance();
 
     globals->device_context4->OMSetDepthStencilState(depth_dss.ptr(),
-                                                     0);
+                                                     1);
 }
 
 void Renderer::changeDepthBufferAccess(bool is_read_only)
@@ -129,6 +132,55 @@ void Renderer::fillDepthBufferFromCopy()
 
     globals->device_context4->CopyResource(depth.ptr(),
                                            depth_copy.ptr());
+}
+
+void Renderer::setStencilTest(bool is_read_only)
+{
+    Globals * globals = Globals::getInstance();
+    
+    D3D11_DEPTH_STENCIL_DESC dss_desc;
+    depth_dss->GetDesc(&dss_desc);
+    dss_desc.StencilEnable = true;
+    dss_desc.StencilReadMask = 0xFF;
+    dss_desc.StencilWriteMask = 0xFF;
+
+    if (is_read_only)
+    {
+        dss_desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+        dss_desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+        dss_desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+        dss_desc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+    }
+    else
+    {
+        dss_desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_REPLACE;
+        dss_desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_REPLACE;
+        dss_desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
+        dss_desc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+    }
+
+    dss_desc.BackFace = dss_desc.FrontFace;
+
+    HRESULT result = globals->device5->CreateDepthStencilState(&dss_desc,
+                                                               depth_dss.reset());
+    assert(result >= 0 && "CreateDepthStencilState");
+
+    bindDepthBuffer();
+}
+
+void Renderer::disableStencilTest()
+{
+    Globals * globals = Globals::getInstance();
+    
+    D3D11_DEPTH_STENCIL_DESC dss_desc;
+    depth_dss->GetDesc(&dss_desc);
+    dss_desc.StencilEnable = false;
+
+    HRESULT result = globals->device5->CreateDepthStencilState(&dss_desc,
+                                                               depth_dss.reset());
+    assert(result >= 0 && "CreateDepthStencilState");
+
+    bindDepthBuffer();
 }
 
 void Renderer::initRenderTarget(int width, int height)
@@ -399,8 +451,8 @@ void Renderer::initDepthBufferMain(int width, int height)
     D3D11_DEPTH_STENCIL_DESC dss_desc;
     ZeroMemory(&dss_desc, sizeof(dss_desc));
     dss_desc.DepthEnable = true;
-    dss_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
-    dss_desc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_GREATER_EQUAL;
+    dss_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    dss_desc.DepthFunc = D3D11_COMPARISON_GREATER_EQUAL;
 
     result = globals->device5->CreateDepthStencilState(&dss_desc,
                                                        depth_dss.reset());

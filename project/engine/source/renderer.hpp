@@ -33,6 +33,9 @@ public:
     void changeDepthBufferAccess(bool is_read_only = false);
     void copyDepthBuffer();
     void fillDepthBufferFromCopy();
+
+    void setStencilTest(bool is_read_only = false);
+    void disableStencilTest();
     
     void initRenderTarget(int width, int height);
     void clearRenderTarget();

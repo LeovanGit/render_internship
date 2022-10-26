@@ -12,6 +12,7 @@
 #include "mesh_system.hpp"
 #include "particle_system.hpp"
 #include "grass_system.hpp"
+#include "decal_system.hpp"
 
 namespace engine
 {
@@ -93,6 +94,7 @@ private:
     void renderParticles(float delta_time,
                          const Camera & camera);
     void renderGrass();
+    void renderDecals();
 
     void initDepthBufferMain(int width, int height);
     void initDepthBufferCopy(int width, int height);

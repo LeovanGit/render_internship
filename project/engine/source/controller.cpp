@@ -422,6 +422,7 @@ void Controller::initShaders()
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
     engine::GrassSystem * grass_sys = engine::GrassSystem::getInstance();
+    engine::DecalSystem * decal_sys = engine::DecalSystem::getInstance();
     
     D3D11_INPUT_ELEMENT_DESC ied_opaque[] =
     {
@@ -779,6 +780,33 @@ void Controller::initShaders()
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
     };
+
+    D3D11_INPUT_ELEMENT_DESC ied_decals[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         0,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"SIZE",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         1,
+         12,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"ALBEDO",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         20,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+    };
     
     mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
                                                   ied_opaque,
@@ -816,17 +844,25 @@ void Controller::initShaders()
 
     renderer->deferred_shader =
         shader_mgr->getShader("../engine/shaders/deferred.hlsl");
+
+    decal_sys->shader =
+        shader_mgr->getShader("../engine/shaders/decals.hlsl",
+                              ied_decals,
+                              3);
 }
 
 void Controller::initTextures()
 {
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
+    engine::DecalSystem * decal_sys = engine::DecalSystem::getInstance();
     
     mesh_system->setTextures(tex_mgr->getTexture("../engine/assets/dissolve.dds"));
     renderer->reflectance = tex_mgr->getTexture("../engine/assets/environment/reflectance.dds");
     renderer->irradiance = tex_mgr->getTexture("../engine/assets/environment/irradiance.dds");
     renderer->reflection = tex_mgr->getTexture("../engine/assets/environment/reflection.dds");
+
+    decal_sys->normals = tex_mgr->getTexture("../engine/assets/decal_normal.dds");
 }
 
 void Controller::initSceneObjects()
@@ -1203,6 +1239,28 @@ void Controller::processInput(Camera & camera,
         spawnKnight(math::Transform(position,
                                     math::EulerAngles(0.0f, 0.0f, 0.0f),
                                     glm::vec3(10.0f, 10.0f, 10.0f)));
+    }
+    if (keys_log[KEY_F] && was_released[KEY_F])
+    {
+        engine::DecalSystem * decal_sys = engine::DecalSystem::getInstance();
+
+        camera.updateMatrices();
+
+        glm::vec2 xy;
+        xy.x = 2.0f * (mouse.x + 0.5f) / width - 1.0f;
+        xy.y = 1.0f - 2.0f * (mouse.y + 0.5f) / height;
+
+        math::Ray ray;
+        ray.origin = camera.getPosition();
+        ray.direction = camera.reproject(xy.x, xy.y) - ray.origin;
+
+        math::MeshIntersection nearest;
+        nearest.reset(0.0f);
+
+        if (mesh_system->findIntersection(ray, nearest))
+        {
+            decal_sys->addDecal(nearest.pos);
+        }        
     }
 }
 

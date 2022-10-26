@@ -23,6 +23,7 @@
 #include "engine.hpp"
 #include "time_system.hpp"
 #include "grass_system.hpp"
+#include "decal_system.hpp"
 
 constexpr int KEYS_COUNT = 254; // 254 keys defined in WinAPI
 constexpr int KEY_W = 87;
@@ -38,6 +39,7 @@ constexpr int KEY_MINUS = 189;
 constexpr int KEY_R = 82;
 constexpr int KEY_T = 84;
 constexpr int KEY_N = 78;
+constexpr int KEY_F = 70;
 constexpr int KEY_SHIFT = 16;
 constexpr int KEY_LMOUSE = 1;
 constexpr int KEY_RMOUSE = 2;

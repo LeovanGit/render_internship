@@ -12,6 +12,7 @@
 #include "window.hpp"
 #include "time_system.hpp"
 #include "grass_system.hpp"
+#include "decal_system.hpp"
 
 namespace engine
 {

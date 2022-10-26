@@ -18,6 +18,7 @@
 | Left Mouse Button hold and drag  | Rotate camera (rotate speed depends on offset from center of the screen) |
 | Right Mouse Button hold and drag | Grab and move object                                         |
 | N                                | Spawn knight                                                 |
+| F                                | Spawn decal                                                  |
 
 # TEXTURE FILTERING
 

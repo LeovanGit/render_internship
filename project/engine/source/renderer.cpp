@@ -57,6 +57,7 @@ void Renderer::renderFrame(windows::Window & window,
     
     renderSceneObjects(window);
     renderGrass();
+    renderDecals();
 
     unbindRTVs();
 
@@ -412,6 +413,13 @@ void Renderer::renderGrass()
     engine::GrassSystem * grass_system = engine::GrassSystem::getInstance();
 
     grass_system->render();
+}
+
+void Renderer::renderDecals()
+{
+    DecalSystem * decal_sys = DecalSystem::getInstance();
+
+    decal_sys->render();
 }
 
 void Renderer::initDepthBufferMain(int width, int height)

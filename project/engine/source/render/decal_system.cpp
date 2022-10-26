@@ -4,7 +4,7 @@
 
 namespace
 {
-constexpr glm::vec2 DECAL_INIT_SIZE(1.0f, 1.0f);
+constexpr glm::vec2 DECAL_INIT_SIZE(2.0f);
 } // namespace
 
 namespace engine
@@ -32,15 +32,24 @@ void DecalSystem::del()
     else spdlog::error("DecalsSystem::del() was called twice!");
 }
 
-void DecalSystem::addDecal(const glm::vec3 & position)
+void DecalSystem::addDecal(const glm::vec3 & position,
+                           const glm::vec3 & forward,
+                           const glm::vec3 & right,
+                           const glm::vec3 & up)
 {
     glm::vec3 albedo(math::randomFromRange(0.0f, 1.0f),
                      math::randomFromRange(0.0f, 1.0f),
                      math::randomFromRange(0.0f, 1.0f));
+
+    glm::mat4x4 transform(right.x, right.y, right.z, 0.0f,
+                          up.x, up.y, up.z, 0.0f,
+                          forward.x, forward.y, forward.z, 0.0f,
+                          position.x, position.y, position.z, 1.0f);
     
     decals.push_back(Decal(position,
                            DECAL_INIT_SIZE,
-                           albedo));
+                           albedo,
+                           transform));
 }
 
 void DecalSystem::updateInstanceBuffer()
@@ -56,7 +65,8 @@ void DecalSystem::updateInstanceBuffer()
     {
         dst[copied_count++] = GPUInstance(decal.position,
                                           decal.size,
-                                          decal.albedo);
+                                          decal.albedo,
+                                          decal.transform);
     }
     
     instance_buffer.unmap();
@@ -74,14 +84,14 @@ void DecalSystem::render()
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     globals->bindDefaultBlendState();
-    globals->bindRasterizer(true);
+    globals->bindRasterizer(false);
 
     shader->bind();
     instance_buffer.bind(1);
     
     normals->bind(0);
 
-    globals->device_context4->DrawInstanced(6,
+    globals->device_context4->DrawInstanced(36,
                                             instance_buffer.get_size(),
                                             0,
                                             0);

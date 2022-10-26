@@ -25,7 +25,10 @@ public:
 
     static void del();
 
-    void addDecal(const glm::vec3 & position);
+    void addDecal(const glm::vec3 & position,
+                  const glm::vec3 & forward,
+                  const glm::vec3 & right,
+                  const glm::vec3 & up);
 
     void updateInstanceBuffer();
     void render();
@@ -43,15 +46,18 @@ private:
     {
         GPUInstance(const glm::vec3 & position,
                     const glm::vec2 & size,
-                    const glm::vec3 & albedo) :
+                    const glm::vec3 & albedo,
+                    const glm::mat4x4 & transform) :
                     position(position),
                     size(size),
-                    albedo(albedo)
+                    albedo(albedo),
+                    transform(transform)
         {}
 
         glm::vec3 position;
         glm::vec2 size;
         glm::vec3 albedo;
+        glm::mat4x4 transform;
     };
 
     VertexBuffer<GPUInstance> instance_buffer;

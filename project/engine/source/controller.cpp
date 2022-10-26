@@ -806,6 +806,39 @@ void Controller::initShaders()
          20,
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
+
+        {"TRANSFORM",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         32,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         1,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         48,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         2,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         64,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         3,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         80,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
     };
     
     mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
@@ -848,7 +881,7 @@ void Controller::initShaders()
     decal_sys->shader =
         shader_mgr->getShader("../engine/shaders/decals.hlsl",
                               ied_decals,
-                              3);
+                              7);
 }
 
 void Controller::initTextures()
@@ -1242,6 +1275,8 @@ void Controller::processInput(Camera & camera,
     }
     if (keys_log[KEY_F] && was_released[KEY_F])
     {
+        was_released[KEY_F] = false;
+
         engine::DecalSystem * decal_sys = engine::DecalSystem::getInstance();
 
         camera.updateMatrices();
@@ -1259,7 +1294,10 @@ void Controller::processInput(Camera & camera,
 
         if (mesh_system->findIntersection(ray, nearest))
         {
-            decal_sys->addDecal(nearest.pos);
+            decal_sys->addDecal(nearest.pos,
+                                camera.getForward(),
+                                camera.getRight(),
+                                camera.getUp());
         }        
     }
 }

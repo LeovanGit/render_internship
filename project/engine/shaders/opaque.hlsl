@@ -31,6 +31,8 @@ struct VS_INPUT
     float4 transform_1 : TRANSFORM1;
     float4 transform_2 : TRANSFORM2;
     float4 transform_3 : TRANSFORM3;
+
+    uint model_id : MODEL_ID;
 };
 
 struct PS_INPUT
@@ -42,6 +44,7 @@ struct PS_INPUT
     float3 tangent : TANGENT;
     float3 bitangent : BITANGENT;
     float4x4 transform : TRANSFORM;
+    uint model_id : MODEL_ID;
 };
 
 struct PS_OUTPUT
@@ -50,6 +53,7 @@ struct PS_OUTPUT
     float3 albedo : SV_TARGET1;
     float2 roughness_metalness : SV_TARGET2;
     float4 emissive_ao : SV_TARGET3;
+    uint model_id : SV_TARGET4;
 };
 
 Texture2D g_albedo : register(t0);
@@ -83,6 +87,8 @@ PS_INPUT vertexShader(VS_INPUT input)
                                                       -input.bitangent;
 
     output.transform = transform;
+
+    output.model_id = input.model_id;
 
     return output;
 }
@@ -134,6 +140,8 @@ PS_OUTPUT fragmentShader(PS_INPUT input,
     output.normals.rg = packOctahedron(N);
 
     output.emissive_ao = float4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    output.model_id = input.model_id;
     
     return output;
 }

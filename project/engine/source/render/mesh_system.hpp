@@ -26,6 +26,8 @@ public:
 
     static void del();
 
+    static uint32_t getModelID();
+
     void setShaders(std::shared_ptr<Shader> opaque,
                     std::shared_ptr<Shader> emissive,
                     std::shared_ptr<Shader> shadow,
@@ -74,6 +76,7 @@ private:
     ~MeshSystem() = default;
     
     static MeshSystem * instance;
+    static uint32_t model_id;
 };
 
 template <>

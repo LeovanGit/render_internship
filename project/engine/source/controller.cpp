@@ -120,10 +120,13 @@ void Controller::initKnight(const math::Transform & transform)
 
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
+    oi::Instance instance(transform_id,
+                          mesh_system->getModelID());
+    
     mesh_system->addInstance<engine::OpaqueInstances>(
         model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
         materials,
-        transform_id);
+        instance);
 }
 
 void Controller::spawnKnight(const math::Transform & transform)
@@ -272,11 +275,14 @@ void Controller::initWall(const math::Transform & transform)
     };
 
     uint32_t transform_id = trans_system->transforms.insert(transform);
+
+    oi::Instance instance(transform_id,
+                          mesh_system->getModelID());
     
     mesh_system->addInstance<engine::OpaqueInstances>(
         model_mgr->getModel("../engine/assets/Wall/SunCityWall.fbx"),
         materials,
-        transform_id);
+        instance);
 }
 
 void Controller::initCube(const math::Transform & transform,
@@ -288,9 +294,12 @@ void Controller::initCube(const math::Transform & transform,
 
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
+    oi::Instance instance(transform_id,
+                          mesh_system->getModelID());
+    
     mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultCube("cube"),
                                                       materials,
-                                                      transform_id);
+                                                      instance);
 }
 
 void Controller::initPlane(const math::Transform & transform,
@@ -302,9 +311,12 @@ void Controller::initPlane(const math::Transform & transform,
 
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
+    oi::Instance instance(transform_id,
+                          mesh_system->getModelID());
+    
     mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultPlane("plane"),
                                                       materials,
-                                                      transform_id);
+                                                      instance);
 }
 
 void Controller::initSphere(const math::Transform & transform,
@@ -316,9 +328,12 @@ void Controller::initSphere(const math::Transform & transform,
 
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
+    oi::Instance instance(transform_id,
+                          mesh_system->getModelID());
+    
     mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultSphere("sphere"),
                                                       materials,
-                                                      transform_id);
+                                                      instance);
 }
 
 void Controller::initFloor(const std::vector<oi::Material> & materials)
@@ -495,6 +510,14 @@ void Controller::initShaders()
          DXGI_FORMAT_R32G32B32A32_FLOAT,
          1,
          48,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"MODEL_ID",
+         0,
+         DXGI_FORMAT_R16_UINT,
+         1,
+         64,
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
     };
@@ -870,11 +893,19 @@ void Controller::initShaders()
          144,
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
+
+        {"MODEL_ID",
+         0,
+         DXGI_FORMAT_R16_UINT,
+         1,
+         160,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
     };
     
     mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
                                                   ied_opaque,
-                                                  9),
+                                                  10),
                             shader_mgr->getShader("../engine/shaders/emissive.hlsl",
                                                   ied_emissive,
                                                   8),
@@ -912,7 +943,7 @@ void Controller::initShaders()
     decal_sys->shader =
         shader_mgr->getShader("../engine/shaders/decals.hlsl",
                               ied_decals,
-                              11);
+                              12);
 }
 
 void Controller::initTextures()
@@ -1329,7 +1360,8 @@ void Controller::processInput(Camera & camera,
             glm::vec4 posMS_h = glm::inverse(transform.toMat4()) * glm::vec4(nearest.pos, 1.0f);
             glm::vec3 posMS = glm::vec3(posMS_h) / posMS_h.w;
             
-            decal_sys->addDecal(nearest.transform_id,
+            decal_sys->addDecal(nearest.model_id,
+                                nearest.transform_id,
                                 posMS,
                                 camera.getForward(),
                                 camera.getRight(),

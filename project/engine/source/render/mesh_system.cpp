@@ -9,6 +9,7 @@ constexpr uint32_t shadow_cubemaps_count = 4;
 namespace engine
 {
 MeshSystem * MeshSystem::instance = nullptr;
+uint32_t MeshSystem::model_id = 0;
 
 void MeshSystem::init()
 {
@@ -29,6 +30,14 @@ void MeshSystem::del()
         instance = nullptr;
     }
     else spdlog::error("MeshSystem::del() was called twice!");
+}
+
+uint32_t MeshSystem::getModelID()
+{
+    uint32_t id = model_id;
+    ++model_id;
+    
+    return id;
 }
 
 void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
@@ -110,6 +119,7 @@ bool MeshSystem::findIntersection(const math::Ray & ray_ws,
                     if (octree[i].intersect(ray_ms, nearest))
                     {
                         nearest.transform_id = instance.transform_id;
+                        nearest.model_id = instance.model_id;
 
                         pos_ws = transform *
                                  mesh_to_model *

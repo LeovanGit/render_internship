@@ -267,6 +267,7 @@ void Renderer::initGBuffer(int width, int height)
     initAlbedoTexture(width, height);
     initRoughnessMetalnessTexture(width, height);
     initEmissiveTexture(width, height);
+    initModelIDTexture(width, height);
 
     initNormalsCopy(width, height);
 }
@@ -290,30 +291,35 @@ void Renderer::bindGBufferSRV()
     globals->device_context4->PSSetShaderResources(3,
                                                    1,
                                                    emissive_ao_srv.get());
+
+    globals->device_context4->PSSetShaderResources(4,
+                                                   1,
+                                                   model_id_srv.get());
 }
 
-void Renderer::bindGBufferRTV(bool bind_depth_buffer)
+void Renderer::bindGBufferRTV(bool bind_depth_buffer,
+                              bool bind_model_id)
 {
     Globals * globals = Globals::getInstance();
 
-    ID3D11RenderTargetView * render_targets[] =
-    {
-        normals_rtv,
-        albedo_rtv,
-        roughness_metalness_rtv,
-        emissive_ao_rtv,
-    };
+    std::vector<ID3D11RenderTargetView *> render_targets;
+
+    render_targets.push_back(normals_rtv.ptr());
+    render_targets.push_back(albedo_rtv.ptr());
+    render_targets.push_back(roughness_metalness_rtv.ptr());
+    render_targets.push_back(emissive_ao_rtv.ptr());
+    if (bind_model_id) render_targets.push_back(model_id_rtv.ptr());
 
     if (bind_depth_buffer)
     {
-        globals->device_context4->OMSetRenderTargets(4,
-                                                     render_targets,
+        globals->device_context4->OMSetRenderTargets(render_targets.size(),
+                                                     render_targets.data(),
                                                      depth_dsv.ptr());
     }
     else
     {
-        globals->device_context4->OMSetRenderTargets(4,
-                                                     render_targets,
+        globals->device_context4->OMSetRenderTargets(render_targets.size(),
+                                                     render_targets.data(),
                                                      NULL);
     }
 }
@@ -332,7 +338,10 @@ void Renderer::clearGBuffer()
                                                     BACKGROUND);
 
     globals->device_context4->ClearRenderTargetView(emissive_ao_rtv.ptr(),
-                                                    BACKGROUND);    
+                                                    BACKGROUND);
+
+    globals->device_context4->ClearRenderTargetView(model_id_rtv.ptr(),
+                                                    BACKGROUND);
 }
 
 void Renderer::unbindSRV(int slot)
@@ -433,10 +442,11 @@ void Renderer::renderDecals()
     copyDepthBuffer();
     copyNormals();
 
-    bindGBufferRTV(false);
+    bindGBufferRTV(false, false);
     
     decal_sys->render(depth_copy_srv,
-                      normals_copy_srv);   
+                      normals_copy_srv,
+                      model_id_srv);
 }
 
 void Renderer::initDepthBufferMain(int width, int height)
@@ -738,6 +748,53 @@ void Renderer::initEmissiveTexture(int width, int height)
     result = globals->device5->CreateShaderResourceView(emissive_ao.ptr(),
                                                         &srv_desc,
                                                         emissive_ao_srv.reset());
+    assert(result >= 0 && "CreateShaderResourceView");    
+}
+
+void Renderer::initModelIDTexture(int width, int height)
+{
+    Globals * globals = Globals::getInstance();
+    HRESULT result;
+    
+    D3D11_TEXTURE2D_DESC texture_desc;
+    ZeroMemory(&texture_desc, sizeof(texture_desc));
+    texture_desc.Width = width;
+    texture_desc.Height = height;
+    texture_desc.MipLevels = 1;
+    texture_desc.ArraySize = 1;
+    texture_desc.Format = DXGI_FORMAT_R16_UINT;
+    texture_desc.SampleDesc.Count = MSAA_SAMPLES_COUNT;
+    texture_desc.Usage = D3D11_USAGE_DEFAULT;
+    texture_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    texture_desc.CPUAccessFlags = 0;
+    texture_desc.MiscFlags = 0;
+
+    result = globals->device5->CreateTexture2D(&texture_desc,
+                                               NULL,
+                                               model_id.reset());
+    assert(result >= 0 && "CreateTexture2D");
+    
+    D3D11_RENDER_TARGET_VIEW_DESC rtv_desc;
+    ZeroMemory(&rtv_desc, sizeof(rtv_desc));
+    rtv_desc.Format = texture_desc.Format;
+    rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+    rtv_desc.Texture2D.MipSlice = 0;
+
+    result = globals->device5->CreateRenderTargetView(model_id.ptr(),
+                                                      &rtv_desc,
+                                                      model_id_rtv.reset());
+    assert(result >= 0 && "CreateRenderTargetView");
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+    ZeroMemory(&srv_desc, sizeof(srv_desc));
+    srv_desc.Format = texture_desc.Format;
+    srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srv_desc.Texture2D.MostDetailedMip = 0;
+    srv_desc.Texture2D.MipLevels = 1;
+
+    result = globals->device5->CreateShaderResourceView(model_id.ptr(),
+                                                        &srv_desc,
+                                                        model_id_srv.reset());
     assert(result >= 0 && "CreateShaderResourceView");    
 }
 

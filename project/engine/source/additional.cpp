@@ -60,9 +60,12 @@ void moveDissolutionToOpaqueInstances()
 
         if (should_move)
         {
+            oi::Instance instance(transform_id,
+                                  mesh_system->getModelID());
+            
             mesh_system->addInstance<engine::OpaqueInstances>(per_model[model].model,
                                                               materials,
-                                                              transform_id);
+                                                              instance);
         }
         
         if (per_mesh.size() == 0)

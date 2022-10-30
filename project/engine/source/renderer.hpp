@@ -1,6 +1,8 @@
 #ifndef RENDERER_HPP
 #define RENDERER_HPP
 
+#include <vector>
+
 #include "window.hpp"
 #include "camera.hpp"
 #include "post_process.hpp"
@@ -44,7 +46,8 @@ public:
 
     void initGBuffer(int width, int height);
     void bindGBufferSRV();
-    void bindGBufferRTV(bool bind_depth_buffer = true);
+    void bindGBufferRTV(bool bind_depth_buffer = true,
+                        bool bind_model_id = true);
     void clearGBuffer();
 
     void unbindSRV(int slot);
@@ -87,6 +90,10 @@ private:
     DxResPtr<ID3D11Texture2D> emissive_ao;
     DxResPtr<ID3D11RenderTargetView> emissive_ao_rtv;
     DxResPtr<ID3D11ShaderResourceView> emissive_ao_srv;    
+
+    DxResPtr<ID3D11Texture2D> model_id;
+    DxResPtr<ID3D11RenderTargetView> model_id_rtv;
+    DxResPtr<ID3D11ShaderResourceView> model_id_srv;
     
     DxResPtr<ID3D11Texture2D> hdr_texture;
     DxResPtr<ID3D11RenderTargetView> hdr_rtv;
@@ -107,6 +114,7 @@ private:
     void initAlbedoTexture(int width, int height);
     void initRoughnessMetalnessTexture(int width, int height);
     void initEmissiveTexture(int width, int height);
+    void initModelIDTexture(int width, int height);
 
     void copyNormals();
     

@@ -16,6 +16,8 @@ struct VS_INPUT
     float4 model_inv_1 : MODEL_INV1;
     float4 model_inv_2 : MODEL_INV2;
     float4 model_inv_3 : MODEL_INV3;
+
+    uint model_id : MODEL_ID;
 };
 
 struct PS_INPUT
@@ -25,6 +27,7 @@ struct PS_INPUT
     nointerpolation row_major float4x4 model_inv : MODEL_INV;
     float3 albedo : ALBEDO;
     float3 half_size : SIZE;
+    uint model_id : MODEL_ID;
 };
 
 struct PS_OUTPUT
@@ -38,6 +41,7 @@ struct PS_OUTPUT
 Texture2D<float4> g_decal_normals : register(t0);
 Texture2D<float> g_depth : register(t1);
 Texture2D<float4> g_normals : register(t2);
+Texture2D<uint> g_model_ids : register(t3);
 
 static const float g_DECAL_ROUGHNESS = 0.25f;
 static const float g_DECAL_METALNESS = 0.0f;
@@ -129,6 +133,7 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
     output.model_inv = model_matrix_inv;
     output.albedo = input.albedo;
     output.half_size = float3(half_size, half_depth);
+    output.model_id = input.model_id;
 
     return output;
 }
@@ -140,6 +145,12 @@ PS_OUTPUT fragmentShader(PS_INPUT input)
 {
     PS_OUTPUT output;
 
+    if (input.model_id != g_model_ids.Load(int3(input.posCS.xy, 0)).r)
+    {
+        discard;
+        return output;
+    }
+    
     float depth = g_depth.Load(int3(input.posCS.xy, 0)).r;
 
     float2 posCS = float2((input.posCS.x / g_screen_size.x) * 2.0f - 1.0f,

@@ -32,7 +32,8 @@ void DecalSystem::del()
     else spdlog::error("DecalsSystem::del() was called twice!");
 }
 
-void DecalSystem::addDecal(uint32_t transform_id,
+void DecalSystem::addDecal(uint32_t model_id,
+                           uint32_t transform_id,
                            const glm::vec3 & posMS,
                            const glm::vec3 & forward,
                            const glm::vec3 & right,
@@ -42,7 +43,8 @@ void DecalSystem::addDecal(uint32_t transform_id,
                      math::randomFromRange(0.0f, 1.0f),
                      math::randomFromRange(0.0f, 1.0f));
     
-    decals.push_back(Decal(transform_id,
+    decals.push_back(Decal(model_id,
+                           transform_id,
                            posMS,
                            DECAL_INIT_SIZE,
                            albedo,
@@ -77,14 +79,16 @@ void DecalSystem::updateInstanceBuffer()
                                           decal.size,
                                           decal.albedo,
                                           model_matrix,
-                                          glm::inverse(model_matrix));
+                                          glm::inverse(model_matrix),
+                                          decal.model_id);
     }
     
     instance_buffer.unmap();
 }
 
 void DecalSystem::render(DxResPtr<ID3D11ShaderResourceView> depth_srv,
-                         DxResPtr<ID3D11ShaderResourceView> normals_srv)
+                         DxResPtr<ID3D11ShaderResourceView> normals_srv,
+                         DxResPtr<ID3D11ShaderResourceView> model_id_srv)
 {
     updateInstanceBuffer();
 
@@ -108,6 +112,9 @@ void DecalSystem::render(DxResPtr<ID3D11ShaderResourceView> depth_srv,
     globals->device_context4->PSSetShaderResources(2,
                                                    1,
                                                    normals_srv.get());
+    globals->device_context4->PSSetShaderResources(3,
+                                                   1,
+                                                   model_id_srv.get());
 
     globals->device_context4->DrawInstanced(36,
                                             instance_buffer.get_size(),

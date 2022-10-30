@@ -8,13 +8,16 @@ namespace engine
 class Decal
 {
 public:
-    Decal(uint32_t transform_id,
+    Decal(uint32_t model_id,
+          uint32_t transform_id,
           const glm::vec3 & posMS,
           const glm::vec2 & size,
           const glm::vec3 & albedo,
           const glm::vec3 & forward,
           const glm::vec3 & right,
           const glm::vec3 & up);
+
+    uint32_t model_id;
 
     uint32_t transform_id;
     

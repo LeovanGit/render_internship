@@ -9,6 +9,7 @@
 #include "shader.hpp"
 #include "texture.hpp"
 #include "random.hpp"
+#include "matrices.hpp"
 
 namespace engine
 {

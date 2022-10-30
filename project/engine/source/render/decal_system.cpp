@@ -47,6 +47,7 @@ void DecalSystem::addDecal(uint32_t model_id,
                            transform_id,
                            posMS,
                            DECAL_INIT_SIZE,
+                           math::randomFromRange(0.0f, 2.0f * math::PI),
                            albedo,
                            forward,
                            right,
@@ -69,11 +70,13 @@ void DecalSystem::updateInstanceBuffer()
         
         glm::vec4 pos_h = transform.toMat4() * glm::vec4(decal.posMS, 1.0f);
         glm::vec3 position = glm::vec3(pos_h) / pos_h.w;
-
+        
         glm::mat4x4 model_matrix(decal.right.x, decal.right.y, decal.right.z, 0.0f,
                                  decal.up.x, decal.up.y, decal.up.z, 0.0f,
                                  decal.forward.x, decal.forward.y, decal.forward.z, 0.0f,
                                  position.x, position.y, position.z, 1.0f);
+
+        model_matrix = model_matrix * math::rotateZ(decal.angle);
         
         dst[copied_count++] = GPUInstance(position,
                                           decal.size,

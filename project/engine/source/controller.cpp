@@ -900,7 +900,7 @@ void Controller::initShaders()
          1,
          160,
          D3D11_INPUT_PER_INSTANCE_DATA,
-         1},
+         1}
     };
     
     mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",

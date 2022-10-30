@@ -12,6 +12,7 @@ public:
           uint32_t transform_id,
           const glm::vec3 & posMS,
           const glm::vec2 & size,
+          float angle,
           const glm::vec3 & albedo,
           const glm::vec3 & forward,
           const glm::vec3 & right,
@@ -23,6 +24,8 @@ public:
     
     glm::vec3 posMS;
     glm::vec2 size;
+    float angle;
+    
     glm::vec3 albedo;
 
     glm::vec3 forward;

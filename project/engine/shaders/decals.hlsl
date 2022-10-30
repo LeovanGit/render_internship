@@ -112,7 +112,7 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID,
         float3(+half_size.x, -half_size.y, -half_depth),
         float3(-half_size.x, -half_size.y, +half_depth),
     };
-
+    
     // decal space -> ws
     float4x4 model_matrix = float4x4(input.model_0,
                                      input.model_1,

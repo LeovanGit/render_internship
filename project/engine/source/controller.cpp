@@ -807,7 +807,7 @@ void Controller::initShaders()
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
 
-        {"TRANSFORM",
+        {"MODEL",
          0,
          DXGI_FORMAT_R32G32B32A32_FLOAT,
          1,
@@ -815,7 +815,7 @@ void Controller::initShaders()
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
 
-        {"TRANSFORM",
+        {"MODEL",
          1,
          DXGI_FORMAT_R32G32B32A32_FLOAT,
          1,
@@ -823,7 +823,7 @@ void Controller::initShaders()
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
 
-        {"TRANSFORM",
+        {"MODEL",
          2,
          DXGI_FORMAT_R32G32B32A32_FLOAT,
          1,
@@ -831,7 +831,7 @@ void Controller::initShaders()
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
 
-        {"TRANSFORM",
+        {"MODEL",
          3,
          DXGI_FORMAT_R32G32B32A32_FLOAT,
          1,
@@ -839,6 +839,37 @@ void Controller::initShaders()
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
 
+        {"MODEL_INV",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         96,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"MODEL_INV",
+         1,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         112,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"MODEL_INV",
+         2,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         128,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"MODEL_INV",
+         3,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         144,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
     };
     
     mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
@@ -881,7 +912,7 @@ void Controller::initShaders()
     decal_sys->shader =
         shader_mgr->getShader("../engine/shaders/decals.hlsl",
                               ied_decals,
-                              7);
+                              11);
 }
 
 void Controller::initTextures()

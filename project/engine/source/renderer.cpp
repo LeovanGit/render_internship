@@ -267,6 +267,8 @@ void Renderer::initGBuffer(int width, int height)
     initAlbedoTexture(width, height);
     initRoughnessMetalnessTexture(width, height);
     initEmissiveTexture(width, height);
+
+    initNormalsCopy(width, height);
 }
 
 void Renderer::bindGBufferSRV()
@@ -290,7 +292,7 @@ void Renderer::bindGBufferSRV()
                                                    emissive_ao_srv.get());
 }
 
-void Renderer::bindGBufferRTV()
+void Renderer::bindGBufferRTV(bool bind_depth_buffer)
 {
     Globals * globals = Globals::getInstance();
 
@@ -301,10 +303,19 @@ void Renderer::bindGBufferRTV()
         roughness_metalness_rtv,
         emissive_ao_rtv,
     };
-    
-    globals->device_context4->OMSetRenderTargets(4,
-                                                 render_targets,
-                                                 depth_dsv.ptr());
+
+    if (bind_depth_buffer)
+    {
+        globals->device_context4->OMSetRenderTargets(4,
+                                                     render_targets,
+                                                     depth_dsv.ptr());
+    }
+    else
+    {
+        globals->device_context4->OMSetRenderTargets(4,
+                                                     render_targets,
+                                                     NULL);
+    }
 }
 
 void Renderer::clearGBuffer()
@@ -419,7 +430,13 @@ void Renderer::renderDecals()
 {
     DecalSystem * decal_sys = DecalSystem::getInstance();
 
-    decal_sys->render();
+    copyDepthBuffer();
+    copyNormals();
+
+    bindGBufferRTV(false);
+    
+    decal_sys->render(depth_copy_srv,
+                      normals_copy_srv);   
 }
 
 void Renderer::initDepthBufferMain(int width, int height)
@@ -543,6 +560,42 @@ void Renderer::initNormalsTexture(int width, int height)
                                                         &srv_desc,
                                                         normals_srv.reset());
     assert(result >= 0 && "CreateShaderResourceView");    
+}
+
+void Renderer::initNormalsCopy(int width, int height)
+{
+    Globals * globals = Globals::getInstance();
+    HRESULT result;
+    
+    D3D11_TEXTURE2D_DESC texture_desc;
+    ZeroMemory(&texture_desc, sizeof(texture_desc));
+    texture_desc.Width = width;
+    texture_desc.Height = height;
+    texture_desc.MipLevels = 1;
+    texture_desc.ArraySize = 1;
+    texture_desc.Format = DXGI_FORMAT_R16G16B16A16_SNORM;
+    texture_desc.SampleDesc.Count = MSAA_SAMPLES_COUNT;
+    texture_desc.Usage = D3D11_USAGE_DEFAULT;
+    texture_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    texture_desc.CPUAccessFlags = 0;
+    texture_desc.MiscFlags = 0;
+
+    result = globals->device5->CreateTexture2D(&texture_desc,
+                                               NULL,
+                                               normals_copy.reset());
+    assert(result >= 0 && "CreateTexture2D");
+    
+    D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+    ZeroMemory(&srv_desc, sizeof(srv_desc));
+    srv_desc.Format = texture_desc.Format;
+    srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srv_desc.Texture2D.MostDetailedMip = 0;
+    srv_desc.Texture2D.MipLevels = 1;
+
+    result = globals->device5->CreateShaderResourceView(normals_copy.ptr(),
+                                                        &srv_desc,
+                                                        normals_copy_srv.reset());
+    assert(result >= 0 && "CreateShaderResourceView");
 }
 
 void Renderer::initAlbedoTexture(int width, int height)
@@ -686,6 +739,14 @@ void Renderer::initEmissiveTexture(int width, int height)
                                                         &srv_desc,
                                                         emissive_ao_srv.reset());
     assert(result >= 0 && "CreateShaderResourceView");    
+}
+
+void Renderer::copyNormals()
+{
+    Globals * globals = Globals::getInstance();
+
+    globals->device_context4->CopyResource(normals_copy.ptr(),
+                                           normals.ptr());
 }
 
 void Renderer::deferredShading()

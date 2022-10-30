@@ -40,16 +40,16 @@ void DecalSystem::addDecal(const glm::vec3 & position,
     glm::vec3 albedo(math::randomFromRange(0.0f, 1.0f),
                      math::randomFromRange(0.0f, 1.0f),
                      math::randomFromRange(0.0f, 1.0f));
-
-    glm::mat4x4 transform(right.x, right.y, right.z, 0.0f,
-                          up.x, up.y, up.z, 0.0f,
-                          forward.x, forward.y, forward.z, 0.0f,
-                          position.x, position.y, position.z, 1.0f);
+    
+    glm::mat4x4 model(right.x, right.y, right.z, 0.0f,
+                      up.x, up.y, up.z, 0.0f,
+                      forward.x, forward.y, forward.z, 0.0f,
+                      position.x, position.y, position.z, 1.0f);
     
     decals.push_back(Decal(position,
                            DECAL_INIT_SIZE,
                            albedo,
-                           transform));
+                           model));
 }
 
 void DecalSystem::updateInstanceBuffer()
@@ -66,13 +66,15 @@ void DecalSystem::updateInstanceBuffer()
         dst[copied_count++] = GPUInstance(decal.position,
                                           decal.size,
                                           decal.albedo,
-                                          decal.transform);
+                                          decal.model,
+                                          decal.model_inv);
     }
     
     instance_buffer.unmap();
 }
 
-void DecalSystem::render()
+void DecalSystem::render(DxResPtr<ID3D11ShaderResourceView> depth_srv,
+                         DxResPtr<ID3D11ShaderResourceView> normals_srv)
 {
     updateInstanceBuffer();
 
@@ -90,6 +92,12 @@ void DecalSystem::render()
     instance_buffer.bind(1);
     
     normals->bind(0);
+    globals->device_context4->PSSetShaderResources(1,
+                                                   1,
+                                                   depth_srv.get());
+    globals->device_context4->PSSetShaderResources(2,
+                                                   1,
+                                                   normals_srv.get());
 
     globals->device_context4->DrawInstanced(36,
                                             instance_buffer.get_size(),

@@ -44,7 +44,7 @@ public:
 
     void initGBuffer(int width, int height);
     void bindGBufferSRV();
-    void bindGBufferRTV();
+    void bindGBufferRTV(bool bind_depth_buffer = true);
     void clearGBuffer();
 
     void unbindSRV(int slot);
@@ -73,6 +73,9 @@ private:
     DxResPtr<ID3D11RenderTargetView> normals_rtv;
     DxResPtr<ID3D11ShaderResourceView> normals_srv;
 
+    DxResPtr<ID3D11Texture2D> normals_copy;
+    DxResPtr<ID3D11ShaderResourceView> normals_copy_srv;
+    
     DxResPtr<ID3D11Texture2D> albedo;
     DxResPtr<ID3D11RenderTargetView> albedo_rtv;
     DxResPtr<ID3D11ShaderResourceView> albedo_srv;
@@ -100,10 +103,13 @@ private:
     void initDepthBufferCopy(int width, int height);
     
     void initNormalsTexture(int width, int height);
+    void initNormalsCopy(int width, int height);
     void initAlbedoTexture(int width, int height);
     void initRoughnessMetalnessTexture(int width, int height);
     void initEmissiveTexture(int width, int height);
 
+    void copyNormals();
+    
     void deferredShading();
 };
 } // namespace engine

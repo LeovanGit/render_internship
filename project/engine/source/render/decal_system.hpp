@@ -31,7 +31,8 @@ public:
                   const glm::vec3 & up);
 
     void updateInstanceBuffer();
-    void render();
+    void render(DxResPtr<ID3D11ShaderResourceView> depth_srv,
+                DxResPtr<ID3D11ShaderResourceView> normals_srv);
 
     std::shared_ptr<Shader> shader;
     std::shared_ptr<Texture> normals;
@@ -47,17 +48,21 @@ private:
         GPUInstance(const glm::vec3 & position,
                     const glm::vec2 & size,
                     const glm::vec3 & albedo,
-                    const glm::mat4x4 & transform) :
+                    const glm::mat4x4 & model,
+                    const glm::mat4x4 & model_inv) :
                     position(position),
                     size(size),
                     albedo(albedo),
-                    transform(transform)
+                    model(model),
+                    model_inv(model_inv)
         {}
 
         glm::vec3 position;
         glm::vec2 size;
         glm::vec3 albedo;
-        glm::mat4x4 transform;
+
+        glm::mat4x4 model;
+        glm::mat4x4 model_inv;
     };
 
     VertexBuffer<GPUInstance> instance_buffer;

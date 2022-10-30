@@ -1321,11 +1321,16 @@ void Controller::processInput(Camera & camera,
         ray.direction = camera.reproject(xy.x, xy.y) - ray.origin;
 
         math::MeshIntersection nearest;
-        nearest.reset(0.0f);
+        nearest.reset(0.0f);        
 
         if (mesh_system->findIntersection(ray, nearest))
         {
-            decal_sys->addDecal(nearest.pos,
+            auto & transform = trans_system->transforms[nearest.transform_id];
+            glm::vec4 posMS_h = glm::inverse(transform.toMat4()) * glm::vec4(nearest.pos, 1.0f);
+            glm::vec3 posMS = glm::vec3(posMS_h) / posMS_h.w;
+            
+            decal_sys->addDecal(nearest.transform_id,
+                                posMS,
                                 camera.getForward(),
                                 camera.getRight(),
                                 camera.getUp());

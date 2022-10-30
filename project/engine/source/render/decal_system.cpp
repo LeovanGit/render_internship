@@ -32,7 +32,8 @@ void DecalSystem::del()
     else spdlog::error("DecalsSystem::del() was called twice!");
 }
 
-void DecalSystem::addDecal(const glm::vec3 & position,
+void DecalSystem::addDecal(uint32_t transform_id,
+                           const glm::vec3 & posMS,
                            const glm::vec3 & forward,
                            const glm::vec3 & right,
                            const glm::vec3 & up)
@@ -41,15 +42,13 @@ void DecalSystem::addDecal(const glm::vec3 & position,
                      math::randomFromRange(0.0f, 1.0f),
                      math::randomFromRange(0.0f, 1.0f));
     
-    glm::mat4x4 model(right.x, right.y, right.z, 0.0f,
-                      up.x, up.y, up.z, 0.0f,
-                      forward.x, forward.y, forward.z, 0.0f,
-                      position.x, position.y, position.z, 1.0f);
-    
-    decals.push_back(Decal(position,
+    decals.push_back(Decal(transform_id,
+                           posMS,
                            DECAL_INIT_SIZE,
                            albedo,
-                           model));
+                           forward,
+                           right,
+                           up));
 }
 
 void DecalSystem::updateInstanceBuffer()
@@ -63,11 +62,22 @@ void DecalSystem::updateInstanceBuffer()
     uint32_t copied_count = 0;
     for (auto & decal : decals)
     {
-        dst[copied_count++] = GPUInstance(decal.position,
+        TransformSystem * trans_sys = TransformSystem::getInstance();
+        auto & transform = trans_sys->transforms[decal.transform_id];
+        
+        glm::vec4 pos_h = transform.toMat4() * glm::vec4(decal.posMS, 1.0f);
+        glm::vec3 position = glm::vec3(pos_h) / pos_h.w;
+
+        glm::mat4x4 model_matrix(decal.right.x, decal.right.y, decal.right.z, 0.0f,
+                                 decal.up.x, decal.up.y, decal.up.z, 0.0f,
+                                 decal.forward.x, decal.forward.y, decal.forward.z, 0.0f,
+                                 position.x, position.y, position.z, 1.0f);
+        
+        dst[copied_count++] = GPUInstance(position,
                                           decal.size,
                                           decal.albedo,
-                                          decal.model,
-                                          decal.model_inv);
+                                          model_matrix,
+                                          glm::inverse(model_matrix));
     }
     
     instance_buffer.unmap();

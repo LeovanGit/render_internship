@@ -25,7 +25,8 @@ public:
 
     static void del();
 
-    void addDecal(const glm::vec3 & position,
+    void addDecal(uint32_t transform_id,
+                  const glm::vec3 & posMS,
                   const glm::vec3 & forward,
                   const glm::vec3 & right,
                   const glm::vec3 & up);

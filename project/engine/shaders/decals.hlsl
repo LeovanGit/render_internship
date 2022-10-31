@@ -179,7 +179,7 @@ PS_OUTPUT fragmentShader(PS_INPUT input)
         return output;
     }
 
-    float4 scene_normals = g_normals.Load(int3(input.posCS.xy, 0));    
+    float4 scene_normals = g_normals.Load(int3(input.posCS.xy, 0));
     float3 scene_N = unpackOctahedron(scene_normals.rg);
     float3 scene_GN = unpackOctahedron(scene_normals.ba);
 
@@ -191,11 +191,12 @@ PS_OUTPUT fragmentShader(PS_INPUT input)
     
     float3 N = normals.xyz;
     N = 2.0f * N - 1.0f;
+    N.y *= -1.0f;
     N = normalize(mul(N, TBN));
     
     output.normals.rg = packOctahedron(normalize(N + scene_N));
-    output.normals.ba = packOctahedron(normalize(N + scene_N));
-    output.albedo = float4(input.albedo, 1.0f);    
+    output.normals.ba = output.normals.rg;
+    output.albedo = float4(input.albedo, 1.0f);
     output.roughness_metalness = float2(g_DECAL_ROUGHNESS, g_DECAL_METALNESS);
     output.emissive_ao = float4(0.0f, 0.0f, 0.0f, 1.0f);
 

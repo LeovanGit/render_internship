@@ -17,7 +17,7 @@ void OpaqueInstances::updateInstanceBuffers()
 
     instance_buffer.init(total_instances);
     D3D11_MAPPED_SUBRESOURCE mapped = instance_buffer.map();
-    glm::mat4 * dst = static_cast<glm::mat4 *>(mapped.pData);
+    GPUInstance * dst = static_cast<GPUInstance *>(mapped.pData);
     
     uint32_t copied_count = 0;
     for (auto & per_model : per_model)
@@ -29,9 +29,10 @@ void OpaqueInstances::updateInstanceBuffers()
                 uint32_t instances_size = per_material.instances.size();
                 for (uint32_t i = 0; i != instances_size; ++i)
                 {
-                    dst[copied_count++] =
+                    dst[copied_count++] = GPUInstance(
                         trans_system->
-                        transforms[per_material.instances[i].transform_id].toMat4();
+                            transforms[per_material.instances[i].transform_id].toMat4(),
+                        per_material.instances[i].model_id);
                 }
             }
         }
@@ -45,26 +46,21 @@ void OpaqueInstances::render()
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
-    TextureManager * tex_mgr = TextureManager::getInstance();
     LightSystem * light_sys = LightSystem::getInstance();
 
+    globals->bindDefaultBlendState();
+    
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     shader->bind();
     instance_buffer.bind(1);
-
-    reflectance->bind(4);
-    irradiance->bind(5);
-    reflection->bind(6);
-
-    light_sys->bindShadowMapSRV(7);
     
     uint32_t rendered_instances = 0;
     
     for (auto & per_model: per_model)
     {
-        if (!static_cast<bool>(per_model.model)) continue;
+        if (per_model.model == nullptr) continue;
 
         // bind vertex and index buffers
         per_model.model->bind();
@@ -116,8 +112,9 @@ void OpaqueInstances::renderWithoutMaterials(int cubemaps_count)
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
-    TextureManager * tex_mgr = TextureManager::getInstance();
 
+    globals->bindDefaultBlendState();
+    
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -127,7 +124,7 @@ void OpaqueInstances::renderWithoutMaterials(int cubemaps_count)
     
     for (auto & per_model: per_model)
     {
-        if (!static_cast<bool>(per_model.model)) continue;
+        if (per_model.model == nullptr) continue;
 
         // bind vertex and index buffers
         per_model.model->bind();

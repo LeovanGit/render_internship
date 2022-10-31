@@ -13,6 +13,8 @@ void Sky::render()
 {
     Globals * globals = Globals::getInstance();
 
+    globals->bindDefaultBlendState();
+    
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     

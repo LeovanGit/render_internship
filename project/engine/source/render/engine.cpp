@@ -3,20 +3,28 @@
 namespace engine
 {
 void Engine::init()
-{
+{    
     // INIT SINGLETONS
     Globals::init();
-    ShaderManager::init(); // depends on Globals
-    TextureManager::init(); // depends on Globals
+    ShaderManager::init();
+    TextureManager::init();
     ModelManager::init();
     MeshSystem::init();
     LightSystem::init();
     TransformSystem::init();
+    ParticleSystem::init();
+    GrassSystem::init();
+    DecalSystem::init();
+
+    TimeSystem::init();
 }
 
 void Engine::del()
 {
     // destruct singletons in reverse order!
+    DecalSystem::del();
+    GrassSystem::del();
+    ParticleSystem::del();
     TransformSystem::del();
     LightSystem::del();
     MeshSystem::del();

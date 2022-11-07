@@ -32,8 +32,7 @@ struct VS_INPUT
     float4 transform_2 : TRANSFORM2;
     float4 transform_3 : TRANSFORM3;
 
-    float spawn_time : SPAWN_TIME;
-    float animation_time : ANIMATION_TIME;
+    uint model_id : MODEL_ID;
 };
 
 struct PS_INPUT
@@ -45,9 +44,7 @@ struct PS_INPUT
     float3 tangent : TANGENT;
     float3 bitangent : BITANGENT;
     float4x4 transform : TRANSFORM;
-
-    float spawn_time : SPAWN_TIME;
-    float animation_time : ANIMATION_TIME;
+    uint model_id : MODEL_ID;
 };
 
 struct PS_OUTPUT
@@ -56,18 +53,13 @@ struct PS_OUTPUT
     float3 albedo : SV_TARGET1;
     float2 roughness_metalness : SV_TARGET2;
     float4 emissive_ao : SV_TARGET3;
+    uint model_id : SV_TARGET4;
 };
 
 Texture2D g_albedo : register(t0);
 Texture2D g_roughness : register(t1);
 Texture2D g_metalness : register(t2);
 Texture2D g_normal : register(t3);
-
-Texture2D g_dissolve : register(t13);
-Texture2D g_noise : register(t14);
-
-static const float4 g_EMISSIVE_COLOR = float4(40.0f, 0.0f, 0.0f, 1.0f);
-static const float g_EMISSIVE_THRESHOLD = 0.04f;
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -95,9 +87,8 @@ PS_INPUT vertexShader(VS_INPUT input)
                                                       -input.bitangent;
 
     output.transform = transform;
-    
-    output.spawn_time = input.spawn_time;
-    output.animation_time = input.animation_time;
+
+    output.model_id = input.model_id;
 
     return output;
 }
@@ -106,67 +97,53 @@ PS_INPUT vertexShader(VS_INPUT input)
 // FRAGMENT SHADER
 //------------------------------------------------------------------------------
 PS_OUTPUT fragmentShader(PS_INPUT input,
-                         bool is_front_face : SV_IsFrontFace)
+                         bool is_front_face: SV_IsFrontFace)
 {
     PS_OUTPUT output;
-    output.emissive_ao = float4(0.0f, 0.0f, 0.0f, 1.0f);
     
-    float alpha = g_dissolve.Sample(g_wrap_sampler, input.uv).r;
-    float threshold = (g_time - input.spawn_time) / input.animation_time;
+    /* // geometry normal */
+    /* float3 GN = normalize(is_front_face ? input.normal : -input.normal); */
     
-    if (alpha > threshold)
-    {        
-        float delta = alpha - threshold;
-        if (delta < g_EMISSIVE_THRESHOLD)
-        {
-            output.emissive_ao = g_EMISSIVE_COLOR *
-                                 g_noise.Sample(g_wrap_sampler, input.uv).r;
-            output.emissive_ao.a = 1.0f;
-        }
-        else
-        {
-            discard;
-            return output;
-        }
-    }
+    /* float3x3 TBN = float3x3(input.tangent, */
+    /*                         input.bitangent, */
+    /*                         GN); */
+
+    /* GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz); */
+    /* GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz); */
+    /* output.normals.ba = packOctahedron(GN); */
     
-    // geometry normal
-    float3 GN = normalize(is_front_face ? input.normal : -input.normal);
+    /* // conversion from sRGB to linear by raising to the power of 2.2 */
+    /* // is delegated to DDSTextureLoader */
+    /* output.albedo = g_has_albedo_texture ? */
+    /*                     g_albedo.Sample(g_wrap_sampler, input.uv).rgb : */
+    /*                     g_albedo_default; */
+
+    /* output.roughness_metalness.r = g_has_roughness_texture ? */
+    /*                                    g_roughness.Sample(g_wrap_sampler, input.uv).r : */
+    /*                                    g_roughness_default; */
     
-    float3x3 TBN = float3x3(input.tangent,
-                            input.bitangent,
-                            GN);
+    /* output.roughness_metalness.g = g_has_metalness_texture ? */
+    /*                                    g_metalness.Sample(g_wrap_sampler, input.uv).r : */
+    /*                                    g_metalness_default; */
 
-    GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
-    GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
-    output.normals.ba = packOctahedron(GN);
+    /* // texture normal */
+    /* float3 N; */
+    /* if (g_has_normal_map) */
+    /* { */
+    /*     N = g_normal.Sample(g_wrap_sampler, input.uv).rgb; */
+    /*     N = 2.0f * N - 1.0f; // [0; 1] -> [-1; 1] */
+    /*     N = normalize(mul(N, TBN)); */
+    /*     N = normalize(mul(float4(N, 0.0f), g_mesh_to_model).xyz); */
+    /*     N = normalize(mul(float4(N, 0.0f), input.transform).xyz); */
+    /* } */
+    /* else N = GN; */
+    /* output.normals.rg = packOctahedron(N); */
 
-    // conversion from sRGB to linear by raising to the power of 2.2
-    // is delegated to DDSTextureLoader
-    output.albedo = g_has_albedo_texture ?
-                        g_albedo.Sample(g_wrap_sampler, input.uv).rgb :
-                        g_albedo_default;
+    /* output.emissive_ao = float4(0.0f, 0.0f, 0.0f, 1.0f); */
 
-    output.roughness_metalness.r = g_has_roughness_texture ?
-                                       g_roughness.Sample(g_wrap_sampler, input.uv).r :
-                                       g_roughness_default;
+    /* output.model_id = input.model_id; */
 
-    output.roughness_metalness.g = g_has_metalness_texture ?
-                                       g_metalness.Sample(g_wrap_sampler, input.uv).r :
-                                       g_metalness_default;
-
-    // texture normal
-    float3 N;
-    if (g_has_normal_map)
-    {
-        N = g_normal.Sample(g_wrap_sampler, input.uv).rgb;
-        N = 2.0f * N - 1.0f; // [0; 1] -> [-1; 1]
-        N = normalize(mul(N, TBN));
-        N = normalize(mul(float4(N, 0.0f), g_mesh_to_model).xyz);
-        N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
-    }
-    else N = GN;
-    output.normals.rg = packOctahedron(N);
+    discard;
     
     return output;
 }

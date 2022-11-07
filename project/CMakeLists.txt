@@ -47,7 +47,8 @@ set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/grass_shadow_cubemap.hlsl
             engine/shaders/particles.hlsl
             engine/shaders/math.hlsl
-            engine/shaders/decals.hlsl)
+            engine/shaders/decals.hlsl
+            engine/shaders/disappear.hlsl)
 
 # does not participate in the compilation:
 set_source_files_properties(${SHADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -93,6 +94,7 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/opaque_instances.hpp
                    engine/source/render/emissive_instances.hpp
                    engine/source/render/dissolution_instances.hpp
+                   engine/source/render/disappear_instances.hpp
                    engine/source/render/mesh_system.hpp
                    engine/source/render/light_system.hpp
                    engine/source/render/vertex.hpp
@@ -122,6 +124,7 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/opaque_instances.cpp
                    engine/source/render/emissive_instances.cpp
                    engine/source/render/dissolution_instances.cpp
+                   engine/source/render/disappear_instances.cpp
                    engine/source/render/mesh_system.cpp
                    engine/source/render/light_system.cpp
                    engine/source/render/post_process.cpp

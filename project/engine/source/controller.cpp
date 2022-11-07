@@ -906,6 +906,9 @@ void Controller::initShaders()
     mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
                                                   ied_opaque,
                                                   10),
+                            shader_mgr->getShader("../engine/shaders/disappear.hlsl",
+                                                  ied_opaque,
+                                                  10),
                             shader_mgr->getShader("../engine/shaders/emissive.hlsl",
                                                   ied_emissive,
                                                   8),
@@ -952,7 +955,8 @@ void Controller::initTextures()
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
     engine::DecalSystem * decal_sys = engine::DecalSystem::getInstance();
     
-    mesh_system->setTextures(tex_mgr->getTexture("../engine/assets/dissolve.dds"));
+    mesh_system->setTextures(tex_mgr->getTexture("../engine/assets/dissolve.dds"),
+                             tex_mgr->getTexture("../engine/assets/noise.dds"));
     renderer->reflectance = tex_mgr->getTexture("../engine/assets/environment/reflectance.dds");
     renderer->irradiance = tex_mgr->getTexture("../engine/assets/environment/irradiance.dds");
     renderer->reflection = tex_mgr->getTexture("../engine/assets/environment/reflection.dds");
@@ -1368,5 +1372,27 @@ void Controller::processInput(Camera & camera,
                                 camera.getUp());
         }        
     }
+    if (keys_log[KEY_M] && was_released[KEY_M])
+    {
+        was_released[KEY_M] = false;
+
+        camera.updateMatrices();
+
+        glm::vec2 xy;
+        xy.x = 2.0f * (mouse.x + 0.5f) / width - 1.0f;
+        xy.y = 1.0f - 2.0f * (mouse.y + 0.5f) / height;
+
+        math::Ray ray;
+        ray.origin = camera.getPosition();
+        ray.direction = camera.reproject(xy.x, xy.y) - ray.origin;
+
+        math::MeshIntersection nearest;
+        nearest.reset(0.0f);        
+
+        if (mesh_system->findIntersection(ray, nearest))
+        {
+            engine::moveOpaqueToDisappearInstances(nearest.model_id);
+        }
+    }    
 }
 

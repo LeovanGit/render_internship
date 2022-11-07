@@ -19,6 +19,7 @@
 | Right Mouse Button hold and drag | Grab and move object                                         |
 | N                                | Spawn knight                                                 |
 | F                                | Spawn decal                                                  |
+| M                                | Despawn knight                                               |
 
 # TEXTURE FILTERING
 

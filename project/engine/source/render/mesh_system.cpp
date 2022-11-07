@@ -41,27 +41,31 @@ uint32_t MeshSystem::getModelID()
 }
 
 void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
+                            std::shared_ptr<Shader> disappear,
                             std::shared_ptr<Shader> emissive,
                             std::shared_ptr<Shader> shadow,
                             std::shared_ptr<Shader> dissolve)
 {
     instance->opaque_instances.shader = opaque;
+    instance->disappear_instances.shader = disappear;
     instance->emissive_instances.shader = emissive;
     instance->dissolution_instances.shader = dissolve;
 
     shadow_shader = shadow;
 }
 
-// move it to renderer.cpp!!!
-void MeshSystem::setTextures(std::shared_ptr<Texture> dissolve)
+void MeshSystem::setTextures(std::shared_ptr<Texture> dissolve,
+                             std::shared_ptr<Texture> noise)
 {
     instance->dissolution_instances.dissolve = dissolve;
+    instance->dissolution_instances.noise = noise;
 }
 
 void MeshSystem::render()
 {
     opaque_instances.render();
     dissolution_instances.render();
+    disappear_instances.render();
 }
 
 void MeshSystem::renderLights()

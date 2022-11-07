@@ -1,8 +1,8 @@
-#include "dissolution_instances.hpp"
+#include "disappear_instances.hpp"
 
 namespace engine
 {
-void DissolutionInstances::updateInstanceBuffers()
+void DisappearInstances::updateInstanceBuffers()
 {
     TransformSystem * trans_system = TransformSystem::getInstance();
     
@@ -32,8 +32,7 @@ void DissolutionInstances::updateInstanceBuffers()
                     dst[copied_count++] = GPUInstance(
                         trans_system->
                             transforms[per_material.instances[i].transform_id].toMat4(),
-                        per_material.instances[i].spawn_time,
-                        per_material.instances[i].animation_time);
+                        per_material.instances[i].model_id);
                 }
             }
         }
@@ -42,24 +41,20 @@ void DissolutionInstances::updateInstanceBuffers()
     instance_buffer.unmap();
 }
 
-void DissolutionInstances::render()
+void DisappearInstances::render()
 {
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
     LightSystem * light_sys = LightSystem::getInstance();
 
-    //globals->bindA2CBlendState();
     globals->bindDefaultBlendState();
     
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    
+
     shader->bind();
     instance_buffer.bind(1);
-
-    dissolve->bind(13);
-    noise->bind(14);
     
     uint32_t rendered_instances = 0;
     
@@ -98,7 +93,7 @@ void DissolutionInstances::render()
                 if (static_cast<bool>(material.roughness)) material.roughness->bind(1);
                 if (static_cast<bool>(material.metalness)) material.metalness->bind(2);
                 if (static_cast<bool>(material.normal)) material.normal->bind(3);
-                
+
                 uint32_t instances_count = uint32_t(per_material.instances.size());
 
                 globals->device_context4->DrawIndexedInstanced(mesh_range.index_count,
@@ -112,13 +107,13 @@ void DissolutionInstances::render()
     }
 }
 
-void DissolutionInstances::renderWithoutMaterials(int cubemaps_count)
+void DisappearInstances::renderWithoutMaterials(int cubemaps_count)
 {
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
 
-    globals->bindA2CBlendState();
+    globals->bindDefaultBlendState();
     
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

@@ -1,5 +1,5 @@
-#ifndef DISSOLUTION_INSTANCES_HPP
-#define DISSOLUTION_INSTANCES_HPP
+#ifndef DISAPPEAR_INSTANCES_HPP
+#define DISAPPEAR_INSTANCES_HPP
 
 #include <vector>
 #include <memory>
@@ -13,40 +13,33 @@
 
 namespace engine
 {
-class DissolutionInstances
+class DisappearInstances
 {
-private:
+public:
     struct GPUInstance
     {
-        GPUInstance(const glm::mat4 & transform,
-                    float spawn_time,
-                    float animation_time) :
+        GPUInstance(glm::mat4x4 transform,
+                    uint16_t model_id) :
                     transform(transform),
-                    spawn_time(spawn_time),
-                    animation_time(animation_time)
+                    model_id(model_id)
         {}
         
-        glm::mat4 transform;
-        float spawn_time;
-        float animation_time; // in seconds
+        glm::mat4x4 transform;
+        uint16_t model_id;
     };
 
-public:
     struct Instance
     {
         Instance() = default;
         Instance(uint32_t transform_id,
-                 float spawn_time,
-                 float animation_time) :
+                 uint16_t model_id) :
                  transform_id(transform_id),
-                 spawn_time(spawn_time),
-                 animation_time(animation_time)
+                 model_id(model_id)
         {}
         
         uint32_t transform_id;
-        float spawn_time;
-        float animation_time;
-    };    
+        uint16_t model_id;
+    };
     
     struct Material
     {
@@ -171,9 +164,6 @@ public:
     VertexBuffer<GPUInstance> instance_buffer;
 
     std::shared_ptr<Shader> shader;
-    
-    std::shared_ptr<Texture> dissolve;
-    std::shared_ptr<Texture> noise;
 };
 } // namespace engine
 

@@ -59,6 +59,8 @@ void MeshSystem::setTextures(std::shared_ptr<Texture> dissolve,
 {
     instance->dissolution_instances.dissolve = dissolve;
     instance->dissolution_instances.noise = noise;
+
+    instance->disappear_instances.noise = noise;
 }
 
 void MeshSystem::render()
@@ -81,7 +83,7 @@ void MeshSystem::renderShadowCubeMaps(int cubemaps_count)
     opaque_instances.renderWithoutMaterials(cubemaps_count);
 
     // uncomment if you want shadows from dissolve instances
-    //dissolution_instances.renderWithoutMaterials(cubemaps_count);    
+    // dissolution_instances.renderWithoutMaterials(cubemaps_count);    
 }
 
 bool MeshSystem::findIntersection(const math::Ray & ray_ws,

@@ -19,26 +19,50 @@ public:
     struct GPUInstance
     {
         GPUInstance(glm::mat4x4 transform,
-                    uint16_t model_id) :
+                    uint16_t model_id,
+                    float model_box_diameter,
+                    float spawn_time,
+                    float animation_duration,
+                    glm::vec3 sphere_origin) :
                     transform(transform),
-                    model_id(model_id)
+                    model_id(model_id),
+                    model_box_diameter(model_box_diameter),
+                    spawn_time(spawn_time),
+                    animation_duration(animation_duration),
+                    sphere_origin(sphere_origin)
         {}
         
         glm::mat4x4 transform;
         uint16_t model_id;
+        float model_box_diameter;
+        float spawn_time;
+        float animation_duration;
+        glm::vec3 sphere_origin;
     };
 
     struct Instance
     {
         Instance() = default;
         Instance(uint32_t transform_id,
-                 uint16_t model_id) :
+                 uint16_t model_id,
+                 float model_box_diameter,
+                 float spawn_time,
+                 float animation_duration,
+                 glm::vec3 sphere_origin) :
                  transform_id(transform_id),
-                 model_id(model_id)
+                 model_id(model_id),
+                 model_box_diameter(model_box_diameter),
+                 spawn_time(spawn_time),
+                 animation_duration(animation_duration),
+                 sphere_origin(sphere_origin)
         {}
         
         uint32_t transform_id;
         uint16_t model_id;
+        float model_box_diameter;
+        float spawn_time;
+        float animation_duration;
+        glm::vec3 sphere_origin;
     };
     
     struct Material
@@ -164,6 +188,8 @@ public:
     VertexBuffer<GPUInstance> instance_buffer;
 
     std::shared_ptr<Shader> shader;
+
+    std::shared_ptr<Texture> noise;
 };
 } // namespace engine
 

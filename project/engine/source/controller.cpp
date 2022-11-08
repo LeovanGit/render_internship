@@ -521,6 +521,121 @@ void Controller::initShaders()
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
     };
+
+    D3D11_INPUT_ELEMENT_DESC ied_disappear[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         0,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TEXCOORD",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         0,
+         12, // 3 floats of 4 bytes
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"NORMAL",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         20,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         32,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"BITANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         44,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+        
+        {"TRANSFORM",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         0, // reset align for instance data!
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         1,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         16,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         2,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         32,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         3,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         48,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"MODEL_ID",
+         0,
+         DXGI_FORMAT_R16_UINT,
+         1,
+         64,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"BOX_DIAMETER",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         68,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"SPAWN_TIME",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         72,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+        
+        {"ANIMATION_TIME",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         76,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+        
+        {"SPHERE_ORIGIN",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         80,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},       
+    };
     
     D3D11_INPUT_ELEMENT_DESC ied_emissive[] =
     {
@@ -907,8 +1022,8 @@ void Controller::initShaders()
                                                   ied_opaque,
                                                   10),
                             shader_mgr->getShader("../engine/shaders/disappear.hlsl",
-                                                  ied_opaque,
-                                                  10),
+                                                  ied_disappear,
+                                                  14),
                             shader_mgr->getShader("../engine/shaders/emissive.hlsl",
                                                   ied_emissive,
                                                   8),
@@ -1390,8 +1505,10 @@ void Controller::processInput(Camera & camera,
         nearest.reset(0.0f);        
 
         if (mesh_system->findIntersection(ray, nearest))
-        {
-            engine::moveOpaqueToDisappearInstances(nearest.model_id);
+        {            
+            engine::moveOpaqueToDisappearInstances(nearest.model_id,
+                                                   2.0f * nearest.box.radius(),
+                                                   nearest.pos);
         }
     }    
 }

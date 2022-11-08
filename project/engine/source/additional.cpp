@@ -77,7 +77,9 @@ void moveDissolutionToOpaqueInstances()
     mesh_system->opaque_instances.updateInstanceBuffers();
 }
 
-void moveOpaqueToDisappearInstances(uint32_t model_id)
+void moveOpaqueToDisappearInstances(uint32_t model_id,
+                                    float model_box_diameter,
+                                    const glm::vec3 & sphere_origin)
 {
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
@@ -129,7 +131,11 @@ void moveOpaqueToDisappearInstances(uint32_t model_id)
         if (should_move)
         {
             dpi::Instance instance(transform_id,
-                                   mesh_system->getModelID());
+                                   mesh_system->getModelID(),
+                                   model_box_diameter,
+                                   TimeSystem::getTimePoint(),
+                                   2.0f,
+                                   sphere_origin);
             
             mesh_system->addInstance<engine::DisappearInstances>(per_model[model].model,
                                                                  materials,
@@ -142,5 +148,40 @@ void moveOpaqueToDisappearInstances(uint32_t model_id)
     
     mesh_system->disappear_instances.updateInstanceBuffers();
     mesh_system->opaque_instances.updateInstanceBuffers(); 
+}
+
+void updateDisappearInstances()
+{
+    engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
+    float engine_time = engine::TimeSystem::getTimePoint();
+
+    auto & per_model = mesh_system->disappear_instances.per_model;
+    for (uint32_t model = 0; model != per_model.size(); ++model)
+    {
+        auto & per_mesh = per_model[model].per_mesh;
+        for (uint32_t mesh = 0; mesh != per_mesh.size(); ++mesh)
+        {
+            auto & per_material = per_mesh[mesh].per_material;
+            for (uint32_t material = 0; material != per_material.size(); ++material)
+            {
+                auto & instances = per_material[material].instances;
+                for (uint32_t i = 0; i != instances.size(); ++i)
+                {
+                    if (engine_time - instances[i].spawn_time > instances[i].animation_duration)
+                    {                        
+                        instances.erase(instances.begin() + i--);
+                    }
+                }
+                if (instances.size() == 0)
+                    per_material.erase(per_material.begin() + material--);
+            }
+            if (per_material.size() == 0)
+                per_mesh.erase(per_mesh.begin() + mesh--);
+        }        
+        if (per_mesh.size() == 0)
+            per_model.erase(per_model.begin() + model--);
+    }
+    
+    mesh_system->disappear_instances.updateInstanceBuffers();
 }
 } // namespace engine

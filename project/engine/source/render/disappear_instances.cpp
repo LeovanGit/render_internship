@@ -32,7 +32,11 @@ void DisappearInstances::updateInstanceBuffers()
                     dst[copied_count++] = GPUInstance(
                         trans_system->
                             transforms[per_material.instances[i].transform_id].toMat4(),
-                        per_material.instances[i].model_id);
+                        per_material.instances[i].model_id,
+                        per_material.instances[i].model_box_diameter,
+                        per_material.instances[i].spawn_time,
+                        per_material.instances[i].animation_duration,
+                        per_material.instances[i].sphere_origin);
                 }
             }
         }
@@ -93,6 +97,8 @@ void DisappearInstances::render()
                 if (static_cast<bool>(material.roughness)) material.roughness->bind(1);
                 if (static_cast<bool>(material.metalness)) material.metalness->bind(2);
                 if (static_cast<bool>(material.normal)) material.normal->bind(3);
+
+                noise->bind(4);
 
                 uint32_t instances_count = uint32_t(per_material.instances.size());
 

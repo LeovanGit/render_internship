@@ -26,7 +26,7 @@ Model::Model(const std::string & model_filename)
     
     std::vector<Vertex> vertices;
     std::vector<int> indices;
-
+    
     uint32_t vertex_sum = 0;
     uint32_t index_sum = 0;
     
@@ -52,7 +52,7 @@ Model::Model(const std::string & model_filename)
         // for collision in TransfromSystem
         math::Mesh mesh;
         mesh.box.min = reinterpret_cast<glm::vec3 &>(src_mesh->mAABB.mMin);
-        mesh.box.max = reinterpret_cast<glm::vec3 &>(src_mesh->mAABB.mMax);        
+        mesh.box.max = reinterpret_cast<glm::vec3 &>(src_mesh->mAABB.mMax);
         
         // read vertex data
         for (uint32_t v = 0; v != src_mesh->mNumVertices; ++v)
@@ -135,7 +135,6 @@ Model::Model(std::vector<Vertex> & vertices,
     octrees.resize(1);
     octrees[0].initialize(std::make_shared<math::Mesh>(mesh));
 }
-
 
 void Model::bind()
 {

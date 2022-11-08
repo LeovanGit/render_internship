@@ -16,7 +16,11 @@ namespace engine
 {
 void moveDissolutionToOpaqueInstances();
 
-void moveOpaqueToDisappearInstances(uint32_t model_id);
+void moveOpaqueToDisappearInstances(uint32_t model_id,
+                                    float model_box_diameter,
+                                    const glm::vec3 & sphere_origin);
+
+void updateDisappearInstances();
 } // namespace engine
 
 #endif

@@ -118,15 +118,16 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Normal.dds")),
     };
 
+    auto model = model_mgr->getModel("../engine/assets/Knight/Knight.fbx");
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
     oi::Instance instance(transform_id,
-                          mesh_system->getModelID());
+                          mesh_system->getModelID(),
+                          model->getBox());
     
-    mesh_system->addInstance<engine::OpaqueInstances>(
-        model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
-        materials,
-        instance);
+    mesh_system->addInstance<engine::OpaqueInstances>(model,
+                                                      materials,
+                                                      instance);
 }
 
 void Controller::spawnKnight(const math::Transform & transform)
@@ -274,15 +275,16 @@ void Controller::initWall(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Wall/dds/Trims_Normal.dds")),
     };
 
+    auto model = model_mgr->getModel("../engine/assets/Wall/SunCityWall.fbx");
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
     oi::Instance instance(transform_id,
-                          mesh_system->getModelID());
+                          mesh_system->getModelID(),
+                          model->getBox());
     
-    mesh_system->addInstance<engine::OpaqueInstances>(
-        model_mgr->getModel("../engine/assets/Wall/SunCityWall.fbx"),
-        materials,
-        instance);
+    mesh_system->addInstance<engine::OpaqueInstances>(model,
+                                                      materials,
+                                                      instance);
 }
 
 void Controller::initCube(const math::Transform & transform,
@@ -292,12 +294,14 @@ void Controller::initCube(const math::Transform & transform,
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
+    auto model = model_mgr->getDefaultCube("cube");
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
     oi::Instance instance(transform_id,
-                          mesh_system->getModelID());
+                          mesh_system->getModelID(),
+                          model->getBox());
     
-    mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultCube("cube"),
+    mesh_system->addInstance<engine::OpaqueInstances>(model,
                                                       materials,
                                                       instance);
 }
@@ -309,12 +313,14 @@ void Controller::initPlane(const math::Transform & transform,
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
+    auto model = model_mgr->getDefaultPlane("plane");
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
     oi::Instance instance(transform_id,
-                          mesh_system->getModelID());
+                          mesh_system->getModelID(),
+                          model->getBox());
     
-    mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultPlane("plane"),
+    mesh_system->addInstance<engine::OpaqueInstances>(model,
                                                       materials,
                                                       instance);
 }
@@ -326,12 +332,14 @@ void Controller::initSphere(const math::Transform & transform,
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
+    auto model = model_mgr->getDefaultSphere("sphere");
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
     oi::Instance instance(transform_id,
-                          mesh_system->getModelID());
+                          mesh_system->getModelID(),
+                          model->getBox());
     
-    mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultSphere("sphere"),
+    mesh_system->addInstance<engine::OpaqueInstances>(model,
                                                       materials,
                                                       instance);
 }
@@ -1505,9 +1513,14 @@ void Controller::processInput(Camera & camera,
         nearest.reset(0.0f);        
 
         if (mesh_system->findIntersection(ray, nearest))
-        {            
+        {
+            glm::mat4 mesh_to_model = trans_system->transforms[nearest.transform_id].toMat4();
+            glm::vec3 box_min = mesh_to_model * glm::vec4(nearest.box.min, 1.0f);
+            glm::vec3 box_max = mesh_to_model * glm::vec4(nearest.box.max, 1.0f);
+            float box_diameter = length(box_max - box_min);
+            
             engine::moveOpaqueToDisappearInstances(nearest.model_id,
-                                                   2.0f * nearest.box.radius(),
+                                                   box_diameter,
                                                    nearest.pos);
         }
     }    

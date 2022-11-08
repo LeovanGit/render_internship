@@ -169,7 +169,6 @@ bool TriangleOctree::intersect(const Ray & ray,
     float box_t = nearest.t;
     if (!ray.intersect(box_t, box)) return false;
 
-    nearest.box = box;
     return intersectInternal(ray, nearest);
 }
 

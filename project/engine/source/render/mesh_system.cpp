@@ -81,9 +81,8 @@ void MeshSystem::renderShadowCubeMaps(int cubemaps_count)
     
     shadow_shader->bind();
     opaque_instances.renderWithoutMaterials(cubemaps_count);
-
-    // uncomment if you want shadows from dissolve instances
-    // dissolution_instances.renderWithoutMaterials(cubemaps_count);    
+    dissolution_instances.renderWithoutMaterials(cubemaps_count);
+    disappear_instances.renderWithoutMaterials(cubemaps_count);
 }
 
 bool MeshSystem::findIntersection(const math::Ray & ray_ws,
@@ -126,6 +125,7 @@ bool MeshSystem::findIntersection(const math::Ray & ray_ws,
                     {
                         nearest.transform_id = instance.transform_id;
                         nearest.model_id = instance.model_id;
+                        nearest.box = instance.box;
 
                         pos_ws = transform *
                                  mesh_to_model *

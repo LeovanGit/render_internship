@@ -148,22 +148,34 @@ void DisappearInstances::renderWithoutMaterials(int cubemaps_count)
 
                 globals->bindRasterizer(material.is_double_sided);
 
-                globals->setPerShadowMeshBuffer(mesh_range.mesh_to_model);
-                globals->updatePerShadowMeshBuffer();
-                
                 uint32_t instances_count = uint32_t(per_material.instances.size());
-
-                for (int cubemap_index = 0; cubemap_index != cubemaps_count; ++cubemap_index)
+                
+                if (cubemaps_count > 0)
                 {
-                    globals->setPerShadowCubemapBuffer(cubemap_index);
-                    globals->updatePerShadowCubemapBuffer();
+                    globals->setPerShadowMeshBuffer(mesh_range.mesh_to_model);
+                    globals->updatePerShadowMeshBuffer();
+
+                    for (int cubemap_index = 0; cubemap_index != cubemaps_count; ++cubemap_index)
+                    {
+                        globals->setPerShadowCubemapBuffer(cubemap_index);
+                        globals->updatePerShadowCubemapBuffer();
                     
+                        globals->device_context4->DrawIndexedInstanced(mesh_range.index_count,
+                                                                       instances_count,
+                                                                       mesh_range.index_offset,
+                                                                       mesh_range.vertex_offset,
+                                                                       rendered_instances);
+                    }
+                }
+                else
+                {
                     globals->device_context4->DrawIndexedInstanced(mesh_range.index_count,
                                                                    instances_count,
                                                                    mesh_range.index_offset,
                                                                    mesh_range.vertex_offset,
                                                                    rendered_instances);
-                }                
+
+                }
                 rendered_instances += instances_count;
             }
         }

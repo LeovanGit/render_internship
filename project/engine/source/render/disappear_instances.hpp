@@ -182,7 +182,7 @@ public:
     void updateInstanceBuffers();
     
     void render();
-    void renderWithoutMaterials(int cubemaps_count);
+    void renderWithoutMaterials(int cubemaps_count = 0);
 
     std::vector<PerModel> per_model;
     VertexBuffer<GPUInstance> instance_buffer;

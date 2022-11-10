@@ -3,6 +3,8 @@
 namespace
 {
 constexpr uint32_t MSAA_SAMPLES_COUNT = 4;
+constexpr uint32_t SPARKS_DATA_BUFFER_SIZE = 150000;
+constexpr uint32_t SPARKS_RANGE_BUFFER_SIZE = 3;
 } // namespace
 
 namespace engine
@@ -11,7 +13,11 @@ ParticleSystem * ParticleSystem::instance = nullptr;
 
 void ParticleSystem::init()
 {
-    if (!instance) instance = new ParticleSystem();
+    if (!instance)
+    {
+        instance = new ParticleSystem();
+        instance->initSparksBuffers();
+    }
     else spdlog::error("ParticleSystem::init() was called twice!");
 }
 
@@ -74,10 +80,10 @@ void ParticleSystem::updateInstanceBuffer(const Camera & camera)
     instance_buffer.unmap();
 }
 
-void ParticleSystem::render(float delta_time,
-                            const Camera & camera,
-                            DxResPtr<ID3D11ShaderResourceView> depth_copy_srv)
-{       
+void ParticleSystem::renderParticles(float delta_time,
+                                     const Camera & camera,
+                                     DxResPtr<ID3D11ShaderResourceView> depth_copy_srv)
+{
     for (auto & smoke_emitter : smoke_emitters)
         smoke_emitter.update(delta_time);
     
@@ -107,6 +113,135 @@ void ParticleSystem::render(float delta_time,
                                             instance_buffer.get_size(),
                                             0,
                                             0);
+}
+
+void ParticleSystem::initSparksDataBuffer()
+{
+    HRESULT result;
+    Globals * globals = Globals::getInstance();
+    
+    // structured buffer
+    D3D11_BUFFER_DESC sb_desc;
+    ZeroMemory(&sb_desc, sizeof(sb_desc));
+    sb_desc.ByteWidth = SPARKS_DATA_BUFFER_SIZE * sizeof(GPUSparkData);
+    sb_desc.Usage = D3D11_USAGE_DEFAULT;
+    sb_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+    sb_desc.CPUAccessFlags = 0;
+    sb_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    sb_desc.StructureByteStride = sizeof(GPUSparkData);
+
+    result = globals->device5->CreateBuffer(&sb_desc,
+                                            nullptr,
+                                            sparks_data.reset());
+    assert(result >= 0 && "CreateBuffer");
+
+    D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+    ZeroMemory(&uav_desc, sizeof(uav_desc));
+    uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+    uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+    uav_desc.Buffer.NumElements = SPARKS_DATA_BUFFER_SIZE;
+    uav_desc.Buffer.FirstElement = 0;
+    uav_desc.Buffer.Flags = 0;
+
+    result = globals->device5->CreateUnorderedAccessView(sparks_data.ptr(),
+                                                         &uav_desc,
+                                                         sparks_data_view.reset());
+    assert(result >= 0 && "CreateUnorderedAccessView");
+}
+
+void ParticleSystem::initSparksRangeBuffer()
+{
+    HRESULT result;
+    Globals * globals = Globals::getInstance();
+    
+    D3D11_BUFFER_DESC sb_desc;
+    ZeroMemory(&sb_desc, sizeof(sb_desc));
+    sb_desc.ByteWidth = SPARKS_RANGE_BUFFER_SIZE * DXGI_FORMAT_R32_UINT;
+    sb_desc.Usage = D3D11_USAGE_DEFAULT;
+    sb_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+    sb_desc.CPUAccessFlags = 0;
+    sb_desc.MiscFlags = 0;
+    sb_desc.StructureByteStride = 0;
+
+    uint32_t data[3] = {0, 0, 0};
+    D3D11_SUBRESOURCE_DATA sub_data;
+    ZeroMemory(&sub_data, sizeof(sub_data));
+    sub_data.pSysMem = &data;
+    
+    result = globals->device5->CreateBuffer(&sb_desc,
+                                            &sub_data,
+                                            sparks_range.reset());
+    assert(result >= 0 && "CreateBuffer");
+
+    D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+    ZeroMemory(&uav_desc, sizeof(uav_desc));
+    uav_desc.Format = DXGI_FORMAT_R32_UINT;
+    uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+    uav_desc.Buffer.NumElements = SPARKS_RANGE_BUFFER_SIZE;
+    uav_desc.Buffer.FirstElement = 0;
+    uav_desc.Buffer.Flags = 0;
+
+    result = globals->device5->CreateUnorderedAccessView(sparks_range.ptr(),
+                                                         &uav_desc,
+                                                         sparks_range_view.reset());
+    assert(result >= 0 && "CreateUnorderedAccessView");
+}
+
+void ParticleSystem::initSparksBuffers()
+{
+    initSparksDataBuffer();
+    initSparksRangeBuffer();
+}
+
+void ParticleSystem::bindSparksBuffers()
+{
+    Globals * globals = Globals::getInstance();
+    
+    ID3D11UnorderedAccessView * uavs[] = {sparks_data_view.ptr(),
+                                          sparks_range_view.ptr()};
+    
+    globals->device_context4->
+        OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL,
+                                                  nullptr,
+                                                  nullptr,
+                                                  1,
+                                                  2,
+                                                  uavs,
+                                                  nullptr);
+}
+
+void ParticleSystem::unbindSparksBuffers()
+{
+    Globals * globals = Globals::getInstance();
+    
+    ID3D11UnorderedAccessView * uavs[] = {nullptr,
+                                          nullptr};
+    
+    globals->device_context4->
+        OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL,
+                                                  nullptr,
+                                                  nullptr,
+                                                  1,
+                                                  2,
+                                                  uavs,
+                                                  nullptr);
+}
+
+void ParticleSystem::spawnSparks()
+{
+    MeshSystem * mesh_sys = MeshSystem::getInstance();
+    
+    bindSparksBuffers();
+    spawn_sparks->bind();
+
+    mesh_sys->disappear_instances.renderWithoutMaterials();
+    
+    unbindSparksBuffers();
+}
+
+void ParticleSystem::renderSparks()
+{
+    spawnSparks();
 }
 } // namespace engine
 

@@ -1049,7 +1049,14 @@ void Controller::initShaders()
         shader_mgr->getShader("../engine/shaders/particles.hlsl",
                               ied_particles,
                               5);
-
+    particle_sys->spawn_sparks =
+        shader_mgr->getShader("../engine/shaders/spawn_sparks.hlsl",
+                              ied_disappear,
+                              14,
+                              true,
+                              false,
+                              false);
+    
     grass_sys->shader =
         shader_mgr->getShader("../engine/shaders/grass.hlsl",
                               ied_grass,

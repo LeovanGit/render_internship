@@ -135,7 +135,7 @@ void moveOpaqueToDisappearInstances(uint32_t model_id,
                                    mesh_system->getModelID(),
                                    model_box_diameter,
                                    TimeSystem::getTimePoint(),
-                                   2.0f,
+                                   5.0f,
                                    sphere_origin);
             
             mesh_system->addInstance<engine::DisappearInstances>(per_model[model].model,

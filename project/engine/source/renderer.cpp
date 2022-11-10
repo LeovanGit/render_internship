@@ -37,7 +37,8 @@ void Renderer::renderFrame(windows::Window & window,
     globals->setPerFrameBuffer(REFLECTION_MIPS_COUNT,
                                SHADOW_MAP_SIZE,
                                PARTICLES_ATLAS_SIZE,
-                               glm::vec<2, int>(width, height));
+                               glm::vec<2, int>(width, height),
+                               delta_time);
     globals->updatePerFrameBuffer();
 
     globals->setPerViewBuffer(camera,
@@ -423,7 +424,10 @@ void Renderer::renderParticles(float delta_time,
     
     changeDepthBufferAccess(true);
     
-    particle_sys->render(delta_time, camera, depth_copy_srv);
+    particle_sys->renderParticles(delta_time, camera, depth_copy_srv);
+
+    unbindRTVs();
+    particle_sys->renderSparks();
 
     changeDepthBufferAccess(false);
 }

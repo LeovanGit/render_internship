@@ -36,7 +36,7 @@ cbuffer PerFrame : register(b0)
     int g_reflection_mips_count;
     int g_shadow_map_size;
     int2 g_particles_atlas_size;
-    int padding_per_frame_0;
+    float g_delta_time;
     int2 g_screen_size;
     float g_time;
     

@@ -374,6 +374,10 @@ void Globals::updatePerFrameBuffer()
     device_context4->PSSetConstantBuffers(0,
                                           1,
                                           per_frame_buffer.get());
+
+    device_context4->CSSetConstantBuffers(0,
+                                          1,
+                                          per_frame_buffer.get());
 }
 
 void Globals::initPerViewBuffer()
@@ -445,6 +449,10 @@ void Globals::updatePerViewBuffer()
     device_context4->PSSetConstantBuffers(4,
                                           1,
                                           per_view_buffer.get());
+
+    device_context4->CSSetConstantBuffers(4,
+                                          1,
+                                          per_view_buffer.get());
 }
 
 void Globals::initPerMeshBuffer()
@@ -513,6 +521,14 @@ void Globals::updatePerMeshBuffer()
                                           per_mesh_buffer.get());
 
     device_context4->PSSetConstantBuffers(1,
+                                          1,
+                                          per_mesh_buffer.get());
+
+    device_context4->GSSetConstantBuffers(1,
+                                          1,
+                                          per_mesh_buffer.get());
+
+    device_context4->CSSetConstantBuffers(1,
                                           1,
                                           per_mesh_buffer.get());
 }

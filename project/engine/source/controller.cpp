@@ -1061,7 +1061,7 @@ void Controller::initShaders()
     particle_sys->render_sparks =
         shader_mgr->getShader("../engine/shaders/render_sparks.hlsl");
     
-    particle_sys->update_sparks =
+    particle_sys->update_ring_buffer =
         shader_mgr->getShader("../engine/shaders/update_ring_buffer.hlsl",
                               nullptr,
                               0,
@@ -1070,6 +1070,14 @@ void Controller::initShaders()
                               false,
                               true);
 
+    particle_sys->update_sparks =
+        shader_mgr->getShader("../engine/shaders/update_sparks.hlsl",
+                              nullptr,
+                              0,
+                              false,
+                              false,
+                              false,
+                              true);
     
     grass_sys->shader =
         shader_mgr->getShader("../engine/shaders/grass.hlsl",

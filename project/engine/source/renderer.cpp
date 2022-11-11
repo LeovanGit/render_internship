@@ -419,13 +419,14 @@ void Renderer::renderParticles(float delta_time,
     engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
 
     copyDepthBuffer();
+    copyNormals();
     
     bindRenderTarget();
     
-    changeDepthBufferAccess(true);
-    
+    changeDepthBufferAccess(true);    
+
     particle_sys->renderParticles(delta_time, camera, depth_copy_srv);
-    particle_sys->renderSparks();
+    particle_sys->renderSparks(depth_copy_srv, normals_copy_srv);
 
     changeDepthBufferAccess(false);
 }

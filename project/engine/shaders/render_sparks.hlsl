@@ -27,10 +27,11 @@ RWStructuredBuffer<Particle> particles_data : register(u1);
 RWBuffer<uint> particles_range : register(u2);
 
 Texture2D<float4> g_spark : register(t0);
-// Texture2D<float> g_depth_buffer : register(t1); bind depth with RT
+Texture2D<float> g_depth_buffer : register(t1);
 
-static const float g_SPARK_SIZE = 1.0f;
+static const float g_SPARK_SIZE = 0.25f;
 static const uint g_SPARKS_DATA_BUFFER_SIZE = 150000;
+static const float g_EMISSIVE_POWER = 2.0f;
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -81,17 +82,7 @@ PS_INPUT vertexShader(uint vertex_index : SV_VERTEXID,
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
     float4 color = g_spark.Sample(g_wrap_sampler, input.uv);
-    //float scene_depth = g_depth_buffer.Load(int3(input.posCS.xy, 0)).r;
-    
-    return color;
-    
-    /* float2 scene_posCS = float2((input.posCS.x / g_screen_size.x) * 2.0f - 1.0f, */
-    /*                             1.0f - 2.0f * (input.posCS.y / g_screen_size.y)); */
-    
-    /* float4 scene_posWS_h = mul(float4(scene_posCS, scene_depth, 1.0f), g_proj_view_inv); */
-    /* float3 scene_posWS = scene_posWS_h.xyz / scene_posWS_h.w; */
-    
-    /* float particle_fading = saturate(length(scene_posWS - input.posWS) / input.size.z); */
+    float scene_depth = g_depth_buffer.Load(int3(input.posCS.xy, 0)).r;
 
-    /* return float4(color, alpha * particle_fading) * input.tint; */
+    return float4(color.rgb * g_EMISSIVE_POWER, color.a);
 }

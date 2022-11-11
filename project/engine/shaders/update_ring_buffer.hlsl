@@ -1,11 +1,3 @@
-struct Particle
-{
-    float3 position;
-    float spawn_time;
-    float3 init_velocity;
-    float particle_padding_0;
-};
-
 // [0] - begin offset
 // [1] - particles count
 // [2] - death particles count

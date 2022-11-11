@@ -41,7 +41,7 @@ struct Particle
 {
     float3 position;
     float spawn_time;
-    float3 init_velocity;
+    float3 velocity;
     float particle_padding_0;
 };
 
@@ -54,7 +54,7 @@ RWStructuredBuffer<Particle> particles_data : register(u1);
 // [2] - death particles count
 RWBuffer<uint> particles_range : register(u2);
 
-static const float g_INIT_SPARK_VELOCITY = 1.0f;
+static const float g_INIT_SPARK_VELOCITY = 15.0f;
 static const uint g_SPARKS_DATA_BUFFER_SIZE = 150000;
 
 //------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ float4 vertexShader(VS_INPUT input) : SV_POSITION
         Particle particle;
         particle.position = pos_WS.xyz;
         particle.spawn_time = g_time;
-        particle.init_velocity = input.normal * g_INIT_SPARK_VELOCITY;
+        particle.velocity = input.normal * g_INIT_SPARK_VELOCITY;
         particle.particle_padding_0 = 0;
 
         particles_data[(particles_range[0] + prev_count) % g_SPARKS_DATA_BUFFER_SIZE] = particle;

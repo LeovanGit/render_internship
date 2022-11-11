@@ -36,7 +36,8 @@ public:
     void bindSparksBuffers(bool to_compute_shader = false);
     void unbindSparksBuffers();
 
-    void renderSparks();
+    void renderSparks(DxResPtr<ID3D11ShaderResourceView> depth_copy_srv,
+                      DxResPtr<ID3D11ShaderResourceView> normals_copy_srv);
     void renderParticles(float delta_time,
                          const Camera & camera,
                          DxResPtr<ID3D11ShaderResourceView> depth_copy_srv);
@@ -53,6 +54,7 @@ public:
     std::shared_ptr<Texture> motion_vectors;
 
     std::shared_ptr<Shader> spawn_sparks;
+    std::shared_ptr<Shader> update_ring_buffer;
     std::shared_ptr<Shader> update_sparks;
     std::shared_ptr<Shader> render_sparks;
     std::shared_ptr<Texture> spark;
@@ -69,8 +71,9 @@ private:
     void copySparksIndirectBuffer();
 
     void spawnSparks();
-    void updateSparks();
-    void drawSparks();
+    void updateSparks(DxResPtr<ID3D11ShaderResourceView> depth_copy_srv,
+                      DxResPtr<ID3D11ShaderResourceView> normals_copy_srv);
+    void drawSparks(DxResPtr<ID3D11ShaderResourceView> depth_copy_srv);
 
     static ParticleSystem * instance;
     

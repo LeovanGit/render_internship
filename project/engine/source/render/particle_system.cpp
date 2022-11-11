@@ -5,6 +5,7 @@ namespace
 constexpr uint32_t MSAA_SAMPLES_COUNT = 4;
 constexpr uint32_t SPARKS_DATA_BUFFER_SIZE = 150000;
 constexpr uint32_t SPARKS_RANGE_BUFFER_SIZE = 3;
+constexpr uint32_t WORKGROUP_THREADS_COUNT = 64;
 } // namespace
 
 namespace engine
@@ -315,19 +316,33 @@ void ParticleSystem::spawnSparks()
     unbindSparksBuffers();
 }
 
-void ParticleSystem::updateSparks()
+void ParticleSystem::updateSparks(DxResPtr<ID3D11ShaderResourceView> depth_copy_srv,
+                                  DxResPtr<ID3D11ShaderResourceView> normals_copy_srv)
 {
     Globals * globals = Globals::getInstance();
     
     bindSparksBuffers(true);
+
+    update_ring_buffer->bind();
+    globals->device_context4->Dispatch(1, 1, 1);
+
     update_sparks->bind();
 
-    globals->device_context4->Dispatch(1, 1, 1);
+    globals->device_context4->CSSetShaderResources(0,
+                                                   1,
+                                                   depth_copy_srv.get());
+
+    globals->device_context4->CSSetShaderResources(1,
+                                                   1,
+                                                   normals_copy_srv.get());
+    
+    uint32_t work_groups_count = SPARKS_DATA_BUFFER_SIZE / WORKGROUP_THREADS_COUNT + 1;
+    globals->device_context4->Dispatch(work_groups_count, 1, 1);
 
     unbindSparksBuffers();
 }
 
-void ParticleSystem::drawSparks()
+void ParticleSystem::drawSparks(DxResPtr<ID3D11ShaderResourceView> depth_copy_srv)
 {
     Globals * globals = Globals::getInstance();
 
@@ -337,6 +352,10 @@ void ParticleSystem::drawSparks()
     render_sparks->bind();
     spark->bind(0);
 
+    globals->device_context4->CSSetShaderResources(1,
+                                                   1,
+                                                   depth_copy_srv.get());
+    
     globals->bindTranslucentBlendState();
 
     globals->device_context4->DrawInstancedIndirect(sparks_indirect_args_copy.ptr(),
@@ -345,11 +364,12 @@ void ParticleSystem::drawSparks()
     unbindSparksBuffers();
 }
 
-void ParticleSystem::renderSparks()
+void ParticleSystem::renderSparks(DxResPtr<ID3D11ShaderResourceView> depth_copy_srv,
+                                  DxResPtr<ID3D11ShaderResourceView> normals_copy_srv)
 {    
     spawnSparks();
-    updateSparks();
-    drawSparks();
+    updateSparks(depth_copy_srv, normals_copy_srv);
+    drawSparks(depth_copy_srv);
 }
 } // namespace engine
 

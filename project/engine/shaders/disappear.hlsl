@@ -72,7 +72,7 @@ Texture2D g_normal : register(t3);
 Texture2D g_noise : register(t4);
 
 static const float4 g_EMISSIVE_COLOR = float4(30.0f, 0.0f, 0.0f, 1.0f);
-static const float g_EMISSIVE_THRESHOLD = 0.04f;
+static const float g_EMISSIVE_THRESHOLD = 0.2f;
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER

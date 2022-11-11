@@ -33,7 +33,7 @@ public:
     static void del();
 
     void initSparksBuffers();
-    void bindSparksBuffers();
+    void bindSparksBuffers(bool to_compute_shader = false);
     void unbindSparksBuffers();
 
     void renderSparks();
@@ -53,6 +53,9 @@ public:
     std::shared_ptr<Texture> motion_vectors;
 
     std::shared_ptr<Shader> spawn_sparks;
+    std::shared_ptr<Shader> update_sparks;
+    std::shared_ptr<Shader> render_sparks;
+    std::shared_ptr<Texture> spark;
     
 private:
     ParticleSystem() = default;
@@ -60,8 +63,14 @@ private:
 
     void initSparksDataBuffer();
     void initSparksRangeBuffer();
+    void initSparksIndirectBuffer();
+    void initSparksIndirectBufferCopy();
+
+    void copySparksIndirectBuffer();
 
     void spawnSparks();
+    void updateSparks();
+    void drawSparks();
 
     static ParticleSystem * instance;
     
@@ -95,6 +104,13 @@ private:
     
     DxResPtr<ID3D11Buffer> sparks_range;
     DxResPtr<ID3D11UnorderedAccessView> sparks_range_view;
+
+    DxResPtr<ID3D11Buffer> sparks_indirect_args;
+    DxResPtr<ID3D11UnorderedAccessView> sparks_indirect_args_view;
+
+    // because impossible to use D3D11_RESOURCE_MISC_BUFFER_STRUCTURED and
+    // D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS in the same buffer
+    DxResPtr<ID3D11Buffer> sparks_indirect_args_copy;
 };
 } // namespace engine
 

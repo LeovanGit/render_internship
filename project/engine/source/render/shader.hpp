@@ -38,13 +38,15 @@ public:
            uint32_t input_desc_size = 0,
            bool vertex_shader = true,
            bool geometry_shader = false,
-           bool fragment_shader = true);
-
+           bool fragment_shader = true,
+           bool compute_shader = false);
+    
     void bind();
 
     DxResPtr<ID3D11VertexShader> vert_shader;
     DxResPtr<ID3D11PixelShader> frag_shader;
     DxResPtr<ID3D11GeometryShader> geom_shader;
+    DxResPtr<ID3D11ComputeShader> comp_shader;
     DxResPtr<ID3D11InputLayout> input_layout;
 };
 } // namespace engine

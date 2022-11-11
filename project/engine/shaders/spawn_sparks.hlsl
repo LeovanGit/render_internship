@@ -37,11 +37,6 @@ struct VS_INPUT
     float3 sphere_origin : SPHERE_ORIGIN;
 };
 
-struct VS_OUTPUT
-{
-    float4 pos_CS : SV_POSITION;
-};
-
 struct Particle
 {
     float3 position;
@@ -65,10 +60,8 @@ static const uint g_SPARKS_DATA_BUFFER_SIZE = 150000;
 //------------------------------------------------------------------------------
 // VERTEX SHADER
 //------------------------------------------------------------------------------
-VS_OUTPUT vertexShader(VS_INPUT input)
-{
-    VS_OUTPUT output;
-    
+float4 vertexShader(VS_INPUT input) : SV_POSITION
+{    
     float4x4 transform = float4x4(input.transform_0,
                                   input.transform_1,
                                   input.transform_2,
@@ -80,7 +73,8 @@ VS_OUTPUT vertexShader(VS_INPUT input)
 
     float dist = length(pos_WS.xyz - input.sphere_origin);
     // time after which sphere radius will be equal dist
-    float spawn_time = dist * input.animation_time / input.model_box_diameter + input.spawn_time;
+    float spawn_time = input.spawn_time +
+                       dist * input.animation_time / input.model_box_diameter;
     // g_time of the previous frame
     float prev_time = g_time - g_delta_time;
     
@@ -98,7 +92,6 @@ VS_OUTPUT vertexShader(VS_INPUT input)
         particles_data[(particles_range[0] + prev_count) % g_SPARKS_DATA_BUFFER_SIZE] = particle;
     }
 
-    output.pos_CS = pos_CS;    
-    return output;
+    return pos_CS;
 }
 

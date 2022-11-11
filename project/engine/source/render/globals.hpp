@@ -126,12 +126,7 @@ public:
     void initBlendStates();
     void bindDefaultBlendState();
     void bindTranslucentBlendState();
-    void bindA2CBlendState();
-    
-    void bindBlendState(bool is_translucent = false,
-                        bool is_dissolve = false);
-
-    
+    void bindA2CBlendState();    
 
     void initPerFrameBuffer();
     void setPerFrameBuffer(int g_reflection_mips_count,

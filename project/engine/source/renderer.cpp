@@ -425,8 +425,6 @@ void Renderer::renderParticles(float delta_time,
     changeDepthBufferAccess(true);
     
     particle_sys->renderParticles(delta_time, camera, depth_copy_srv);
-
-    unbindRTVs();
     particle_sys->renderSparks();
 
     changeDepthBufferAccess(false);

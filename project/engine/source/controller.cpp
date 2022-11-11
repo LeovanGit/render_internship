@@ -1049,6 +1049,7 @@ void Controller::initShaders()
         shader_mgr->getShader("../engine/shaders/particles.hlsl",
                               ied_particles,
                               5);
+
     particle_sys->spawn_sparks =
         shader_mgr->getShader("../engine/shaders/spawn_sparks.hlsl",
                               ied_disappear,
@@ -1056,6 +1057,19 @@ void Controller::initShaders()
                               true,
                               false,
                               false);
+
+    particle_sys->render_sparks =
+        shader_mgr->getShader("../engine/shaders/render_sparks.hlsl");
+    
+    particle_sys->update_sparks =
+        shader_mgr->getShader("../engine/shaders/update_ring_buffer.hlsl",
+                              nullptr,
+                              0,
+                              false,
+                              false,
+                              false,
+                              true);
+
     
     grass_sys->shader =
         shader_mgr->getShader("../engine/shaders/grass.hlsl",
@@ -1286,6 +1300,8 @@ void Controller::initParticleEmitters()
                              1.0f,
                              0.025f,
                              0.1f));
+
+    particle_sys->spark = texture_mgr->getTexture("../engine/assets/spark.dds");
 }
 
 void Controller::initGrassFields()

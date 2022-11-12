@@ -47,8 +47,13 @@ set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/grass_shadow_cubemap.hlsl
             engine/shaders/particles.hlsl
             engine/shaders/math.hlsl
+            engine/shaders/deferred.hlsl
             engine/shaders/decals.hlsl
-            engine/shaders/disappear.hlsl)
+            engine/shaders/disappear.hlsl
+            engine/shaders/render_sparks.hlsl
+            engine/shaders/update_sparks.hlsl
+            engine/shaders/spawn_sparks.hlsl
+            engine/shaders/update_ring_buffer.hlsl)
 
 # does not participate in the compilation:
 set_source_files_properties(${SHADERS} PROPERTIES HEADER_FILE_ONLY TRUE)

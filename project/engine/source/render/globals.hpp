@@ -50,6 +50,8 @@ struct PerFrameBufferData
     float g_delta_time;
     glm::vec<2, int> g_screen_size;
     float g_time;
+    float g_sparks_data_buffer_size;
+    glm::vec3 padding_per_frame_0;
     
     glm::mat4 g_light_proj_view[24]; // 4 cubemaps
 };
@@ -133,7 +135,8 @@ public:
                            int g_shadow_map_size,
                            const glm::vec<2, int> & g_particles_atlas_size,
                            const glm::vec<2, int> & g_screen_size,
-                           float g_delta_time);
+                           float g_delta_time,
+                           float g_sparks_data_buffer_size);
     void updatePerFrameBuffer();
 
     void initPerViewBuffer();

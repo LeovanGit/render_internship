@@ -302,6 +302,11 @@ void ParticleSystem::unbindSparksBuffers()
                                                   3,
                                                   uavs,
                                                   nullptr);
+
+    globals->device_context4->CSSetUnorderedAccessViews(1,
+                                                        3,
+                                                        uavs,
+                                                        nullptr);
 }
 
 void ParticleSystem::spawnSparks()

@@ -8,6 +8,7 @@ constexpr uint32_t SHADOW_CUBEMAPS_COUNT = 4;
 constexpr int SHADOW_MAP_SIZE = 1024;
 constexpr glm::vec<2, int> PARTICLES_ATLAS_SIZE(8, 8);
 constexpr uint32_t MSAA_SAMPLES_COUNT = 1;
+constexpr uint32_t g_SPARKS_DATA_BUFFER_SIZE = 150000;
 } // namespace
 
 namespace engine
@@ -38,7 +39,8 @@ void Renderer::renderFrame(windows::Window & window,
                                SHADOW_MAP_SIZE,
                                PARTICLES_ATLAS_SIZE,
                                glm::vec<2, int>(width, height),
-                               delta_time);
+                               delta_time,
+                               g_SPARKS_DATA_BUFFER_SIZE);
     globals->updatePerFrameBuffer();
 
     globals->setPerViewBuffer(camera,

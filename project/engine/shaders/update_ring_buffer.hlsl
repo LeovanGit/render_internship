@@ -1,3 +1,5 @@
+#include "globals.hlsl"
+
 // [0] - begin offset
 // [1] - particles count
 // [2] - death particles count
@@ -13,12 +15,10 @@ struct DrawInstancedIndirectArgs
 
 RWStructuredBuffer<DrawInstancedIndirectArgs> sparks_indirect_args : register(u3);
 
-static const uint g_SPARKS_DATA_BUFFER_SIZE = 150000;
-
 [numthreads(1, 1, 1)]
 void computeShader()
 {
-    particles_range[0] = (particles_range[0] + particles_range[2]) % g_SPARKS_DATA_BUFFER_SIZE;
+    particles_range[0] = (particles_range[0] + particles_range[2]) % g_sparks_data_buffer_size;
     particles_range[1] -= particles_range[2];
     particles_range[2] = 0;
     

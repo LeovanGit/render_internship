@@ -30,8 +30,7 @@ Texture2D<float4> g_spark : register(t0);
 Texture2D<float> g_depth_buffer : register(t1);
 
 static const float g_SPARK_SIZE = 0.25f;
-static const uint g_SPARKS_DATA_BUFFER_SIZE = 150000;
-static const float g_EMISSIVE_POWER = 2.0f;
+static const float g_EMISSIVE_POWER = 50.0f;
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -39,7 +38,7 @@ static const float g_EMISSIVE_POWER = 2.0f;
 PS_INPUT vertexShader(uint vertex_index : SV_VERTEXID,
                       uint instance_index : SV_INSTANCEID)
 {
-    uint spark_index = (particles_range[0] + instance_index) % g_SPARKS_DATA_BUFFER_SIZE;
+    uint spark_index = (particles_range[0] + instance_index) % g_sparks_data_buffer_size;
     float3 posWS = particles_data[spark_index].position;
     float4 posVS = mul(float4(posWS, 1.0f), g_view);
     float half_size = g_SPARK_SIZE / 2.0f;

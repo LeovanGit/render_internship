@@ -55,7 +55,6 @@ RWStructuredBuffer<Particle> particles_data : register(u1);
 RWBuffer<uint> particles_range : register(u2);
 
 static const float g_INIT_SPARK_VELOCITY = 15.0f;
-static const uint g_SPARKS_DATA_BUFFER_SIZE = 150000;
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -89,7 +88,7 @@ float4 vertexShader(VS_INPUT input) : SV_POSITION
         particle.velocity = input.normal * g_INIT_SPARK_VELOCITY;
         particle.particle_padding_0 = 0;
 
-        particles_data[(particles_range[0] + prev_count) % g_SPARKS_DATA_BUFFER_SIZE] = particle;
+        particles_data[(particles_range[0] + prev_count) % g_sparks_data_buffer_size] = particle;
     }
 
     return pos_CS;

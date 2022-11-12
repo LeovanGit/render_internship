@@ -31,6 +31,8 @@ Texture2D<float> g_depth_buffer : register(t1);
 
 static const float g_SPARK_SIZE = 0.25f;
 static const float g_EMISSIVE_POWER = 50.0f;
+static const float g_MAX_LIFETIME = 3.0f;
+static const float g_APPEARING_TIME = 1.0f; // seconds
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER
@@ -81,7 +83,17 @@ PS_INPUT vertexShader(uint vertex_index : SV_VERTEXID,
 float4 fragmentShader(PS_INPUT input) : SV_TARGET
 {
     float4 color = g_spark.Sample(g_wrap_sampler, input.uv);
-    float scene_depth = g_depth_buffer.Load(int3(input.posCS.xy, 0)).r;
 
-    return float4(color.rgb * g_EMISSIVE_POWER, color.a);
+    float animation_time = g_time - input.spawn_time;
+    float alpha_fading = 1.0f;
+    if (animation_time < g_APPEARING_TIME)
+    {
+        alpha_fading = animation_time / g_APPEARING_TIME;
+    }
+    else if (animation_time > g_MAX_LIFETIME - g_APPEARING_TIME)
+    {
+        alpha_fading = (g_MAX_LIFETIME - animation_time) / g_APPEARING_TIME;
+    }
+
+    return float4(color.rgb * g_EMISSIVE_POWER, color.a * alpha_fading);
 }

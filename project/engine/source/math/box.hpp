@@ -17,7 +17,8 @@ struct BoundingBox
 
     glm::vec3 size() const { return max - min; }
     glm::vec3 center() const { return (min + max) / 2.0f; }
-    float radius() const { return size().length() / 2.0f; }
+    float diameter() const { return length(size()); }
+    float radius() const { return diameter() / 2.0f; }
 
     void reset()
     {

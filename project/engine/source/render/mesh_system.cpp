@@ -9,6 +9,7 @@ constexpr uint32_t shadow_cubemaps_count = 4;
 namespace engine
 {
 MeshSystem * MeshSystem::instance = nullptr;
+uint32_t MeshSystem::model_id = 0;
 
 void MeshSystem::init()
 {
@@ -31,28 +32,46 @@ void MeshSystem::del()
     else spdlog::error("MeshSystem::del() was called twice!");
 }
 
+uint32_t MeshSystem::getModelID()
+{
+    uint32_t id = model_id;
+    ++model_id;
+    
+    return id;
+}
+
 void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
+                            std::shared_ptr<Shader> disappear,
                             std::shared_ptr<Shader> emissive,
-                            std::shared_ptr<Shader> shadow)
+                            std::shared_ptr<Shader> shadow,
+                            std::shared_ptr<Shader> dissolve)
 {
     instance->opaque_instances.shader = opaque;
+    instance->disappear_instances.shader = disappear;
     instance->emissive_instances.shader = emissive;
+    instance->dissolution_instances.shader = dissolve;
 
     shadow_shader = shadow;
 }
 
-void MeshSystem::setTextures(std::shared_ptr<Texture> reflectance,
-                             std::shared_ptr<Texture> irradiance,
-                             std::shared_ptr<Texture> reflection)
+void MeshSystem::setTextures(std::shared_ptr<Texture> dissolve,
+                             std::shared_ptr<Texture> noise)
 {
-    instance->opaque_instances.reflectance = reflectance;
-    instance->opaque_instances.irradiance = irradiance;
-    instance->opaque_instances.reflection = reflection;
+    instance->dissolution_instances.dissolve = dissolve;
+    instance->dissolution_instances.noise = noise;
+
+    instance->disappear_instances.noise = noise;
 }
 
 void MeshSystem::render()
 {
     opaque_instances.render();
+    dissolution_instances.render();
+    disappear_instances.render();
+}
+
+void MeshSystem::renderLights()
+{
     emissive_instances.render();
 }
 
@@ -62,6 +81,8 @@ void MeshSystem::renderShadowCubeMaps(int cubemaps_count)
     
     shadow_shader->bind();
     opaque_instances.renderWithoutMaterials(cubemaps_count);
+    dissolution_instances.renderWithoutMaterials(cubemaps_count);
+    disappear_instances.renderWithoutMaterials(cubemaps_count);
 }
 
 bool MeshSystem::findIntersection(const math::Ray & ray_ws,
@@ -103,6 +124,8 @@ bool MeshSystem::findIntersection(const math::Ray & ray_ws,
                     if (octree[i].intersect(ray_ms, nearest))
                     {
                         nearest.transform_id = instance.transform_id;
+                        nearest.model_id = instance.model_id;
+                        nearest.box = instance.box;
 
                         pos_ws = transform *
                                  mesh_to_model *

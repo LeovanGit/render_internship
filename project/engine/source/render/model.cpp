@@ -26,9 +26,12 @@ Model::Model(const std::string & model_filename)
     
     std::vector<Vertex> vertices;
     std::vector<int> indices;
-
+    
     uint32_t vertex_sum = 0;
     uint32_t index_sum = 0;
+
+    // model bounding box
+    box.reset();
     
     for (uint32_t m = 0; m != ai_scene->mNumMeshes; ++m)
     {                
@@ -52,7 +55,15 @@ Model::Model(const std::string & model_filename)
         // for collision in TransfromSystem
         math::Mesh mesh;
         mesh.box.min = reinterpret_cast<glm::vec3 &>(src_mesh->mAABB.mMin);
-        mesh.box.max = reinterpret_cast<glm::vec3 &>(src_mesh->mAABB.mMax);        
+        mesh.box.max = reinterpret_cast<glm::vec3 &>(src_mesh->mAABB.mMax);
+
+        if (mesh.box.min.x < box.min.x) box.min.x = mesh.box.min.x;
+        if (mesh.box.min.y < box.min.y) box.min.y = mesh.box.min.y;
+        if (mesh.box.min.z < box.min.z) box.min.z = mesh.box.min.z;
+
+        if (mesh.box.max.x > box.max.x) box.max.x = mesh.box.max.x;
+        if (mesh.box.max.y > box.max.y) box.max.y = mesh.box.max.y;
+        if (mesh.box.max.z > box.max.z) box.max.z = mesh.box.max.z;
         
         // read vertex data
         for (uint32_t v = 0; v != src_mesh->mNumVertices; ++v)
@@ -122,6 +133,7 @@ Model::Model(std::vector<Vertex> & vertices,
     math::Mesh mesh;
     mesh.vertices = vertices;
     mesh.box = math::BoundingBox::unit();
+    box = mesh.box;
     for (uint32_t i = 0, size = indices_size; i != size; i += 3)
     {
         math::Mesh::Triangle triangle;
@@ -135,7 +147,6 @@ Model::Model(std::vector<Vertex> & vertices,
     octrees.resize(1);
     octrees[0].initialize(std::make_shared<math::Mesh>(mesh));
 }
-
 
 void Model::bind()
 {
@@ -156,5 +167,10 @@ Model::MeshRange & Model::getMeshRange(uint32_t index)
 std::vector<math::TriangleOctree> & Model::getOctree()
 {
     return octrees;
+}
+
+math::BoundingBox Model::getBox()
+{
+    return box;
 }
 } // namespace engine

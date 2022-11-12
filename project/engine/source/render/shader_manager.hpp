@@ -30,7 +30,8 @@ public:
                                       uint32_t input_desc_size = 0,
                                       bool vertex_shader = true,
                                       bool geometry_shader = false,
-                                      bool fragment_shader = true);
+                                      bool fragment_shader = true,
+                                      bool compute_shader = false);
 
     void bindShader(const std::string & key);
        

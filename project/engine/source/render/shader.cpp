@@ -7,9 +7,10 @@ Shader::Shader(const std::string & shader_path,
                uint32_t input_desc_size,
                bool vertex_shader,
                bool geometry_shader,
-               bool fragment_shader)
+               bool fragment_shader,
+               bool compute_shader)
 {
-    if (!vertex_shader && !geometry_shader && !fragment_shader) return;
+    if (!vertex_shader && !geometry_shader && !fragment_shader && !compute_shader) return;
     
     HRESULT result;
     Globals * globals = Globals::getInstance();
@@ -18,6 +19,7 @@ Shader::Shader(const std::string & shader_path,
     ID3DBlob * vert_shader_buffer(0);
     ID3DBlob * frag_shader_buffer(0);
     ID3DBlob * geom_shader_buffer(0);
+    ID3DBlob * comp_shader_buffer(0);
 
     // pass only path to shader
     ShaderIncluder includer(shader_path.substr(0, shader_path.rfind("/")));
@@ -122,6 +124,35 @@ Shader::Shader(const std::string & shader_path,
                                  geom_shader.reset());
         assert(result >= 0 && "CreateGeometryShader");
     }
+
+    if (compute_shader)
+    {
+        result = D3DCompileFromFile(path.c_str(),
+                                    NULL,
+                                    &includer,
+                                    "computeShader",
+                                    "cs_5_0",
+                                    SKIP_SHADER_OPTIMIZATIONS,
+                                    0,
+                                    &comp_shader_buffer,
+                                    &error_message);
+
+        if(FAILED(result))
+        {
+            if (error_message) std::cout << "\nCOMPUTE SHADER COMPILATION ERROR:\n" 
+                                         << (char *)error_message->GetBufferPointer()
+                                         << "\n\n";
+            else std::cout << "COMPUTE SHADER NOT FOUND\n";
+            assert(result >= 0 && "D3DCompileFromFile compute shader");
+        }
+
+        result = globals->device5->
+            CreateComputeShader(comp_shader_buffer->GetBufferPointer(),
+                                comp_shader_buffer->GetBufferSize(),
+                                NULL,
+                                comp_shader.reset());
+        assert(result >= 0 && "CreateComputeShader");
+    }
 }
 
 void Shader::bind()
@@ -132,6 +163,7 @@ void Shader::bind()
     globals->device_context4->VSSetShader(vert_shader.ptr(), 0, 0);
     globals->device_context4->PSSetShader(frag_shader.ptr(), 0, 0);
     globals->device_context4->GSSetShader(geom_shader.ptr(), 0, 0);
+    globals->device_context4->CSSetShader(comp_shader.ptr(), 0, 0);
     globals->device_context4->IASetInputLayout(input_layout);
 }
 } // namespace engine

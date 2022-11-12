@@ -8,6 +8,11 @@
 #include "mesh_system.hpp"
 #include "light_system.hpp"
 #include "transform_system.hpp"
+#include "particle_system.hpp"
+#include "window.hpp"
+#include "time_system.hpp"
+#include "grass_system.hpp"
+#include "decal_system.hpp"
 
 namespace engine
 {

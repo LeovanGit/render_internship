@@ -39,12 +39,14 @@ public:
     std::vector<MeshRange> & getMeshRanges();
     MeshRange & getMeshRange(uint32_t index);
     std::vector<math::TriangleOctree> & getOctree();
+    math::BoundingBox getBox();
     
 protected:
     std::vector<MeshRange> meshes;
     VertexBuffer<Vertex> vertex_buffer;
     IndexBuffer index_buffer;
     std::vector<math::TriangleOctree> octrees;
+    math::BoundingBox box;
 };
 } // namespace engine
 

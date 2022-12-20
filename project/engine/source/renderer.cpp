@@ -20,7 +20,8 @@ void Renderer::init(const windows::Window & window)
     int height = client_size.bottom - client_size.top;
 
     initGBuffer(width, height);
-    initRenderTarget(width, height);
+    initRenderTargetHDR(width, height);
+    initRenderTargetLDR(width, height);
 }
 
 void Renderer::renderFrame(windows::Window & window,
@@ -72,8 +73,11 @@ void Renderer::renderFrame(windows::Window & window,
     mesh_sys->renderLights();
     
     renderParticles(delta_time, camera);
-    
-    post_process.resolve(hdr_srv, window.getRenderTarget());
+
+    clearRenderTargetLDR();
+    //post_process.resolve(hdr_srv, window.getRenderTarget());    
+    post_process.resolve(hdr_srv, ldr_rtv);
+    post_process.gaussian_blur(ldr_srv, window.getRenderTarget());
     window.switchBuffer();
 
     unbindSRVs();
@@ -187,7 +191,7 @@ void Renderer::disableStencilTest()
     bindDepthBuffer();
 }
 
-void Renderer::initRenderTarget(int width, int height)
+void Renderer::initRenderTargetHDR(int width, int height)
 {
     Globals * globals = Globals::getInstance();
     HRESULT result;
@@ -237,7 +241,7 @@ void Renderer::initRenderTarget(int width, int height)
     assert(result >= 0 && "CreateShaderResourceView");
 }
 
-void Renderer::clearRenderTarget()
+void Renderer::clearRenderTargetHDR()
 {
     Globals * globals = Globals::getInstance();
 
@@ -245,7 +249,7 @@ void Renderer::clearRenderTarget()
                                                     BACKGROUND);
 }
 
-void Renderer::bindRenderTarget(bool bind_depth_buffer)
+void Renderer::bindRenderTargetHDR(bool bind_depth_buffer)
 {
     Globals * globals = Globals::getInstance();
 
@@ -261,6 +265,64 @@ void Renderer::bindRenderTarget(bool bind_depth_buffer)
                                                      hdr_rtv.get(),
                                                      NULL);   
     }
+}
+
+void Renderer::initRenderTargetLDR(int width, int height)
+{
+    Globals * globals = Globals::getInstance();
+    HRESULT result;
+
+    // create texture
+    D3D11_TEXTURE2D_DESC texture_desc;
+    ZeroMemory(&texture_desc, sizeof(texture_desc));
+    texture_desc.Width = width;
+    texture_desc.Height = height;
+    texture_desc.MipLevels = 1;
+    texture_desc.ArraySize = 1;
+    texture_desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+    texture_desc.SampleDesc.Count = MSAA_SAMPLES_COUNT;
+    texture_desc.Usage = D3D11_USAGE_DEFAULT;
+    texture_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    texture_desc.CPUAccessFlags = 0;
+    texture_desc.MiscFlags = 0;
+
+    result = globals->device5->CreateTexture2D(&texture_desc,
+                                               NULL,
+                                               ldr_texture.reset());
+    assert(result >= 0 && "CreateTexture2D");
+    
+    // create LDR render target
+    D3D11_RENDER_TARGET_VIEW_DESC rtv_desc;
+    ZeroMemory(&rtv_desc, sizeof(rtv_desc));
+    rtv_desc.Format = texture_desc.Format;
+    rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+    rtv_desc.Texture2D.MipSlice = 0;
+
+    result = globals->device5->CreateRenderTargetView(ldr_texture.ptr(),
+                                                      &rtv_desc,
+                                                      ldr_rtv.reset());
+    assert(result >= 0 && "CreateRenderTargetView");
+
+    // create LDR shader resource view
+    D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+    ZeroMemory(&srv_desc, sizeof(srv_desc));
+    srv_desc.Format = texture_desc.Format;
+    srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srv_desc.Texture2D.MostDetailedMip = 0;
+    srv_desc.Texture2D.MipLevels = 1;
+
+    result = globals->device5->CreateShaderResourceView(ldr_texture.ptr(),
+                                                        &srv_desc,
+                                                        ldr_srv.reset());
+    assert(result >= 0 && "CreateShaderResourceView");
+}
+
+void Renderer::clearRenderTargetLDR()
+{
+    Globals * globals = Globals::getInstance();
+
+    globals->device_context4->ClearRenderTargetView(ldr_rtv.ptr(),
+                                                    BACKGROUND);
 }
 
 void Renderer::initGBuffer(int width, int height)
@@ -423,7 +485,7 @@ void Renderer::renderParticles(float delta_time,
     copyDepthBuffer();
     copyNormals();
     
-    bindRenderTarget();
+    bindRenderTargetHDR();
     
     changeDepthBufferAccess(true);    
 
@@ -821,8 +883,8 @@ void Renderer::deferredShading()
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    bindRenderTarget(true);
-    clearRenderTarget();
+    bindRenderTargetHDR(true);
+    clearRenderTargetHDR();
 
     changeDepthBufferAccess(true);
 

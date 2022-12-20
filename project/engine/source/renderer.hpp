@@ -39,11 +39,14 @@ public:
 
     void setStencilTest(bool is_read_only = false);
     void disableStencilTest();
-    
-    void initRenderTarget(int width, int height);
-    void clearRenderTarget();
-    void bindRenderTarget(bool bind_depth_buffer = true);
 
+    void initRenderTargetHDR(int width, int height);
+    void clearRenderTargetHDR();
+    void bindRenderTargetHDR(bool bind_depth_buffer = true);
+
+    void initRenderTargetLDR(int width, int height);
+    void clearRenderTargetLDR();
+    
     void initGBuffer(int width, int height);
     void bindGBufferSRV();
     void bindGBufferRTV(bool bind_depth_buffer = true,
@@ -98,6 +101,10 @@ private:
     DxResPtr<ID3D11Texture2D> hdr_texture;
     DxResPtr<ID3D11RenderTargetView> hdr_rtv;
     DxResPtr<ID3D11ShaderResourceView> hdr_srv;
+
+    DxResPtr<ID3D11Texture2D> ldr_texture;
+    DxResPtr<ID3D11RenderTargetView> ldr_rtv;
+    DxResPtr<ID3D11ShaderResourceView> ldr_srv;
     
     void renderSceneObjects(windows::Window & window);
     void renderShadows();

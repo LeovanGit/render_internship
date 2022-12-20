@@ -33,7 +33,9 @@ void Controller::initPostprocess()
 {
     engine::ShaderManager * shader_mgr = engine::ShaderManager::getInstance();
     
-    post_process->init(shader_mgr->getShader("../engine/shaders/resolve.hlsl"), 0.5f);
+    post_process->init(shader_mgr->getShader("../engine/shaders/resolve.hlsl"),
+                       shader_mgr->getShader("../engine/shaders/gaussian_blur.hlsl"),
+                       0.5f);
 }
 
 void Controller::initKnight(const math::Transform & transform)

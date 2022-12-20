@@ -160,7 +160,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
             {
                 win.resize(LOWORD(lParam), HIWORD(lParam));
                 renderer.initDepthBuffer(LOWORD(lParam), HIWORD(lParam));
-                renderer.initRenderTarget(LOWORD(lParam), HIWORD(lParam));
+                renderer.initRenderTargetHDR(LOWORD(lParam), HIWORD(lParam));
+                renderer.initRenderTargetLDR(LOWORD(lParam), HIWORD(lParam));
                 renderer.initGBuffer(LOWORD(lParam), HIWORD(lParam));
 
                 camera.setPerspective(glm::radians(45.0f),

@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.3)
 project(engine VERSION 1.0 LANGUAGES C CXX)
 
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
+
 # for emacs lsp-mode indexing
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # compilation flags
 # add_definitions("-Wall")
-add_definitions("/std:c++17")
+set(CMAKE_CXX_STANDARD 17)
 
 # VS multi-processor compilation
 add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)

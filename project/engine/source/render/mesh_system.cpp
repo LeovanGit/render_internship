@@ -41,27 +41,33 @@ uint32_t MeshSystem::getModelID()
 }
 
 void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
+                            std::shared_ptr<Shader> disappear,
                             std::shared_ptr<Shader> emissive,
                             std::shared_ptr<Shader> shadow,
                             std::shared_ptr<Shader> dissolve)
 {
     instance->opaque_instances.shader = opaque;
+    instance->disappear_instances.shader = disappear;
     instance->emissive_instances.shader = emissive;
     instance->dissolution_instances.shader = dissolve;
 
     shadow_shader = shadow;
 }
 
-// move it to renderer.cpp!!!
-void MeshSystem::setTextures(std::shared_ptr<Texture> dissolve)
+void MeshSystem::setTextures(std::shared_ptr<Texture> dissolve,
+                             std::shared_ptr<Texture> noise)
 {
     instance->dissolution_instances.dissolve = dissolve;
+    instance->dissolution_instances.noise = noise;
+
+    instance->disappear_instances.noise = noise;
 }
 
 void MeshSystem::render()
 {
     opaque_instances.render();
     dissolution_instances.render();
+    disappear_instances.render();
 }
 
 void MeshSystem::renderLights()
@@ -75,9 +81,8 @@ void MeshSystem::renderShadowCubeMaps(int cubemaps_count)
     
     shadow_shader->bind();
     opaque_instances.renderWithoutMaterials(cubemaps_count);
-
-    // uncomment if you want shadows from dissolve instances
-    //dissolution_instances.renderWithoutMaterials(cubemaps_count);    
+    dissolution_instances.renderWithoutMaterials(cubemaps_count);
+    disappear_instances.renderWithoutMaterials(cubemaps_count);
 }
 
 bool MeshSystem::findIntersection(const math::Ray & ray_ws,
@@ -120,6 +125,7 @@ bool MeshSystem::findIntersection(const math::Ray & ray_ws,
                     {
                         nearest.transform_id = instance.transform_id;
                         nearest.model_id = instance.model_id;
+                        nearest.box = instance.box;
 
                         pos_ws = transform *
                                  mesh_to_model *

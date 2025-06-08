@@ -1,8 +1,8 @@
-#include "dissolution_instances.hpp"
+#include "disappear_instances.hpp"
 
 namespace engine
 {
-void DissolutionInstances::updateInstanceBuffers()
+void DisappearInstances::updateInstanceBuffers()
 {
     TransformSystem * trans_system = TransformSystem::getInstance();
     
@@ -32,8 +32,11 @@ void DissolutionInstances::updateInstanceBuffers()
                     dst[copied_count++] = GPUInstance(
                         trans_system->
                             transforms[per_material.instances[i].transform_id].toMat4(),
+                        per_material.instances[i].model_id,
+                        per_material.instances[i].model_box_diameter,
                         per_material.instances[i].spawn_time,
-                        per_material.instances[i].animation_time);
+                        per_material.instances[i].animation_duration,
+                        per_material.instances[i].sphere_origin);
                 }
             }
         }
@@ -42,24 +45,20 @@ void DissolutionInstances::updateInstanceBuffers()
     instance_buffer.unmap();
 }
 
-void DissolutionInstances::render()
+void DisappearInstances::render()
 {
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
     LightSystem * light_sys = LightSystem::getInstance();
 
-    //globals->bindA2CBlendState();
     globals->bindDefaultBlendState();
     
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    
+
     shader->bind();
     instance_buffer.bind(1);
-
-    dissolve->bind(13);
-    noise->bind(14);
     
     uint32_t rendered_instances = 0;
     
@@ -98,7 +97,9 @@ void DissolutionInstances::render()
                 if (static_cast<bool>(material.roughness)) material.roughness->bind(1);
                 if (static_cast<bool>(material.metalness)) material.metalness->bind(2);
                 if (static_cast<bool>(material.normal)) material.normal->bind(3);
-                
+
+                noise->bind(4);
+
                 uint32_t instances_count = uint32_t(per_material.instances.size());
 
                 globals->device_context4->DrawIndexedInstanced(mesh_range.index_count,
@@ -112,13 +113,13 @@ void DissolutionInstances::render()
     }
 }
 
-void DissolutionInstances::renderWithoutMaterials(int cubemaps_count)
+void DisappearInstances::renderWithoutMaterials(int cubemaps_count)
 {
     if (instance_buffer.get_size() == 0) return;
 
     Globals * globals = Globals::getInstance();
 
-    globals->bindA2CBlendState();
+    globals->bindDefaultBlendState();
     
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -147,22 +148,34 @@ void DissolutionInstances::renderWithoutMaterials(int cubemaps_count)
 
                 globals->bindRasterizer(material.is_double_sided);
 
-                globals->setPerShadowMeshBuffer(mesh_range.mesh_to_model);
-                globals->updatePerShadowMeshBuffer();
-                
                 uint32_t instances_count = uint32_t(per_material.instances.size());
-
-                for (int cubemap_index = 0; cubemap_index != cubemaps_count; ++cubemap_index)
+                
+                if (cubemaps_count > 0)
                 {
-                    globals->setPerShadowCubemapBuffer(cubemap_index);
-                    globals->updatePerShadowCubemapBuffer();
+                    globals->setPerShadowMeshBuffer(mesh_range.mesh_to_model);
+                    globals->updatePerShadowMeshBuffer();
+
+                    for (int cubemap_index = 0; cubemap_index != cubemaps_count; ++cubemap_index)
+                    {
+                        globals->setPerShadowCubemapBuffer(cubemap_index);
+                        globals->updatePerShadowCubemapBuffer();
                     
+                        globals->device_context4->DrawIndexedInstanced(mesh_range.index_count,
+                                                                       instances_count,
+                                                                       mesh_range.index_offset,
+                                                                       mesh_range.vertex_offset,
+                                                                       rendered_instances);
+                    }
+                }
+                else
+                {
                     globals->device_context4->DrawIndexedInstanced(mesh_range.index_count,
                                                                    instances_count,
                                                                    mesh_range.index_offset,
                                                                    mesh_range.vertex_offset,
                                                                    rendered_instances);
-                }                
+
+                }
                 rendered_instances += instances_count;
             }
         }

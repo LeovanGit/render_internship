@@ -32,13 +32,16 @@ public:
     {
         Instance() = default;
         Instance(uint32_t transform_id,
-                 uint16_t model_id) :
+                 uint16_t model_id,
+                 math::BoundingBox box) :
                  transform_id(transform_id),
-                 model_id(model_id)
+                 model_id(model_id),
+                 box(box)
         {}
         
         uint32_t transform_id;
         uint16_t model_id;
+        math::BoundingBox box;
     };
     
     struct Material

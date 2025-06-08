@@ -8,6 +8,7 @@ constexpr uint32_t SHADOW_CUBEMAPS_COUNT = 4;
 constexpr int SHADOW_MAP_SIZE = 1024;
 constexpr glm::vec<2, int> PARTICLES_ATLAS_SIZE(8, 8);
 constexpr uint32_t MSAA_SAMPLES_COUNT = 1;
+constexpr uint32_t g_SPARKS_DATA_BUFFER_SIZE = 150000;
 } // namespace
 
 namespace engine
@@ -37,7 +38,9 @@ void Renderer::renderFrame(windows::Window & window,
     globals->setPerFrameBuffer(REFLECTION_MIPS_COUNT,
                                SHADOW_MAP_SIZE,
                                PARTICLES_ATLAS_SIZE,
-                               glm::vec<2, int>(width, height));
+                               glm::vec<2, int>(width, height),
+                               delta_time,
+                               g_SPARKS_DATA_BUFFER_SIZE);
     globals->updatePerFrameBuffer();
 
     globals->setPerViewBuffer(camera,
@@ -418,12 +421,14 @@ void Renderer::renderParticles(float delta_time,
     engine::ParticleSystem * particle_sys = engine::ParticleSystem::getInstance();
 
     copyDepthBuffer();
+    copyNormals();
     
     bindRenderTarget();
     
-    changeDepthBufferAccess(true);
-    
-    particle_sys->render(delta_time, camera, depth_copy_srv);
+    changeDepthBufferAccess(true);    
+
+    particle_sys->renderParticles(delta_time, camera, depth_copy_srv);
+    particle_sys->renderSparks(depth_copy_srv, normals_copy_srv);
 
     changeDepthBufferAccess(false);
 }

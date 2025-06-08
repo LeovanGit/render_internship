@@ -118,15 +118,16 @@ void Controller::initKnight(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Knight/dds/Glove_Normal.dds")),
     };
 
+    auto model = model_mgr->getModel("../engine/assets/Knight/Knight.fbx");
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
     oi::Instance instance(transform_id,
-                          mesh_system->getModelID());
+                          mesh_system->getModelID(),
+                          model->getBox());
     
-    mesh_system->addInstance<engine::OpaqueInstances>(
-        model_mgr->getModel("../engine/assets/Knight/Knight.fbx"),
-        materials,
-        instance);
+    mesh_system->addInstance<engine::OpaqueInstances>(model,
+                                                      materials,
+                                                      instance);
 }
 
 void Controller::spawnKnight(const math::Transform & transform)
@@ -274,15 +275,16 @@ void Controller::initWall(const math::Transform & transform)
                      tex_mgr->getTexture("../engine/assets/Wall/dds/Trims_Normal.dds")),
     };
 
+    auto model = model_mgr->getModel("../engine/assets/Wall/SunCityWall.fbx");
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
     oi::Instance instance(transform_id,
-                          mesh_system->getModelID());
+                          mesh_system->getModelID(),
+                          model->getBox());
     
-    mesh_system->addInstance<engine::OpaqueInstances>(
-        model_mgr->getModel("../engine/assets/Wall/SunCityWall.fbx"),
-        materials,
-        instance);
+    mesh_system->addInstance<engine::OpaqueInstances>(model,
+                                                      materials,
+                                                      instance);
 }
 
 void Controller::initCube(const math::Transform & transform,
@@ -292,12 +294,14 @@ void Controller::initCube(const math::Transform & transform,
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
+    auto model = model_mgr->getDefaultCube("cube");
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
     oi::Instance instance(transform_id,
-                          mesh_system->getModelID());
+                          mesh_system->getModelID(),
+                          model->getBox());
     
-    mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultCube("cube"),
+    mesh_system->addInstance<engine::OpaqueInstances>(model,
                                                       materials,
                                                       instance);
 }
@@ -309,12 +313,14 @@ void Controller::initPlane(const math::Transform & transform,
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
+    auto model = model_mgr->getDefaultPlane("plane");
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
     oi::Instance instance(transform_id,
-                          mesh_system->getModelID());
+                          mesh_system->getModelID(),
+                          model->getBox());
     
-    mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultPlane("plane"),
+    mesh_system->addInstance<engine::OpaqueInstances>(model,
                                                       materials,
                                                       instance);
 }
@@ -326,12 +332,14 @@ void Controller::initSphere(const math::Transform & transform,
     engine::MeshSystem * mesh_system = engine::MeshSystem::getInstance();
     engine::TransformSystem * trans_system = engine::TransformSystem::getInstance();
 
+    auto model = model_mgr->getDefaultSphere("sphere");
     uint32_t transform_id = trans_system->transforms.insert(transform);
 
     oi::Instance instance(transform_id,
-                          mesh_system->getModelID());
+                          mesh_system->getModelID(),
+                          model->getBox());
     
-    mesh_system->addInstance<engine::OpaqueInstances>(model_mgr->getDefaultSphere("sphere"),
+    mesh_system->addInstance<engine::OpaqueInstances>(model,
                                                       materials,
                                                       instance);
 }
@@ -520,6 +528,121 @@ void Controller::initShaders()
          64,
          D3D11_INPUT_PER_INSTANCE_DATA,
          1},
+    };
+
+    D3D11_INPUT_ELEMENT_DESC ied_disappear[] =
+    {
+        {"POSITION",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         0,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TEXCOORD",
+         0,
+         DXGI_FORMAT_R32G32_FLOAT,
+         0,
+         12, // 3 floats of 4 bytes
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"NORMAL",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         20,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"TANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         32,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+
+        {"BITANGENT",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         0,
+         44,
+         D3D11_INPUT_PER_VERTEX_DATA,
+         0},
+        
+        {"TRANSFORM",
+         0,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         0, // reset align for instance data!
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         1,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         16,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         2,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         32,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"TRANSFORM",
+         3,
+         DXGI_FORMAT_R32G32B32A32_FLOAT,
+         1,
+         48,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"MODEL_ID",
+         0,
+         DXGI_FORMAT_R16_UINT,
+         1,
+         64,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"BOX_DIAMETER",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         68,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+
+        {"SPAWN_TIME",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         72,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+        
+        {"ANIMATION_TIME",
+         0,
+         DXGI_FORMAT_R32_FLOAT,
+         1,
+         76,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},
+        
+        {"SPHERE_ORIGIN",
+         0,
+         DXGI_FORMAT_R32G32B32_FLOAT,
+         1,
+         80,
+         D3D11_INPUT_PER_INSTANCE_DATA,
+         1},       
     };
     
     D3D11_INPUT_ELEMENT_DESC ied_emissive[] =
@@ -906,6 +1029,9 @@ void Controller::initShaders()
     mesh_system->setShaders(shader_mgr->getShader("../engine/shaders/opaque.hlsl",
                                                   ied_opaque,
                                                   10),
+                            shader_mgr->getShader("../engine/shaders/disappear.hlsl",
+                                                  ied_disappear,
+                                                  14),
                             shader_mgr->getShader("../engine/shaders/emissive.hlsl",
                                                   ied_emissive,
                                                   8),
@@ -924,6 +1050,35 @@ void Controller::initShaders()
                               ied_particles,
                               5);
 
+    particle_sys->spawn_sparks =
+        shader_mgr->getShader("../engine/shaders/spawn_sparks.hlsl",
+                              ied_disappear,
+                              14,
+                              true,
+                              false,
+                              false);
+
+    particle_sys->render_sparks =
+        shader_mgr->getShader("../engine/shaders/render_sparks.hlsl");
+    
+    particle_sys->update_ring_buffer =
+        shader_mgr->getShader("../engine/shaders/update_ring_buffer.hlsl",
+                              nullptr,
+                              0,
+                              false,
+                              false,
+                              false,
+                              true);
+
+    particle_sys->update_sparks =
+        shader_mgr->getShader("../engine/shaders/update_sparks.hlsl",
+                              nullptr,
+                              0,
+                              false,
+                              false,
+                              false,
+                              true);
+    
     grass_sys->shader =
         shader_mgr->getShader("../engine/shaders/grass.hlsl",
                               ied_grass,
@@ -952,7 +1107,8 @@ void Controller::initTextures()
     engine::TextureManager * tex_mgr = engine::TextureManager::getInstance();
     engine::DecalSystem * decal_sys = engine::DecalSystem::getInstance();
     
-    mesh_system->setTextures(tex_mgr->getTexture("../engine/assets/dissolve.dds"));
+    mesh_system->setTextures(tex_mgr->getTexture("../engine/assets/dissolve.dds"),
+                             tex_mgr->getTexture("../engine/assets/noise.dds"));
     renderer->reflectance = tex_mgr->getTexture("../engine/assets/environment/reflectance.dds");
     renderer->irradiance = tex_mgr->getTexture("../engine/assets/environment/irradiance.dds");
     renderer->reflection = tex_mgr->getTexture("../engine/assets/environment/reflection.dds");
@@ -1152,6 +1308,8 @@ void Controller::initParticleEmitters()
                              1.0f,
                              0.025f,
                              0.1f));
+
+    particle_sys->spark = texture_mgr->getTexture("../engine/assets/spark.dds");
 }
 
 void Controller::initGrassFields()
@@ -1368,5 +1526,34 @@ void Controller::processInput(Camera & camera,
                                 camera.getUp());
         }        
     }
+    if (keys_log[KEY_M] && was_released[KEY_M])
+    {
+        was_released[KEY_M] = false;
+
+        camera.updateMatrices();
+
+        glm::vec2 xy;
+        xy.x = 2.0f * (mouse.x + 0.5f) / width - 1.0f;
+        xy.y = 1.0f - 2.0f * (mouse.y + 0.5f) / height;
+
+        math::Ray ray;
+        ray.origin = camera.getPosition();
+        ray.direction = camera.reproject(xy.x, xy.y) - ray.origin;
+
+        math::MeshIntersection nearest;
+        nearest.reset(0.0f);        
+
+        if (mesh_system->findIntersection(ray, nearest))
+        {
+            glm::mat4 mesh_to_model = trans_system->transforms[nearest.transform_id].toMat4();
+            glm::vec3 box_min = mesh_to_model * glm::vec4(nearest.box.min, 1.0f);
+            glm::vec3 box_max = mesh_to_model * glm::vec4(nearest.box.max, 1.0f);
+            float box_diameter = length(box_max - box_min);
+            
+            engine::moveOpaqueToDisappearInstances(nearest.model_id,
+                                                   box_diameter,
+                                                   nearest.pos);
+        }
+    }    
 }
 

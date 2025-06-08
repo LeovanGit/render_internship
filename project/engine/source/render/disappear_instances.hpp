@@ -1,5 +1,5 @@
-#ifndef DISSOLUTION_INSTANCES_HPP
-#define DISSOLUTION_INSTANCES_HPP
+#ifndef DISAPPEAR_INSTANCES_HPP
+#define DISAPPEAR_INSTANCES_HPP
 
 #include <vector>
 #include <memory>
@@ -13,40 +13,57 @@
 
 namespace engine
 {
-class DissolutionInstances
+class DisappearInstances
 {
-private:
+public:
     struct GPUInstance
     {
-        GPUInstance(const glm::mat4 & transform,
+        GPUInstance(glm::mat4x4 transform,
+                    uint16_t model_id,
+                    float model_box_diameter,
                     float spawn_time,
-                    float animation_time) :
+                    float animation_duration,
+                    glm::vec3 sphere_origin) :
                     transform(transform),
+                    model_id(model_id),
+                    model_box_diameter(model_box_diameter),
                     spawn_time(spawn_time),
-                    animation_time(animation_time)
+                    animation_duration(animation_duration),
+                    sphere_origin(sphere_origin)
         {}
         
-        glm::mat4 transform;
+        glm::mat4x4 transform;
+        uint16_t model_id;
+        float model_box_diameter;
         float spawn_time;
-        float animation_time; // in seconds
+        float animation_duration;
+        glm::vec3 sphere_origin;
     };
 
-public:
     struct Instance
     {
         Instance() = default;
         Instance(uint32_t transform_id,
+                 uint16_t model_id,
+                 float model_box_diameter,
                  float spawn_time,
-                 float animation_time) :
+                 float animation_duration,
+                 glm::vec3 sphere_origin) :
                  transform_id(transform_id),
+                 model_id(model_id),
+                 model_box_diameter(model_box_diameter),
                  spawn_time(spawn_time),
-                 animation_time(animation_time)
+                 animation_duration(animation_duration),
+                 sphere_origin(sphere_origin)
         {}
         
         uint32_t transform_id;
+        uint16_t model_id;
+        float model_box_diameter;
         float spawn_time;
-        float animation_time;
-    };    
+        float animation_duration;
+        glm::vec3 sphere_origin;
+    };
     
     struct Material
     {
@@ -165,14 +182,13 @@ public:
     void updateInstanceBuffers();
     
     void render();
-    void renderWithoutMaterials(int cubemaps_count);
+    void renderWithoutMaterials(int cubemaps_count = 0);
 
     std::vector<PerModel> per_model;
     VertexBuffer<GPUInstance> instance_buffer;
 
     std::shared_ptr<Shader> shader;
-    
-    std::shared_ptr<Texture> dissolve;
+
     std::shared_ptr<Texture> noise;
 };
 } // namespace engine

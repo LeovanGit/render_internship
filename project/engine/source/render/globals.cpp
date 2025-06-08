@@ -79,8 +79,8 @@ void Globals::initD3D()
     }
 
     // DEVICE AND DEVICE CONTEXT
-    const D3D_FEATURE_LEVEL featureLevelRequested = D3D_FEATURE_LEVEL_11_0;
-    D3D_FEATURE_LEVEL featureLevelInitialized = D3D_FEATURE_LEVEL_11_0;
+    const D3D_FEATURE_LEVEL featureLevelRequested = D3D_FEATURE_LEVEL_11_1;
+    D3D_FEATURE_LEVEL featureLevelInitialized = D3D_FEATURE_LEVEL_11_1;
 
     result = D3D11CreateDevice(nullptr,
                                D3D_DRIVER_TYPE_HARDWARE,
@@ -291,7 +291,9 @@ void Globals::initPerFrameBuffer()
 void Globals::setPerFrameBuffer(int g_reflection_mips_count,
                                 int g_shadow_map_size,
                                 const glm::vec<2, int> & g_particles_atlas_size,
-                                const glm::vec<2, int> & g_screen_size)
+                                const glm::vec<2, int> & g_screen_size,
+                                float g_delta_time,
+                                float g_sparks_data_buffer_size)
 {
     LightSystem * light_system = LightSystem::getInstance();
     TransformSystem * trans_system = TransformSystem::getInstance();
@@ -301,6 +303,8 @@ void Globals::setPerFrameBuffer(int g_reflection_mips_count,
     per_frame_buffer_data.g_particles_atlas_size = g_particles_atlas_size;
     per_frame_buffer_data.g_screen_size = g_screen_size;
     per_frame_buffer_data.g_time = TimeSystem::getTimePoint();
+    per_frame_buffer_data.g_delta_time = g_delta_time;
+    per_frame_buffer_data.g_sparks_data_buffer_size = g_sparks_data_buffer_size;
 
     auto & point_lights = light_system->getPointLights();
     for (uint32_t size = point_lights.size(), i = 0; i != size; ++i)
@@ -370,6 +374,10 @@ void Globals::updatePerFrameBuffer()
                                           per_frame_buffer.get());
     
     device_context4->PSSetConstantBuffers(0,
+                                          1,
+                                          per_frame_buffer.get());
+
+    device_context4->CSSetConstantBuffers(0,
                                           1,
                                           per_frame_buffer.get());
 }
@@ -443,6 +451,10 @@ void Globals::updatePerViewBuffer()
     device_context4->PSSetConstantBuffers(4,
                                           1,
                                           per_view_buffer.get());
+
+    device_context4->CSSetConstantBuffers(4,
+                                          1,
+                                          per_view_buffer.get());
 }
 
 void Globals::initPerMeshBuffer()
@@ -511,6 +523,14 @@ void Globals::updatePerMeshBuffer()
                                           per_mesh_buffer.get());
 
     device_context4->PSSetConstantBuffers(1,
+                                          1,
+                                          per_mesh_buffer.get());
+
+    device_context4->GSSetConstantBuffers(1,
+                                          1,
+                                          per_mesh_buffer.get());
+
+    device_context4->CSSetConstantBuffers(1,
                                           1,
                                           per_mesh_buffer.get());
 }

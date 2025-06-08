@@ -30,7 +30,8 @@ std::shared_ptr<Shader> ShaderManager::getShader(const std::string shader_path,
                                                  uint32_t input_desc_size,
                                                  bool vertex_shader,
                                                  bool geometry_shader,
-                                                 bool fragment_shader)
+                                                 bool fragment_shader,
+                                                 bool compute_shader)
 {
     auto item = shaders.find(shader_path);
     if (item != shaders.end()) return item->second;
@@ -41,7 +42,8 @@ std::shared_ptr<Shader> ShaderManager::getShader(const std::string shader_path,
                                                                input_desc_size,
                                                                vertex_shader,
                                                                geometry_shader,
-                                                               fragment_shader));
+                                                               fragment_shader,
+                                                               compute_shader));
     return result.first->second;
 }
 

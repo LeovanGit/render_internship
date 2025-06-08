@@ -76,7 +76,7 @@ void ParticleSystem::updateInstanceBuffer(const Camera & camera)
 
 void ParticleSystem::render(float delta_time,
                             const Camera & camera,
-                            DxResPtr<ID3D11ShaderResourceView> depth_srv_not_ms)
+                            DxResPtr<ID3D11ShaderResourceView> depth_copy_srv)
 {       
     for (auto & smoke_emitter : smoke_emitters)
         smoke_emitter.update(delta_time);
@@ -101,7 +101,7 @@ void ParticleSystem::render(float delta_time,
 
     globals->device_context4->PSSetShaderResources(11,
                                                    1,
-                                                   depth_srv_not_ms.get());
+                                                   depth_copy_srv.get());
     
     globals->device_context4->DrawInstanced(6,
                                             instance_buffer.get_size(),

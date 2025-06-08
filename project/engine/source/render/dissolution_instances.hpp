@@ -171,10 +171,7 @@ public:
     VertexBuffer<GPUInstance> instance_buffer;
 
     std::shared_ptr<Shader> shader;
-
-    std::shared_ptr<Texture> reflectance;
-    std::shared_ptr<Texture> irradiance;
-    std::shared_ptr<Texture> reflection;
+    
     std::shared_ptr<Texture> dissolve;
 };
 } // namespace engine

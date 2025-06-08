@@ -35,4 +35,17 @@ bool areAlmostEqual(float a, float b, float epsilon)
 {
     return std::fabs(a - b) < epsilon;
 }
+
+glm::mat4 rotateZ(float angle)
+{
+    float cosa = std::cosf(angle);
+    float sina = std::sinf(angle);
+
+    glm::mat4x4 rotate(cosa, -sina, 0.0f, 0.0f,
+                       sina,  cosa, 0.0f, 0.0f,
+                       0.0f,  0.0f, 1.0f, 0.0f,
+                       0.0f,  0.0f, 0.0f, 1.0f);        
+    
+    return rotate;
+}
 } // namespace math

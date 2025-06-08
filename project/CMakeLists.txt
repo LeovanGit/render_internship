@@ -42,12 +42,12 @@ set(SHADERS engine/shaders/opaque.hlsl
             engine/shaders/resolve.hlsl
             engine/shaders/lighting.hlsl
             engine/shaders/shadow_cubemap.hlsl
-            engine/shaders/copy_ms_depth.hlsl
             engine/shaders/dissolve.hlsl
             engine/shaders/grass.hlsl
             engine/shaders/grass_shadow_cubemap.hlsl
             engine/shaders/particles.hlsl
-            engine/shaders/math.hlsl)
+            engine/shaders/math.hlsl
+            engine/shaders/decals.hlsl)
 
 # does not participate in the compilation:
 set_source_files_properties(${SHADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -56,14 +56,14 @@ source_group("shaders" FILES ${SHADERS})
 
 # --------------------[SOURCE]--------------------
 set(HEADERS engine/source/controller.hpp
-            engine/source/scene.hpp
+            engine/source/renderer.hpp
             engine/source/camera.hpp
             engine/source/transform_system.hpp
             engine/source/timer.hpp
             engine/source/additional.hpp)
 
 set(SOURCES engine/source/controller.cpp
-            engine/source/scene.cpp
+            engine/source/renderer.cpp
             engine/source/camera.cpp
             engine/source/main.cpp
             engine/source/transform_system.cpp
@@ -103,7 +103,9 @@ set(RENDER_HEADERS engine/source/render/window.hpp
                    engine/source/render/time_system.hpp
                    engine/source/render/grass.hpp
                    engine/source/render/grass_field.hpp
-                   engine/source/render/grass_system.hpp)
+                   engine/source/render/grass_system.hpp
+                   engine/source/render/decal.hpp
+                   engine/source/render/decal_system.hpp)
 
 set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/globals.cpp
@@ -129,7 +131,9 @@ set(RENDER_SOURCES engine/source/render/window.cpp
                    engine/source/render/time_system.cpp
                    engine/source/render/grass.cpp
                    engine/source/render/grass_field.cpp
-                   engine/source/render/grass_system.cpp)
+                   engine/source/render/grass_system.cpp
+                   engine/source/render/decal.cpp
+                   engine/source/render/decal_system.cpp)
 
 source_group("Header Files/source/render" FILES ${RENDER_HEADERS})
 source_group("Source Files/source/render" FILES ${RENDER_SOURCES})

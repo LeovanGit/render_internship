@@ -13,6 +13,7 @@ struct MeshIntersection
     float t;
     uint32_t triangle;
     uint32_t transform_id;
+    uint16_t model_id;
 
     constexpr void reset(float near,
                          float far = std::numeric_limits<float>::infinity())

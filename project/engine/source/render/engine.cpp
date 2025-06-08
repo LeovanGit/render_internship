@@ -14,6 +14,7 @@ void Engine::init()
     TransformSystem::init();
     ParticleSystem::init();
     GrassSystem::init();
+    DecalSystem::init();
 
     TimeSystem::init();
 }
@@ -21,6 +22,7 @@ void Engine::init()
 void Engine::del()
 {
     // destruct singletons in reverse order!
+    DecalSystem::del();
     GrassSystem::del();
     ParticleSystem::del();
     TransformSystem::del();

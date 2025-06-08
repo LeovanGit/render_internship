@@ -39,6 +39,8 @@ glm::quat quatFromEuler(const EulerAngles & angles,
                                                     glm::vec3(0, 0, 1.0f)));
 
 bool areAlmostEqual(float a, float b, float epsilon);
+
+glm::mat4 rotateZ(float angle);
 } // namespace math
 
 #endif

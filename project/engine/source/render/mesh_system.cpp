@@ -9,6 +9,7 @@ constexpr uint32_t shadow_cubemaps_count = 4;
 namespace engine
 {
 MeshSystem * MeshSystem::instance = nullptr;
+uint32_t MeshSystem::model_id = 0;
 
 void MeshSystem::init()
 {
@@ -31,6 +32,14 @@ void MeshSystem::del()
     else spdlog::error("MeshSystem::del() was called twice!");
 }
 
+uint32_t MeshSystem::getModelID()
+{
+    uint32_t id = model_id;
+    ++model_id;
+    
+    return id;
+}
+
 void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
                             std::shared_ptr<Shader> emissive,
                             std::shared_ptr<Shader> shadow,
@@ -43,26 +52,21 @@ void MeshSystem::setShaders(std::shared_ptr<Shader> opaque,
     shadow_shader = shadow;
 }
 
-void MeshSystem::setTextures(std::shared_ptr<Texture> reflectance,
-                             std::shared_ptr<Texture> irradiance,
-                             std::shared_ptr<Texture> reflection,
-                             std::shared_ptr<Texture> dissolve)
+// move it to renderer.cpp!!!
+void MeshSystem::setTextures(std::shared_ptr<Texture> dissolve)
 {
-    instance->opaque_instances.reflectance = reflectance;
-    instance->opaque_instances.irradiance = irradiance;
-    instance->opaque_instances.reflection = reflection;
-
-    instance->dissolution_instances.reflectance = reflectance;
-    instance->dissolution_instances.irradiance = irradiance;
-    instance->dissolution_instances.reflection = reflection;
     instance->dissolution_instances.dissolve = dissolve;
 }
 
 void MeshSystem::render()
 {
     opaque_instances.render();
-    emissive_instances.render();
     dissolution_instances.render();
+}
+
+void MeshSystem::renderLights()
+{
+    emissive_instances.render();
 }
 
 void MeshSystem::renderShadowCubeMaps(int cubemaps_count)
@@ -115,6 +119,7 @@ bool MeshSystem::findIntersection(const math::Ray & ray_ws,
                     if (octree[i].intersect(ray_ms, nearest))
                     {
                         nearest.transform_id = instance.transform_id;
+                        nearest.model_id = instance.model_id;
 
                         pos_ws = transform *
                                  mesh_to_model *

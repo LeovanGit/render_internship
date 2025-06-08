@@ -26,17 +26,17 @@ public:
 
     static void del();
 
+    static uint32_t getModelID();
+
     void setShaders(std::shared_ptr<Shader> opaque,
                     std::shared_ptr<Shader> emissive,
                     std::shared_ptr<Shader> shadow,
                     std::shared_ptr<Shader> dissolve);
 
-    void setTextures(std::shared_ptr<Texture> reflectance,
-                     std::shared_ptr<Texture> irradiance,
-                     std::shared_ptr<Texture> reflection,
-                     std::shared_ptr<Texture> dissolve);
+    void setTextures(std::shared_ptr<Texture> dissolve);
     
     void render();
+    void renderLights();
 
     // for shadows from point lights
     void renderShadowCubeMaps(int cubemaps_count);
@@ -76,6 +76,7 @@ private:
     ~MeshSystem() = default;
     
     static MeshSystem * instance;
+    static uint32_t model_id;
 };
 
 template <>

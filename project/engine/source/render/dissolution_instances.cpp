@@ -49,7 +49,8 @@ void DissolutionInstances::render()
     Globals * globals = Globals::getInstance();
     LightSystem * light_sys = LightSystem::getInstance();
 
-    globals->bindA2CBlendState();
+    //globals->bindA2CBlendState();
+    globals->bindDefaultBlendState();
     
     globals->device_context4->
         IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -57,13 +58,7 @@ void DissolutionInstances::render()
     shader->bind();
     instance_buffer.bind(1);
 
-    reflectance->bind(4);
-    irradiance->bind(5);
-    reflection->bind(6);
-
     dissolve->bind(13);
-
-    light_sys->bindShadowMapSRV(7);
     
     uint32_t rendered_instances = 0;
     

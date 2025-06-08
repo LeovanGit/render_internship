@@ -28,7 +28,7 @@ public:
     void updateInstanceBuffer(const Camera & camera);
     void render(float delta_time,
                 const Camera & camera,
-                DxResPtr<ID3D11ShaderResourceView> depth_srv_not_ms);
+                DxResPtr<ID3D11ShaderResourceView> depth_copy_srv);
 
     // move them to Emitter class for different textures:
     std::shared_ptr<Shader> shader;

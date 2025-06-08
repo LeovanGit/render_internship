@@ -50,6 +50,14 @@ struct PS_INPUT
     float animation_time : ANIMATION_TIME;
 };
 
+struct PS_OUTPUT
+{
+    float4 normals : SV_TARGET0;
+    float3 albedo : SV_TARGET1;
+    float2 roughness_metalness : SV_TARGET2;
+    float4 emissive_ao : SV_TARGET3;
+};
+
 Texture2D g_albedo : register(t0);
 Texture2D g_roughness : register(t1);
 Texture2D g_metalness : register(t2);
@@ -96,17 +104,12 @@ PS_INPUT vertexShader(VS_INPUT input)
 //------------------------------------------------------------------------------
 // FRAGMENT SHADER
 //------------------------------------------------------------------------------
-struct Material
+PS_OUTPUT fragmentShader(PS_INPUT input,
+                         bool is_front_face : SV_IsFrontFace)
 {
-    float3 albedo;
-    float roughness;
-    float metalness;
-    float3 fresnel;
-};
-
-float4 fragmentShader(PS_INPUT input,
-                      bool is_front_face : SV_IsFrontFace) : SV_TARGET
-{
+    PS_OUTPUT output;
+    output.emissive_ao = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    
     float alpha = g_dissolve.Sample(g_wrap_sampler, input.uv).r;
     float threshold = (g_time - input.spawn_time) / input.animation_time;
     
@@ -126,13 +129,18 @@ float4 fragmentShader(PS_INPUT input,
             float4 g_emissive_color_norm = float4(g_EMISSIVE_COLOR.rgb /
                                                   max3(g_EMISSIVE_COLOR), 1.0f);
 
-            return lerp(g_emissive_color_norm,
-                        g_EMISSIVE_COLOR,
-                        delta);
+            output.emissive_ao = lerp(g_emissive_color_norm,
+                                      g_EMISSIVE_COLOR,
+                                      delta);
+            output.emissive_ao.a = 1.0f;
         }
-        else return float4(0.0f, 0.0f, 0.0f, 0.0f);
+        else
+        {
+            discard;
+            return output;
+        }
     }
-
+    
     // geometry normal
     float3 GN = normalize(is_front_face ? input.normal : -input.normal);
     
@@ -142,24 +150,21 @@ float4 fragmentShader(PS_INPUT input,
 
     GN = normalize(mul(float4(GN, 0.0f), g_mesh_to_model).xyz);
     GN = normalize(mul(float4(GN, 0.0f), input.transform).xyz);
-    
-    Material material;
+    output.normals.ba = packOctahedron(GN);
 
     // conversion from sRGB to linear by raising to the power of 2.2
     // is delegated to DDSTextureLoader
-    material.albedo = g_has_albedo_texture ? g_albedo.Sample(g_wrap_sampler, input.uv).rgb :
-                                             g_albedo_default;
+    output.albedo = g_has_albedo_texture ?
+                        g_albedo.Sample(g_wrap_sampler, input.uv).rgb :
+                        g_albedo_default;
 
-    material.roughness = g_has_roughness_texture ? g_roughness.Sample(g_wrap_sampler, input.uv).r :
-                                                   g_roughness_default;
-    // perception roughness -> roughness
-    // material.roughness *= material.roughness;
+    output.roughness_metalness.r = g_has_roughness_texture ?
+                                       g_roughness.Sample(g_wrap_sampler, input.uv).r :
+                                       g_roughness_default;
 
-    material.metalness = g_has_metalness_texture ? g_metalness.Sample(g_wrap_sampler, input.uv).r :
-                                                   g_metalness_default;
-        
-    // use albedo as F0 for metals
-    material.fresnel = lerp(g_F0_DIELECTRIC, material.albedo, material.metalness);
+    output.roughness_metalness.g = g_has_metalness_texture ?
+                                       g_metalness.Sample(g_wrap_sampler, input.uv).r :
+                                       g_metalness_default;
 
     // texture normal
     float3 N;
@@ -172,18 +177,8 @@ float4 fragmentShader(PS_INPUT input,
         N = normalize(mul(float4(N, 0.0f), input.transform).xyz);
     }
     else N = GN;
+    output.normals.rg = packOctahedron(N);
     
-    float3 V = normalize(g_camera_position - input.pos_WS);
-    
-    float3 color = calculateLighting(material.albedo,
-                                     material.roughness,
-                                     material.metalness,
-                                     material.fresnel,
-                                     N,
-                                     GN,
-                                     V,
-                                     input.pos_WS);
-
-    return float4(color, 1.0f);
+    return output;
 }
 

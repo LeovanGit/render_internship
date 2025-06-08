@@ -67,8 +67,8 @@ float4 fragmentShader(PS_INPUT input) : SV_TARGET
 
     float3 radiance_norm = input.radiance / max3(input.radiance);
     
-    float3 color = lerp(radiance_norm, input.radiance, pow(NV, 6));    
-    
+    float3 color = lerp(radiance_norm, input.radiance, pow(NV, 6));
+
     return float4(color, 1.0f);
 }
 

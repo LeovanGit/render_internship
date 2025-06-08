@@ -16,12 +16,29 @@ namespace engine
 class OpaqueInstances
 {
 public:
+    struct GPUInstance
+    {
+        GPUInstance(glm::mat4x4 transform,
+                    uint16_t model_id) :
+                    transform(transform),
+                    model_id(model_id)
+        {}
+        
+        glm::mat4x4 transform;
+        uint16_t model_id;
+    };
+
     struct Instance
     {
         Instance() = default;
-        Instance(uint32_t transform_id) : transform_id(transform_id) {}
+        Instance(uint32_t transform_id,
+                 uint16_t model_id) :
+                 transform_id(transform_id),
+                 model_id(model_id)
+        {}
         
         uint32_t transform_id;
+        uint16_t model_id;
     };
     
     struct Material
@@ -144,13 +161,9 @@ public:
     void renderWithoutMaterials(int cubemaps_count);
 
     std::vector<PerModel> per_model;
-    VertexBuffer<glm::mat4> instance_buffer;
+    VertexBuffer<GPUInstance> instance_buffer;
 
     std::shared_ptr<Shader> shader;
-
-    std::shared_ptr<Texture> reflectance;
-    std::shared_ptr<Texture> irradiance;
-    std::shared_ptr<Texture> reflection;
 };
 } // namespace engine
 

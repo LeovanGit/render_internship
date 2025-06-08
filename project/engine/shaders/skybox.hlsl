@@ -19,7 +19,7 @@ PS_INPUT vertexShader(uint vertex_index: SV_VERTEXID)
                           { 3.0f, -1.0f}};
 
     PS_INPUT output;
-    // 1.0f -> draw skybox on far frustum plane
+    // 0.0f -> draw skybox on far frustum plane
     output.posCS = float4(vertexCS[vertex_index], 0.0f, 1.0f);
    
     float3 dx = g_frustum_corners[2] - g_frustum_corners[0];

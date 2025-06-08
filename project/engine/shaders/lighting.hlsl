@@ -1,11 +1,11 @@
 #ifndef LIGHTING_HLSL
 #define LIGHTING_HLSL
 
-Texture2D<float2> g_reflectance : register(t4);
-TextureCube g_irradiance : register(t5);
-TextureCube g_reflection : register(t6);
+Texture2D<float2> g_reflectance : register(t6);
+TextureCube g_irradiance : register(t7);
+TextureCube g_reflection : register(t8);
 
-TextureCubeArray<float4> g_shadow_maps : register(t7);
+TextureCubeArray<float4> g_shadow_maps : register(t9);
 
 static const float g_DEPTH_OFFSET = 0.005f;
 static const float g_TRANSMITTANCE_POWER = 32.0f;
@@ -152,8 +152,7 @@ float3 calculateSurfaceLightTransmission(float3 posWS,
             transmittion += g_point_lights[i].radiance *
                             transmittance_color *
                             solid_angle *
-                            pow(-NL, g_TRANSMITTANCE_POWER) *
-                            shadow;
+                            pow(-NL, g_TRANSMITTANCE_POWER);
         }
     }
 
@@ -164,9 +163,9 @@ float3 calculateSurfaceLightTransmission(float3 posWS,
 
         // if light source is behind the surface
         if (NL < 0.0f) transmittion += g_dir_lights[i].radiance *
-                                    transmittance_color *
-                                    pow(-NL, g_TRANSMITTANCE_POWER) *
-                                    g_dir_lights[i].solid_angle;
+                                       transmittance_color *
+                                       pow(-NL, g_TRANSMITTANCE_POWER) *
+                                       g_dir_lights[i].solid_angle;
     }
     
     return transmittion;
@@ -379,43 +378,6 @@ float3 calculateLighting(float3 albedo,
     return color;
 }
 
-float3 calculateGrassLighting(float3 albedo,
-                              float roughness,
-                              float metalness,
-                              float3 fresnel,
-                              float3 N,
-                              float3 GN,
-                              float3 V,
-                              float3 posWS,
-                              float3 transmittance_color)
-{
-    float3 color = 0.0f;
-    color += calculateDirectionalLights(albedo,
-                                        roughness,
-                                        metalness,
-                                        fresnel,
-                                        N,
-                                        V);
-    
-    color += calculatePointLights(albedo,
-                                  roughness,
-                                  metalness,
-                                  fresnel,
-                                  N,
-                                  GN,
-                                  V,
-                                  posWS);
-
-    color += calculateEnvironment(albedo,
-                                  metalness,
-                                  N);
-
-    color += calculateSurfaceLightTransmission(posWS,
-                                               N,
-                                               transmittance_color);
-    
-    return color;
-}
 //------------------------------------------------------------------------------
 // LIGHTMAPS LIGHTING
 //------------------------------------------------------------------------------

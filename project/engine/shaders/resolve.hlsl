@@ -5,8 +5,7 @@ struct PS_INPUT
     float4 pos : SV_POSITION; 
 };
 
-Texture2DMS<float4> g_hdr_scene;
-static const int g_samples_count = 4;
+Texture2DMS<float4> g_hdr_scene : register(t0);
 
 //------------------------------------------------------------------------------
 // VERTEX SHADER

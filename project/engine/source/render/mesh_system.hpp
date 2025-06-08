@@ -6,13 +6,14 @@
 
 #include "opaque_instances.hpp"
 #include "emissive_instances.hpp"
+#include "dissolution_instances.hpp"
 #include "model.hpp"
 #include "matrices.hpp"
 #include "transform_system.hpp"
 
 namespace engine
 {
-class MeshSystem
+class MeshSystem final
 {
 public:
     // deleted methods should be public for better error messages
@@ -27,11 +28,13 @@ public:
 
     void setShaders(std::shared_ptr<Shader> opaque,
                     std::shared_ptr<Shader> emissive,
-                    std::shared_ptr<Shader> shadow);
+                    std::shared_ptr<Shader> shadow,
+                    std::shared_ptr<Shader> dissolve);
 
     void setTextures(std::shared_ptr<Texture> reflectance,
                      std::shared_ptr<Texture> irradiance,
-                     std::shared_ptr<Texture> reflection);
+                     std::shared_ptr<Texture> reflection,
+                     std::shared_ptr<Texture> dissolve);
     
     void render();
 
@@ -56,8 +59,15 @@ public:
                                         const std::vector<EmissiveInstances::Material> & materials,
                                         const EmissiveInstances::Instance & instance);
 
+    template <>
+    void addInstance<DissolutionInstances>(
+        std::shared_ptr<Model> model,
+        const std::vector<DissolutionInstances::Material> & materials,
+        const DissolutionInstances::Instance & instance);
+
     OpaqueInstances opaque_instances;
     EmissiveInstances emissive_instances;
+    DissolutionInstances dissolution_instances;
 
     std::shared_ptr<Shader> shadow_shader;
 
@@ -184,6 +194,66 @@ void MeshSystem::addInstance<EmissiveInstances>(std::shared_ptr<Model> model,
     
  end:
     emissive_instances.updateInstanceBuffers();
+}
+
+template <>
+void MeshSystem::addInstance<DissolutionInstances>(
+    std::shared_ptr<Model> model,
+    const std::vector<DissolutionInstances::Material> & materials,
+    const DissolutionInstances::Instance & instance)
+{
+    // try to find the same model
+    for (auto & per_model : dissolution_instances.per_model)
+    {
+        if (per_model.model == model)
+        {
+            // meshes and is materials are in the same order!
+            for (uint32_t i = 0, size = materials.size(); i != size; ++i)
+            {
+                // try to find the same material
+                for (auto & per_material: per_model.per_mesh[i].per_material)
+                {
+                    if (per_material.material == materials[i])
+                    {                                              
+                        per_material.instances.push_back(instance);
+                        goto next_material;
+                    }
+                }
+                // if not found same materials in the mesh -> add new
+                {
+                DissolutionInstances::PerMaterial per_material;
+                per_material.material = materials[i];
+                per_material.instances.push_back(instance);
+                per_model.per_mesh[i].per_material.push_back(per_material);
+                } // block
+                next_material:
+                    continue;
+            }
+            goto end;
+        }
+    }
+    // if not found same model -> add new
+    {
+    DissolutionInstances::PerModel per_model;
+    per_model.model = model;
+        
+    for (auto & material : materials)
+    {
+        DissolutionInstances::PerMaterial per_material;
+        per_material.material = material;
+        per_material.instances.push_back(instance);
+
+        DissolutionInstances::PerMesh per_mesh;
+        per_mesh.per_material.push_back(per_material);
+
+        per_model.per_mesh.push_back(per_mesh);
+    }
+    
+    dissolution_instances.per_model.push_back(per_model);
+    } // block
+    
+ end:
+    dissolution_instances.updateInstanceBuffers();
 }
 } // namespace engine
 

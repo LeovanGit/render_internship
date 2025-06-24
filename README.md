@@ -1,5 +1,26 @@
-# CONTROLS
+# OVERVIEW
+![main](img/main.jpg)
+![light](img/light.gif)
+![spawn](img/spawn.gif)
+![destroy](img/destroy.gif)
+![particles](img/particles.gif)
+![decals](img/decals.gif)
 
+# TEXTURE FILTERING
+## MAGNIFICATION
+![mag](img/magnification.png)
+
+## MINIFICATION
+![min](img/minification.png)
+
+## ANISOTROPIC
+![af](img/anisotropic.png)
+
+## ANISOTROPIC X16 vs LINEAR
+![linear_vs_af](img/linear_vs_af.png)
+![af_vs_linear](img/af_vs_linear.png)
+
+# CONTROLS
 | KEY                              | ACTION                                                       |
 | -------------------------------- | ------------------------------------------------------------ |
 | W                                | Move forward                                                 |
@@ -20,23 +41,3 @@
 | N                                | Spawn knight                                                 |
 | F                                | Spawn decal                                                  |
 | M                                | Despawn model                                                |
-
-# TEXTURE FILTERING
-
-## MAGNIFICATION
-
-![mag](img/magnification.png)
-
-## MINIFICATION
-
-![min](img/minification.png)
-
-## ANISOTROPIC
-
-![af](img/anisotropic.png)
-
-## ANISOTROPIC X16 vs LINEAR
-
-![linear_vs_af](img/linear_vs_af.png)
-
-![af_vs_linear](img/af_vs_linear.png)
